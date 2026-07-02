@@ -1,55 +1,55 @@
+//==============================================================================================
+// Using Unity Engine
+//==============================================================================================
 using UnityEngine;
 using System.Collections;
-
-public class enemyAI : MonoBehaviour, IDamage
-{
-    [SerializeField] Renderer model;
-
+using UnityEditor;
+//==============================================================================================
+// Declare Enemy AI
+//==============================================================================================
+public class EnemyAI : MonoBehaviour, IDamage {
+    //==========================================================================================
+    // Declare Variables
+    //==========================================================================================
     [SerializeField] int HP;
-
-    Color colorOriginal;
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-        colorOriginal = model.material.color;
-
+    [SerializeField] Renderer model;
+    Color colorOrig;
+    //==========================================================================================
+    // Function, Start
+    //==========================================================================================
+    void Start() {
+        colorOrig = model.material.color;
     }
-
-    // Update is called once per frame
-    void Update()
-    {
+    //==========================================================================================
+    // Function, Update
+    //==========================================================================================
+    void Update() {
         
     }
-
-    public void takeDamage(int amount)
-    {
-
+    //==========================================================================================
+    // Function, TakeDamage
+    //==========================================================================================
+    public void TakeDamage(int amount) {
         HP -= amount;
-
-        if(HP <= 0)
-        {
-
-            Destroy(gameObject);
-
-        }
-        else
-        {
-
+        if (HP <= 0) {
+            if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolve()); }
+        } else {
             StartCoroutine(flashRed());
-
         }
-
     }
-
-
+    //==========================================================================================
+    // Function, TakeDamage
+    //==========================================================================================
     IEnumerator flashRed()
     {
-
-        model.material.color = Color.red;
-        yield return new WaitForSeconds(0.1f);
-        model.material.color = colorOriginal;
-
+        //model.material.color = Color.red;
+        //yield return new WaitForSeconds(0.1f);
+        //model.material.color = colorOrig;
+        if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolveFlash()); }
+        yield return null;
     }
+    //==========================================================================================
 }
+//==============================================================================================
+// End of Enemy AI .cs
+//==============================================================================================

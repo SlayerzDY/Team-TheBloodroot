@@ -1,133 +1,100 @@
+//==============================================================================================
+// Using Unity Engine
+//==============================================================================================
 using UnityEngine;
-
-public class playerController : MonoBehaviour
-{
+//==============================================================================================
+// Declare Player Controller
+//==============================================================================================
+public class playerController : MonoBehaviour {
+    //==========================================================================================
+    // Define Variables
+    //==========================================================================================
     [SerializeField] CharacterController controller;
     [SerializeField] LayerMask ignoreLayer;
-
+    // Player Stats
     [SerializeField] int HP;
     [SerializeField] int speed;
     [SerializeField] int sprintMod;
     [SerializeField] int jumpSpeed;
     [SerializeField] int jumpMax;
     [SerializeField] int gravity;
-
+    // Weapon Stats
     [SerializeField] int shootDamage;
     [SerializeField] int shootDist;
     [SerializeField] float shootRate;
-
     int jumpCount;
     int HPOrig;
-
     float shootTimer;
-
     Vector3 moveDir;
     Vector3 playerVel;
-
-
-
+    //==========================================================================================
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        HPOrig = HP; 
+    //==========================================================================================
+    void Start() {
+        HPOrig = HP;
     }
-
+    //==========================================================================================
     // Update is called once per frame
-    void Update()
-    {
-
+    //==========================================================================================
+    void Update() {
         movement();
-
         sprint();
-
     }
-
-    void movement()
-    {
-
-        if (controller.isGrounded)
-        {
-
+    //==========================================================================================
+    // Function, Movement
+    //==========================================================================================
+    void movement() {
+        
+        if (controller.isGrounded) {
             playerVel.y = 0;
-
             jumpCount = 0;
-
         }
-
-        // remove vertical for side scrolling
+        // kill after the plus to make Side Scroller
         moveDir = Input.GetAxis("Horizontal") * transform.right + Input.GetAxis("Vertical") * transform.forward;
         controller.Move(moveDir.normalized * speed * Time.deltaTime);
-
         jump();
         controller.Move(playerVel * Time.deltaTime);
         playerVel.y -= gravity * Time.deltaTime;
-
         shootTimer += Time.deltaTime;
-        if(Input.GetButton("Fire1") && shootTimer > shootRate)
-        {
-
-            shoot();
-
-        }
-
+        if (Input.GetButton("Fire1") && shootTimer > shootRate) { shoot(); }
         Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * shootDist, Color.red);
-
     }
-
-    void sprint()
-    {
-
-        if (Input.GetButtonDown("Sprint"))
-        {
-
+    //==========================================================================================
+    // Function, Movement
+    //==========================================================================================
+    void sprint() {
+        if(Input.GetButtonDown("Sprint")) {
             speed *= sprintMod;
-
-        } else if (Input.GetButtonUp("Sprint"))
-        {
-
+        } else if(Input.GetButtonUp("Sprint")) {
             speed /= sprintMod;
-
         }
-
     }
-
-    void jump()
-    {
-
-        if (Input.GetButtonDown("Jump") && jumpCount < jumpMax)
-        {
-
+    //==========================================================================================
+    // Function, Movement
+    //==========================================================================================
+    void jump() {
+        if (Input.GetButtonDown("Jump") && jumpCount < jumpMax) {
             playerVel.y = jumpSpeed;
-
             jumpCount++;
 
         }
-
     }
 
-    void shoot()
-    {
-
+    //==========================================================================================
+    // Function, Shoot
+    //==========================================================================================
+    void shoot() {
         shootTimer = 0;
-
         RaycastHit hit;
-
-        if(Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, shootDist, ~ignoreLayer))
-        {
-
+        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, shootDist, ~ignoreLayer)) {
             Debug.Log(hit.collider.name);
-
             IDamage dmg = hit.collider.GetComponent<IDamage>();
-
-            if(dmg != null)
-            {
-
-                dmg.takeDamage(shootDamage);
-
-            }
-
+            if (dmg != null) { dmg.TakeDamage(shootDamage); }
         }
-
+        
     }
-
+    //==========================================================================================
 }
+//==============================================================================================
+// End of Player Controller .cs
+//==============================================================================================
