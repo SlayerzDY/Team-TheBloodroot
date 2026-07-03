@@ -1,8 +1,9 @@
 //==============================================================================================
 // Using Unity Engine
 //==============================================================================================
-using UnityEngine;
 using System.Collections;
+using UnityEngine;
+using UnityEngine.Audio;
 //==============================================================================================
 // Instructions for Using the Dissolve Script
 //==============================================================================================
@@ -31,6 +32,8 @@ public class Dissolver : MonoBehaviour {
     //==========================================================================================
     [SerializeField] Material dissolveMaterial;
     [SerializeField] Renderer model;
+    [SerializeField] AudioClip dissolveDamage;
+    [SerializeField] AudioClip dissolveDeath;
     [SerializeField] float dissolveDuration = 10f;
     [SerializeField] float dissolveStrength = 0;
     [SerializeField] float flashDuration = 0.5f;
@@ -52,10 +55,11 @@ public class Dissolver : MonoBehaviour {
         
     }
     //==========================================================================================
-    // Function, TakeDamage
+    // Function, dissolve
     //==========================================================================================
     public IEnumerator dissolve()
     {
+        if (dissolveDeath != null) { AudioSource.PlayClipAtPoint(dissolveDeath, gameObject.transform.position); }
         Renderer[] allRenderers = GetComponentsInChildren<Renderer>();
         for (int i = 0; i < allRenderers.Length; i++)
         {
@@ -73,12 +77,10 @@ public class Dissolver : MonoBehaviour {
         Destroy(gameObject);
     }
     //==========================================================================================
-    // Function, TakeDamage
-    //==========================================================================================
-    //==========================================================================================
-    // Function, TakeDamage
+    // Function, dissolveFlash
     //==========================================================================================
     public IEnumerator dissolveFlash() {
+        if (dissolveDeath != null) { AudioSource.PlayClipAtPoint(dissolveDamage, gameObject.transform.position); }
         Renderer[] allRenderers = GetComponentsInChildren<Renderer>();
         Material[][] originalMaterials = new Material[allRenderers.Length][];
         for (int i = 0; i < allRenderers.Length; i++) {
@@ -112,5 +114,5 @@ public class Dissolver : MonoBehaviour {
     //==========================================================================================
 }
 //==============================================================================================
-// End of Dissolver .cs
+// End of Dissolver .cs 
 //==============================================================================================
