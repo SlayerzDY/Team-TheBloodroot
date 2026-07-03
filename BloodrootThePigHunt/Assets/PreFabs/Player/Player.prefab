@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4626545220812247112}
   - component: {fileID: 8710734601291140226}
+  - component: {fileID: -8431179158795951775}
   - component: {fileID: -8392764604186568942}
   - component: {fileID: 3625823160589573346}
   - component: {fileID: 2833626972417002949}
@@ -50,7 +51,7 @@ MonoBehaviour:
   controller: {fileID: -8392764604186568942}
   ignoreLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8
   HP: 10
   speed: 5
   sprintMod: 3
@@ -60,6 +61,25 @@ MonoBehaviour:
   shootDamage: 1
   shootDist: 10
   shootRate: 0.5
+--- !u!114 &-8431179158795951775
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4487108381089071605}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6c002d6b023a334da6369bfb788c2e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dissolveMaterial: {fileID: 2100000, guid: 5c357d2d49026a741ac452c015da1536, type: 2}
+  model: {fileID: 2833626972417002949}
+  dissolveDuration: 2
+  dissolveStrength: 0
+  flashDuration: 0.1
+  flashStartStrength: 0
+  flashEndStrength: 0.2
 --- !u!143 &-8392764604186568942
 CharacterController:
   m_ObjectHideFlags: 0
@@ -113,8 +133,6 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
-  m_ForceMeshLod: -1
-  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -136,9 +154,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
