@@ -2013,7 +2013,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4626545220812247112, guid: 688e51737cb73334da21e0c827d5e85d, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 59.95549
+      value: 53.311165
       objectReference: {fileID: 0}
     - target: {fileID: 4626545220812247112, guid: 688e51737cb73334da21e0c827d5e85d, type: 3}
       propertyPath: m_LocalPosition.y
@@ -2021,7 +2021,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4626545220812247112, guid: 688e51737cb73334da21e0c827d5e85d, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -56.759216
+      value: -14.737165
       objectReference: {fileID: 0}
     - target: {fileID: 4626545220812247112, guid: 688e51737cb73334da21e0c827d5e85d, type: 3}
       propertyPath: m_LocalRotation.w
@@ -5111,7 +5111,7 @@ Transform:
   m_GameObject: {fileID: 1584553381}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -37.350002, y: 1, z: 25.59999}
+  m_LocalPosition: {x: 34.05, y: 3.0000005, z: -5.2000093}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5133,10 +5133,11 @@ MonoBehaviour:
   Enemy: {fileID: 7791680660320909169, guid: f07200c1e7570da41a4cb102a86c160b, type: 3}
   spawnPoint:
   - {fileID: 1275959101}
-  spawnRate: 5
-  maxEnemies: 0
+  spawnRate: 2
   spawnRadius: 5
+  maxEnemies: 5
   currentEnemies: 0
+  isWaveActive: 0
 --- !u!1001 &1589609155
 PrefabInstance:
   m_ObjectHideFlags: 0
