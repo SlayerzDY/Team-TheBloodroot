@@ -111,7 +111,25 @@ public class playerController : MonoBehaviour, IDamage {
         }
     }
     //==========================================================================================
-    // Function, TakeDamage
+    // Function, OnDeath
+    //==========================================================================================
+    public void onDeath(bool death)
+    {
+        if (death)
+        {
+            return;
+        }
+        Dissolver dissolver = GetComponent<Dissolver>();
+        if (dissolver != null)
+        {
+            dissolver.StartCoroutine(dissolver.dissolve());
+        }
+        gameManager.instance.youLose();
+    }
+
+
+    //==========================================================================================
+    // Function, flashRed
     //==========================================================================================
     IEnumerator flashRed()
     {
