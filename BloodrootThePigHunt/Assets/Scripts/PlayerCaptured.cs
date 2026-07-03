@@ -19,7 +19,8 @@ public class PlayerCaptured : MonoBehaviour {
     // Define Variables
     //==========================================================================================
     [SerializeField] float holdTime = 5f;
-    [SerializeField] float releaseTime = 5f;    
+    [SerializeField] float releaseTime = 5f;
+    [SerializeField] AudioClip damageSound;
     float elapsedTime = 0f;
     //==========================================================================================
     // Function, Update
@@ -39,6 +40,7 @@ public class PlayerCaptured : MonoBehaviour {
     // Function, Hold Object
     //==========================================================================================
     IEnumerator holdObject(GameObject entity) {
+        if (damageSound != null) { AudioSource.PlayClipAtPoint(damageSound, gameObject.transform.position); }
         disableMovement(entity);
         float timer = 0f;
         while (timer < holdTime) {
