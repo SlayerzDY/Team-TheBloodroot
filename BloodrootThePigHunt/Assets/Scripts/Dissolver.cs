@@ -52,7 +52,7 @@ public class Dissolver : MonoBehaviour {
         
     }
     //==========================================================================================
-    // Function, TakeDamage
+    // Function, dissolve
     //==========================================================================================
     public IEnumerator dissolve()
     {
@@ -73,10 +73,7 @@ public class Dissolver : MonoBehaviour {
         Destroy(gameObject);
     }
     //==========================================================================================
-    // Function, TakeDamage
-    //==========================================================================================
-    //==========================================================================================
-    // Function, TakeDamage
+    // Function, dissolveFlash
     //==========================================================================================
     public IEnumerator dissolveFlash() {
         Renderer[] allRenderers = GetComponentsInChildren<Renderer>();
