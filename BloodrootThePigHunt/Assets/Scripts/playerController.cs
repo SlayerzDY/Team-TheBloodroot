@@ -114,7 +114,7 @@ public class playerController : MonoBehaviour, IDamage {
     // Function, TakeDamage
     //==========================================================================================
     IEnumerator flashRed()
-    {
+    {  
         //model.material.color = Color.red;
         //yield return new WaitForSeconds(0.1f);
         //model.material.color = colorOrig;

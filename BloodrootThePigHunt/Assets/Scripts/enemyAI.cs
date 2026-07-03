@@ -26,7 +26,7 @@ public class EnemyAI : MonoBehaviour, IDamage {
     float shootTimer;
     bool playerInTrigger;
     //==========================================================================================
-    // Function, Start
+    // Function, Start 
     //==========================================================================================
     void Start() {
         colorOrig = model.material.color;

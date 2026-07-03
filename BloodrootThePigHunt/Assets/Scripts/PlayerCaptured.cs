@@ -12,7 +12,7 @@ using System.Collections;
  * 2.) Assign the release time in the Inspector.
 */
 //==============================================================================================
-// Declare Player Captured
+// Declare Player Captured 
 //==============================================================================================
 public class PlayerCaptured : MonoBehaviour {
     //==========================================================================================
