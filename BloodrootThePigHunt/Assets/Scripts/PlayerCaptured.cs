@@ -4,7 +4,15 @@
 using UnityEngine;
 using System.Collections;
 //==============================================================================================
-// Declare Player Captured
+// Instructions for Using the Dissolve Script
+//==============================================================================================
+/* 
+ * Instructions for using the Dissolver Script:
+ * 1.) Assign the hold time in the Inspector.
+ * 2.) Assign the release time in the Inspector.
+*/
+//==============================================================================================
+// Declare Player Captured 
 //==============================================================================================
 public class PlayerCaptured : MonoBehaviour {
     //==========================================================================================
@@ -14,40 +22,38 @@ public class PlayerCaptured : MonoBehaviour {
     [SerializeField] float releaseTime = 5f;    
     float elapsedTime = 0f;
     //==========================================================================================
-    // Function, Start
-    //==========================================================================================
-    void Start() {
-        
-    }
-    //==========================================================================================
     // Function, Update
     //==========================================================================================
-    void Update() {
-        elapsedTime += Time.deltaTime;
-    }
-    //==========================================================================================
-    // Function, Update
-    //==========================================================================================
-    void OnTriggerEnter(Collider gameObject) {
-        elapsedTime = 0f;
-        StartCoroutine(holdObject(gameObject.gameObject));
+    void OnTriggerEnter(Collider other) {
+        if (!(other is CapsuleCollider) && other.CompareTag("Enemy")) return;
+        if (other.CompareTag("Enemy")) {
+            if (other.GetComponent<EnemyAI>() != null) {
+                StartCoroutine(holdObject(other.gameObject));
+            }
+        }
+        if (other.CompareTag("Player")) {
+            StartCoroutine(holdObject(other.gameObject));
+        }
     }
     //==========================================================================================
     // Function, Hold Object
     //==========================================================================================
     IEnumerator holdObject(GameObject entity) {
-        disableMovement(entity);    
-        while (elapsedTime < holdTime) {
+        disableMovement(entity);
+        float timer = 0f;
+        while (timer < holdTime) {
+            timer += Time.deltaTime;
             yield return null;
         }
         StartCoroutine(releaseObject(entity));
-
     }
     //==========================================================================================
     // Function, Release Object
     //==========================================================================================
     IEnumerator releaseObject(GameObject entity) {
-        while (elapsedTime < releaseTime) {
+        float timer = 0f;
+        while (timer < releaseTime) {
+            timer += Time.deltaTime;
             yield return null;
         }
         enableMovement(entity);
@@ -63,8 +69,7 @@ public class PlayerCaptured : MonoBehaviour {
                 playerCtrl.enabled = false;
             }
         }
-        if (entity.tag == "Enemy")
-        {
+        if (entity.tag == "Enemy") {
             EnemyAI enemyAI = entity.GetComponent<EnemyAI>();
             if (enemyAI != null) {
                 enemyAI.enabled = false;
