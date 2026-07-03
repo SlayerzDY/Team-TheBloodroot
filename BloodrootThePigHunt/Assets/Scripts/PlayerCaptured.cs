@@ -17,7 +17,7 @@ public class PlayerCaptured : MonoBehaviour {
     // Function, Update
     //==========================================================================================
     void OnTriggerEnter(Collider other) {
-        if (!(other is CapsuleCollider)) return;
+        if (!(other is CapsuleCollider) && other.CompareTag("Enemy")) return;
         if (other.CompareTag("Enemy")) {
             if (other.GetComponent<EnemyAI>() != null) {
                 StartCoroutine(holdObject(other.gameObject));
@@ -32,7 +32,6 @@ public class PlayerCaptured : MonoBehaviour {
     //==========================================================================================
     IEnumerator holdObject(GameObject entity) {
         disableMovement(entity);
-        // A local timer that starts fresh at 0
         float timer = 0f;
         while (timer < holdTime) {
             timer += Time.deltaTime;
@@ -44,14 +43,13 @@ public class PlayerCaptured : MonoBehaviour {
     // Function, Release Object
     //==========================================================================================
     IEnumerator releaseObject(GameObject entity) {
-        // Another fresh local timer
         float timer = 0f;
         while (timer < releaseTime) {
             timer += Time.deltaTime;
             yield return null;
         }
         enableMovement(entity);
-        Destroy(gameObject); // Now it will safely wait for both timers to finish!
+        Destroy(gameObject);
     }
     //==========================================================================================
     // Function, Disable Movement
@@ -63,8 +61,7 @@ public class PlayerCaptured : MonoBehaviour {
                 playerCtrl.enabled = false;
             }
         }
-        if (entity.tag == "Enemy")
-        {
+        if (entity.tag == "Enemy") {
             EnemyAI enemyAI = entity.GetComponent<EnemyAI>();
             if (enemyAI != null) {
                 enemyAI.enabled = false;
