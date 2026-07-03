@@ -14,7 +14,6 @@ public class waveManager : MonoBehaviour
     [SerializeField, Min(0)] int enemiesAddedPerWave = 1;
 
     [Header("Connections")]
-    [SerializeField] MobSpawner mobSpawner;
     [SerializeField] BloodMoonWaveDirector bloodMoonDirector;
 
     private bool encounterStarted;
@@ -30,23 +29,8 @@ public class waveManager : MonoBehaviour
 
     void Awake()
     {
-        if (mobSpawner == null)
-            mobSpawner = FindFirstObjectByType<MobSpawner>();
-
         if (bloodMoonDirector == null)
             bloodMoonDirector = FindFirstObjectByType<BloodMoonWaveDirector>();
-    }
-
-    void OnEnable()
-    {
-        if (mobSpawner != null)
-            mobSpawner.EnemyDied += EnemyDefeated;
-    }
-
-    void OnDisable()
-    {
-        if (mobSpawner != null)
-            mobSpawner.EnemyDied -= EnemyDefeated;
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -85,9 +69,6 @@ public class waveManager : MonoBehaviour
 
         waveActive = true;
 
-        if (mobSpawner != null)
-            mobSpawner.ConfigureWave(enemiesRemaining, ActiveBloodMoonModifier);
-
         WaveStarted?.Invoke(currentWave, enemiesRemaining, ActiveBloodMoonModifier);
         Debug.Log($"Wave {currentWave} started with {enemiesRemaining} enemies.");
 
@@ -109,7 +90,6 @@ public class waveManager : MonoBehaviour
     private void CompleteWave()
     {
         waveActive = false;
-        mobSpawner?.StopWave();
         bloodMoonDirector?.EndWave(currentWave);
         ActiveBloodMoonModifier = null;
 
