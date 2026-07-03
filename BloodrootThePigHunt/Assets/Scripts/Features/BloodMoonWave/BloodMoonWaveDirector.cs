@@ -29,15 +29,15 @@ namespace Bloodroot.Features.BloodMoon
                 new BloodMoonModifier(
                     "Stampede",
                     "More pigs move faster, but have less health.",
-                    1.4f, 0.75f, 1f, 1.3f, 1.15f),
+                    1.4f, 0.75f, 1f, 1.3f),
                 new BloodMoonModifier(
                     "Thick Hide",
                     "Fewer pigs arrive with more health and damage.",
-                    0.7f, 1.8f, 1.3f, 0.9f, 1.5f),
+                    0.7f, 1.8f, 1.3f, 0.9f),
                 new BloodMoonModifier(
                     "Blood Frenzy",
-                    "Pigs hit harder and drop more parts.",
-                    1f, 1f, 1.5f, 1.15f, 1.75f)
+                    "Pigs hit harder and move faster.",
+                    1f, 1f, 1.5f, 1.15f)
             };
         }
 

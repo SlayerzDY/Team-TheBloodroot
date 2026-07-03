@@ -12,7 +12,6 @@ namespace Bloodroot.Features.BloodMoon
         [SerializeField, Min(0f)] private float enemyHealth = 1f;
         [SerializeField, Min(0f)] private float enemyDamage = 1f;
         [SerializeField, Min(0f)] private float enemySpeed = 1f;
-        [SerializeField, Min(0f)] private float partReward = 1f;
 
         public string DisplayName => displayName;
         public string Description => description;
@@ -27,8 +26,7 @@ namespace Bloodroot.Features.BloodMoon
             float enemyCount,
             float enemyHealth,
             float enemyDamage,
-            float enemySpeed,
-            float partReward)
+            float enemySpeed)
         {
             this.displayName = displayName;
             this.description = description;
@@ -36,7 +34,6 @@ namespace Bloodroot.Features.BloodMoon
             this.enemyHealth = enemyHealth;
             this.enemyDamage = enemyDamage;
             this.enemySpeed = enemySpeed;
-            this.partReward = partReward;
         }
 
         public int ModifyEnemyCount(int baseValue)
@@ -59,9 +56,5 @@ namespace Bloodroot.Features.BloodMoon
             return Mathf.Max(0f, baseValue * enemySpeed);
         }
 
-        public int ModifyPartReward(int baseValue)
-        {
-            return Mathf.Max(0, Mathf.RoundToInt(baseValue * partReward));
-        }
     }
 }

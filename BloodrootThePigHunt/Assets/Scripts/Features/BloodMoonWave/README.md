@@ -22,8 +22,7 @@ Use `ModifyHealth`, `ModifyDamage`, and `ModifySpeed` when preparing each spawne
 enemy. Always start from the enemy's base values so pooled enemies do not multiply
 their stats more than once.
 
-Call `EndWave(waveNumber)` after the last enemy and its rewards are processed.
-Pig-part rewards can use `ModifyPartReward` before the modifier is cleared.
+Call `EndWave(waveNumber)` after the last enemy is defeated.
 
 `BloodMoonPresentation` is optional. It changes one light to red, briefly shows a
 CanvasGroup, and plays one sound. All three references can be left empty while the
