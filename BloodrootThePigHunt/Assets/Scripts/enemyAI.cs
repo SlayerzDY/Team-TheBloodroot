@@ -13,12 +13,15 @@ public class EnemyAI : MonoBehaviour, IDamage {
     //==========================================================================================
     [SerializeField] int HP;
     [SerializeField] Renderer model;
+    [SerializeField] MobSpawner spawner;
     Color colorOrig;
     //==========================================================================================
     // Function, Start
     //==========================================================================================
     void Start() {
         colorOrig = model.material.color;
+
+        spawner = FindAnyObjectByType<MobSpawner>();
     }
     //==========================================================================================
     // Function, Update
@@ -47,6 +50,16 @@ public class EnemyAI : MonoBehaviour, IDamage {
         //model.material.color = colorOrig;
         if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolveFlash()); }
         yield return null;
+    }
+
+    public void onDeath(bool dead)
+    {
+
+        if (dead == true)
+        {
+
+            
+        }
     }
     //==========================================================================================
 }
