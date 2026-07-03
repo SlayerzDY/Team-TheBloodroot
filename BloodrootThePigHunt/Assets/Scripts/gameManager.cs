@@ -17,7 +17,8 @@ public class gameManager : MonoBehaviour
     [SerializeField] GameObject menuWin;
     [SerializeField] GameObject menuLose;
     [SerializeField] GameObject menuMain;
-
+    [SerializeField] GameObject menuInteract;
+     
     public bool isPaused = false;
     public GameObject player;
     public playerController playerController;
@@ -114,6 +115,27 @@ public class gameManager : MonoBehaviour
         menuActive = menuWin;
         menuActive.SetActive(true);
     }
+    //==========================================================================================
+    // Function, Interact Display
+    //==========================================================================================
+    public void InteractDisplay(bool isOn)
+    {
+        if (isOn)
+        {
+            menuActive = menuInteract;
+            menuActive.SetActive(true);
+        }
+        else
+        {
+            if (menuActive != null)
+            {
+                menuActive.SetActive(false);
+                menuActive = null;
+            }
+        }
+    }
+    //
+
     //==========================================================================================
     // Function, StartNextWave
     //==========================================================================================
