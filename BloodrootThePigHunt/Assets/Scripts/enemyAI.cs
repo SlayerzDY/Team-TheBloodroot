@@ -16,7 +16,7 @@ public class EnemyAI : MonoBehaviour, IDamage {
     [SerializeField] MobSpawner spawner;
     Color colorOrig;
     //==========================================================================================
-    // Function, Start
+    // Function, Start 
     //==========================================================================================
     void Start() {
         colorOrig = model.material.color;

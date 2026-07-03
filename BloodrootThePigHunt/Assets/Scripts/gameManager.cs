@@ -25,7 +25,7 @@ public class gameManager : MonoBehaviour {
     private float timeScaleOrig;
     private int gameGoalCount;
     //==========================================================================================
-    // Function, Awake, Pre Start
+    // Function, Awake, Pre Start 
     //==========================================================================================
     void Awake() {
         // Create world static singleton instance of the game manager
