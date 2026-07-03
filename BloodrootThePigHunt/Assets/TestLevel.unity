@@ -342,6 +342,26 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2014507428258083289, guid: f07200c1e7570da41a4cb102a86c160b, type: 3}
+      propertyPath: gunPivot
+      value: 
+      objectReference: {fileID: 1052998814}
+    - target: {fileID: 2014507428258083289, guid: f07200c1e7570da41a4cb102a86c160b, type: 3}
+      propertyPath: shootPos
+      value: 
+      objectReference: {fileID: 1967575725}
+    - target: {fileID: 2014507428258083289, guid: f07200c1e7570da41a4cb102a86c160b, type: 3}
+      propertyPath: shootRate
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2014507428258083289, guid: f07200c1e7570da41a4cb102a86c160b, type: 3}
+      propertyPath: gunRotateSpeed
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 2014507428258083289, guid: f07200c1e7570da41a4cb102a86c160b, type: 3}
+      propertyPath: faceTargetSpeed
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 7791680660320909169, guid: f07200c1e7570da41a4cb102a86c160b, type: 3}
       propertyPath: m_Name
       value: Enemy 1.0
@@ -577,6 +597,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 50074444c071b7a48a015c3f860759c6, type: 3}
+--- !u!4 &1052998814 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4446749787455840186, guid: f07200c1e7570da41a4cb102a86c160b, type: 3}
+  m_PrefabInstance: {fileID: 546212486}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1256375085
 GameObject:
   m_ObjectHideFlags: 0
@@ -1052,6 +1077,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b2f315e2baa683f46a472605e11151ae, type: 3}
+--- !u!4 &1967575725 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4270699528705787131, guid: f07200c1e7570da41a4cb102a86c160b, type: 3}
+  m_PrefabInstance: {fileID: 546212486}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1967857102
 PrefabInstance:
   m_ObjectHideFlags: 0
