@@ -6,32 +6,22 @@ namespace Bloodroot.Features.BloodMoon
     [Serializable]
     public sealed class BloodMoonModifier
     {
-        [SerializeField] private string id = "new-modifier";
-        [SerializeField] private string displayName = "New Modifier";
-        [SerializeField, TextArea(2, 4)] private string description;
-
-        [Header("Wave Multipliers")]
+        [SerializeField] private string displayName = "Blood Moon";
+        [SerializeField, TextArea] private string description;
         [SerializeField, Min(0f)] private float enemyCount = 1f;
         [SerializeField, Min(0f)] private float enemyHealth = 1f;
         [SerializeField, Min(0f)] private float enemyDamage = 1f;
         [SerializeField, Min(0f)] private float enemySpeed = 1f;
         [SerializeField, Min(0f)] private float partReward = 1f;
 
-        public string Id => id;
         public string DisplayName => displayName;
         public string Description => description;
-        public float EnemyCountMultiplier => enemyCount;
-        public float EnemyHealthMultiplier => enemyHealth;
-        public float EnemyDamageMultiplier => enemyDamage;
-        public float EnemySpeedMultiplier => enemySpeed;
-        public float PartRewardMultiplier => partReward;
 
         public BloodMoonModifier()
         {
         }
 
         public BloodMoonModifier(
-            string id,
             string displayName,
             string description,
             float enemyCount,
@@ -40,7 +30,6 @@ namespace Bloodroot.Features.BloodMoon
             float enemySpeed,
             float partReward)
         {
-            this.id = id;
             this.displayName = displayName;
             this.description = description;
             this.enemyCount = enemyCount;
@@ -50,50 +39,29 @@ namespace Bloodroot.Features.BloodMoon
             this.partReward = partReward;
         }
 
-        public int ModifyEnemyCount(int baseCount)
+        public int ModifyEnemyCount(int baseValue)
         {
-            return Mathf.Max(0, Mathf.CeilToInt(baseCount * enemyCount));
+            return Mathf.Max(0, Mathf.CeilToInt(baseValue * enemyCount));
         }
 
-        public float ModifyHealth(float baseHealth)
+        public float ModifyHealth(float baseValue)
         {
-            return Mathf.Max(0f, baseHealth * enemyHealth);
+            return Mathf.Max(0f, baseValue * enemyHealth);
         }
 
-        public float ModifyDamage(float baseDamage)
+        public float ModifyDamage(float baseValue)
         {
-            return Mathf.Max(0f, baseDamage * enemyDamage);
+            return Mathf.Max(0f, baseValue * enemyDamage);
         }
 
-        public float ModifySpeed(float baseSpeed)
+        public float ModifySpeed(float baseValue)
         {
-            return Mathf.Max(0f, baseSpeed * enemySpeed);
+            return Mathf.Max(0f, baseValue * enemySpeed);
         }
 
-        public int ModifyPartReward(int baseReward)
+        public int ModifyPartReward(int baseValue)
         {
-            return Mathf.Max(0, Mathf.RoundToInt(baseReward * partReward));
+            return Mathf.Max(0, Mathf.RoundToInt(baseValue * partReward));
         }
-
-        internal void Validate()
-        {
-            id = string.IsNullOrWhiteSpace(id) ? "unnamed-modifier" : id.Trim();
-            displayName = string.IsNullOrWhiteSpace(displayName) ? id : displayName.Trim();
-            enemyCount = Mathf.Max(0f, enemyCount);
-            enemyHealth = Mathf.Max(0f, enemyHealth);
-            enemyDamage = Mathf.Max(0f, enemyDamage);
-            enemySpeed = Mathf.Max(0f, enemySpeed);
-            partReward = Mathf.Max(0f, partReward);
-        }
-    }
-
-    /// <summary>
-    /// Implement this on a wave spawner or stat manager when it is more convenient
-    /// to receive modifier changes than to query BloodMoonWaveDirector directly.
-    /// </summary>
-    public interface IBloodMoonModifierTarget
-    {
-        void ApplyBloodMoonModifier(BloodMoonModifier modifier);
-        void ClearBloodMoonModifier();
     }
 }
