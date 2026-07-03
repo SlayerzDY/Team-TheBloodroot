@@ -30,7 +30,7 @@ public class waveManager : MonoBehaviour
     void Awake()
     {
         if (bloodMoonDirector == null)
-            bloodMoonDirector = FindFirstObjectByType<BloodMoonWaveDirector>();
+            bloodMoonDirector = FindAnyObjectByType<BloodMoonWaveDirector>();
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
