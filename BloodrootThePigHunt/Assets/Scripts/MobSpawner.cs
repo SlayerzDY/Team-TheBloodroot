@@ -1,3 +1,5 @@
+using System;
+using Bloodroot.Features.BloodMoon;
 using UnityEngine;
 
 // Instuctions:
@@ -26,6 +28,16 @@ public class MobSpawner : MonoBehaviour, IDamage
    [SerializeField] int currentEnemies = 0;
 
     float timer = 0f;
+    int waveEnemyCount;
+    int enemiesSpawnedThisWave;
+    bool waveSpawning;
+
+    public BloodMoonModifier ActiveModifier { get; private set; }
+    public int WaveEnemyCount => waveEnemyCount;
+    public int EnemiesSpawnedThisWave => enemiesSpawnedThisWave;
+
+    public event Action<GameObject, BloodMoonModifier> EnemySpawned;
+    public event Action EnemyDied;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -37,9 +49,14 @@ public class MobSpawner : MonoBehaviour, IDamage
     // Update is called once per frame
     void Update()
     {
+        if (!waveSpawning)
+            return;
+
         timer += Time.deltaTime;
 
-        if(timer >= spawnRate && currentEnemies < maxEnemies)
+        if(timer >= spawnRate &&
+           currentEnemies < maxEnemies &&
+           enemiesSpawnedThisWave < waveEnemyCount)
         {
 
             SpawnObject();
@@ -61,15 +78,38 @@ public class MobSpawner : MonoBehaviour, IDamage
         Vector3 randomOffset = new Vector3(randomCircle.x, 0, randomCircle.y);
         Vector3 Spawn = center.position + randomOffset;
 
-        Instantiate(Enemy, Spawn, center.rotation);
+        GameObject spawnedEnemy = Instantiate(Enemy, Spawn, center.rotation);
         currentEnemies++;
+        enemiesSpawnedThisWave++;
 
+        EnemySpawned?.Invoke(spawnedEnemy, ActiveModifier);
+
+        if (enemiesSpawnedThisWave >= waveEnemyCount)
+            waveSpawning = false;
+
+    }
+
+    public void ConfigureWave(int enemyCount, BloodMoonModifier modifier)
+    {
+        waveEnemyCount = Mathf.Max(0, enemyCount);
+        enemiesSpawnedThisWave = 0;
+        currentEnemies = 0;
+        ActiveModifier = modifier;
+        timer = spawnRate;
+        waveSpawning = waveEnemyCount > 0;
+    }
+
+    public void StopWave()
+    {
+        waveSpawning = false;
+        ActiveModifier = null;
     }
 
     public void MobDied()
     {
 
-        currentEnemies--;
+        currentEnemies = Mathf.Max(0, currentEnemies - 1);
+        EnemyDied?.Invoke();
         Debug.Log(currentEnemies);
 
     }
