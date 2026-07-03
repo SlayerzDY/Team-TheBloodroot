@@ -2,11 +2,10 @@
 // Using Unity Engine
 //==============================================================================================
 using UnityEngine;
-using System.Collections;
 //==============================================================================================
 // Declare Player Controller
 //==============================================================================================
-public class playerController : MonoBehaviour, IDamage {
+public class playerController : MonoBehaviour {
     //==========================================================================================
     // Define Variables
     //==========================================================================================
@@ -93,33 +92,6 @@ public class playerController : MonoBehaviour, IDamage {
             if (dmg != null) { dmg.TakeDamage(shootDamage); }
         }
         
-    }
-    //==========================================================================================
-    // Function, TakeDamage
-    //==========================================================================================
-    public void TakeDamage(int amount)
-    {
-        HP -= amount;
-        if (HP <= 0)
-        {
-            if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolve()); }
-            gameManager.instance.youLose();
-        }
-        else
-        {
-            StartCoroutine(flashRed());
-        }
-    }
-    //==========================================================================================
-    // Function, TakeDamage
-    //==========================================================================================
-    IEnumerator flashRed()
-    {
-        //model.material.color = Color.red;
-        //yield return new WaitForSeconds(0.1f);
-        //model.material.color = colorOrig;
-        if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolveFlash()); }
-        yield return null;
     }
     //==========================================================================================
 }

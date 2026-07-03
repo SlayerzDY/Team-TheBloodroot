@@ -511,8 +511,6 @@ GameObject:
   - component: {fileID: 6986632289804971165}
   - component: {fileID: 6515721808002073225}
   - component: {fileID: 2417267289540732642}
-  - component: {fileID: -7940770547195599065}
-  - component: {fileID: 7577082800726680620}
   m_Layer: 7
   m_Name: Enemy 1.0
   m_TagString: Untagged
@@ -528,15 +526,15 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7791680660320909169}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.9238794, z: -0, w: 0.38268375}
-  m_LocalPosition: {x: -598.33453, y: 1216.3124, z: 94.010345}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -29.45909, y: 1, z: 21.578205}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1559942487890406157}
   - {fileID: 4446749787455840186}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 135, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2014507428258083289
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -551,13 +549,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HP: 3
   model: {fileID: 6515721808002073225}
-  agent: {fileID: 7577082800726680620}
-  bullet: {fileID: 5433222104674597542, guid: 8b8a21829e51d6e4fb34ce4540b9e2d9, type: 3}
-  gunPivot: {fileID: 4446749787455840186}
-  shootPos: {fileID: 4270699528705787131}
-  shootRate: 1
-  gunRotateSpeed: 1
-  faceTargetSpeed: 2
 --- !u!114 &-1313171426562838978
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -572,11 +563,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dissolveMaterial: {fileID: 2100000, guid: 5c357d2d49026a741ac452c015da1536, type: 2}
   model: {fileID: 6515721808002073225}
-  dissolveDuration: 2
+  dissolveDuration: 10
   dissolveStrength: 0
-  flashDuration: 0.1
+  flashDuration: 0.25
   flashStartStrength: 0
-  flashEndStrength: 0.1
+  flashEndStrength: 0.2
 --- !u!33 &6986632289804971165
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -653,46 +644,3 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!135 &-7940770547195599065
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7791680660320909169}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 20
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!195 &7577082800726680620
-NavMeshAgent:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7791680660320909169}
-  m_Enabled: 1
-  m_AgentTypeID: 0
-  m_Radius: 0.49999994
-  m_Speed: 3.5
-  m_Acceleration: 16
-  avoidancePriority: 50
-  m_AngularSpeed: 600
-  m_StoppingDistance: 10
-  m_AutoTraverseOffMeshLink: 1
-  m_AutoBraking: 0
-  m_AutoRepath: 1
-  m_Height: 2
-  m_BaseOffset: 1
-  m_WalkableMask: 4294967295
-  m_ObstacleAvoidanceType: 4
