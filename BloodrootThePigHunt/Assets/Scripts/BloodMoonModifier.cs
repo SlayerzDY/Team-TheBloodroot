@@ -1,5 +1,5 @@
-using System;
 using UnityEngine;
+using System;
 
 namespace Bloodroot.Features.BloodMoon
 {
@@ -9,7 +9,7 @@ namespace Bloodroot.Features.BloodMoon
         [SerializeField] private string displayName = "Blood Moon";
         [SerializeField, TextArea] private string description;
         [SerializeField, Min(0f)] private float enemyCount = 1f;
-        [SerializeField, Min(0f)] private float enemyHealth = 1f;
+        [SerializeField, Min(0f)] private float enemyHealth = -1f;
         [SerializeField, Min(0f)] private float enemyDamage = 1f;
         [SerializeField, Min(0f)] private float enemySpeed = 1f;
 
@@ -18,6 +18,7 @@ namespace Bloodroot.Features.BloodMoon
 
         public BloodMoonModifier()
         {
+
         }
 
         public BloodMoonModifier(
@@ -57,4 +58,5 @@ namespace Bloodroot.Features.BloodMoon
         }
 
     }
+
 }
