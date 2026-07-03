@@ -121,6 +121,11 @@ public class playerController : MonoBehaviour, IDamage {
         if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolveFlash()); }
         yield return null;
     }
+
+    public void onDeath(bool dead)
+    {
+        throw new System.NotImplementedException();
+    }
     //==========================================================================================
 }
 //==============================================================================================
