@@ -129,8 +129,11 @@ public class gameManager : MonoBehaviour
         {
             if (menuActive != null)
             {
-                menuActive.SetActive(false);
-                menuActive = null;
+                if (menuActive == menuInteract)
+                {
+                    menuActive.SetActive(false);
+                    menuActive = null;
+                }
             }
         }
     }
