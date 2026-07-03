@@ -14,44 +14,44 @@ public class PlayerCaptured : MonoBehaviour {
     [SerializeField] float releaseTime = 5f;    
     float elapsedTime = 0f;
     //==========================================================================================
-    // Function, Start
-    //==========================================================================================
-    void Start() {
-        
-    }
-    //==========================================================================================
     // Function, Update
     //==========================================================================================
-    void Update() {
-        elapsedTime += Time.deltaTime;
-    }
-    //==========================================================================================
-    // Function, Update
-    //==========================================================================================
-    void OnTriggerEnter(Collider gameObject) {
-        elapsedTime = 0f;
-        StartCoroutine(holdObject(gameObject.gameObject));
+    void OnTriggerEnter(Collider other) {
+        if (!(other is CapsuleCollider)) return;
+        if (other.CompareTag("Enemy")) {
+            if (other.GetComponent<EnemyAI>() != null) {
+                StartCoroutine(holdObject(other.gameObject));
+            }
+        }
+        if (other.CompareTag("Player")) {
+            StartCoroutine(holdObject(other.gameObject));
+        }
     }
     //==========================================================================================
     // Function, Hold Object
     //==========================================================================================
     IEnumerator holdObject(GameObject entity) {
-        disableMovement(entity);    
-        while (elapsedTime < holdTime) {
+        disableMovement(entity);
+        // A local timer that starts fresh at 0
+        float timer = 0f;
+        while (timer < holdTime) {
+            timer += Time.deltaTime;
             yield return null;
         }
         StartCoroutine(releaseObject(entity));
-
     }
     //==========================================================================================
     // Function, Release Object
     //==========================================================================================
     IEnumerator releaseObject(GameObject entity) {
-        while (elapsedTime < releaseTime) {
+        // Another fresh local timer
+        float timer = 0f;
+        while (timer < releaseTime) {
+            timer += Time.deltaTime;
             yield return null;
         }
         enableMovement(entity);
-        Destroy(gameObject);
+        Destroy(gameObject); // Now it will safely wait for both timers to finish!
     }
     //==========================================================================================
     // Function, Disable Movement
