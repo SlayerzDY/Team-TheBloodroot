@@ -7,6 +7,8 @@ using UnityEngine;
 //==============================================================================================
 public interface IDamage {
     void TakeDamage(int amount);
+
+    void onDeath(bool dead);
 }
 //==============================================================================================
 // End of Interface IDamage
