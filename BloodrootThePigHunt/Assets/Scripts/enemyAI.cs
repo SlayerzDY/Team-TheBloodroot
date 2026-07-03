@@ -20,6 +20,7 @@ public class EnemyAI : MonoBehaviour, IDamage {
     [SerializeField] float shootRate;
     [SerializeField] int gunRotateSpeed;
     [SerializeField] int faceTargetSpeed;
+    public bool canMove =  true;
     Color colorOrig;
     Vector3 playerDir;
     float shootTimer;
@@ -36,14 +37,16 @@ public class EnemyAI : MonoBehaviour, IDamage {
     //==========================================================================================
     void Update() {
         // Shoot Mechanics
-        if (playerInTrigger) {
-            agent.SetDestination(gameManager.instance.player.transform.position);
-            shootTimer += Time.deltaTime;
-            playerDir = gameManager.instance.player.transform.position - transform.position;
-            rotateGun();
-            faceTarget();
-            if (shootTimer >= shootRate) {
-                shoot();
+        if (canMove) {
+            if (playerInTrigger) {
+                agent.SetDestination(gameManager.instance.player.transform.position);
+                shootTimer += Time.deltaTime;
+                playerDir = gameManager.instance.player.transform.position - transform.position;
+                rotateGun();
+                faceTarget();
+                if (shootTimer >= shootRate) {
+                    shoot();
+                }
             }
         }
     }

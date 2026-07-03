@@ -21,6 +21,7 @@ public class gameManager : MonoBehaviour {
     public GameObject player;
     public playerController playerController;
 
+    private float timer = 0;
     private float timeScaleOrig;
     private int gameGoalCount;
     //==========================================================================================
@@ -51,6 +52,7 @@ public class gameManager : MonoBehaviour {
                 if (menuActive == menuPause) { stateUnpause(); }
             }
         }
+        timer += Time.deltaTime;
     }
     //==========================================================================================
     // Function, StatePause
