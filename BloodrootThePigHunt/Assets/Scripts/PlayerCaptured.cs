@@ -4,6 +4,14 @@
 using UnityEngine;
 using System.Collections;
 //==============================================================================================
+// Instructions for Using the Dissolve Script
+//==============================================================================================
+/* 
+ * Instructions for using the Dissolver Script:
+ * 1.) Assign the hold time in the Inspector.
+ * 2.) Assign the release time in the Inspector.
+*/
+//==============================================================================================
 // Declare Player Captured
 //==============================================================================================
 public class PlayerCaptured : MonoBehaviour {
