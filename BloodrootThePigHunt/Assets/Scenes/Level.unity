@@ -7531,6 +7531,176 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 78432cf4c610b7148975d24b23217d27, type: 3}
+--- !u!1 &65379833
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 65379838}
+  - component: {fileID: 65379837}
+  - component: {fileID: 65379836}
+  m_Layer: 0
+  m_Name: waveStartTrigger
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &65379836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 65379833}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cc9e461a9a93d44db2f36e62ece6b7b, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::waveTrigger
+  manager: {fileID: 187925918}
+--- !u!65 &65379837
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 65379833}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 20, y: 10, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!4 &65379838
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 65379833}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0, z: -0.18207979}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!1 &187925917
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 187925919}
+  - component: {fileID: 187925918}
+  - component: {fileID: 187925920}
+  - component: {fileID: 187925921}
+  m_Layer: 0
+  m_Name: waveManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &187925918
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 187925917}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f165b7a064642ff489ba11af3f3953cf, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::waveManager
+  totalWaves: 9
+  timeBetweenWaves: 3
+  startingEnemyCount: 5
+  enemiesAddedPerWave: 1
+  bloodMoonDirector: {fileID: 187925920}
+--- !u!4 &187925919
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 187925917}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -53.20881, y: 0, z: 11.6391}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &187925920
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 187925917}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e8e5b82893e0094ab6bbefcd583ab8d, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::BloodMoonWaveDirector
+  firstBloodMoonWave: 3
+  wavesBetweenBloodMoons: 3
+  modifiers:
+  - displayName: Stampede
+    description: More pigs move faster, but have less health.
+    enemyCount: 1.4
+    enemyHealth: 0.75
+    enemyDamage: 1
+    enemySpeed: 1.3
+  - displayName: Thick Hide
+    description: Fewer pigs arrive with more health and damage.
+    enemyCount: 0.7
+    enemyHealth: 1.8
+    enemyDamage: 1.3
+    enemySpeed: 0.9
+  - displayName: Blood Frenzy
+    description: Pigs hit harder and move faster.
+    enemyCount: 1
+    enemyHealth: 1
+    enemyDamage: 1.5
+    enemySpeed: 1.15
+--- !u!114 &187925921
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 187925917}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17d2b899ff589cc47a56223b00764ff4, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Features.BloodMoon.BloodMoonPresentation
+  director: {fileID: 187925920}
+  sceneLight: {fileID: 410087040}
+  announcementBanner: {fileID: 0}
+  stingerSource: {fileID: 0}
+  bloodMoonStinger: {fileID: 0}
+  bloodMoonColor: {r: 0.65, g: 0.08, b: 0.06, a: 1}
+  bannerSeconds: 2.5
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -7545,3 +7715,5 @@ SceneRoots:
   - {fileID: 3930729281790550368}
   - {fileID: 1961245533}
   - {fileID: 670386044}
+  - {fileID: 65379838}
+  - {fileID: 187925919}
