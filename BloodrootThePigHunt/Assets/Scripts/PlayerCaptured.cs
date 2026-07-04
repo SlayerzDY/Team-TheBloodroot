@@ -14,7 +14,7 @@ using System.Collections;
 //==============================================================================================
 // Declare Player Captured 
 //==============================================================================================
-public class PlayerCaptured : MonoBehaviour {
+public class PlayerCaptured : MonoBehaviour, IInteract {
     //==========================================================================================
     // Define Variables
     //==========================================================================================
@@ -48,6 +48,12 @@ public class PlayerCaptured : MonoBehaviour {
             yield return null;
         }
         StartCoroutine(releaseObject(entity));
+    }
+    //==========================================================================================
+    // Function, Release Object
+    //==========================================================================================
+    private void disable() {
+        Destroy(gameObject);
     }
     //==========================================================================================
     // Function, Release Object
@@ -94,6 +100,14 @@ public class PlayerCaptured : MonoBehaviour {
                 enemyAI.enabled = true;
             }
         }
+    }
+    //==========================================================================================
+    // Function, Send Interact
+    //==========================================================================================
+    public void SendInteract(Collider target) {
+        if (damageSound != null) { AudioSource.PlayClipAtPoint(damageSound, gameObject.transform.position); }
+        if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolve()); return;  }
+        disable();
     }
     //==========================================================================================
 }
