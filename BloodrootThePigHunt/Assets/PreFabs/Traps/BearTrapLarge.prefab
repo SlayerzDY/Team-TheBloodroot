@@ -9,15 +9,17 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8740598040924119038}
+  - component: {fileID: 6649248045313612006}
   - component: {fileID: -5892788172628357444}
   - component: {fileID: 1673740098413015076}
+  - component: {fileID: 4054523134020191913}
   - component: {fileID: 8346228078949359004}
   - component: {fileID: 8204202309931736455}
   - component: {fileID: 1280194749174694862}
   - component: {fileID: -1676379242035495570}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: BearTrapLarge
-  m_TagString: Untagged
+  m_TagString: Interact
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -37,6 +39,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6649248045313612006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8805823926485247629}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3865add71eef4754e9ac44b0909da539, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Interact
+  InteractRange: 0
+  InteractLayer:
+    serializedVersion: 2
+    m_Bits: 1024
 --- !u!114 &-5892788172628357444
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -71,6 +89,27 @@ MonoBehaviour:
   bulletSpeed: 0
   bulletDestroyTime: 0
   hitEffect: {fileID: 0}
+--- !u!114 &4054523134020191913
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8805823926485247629}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6c002d6b023a334da6369bfb788c2e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dissolveMaterial: {fileID: 2100000, guid: 5c357d2d49026a741ac452c015da1536, type: 2}
+  model: {fileID: 8204202309931736455}
+  dissolveDamage: {fileID: 8300000, guid: ad2395e6710ebf944bbcd30444b3a468, type: 3}
+  dissolveDeath: {fileID: 8300000, guid: 8fa41b62e422a3e44a4ea375b05052d4, type: 3}
+  dissolveDuration: 2
+  dissolveStrength: 0
+  flashDuration: 0.1
+  flashStartStrength: 0
+  flashEndStrength: 0.2
 --- !u!33 &8346228078949359004
 MeshFilter:
   m_ObjectHideFlags: 0

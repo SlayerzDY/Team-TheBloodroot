@@ -1,4 +1,6 @@
 using UnityEngine;
+using Bloodroot.Features.BloodMoon;
+
 
 // Instuctions:
 // 1. Create a empty 3D object
@@ -13,7 +15,7 @@ using UnityEngine;
 
 //
 
-public class MobSpawner : MonoBehaviour, IDamage
+public class MobSpawner : MonoBehaviour
 {
 
     [SerializeField] GameObject Enemy;
@@ -23,12 +25,17 @@ public class MobSpawner : MonoBehaviour, IDamage
 
 
     public int maxEnemies;
-    public int currentEnemies = 0;
+    public int currentEnemies;
 
     float timer = 0f;
 
-    public bool isWaveActive = false;
-    
+    public bool isWaveActive;
+    private int enemiesInWave;
+    private int enemiesSpawnedThisWave;
+
+    private waveManager manager;
+    private BloodMoonModifier activeModifier;
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -66,7 +73,7 @@ public class MobSpawner : MonoBehaviour, IDamage
         Instantiate(Enemy, Spawn, center.rotation);
         currentEnemies++;
 
-        if(currentEnemies > maxEnemies)
+        if(currentEnemies >= maxEnemies)
         {
 
             isWaveActive = false;
@@ -75,21 +82,5 @@ public class MobSpawner : MonoBehaviour, IDamage
 
     }
 
-    public void MobDied()
-    {
-
-        currentEnemies--;
-        Debug.Log(currentEnemies);
-
-    }
-
-    public void TakeDamage(int amount)
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public void onDeath(bool dead)
-    {
-        MobDied();
-    }
+  
 }

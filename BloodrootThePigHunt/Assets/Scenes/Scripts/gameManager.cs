@@ -3,6 +3,7 @@
 //==============================================================================================
 using UnityEngine;
 using System.Collections;
+using Bloodroot.Features.BloodMoon;
 //==============================================================================================
 // Declare Game Manager
 //==============================================================================================
@@ -90,8 +91,8 @@ public class gameManager : MonoBehaviour
     //==========================================================================================
     public void updateGameGoal(int amount)
     {
-        gameGoalCount += amount;
-        if (gameGoalCount <= 0)
+        //gameGoalCount += amount;
+        if (gameGoalCount >= 10)
         {
             // You win the game
             youWin();
@@ -129,8 +130,11 @@ public class gameManager : MonoBehaviour
         {
             if (menuActive != null)
             {
-                menuActive.SetActive(false);
-                menuActive = null;
+                if (menuActive == menuInteract)
+                {
+                    menuActive.SetActive(false);
+                    menuActive = null;
+                }
             }
         }
     }
@@ -140,7 +144,7 @@ public class gameManager : MonoBehaviour
     // Function, StartNextWave
     //==========================================================================================
 
-    public void StartNextWave(int enemiesInWave)
+    public void StartNextWave(int enemyNum)
     {
 
         MobSpawner spawner = FindAnyObjectByType<MobSpawner>();
@@ -148,7 +152,7 @@ public class gameManager : MonoBehaviour
         if(spawner != null)
         {
 
-            spawner.maxEnemies = enemiesInWave;
+            spawner.maxEnemies = enemyNum;
 
             spawner.currentEnemies = 0;
 

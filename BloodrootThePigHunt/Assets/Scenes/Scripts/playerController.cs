@@ -88,11 +88,12 @@ public class playerController : MonoBehaviour, IDamage {
         shootTimer = 0;
         RaycastHit hit;
         if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, shootDist, ~ignoreLayer)) {
+            if (hit.collider.CompareTag("Player")) { return; }
+            if (!(hit.collider is CapsuleCollider)) { return; }
             Debug.Log(hit.collider.name);
             IDamage dmg = hit.collider.GetComponent<IDamage>();
             if (dmg != null) { dmg.TakeDamage(shootDamage); }
         }
-        
     }
     //==========================================================================================
     // Function, TakeDamage
