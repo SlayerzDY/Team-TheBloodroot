@@ -1,40 +1,43 @@
-using UnityEngine;
 using System;
 using System.Collections;
 using Bloodroot.Features.BloodMoon;
+using UnityEngine;
 
 public class waveManager : MonoBehaviour
 {
-
-    [SerializeField] int totalWaves;
-    [SerializeField] float timeBetweenWaves;
+    [SerializeField, Min(1)] private int totalWaves;
+    [SerializeField, Min(0f)] private float timeBetweenWaves;
 
     [Header("Wave Size")]
-    [SerializeField, Min(0)] int startingEnemyCount = 5;
-    [SerializeField, Min(0)] int enemiesAddedPerWave = 1;
+    [SerializeField, Min(0)] private int startingEnemyCount;
+    [SerializeField, Min(0)] private int enemiesAddedPerWave;
 
     [Header("Connections")]
-    [SerializeField] BloodMoonWaveDirector bloodMoonDirector;
+    [SerializeField] private MobSpawner mobSpawner;
+    [SerializeField] private BloodMoonWaveDirector bloodMoonDirector;
 
     private bool encounterStarted;
 
     public int currentWave { get; private set; }
     public int enemiesRemaining { get; private set; }
     public bool waveActive { get; private set; }
+
     public BloodMoonModifier ActiveBloodMoonModifier { get; private set; }
 
-    public event Action<int> NextWaveRequested;
     public event Action<int, int, BloodMoonModifier> WaveStarted;
+    public event Action<int> WaveCompleted;
     public event Action AllWavesCompleted;
 
-    void Awake()
+    private void Awake()
     {
+        if (mobSpawner == null)
+            mobSpawner = FindAnyObjectByType<MobSpawner>();
+
         if (bloodMoonDirector == null)
             bloodMoonDirector = FindAnyObjectByType<BloodMoonWaveDirector>();
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void Start()
     {
         currentWave = 0;
         enemiesRemaining = 0;
@@ -47,15 +50,30 @@ public class waveManager : MonoBehaviour
             return;
 
         encounterStarted = true;
-        RequestWave(1);
+        StartNextWave();
+    }
 
-        Debug.Log("Wave encounter triggered");
+    private void StartNextWave()
+    {
+        int nextWave = currentWave + 1;
+
+        int baseEnemyCount =
+            startingEnemyCount +
+            (nextWave - 1) * enemiesAddedPerWave;
+
+        StartWave(baseEnemyCount);
     }
 
     public void StartWave(int baseEnemyCount)
     {
         if (waveActive || currentWave >= totalWaves)
             return;
+
+        if (mobSpawner == null)
+        {
+            Debug.LogError("WaveManager cannot find MobSpawner.");
+            return;
+        }
 
         currentWave++;
 
@@ -68,9 +86,17 @@ public class waveManager : MonoBehaviour
             : Mathf.Max(0, baseEnemyCount);
 
         waveActive = true;
+        
+        gameManager.instance.StartNextWave(enemiesRemaining);
 
-        WaveStarted?.Invoke(currentWave, enemiesRemaining, ActiveBloodMoonModifier);
-        Debug.Log($"Wave {currentWave} started with {enemiesRemaining} enemies.");
+        WaveStarted?.Invoke(
+            currentWave,
+            enemiesRemaining,
+            ActiveBloodMoonModifier);
+
+        Debug.Log(
+            $"Wave {currentWave} started with " +
+            $"{enemiesRemaining} enemies.");
 
         if (enemiesRemaining == 0)
             CompleteWave();
@@ -81,7 +107,8 @@ public class waveManager : MonoBehaviour
         if (!waveActive)
             return;
 
-        enemiesRemaining = Mathf.Max(enemiesRemaining - 1, 0);
+        enemiesRemaining =
+            Mathf.Max(0, enemiesRemaining - 1);
 
         if (enemiesRemaining == 0)
             CompleteWave();
@@ -90,10 +117,12 @@ public class waveManager : MonoBehaviour
     private void CompleteWave()
     {
         waveActive = false;
+
         bloodMoonDirector?.EndWave(currentWave);
+
         ActiveBloodMoonModifier = null;
 
-        Debug.Log($"Wave {currentWave} complete!");
+        WaveCompleted?.Invoke(currentWave);
 
         if (currentWave >= totalWaves)
         {
@@ -108,19 +137,8 @@ public class waveManager : MonoBehaviour
     private IEnumerator WaitForNextWave()
     {
         yield return new WaitForSeconds(timeBetweenWaves);
-        RequestWave(currentWave + 1);
+
+        StartNextWave();
+
     }
-
-    private void RequestWave(int waveNumber)
-    {
-        NextWaveRequested?.Invoke(waveNumber);
-
-        if (!waveActive)
-        {
-            int baseEnemyCount = startingEnemyCount +
-                                 (waveNumber - 1) * enemiesAddedPerWave;
-            StartWave(baseEnemyCount);
-        }
-    }
-
 }

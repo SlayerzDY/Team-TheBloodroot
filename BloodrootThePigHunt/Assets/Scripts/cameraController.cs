@@ -23,7 +23,7 @@ public class cameraController : MonoBehaviour {
     // Update is called once per frame 
     //==========================================================================================
     void Update() { 
-       // if (!gameManager.instance.isPaused) {
+       if (!gameManager.instance.isPaused) {
             float mouseX = Input.GetAxisRaw("Mouse X") * sens;
             float mouseY = Input.GetAxisRaw("Mouse Y") * sens;
             camRotX -= mouseY;
@@ -31,7 +31,7 @@ public class cameraController : MonoBehaviour {
             // flight controls if you use others?
             transform.localRotation = Quaternion.Euler(camRotX, 0, 0);
             transform.parent.Rotate(Vector3.up * mouseX);
-        //}
+        }
     }
     //==========================================================================================
 }
