@@ -3,96 +3,99 @@
 //==============================================================================================
 using UnityEngine;
 using System.Collections;
+using UnityEngine.AI;
 //==============================================================================================
-// Declare Player Controller
+// Declare Enemy AI
 //==============================================================================================
-public class playerController : MonoBehaviour, IDamage {
+public class EnemyAI : MonoBehaviour, IDamage
+{
     //==========================================================================================
-    // Define Variables
+    // Declare Variables
     //==========================================================================================
-    [SerializeField] CharacterController controller;
-    [SerializeField] LayerMask ignoreLayer;
-    // Player Stats
     [SerializeField] int HP;
-    [SerializeField] int speed;
-    [SerializeField] int sprintMod;
-    [SerializeField] int jumpSpeed;
-    [SerializeField] int jumpMax;
-    [SerializeField] int gravity;
-    // Weapon Stats
-    [SerializeField] int shootDamage;
-    [SerializeField] int shootDist;
+    [SerializeField] Renderer model;
+    [SerializeField] NavMeshAgent agent;
+    [SerializeField] GameObject bullet;
+    [SerializeField] Transform gunPivot;
+    [SerializeField] Transform shootPos;
     [SerializeField] float shootRate;
-    int jumpCount;
-    int HPOrig;
+    [SerializeField] int gunRotateSpeed;
+    [SerializeField] int faceTargetSpeed;
+    [SerializeField] MobSpawner spawner;
+    Color colorOrig;
+    Vector3 playerDir;
     float shootTimer;
-    Vector3 moveDir;
-    Vector3 playerVel;
+    bool playerInTrigger;
     //==========================================================================================
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    // Function, Start
     //==========================================================================================
-    void Start() {
-        HPOrig = HP;
+    void Start()
+    {
+        colorOrig = model.material.color;
+        gameManager.instance.updateGameGoal(1);
     }
     //==========================================================================================
-    // Update is called once per frame
+    // Function, Update
     //==========================================================================================
-    void Update() {
-        movement();
-        sprint();
-    }
-    //==========================================================================================
-    // Function, Movement
-    //==========================================================================================
-    void movement() {
-        
-        if (controller.isGrounded) {
-            playerVel.y = 0;
-            jumpCount = 0;
-        }
-        // kill after the plus to make Side Scroller
-        moveDir = Input.GetAxis("Horizontal") * transform.right + Input.GetAxis("Vertical") * transform.forward;
-        controller.Move(moveDir.normalized * speed * Time.deltaTime);
-        jump();
-        controller.Move(playerVel * Time.deltaTime);
-        playerVel.y -= gravity * Time.deltaTime;
-        shootTimer += Time.deltaTime;
-        if (Input.GetButton("Fire1") && shootTimer > shootRate) { shoot(); }
-        Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * shootDist, Color.red);
-    }
-    //==========================================================================================
-    // Function, Movement
-    //==========================================================================================
-    void sprint() {
-        if(Input.GetButtonDown("Sprint")) {
-            speed *= sprintMod;
-        } else if(Input.GetButtonUp("Sprint")) {
-            speed /= sprintMod;
+    void Update()
+    {
+        // Shoot Mechanics
+        if (playerInTrigger)
+        {
+            agent.SetDestination(gameManager.instance.player.transform.position);
+            shootTimer += Time.deltaTime;
+            playerDir = gameManager.instance.player.transform.position - transform.position;
+            rotateGun();
+            faceTarget();
+            if (shootTimer >= shootRate)
+            {
+                shoot();
+            }
         }
     }
     //==========================================================================================
-    // Function, Movement
+    // Function, On Trigger Enter
     //==========================================================================================
-    void jump() {
-        if (Input.GetButtonDown("Jump") && jumpCount < jumpMax) {
-            playerVel.y = jumpSpeed;
-            jumpCount++;
-
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            playerInTrigger = true;
         }
     }
-
+    //==========================================================================================
+    // Function, On Trigger Exit
+    //==========================================================================================
+    void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            playerInTrigger = false;
+        }
+    }
     //==========================================================================================
     // Function, Shoot
     //==========================================================================================
-    void shoot() {
+    void shoot()
+    {
         shootTimer = 0;
-        RaycastHit hit;
-        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, shootDist, ~ignoreLayer)) {
-            Debug.Log(hit.collider.name);
-            IDamage dmg = hit.collider.GetComponent<IDamage>();
-            if (dmg != null) { dmg.TakeDamage(shootDamage); }
-        }
-        
+        Instantiate(bullet, shootPos.position, gunPivot.rotation);
+    }
+    //==========================================================================================
+    // Function, Face Target
+    //==========================================================================================
+    void faceTarget()
+    {
+        Quaternion rot = Quaternion.LookRotation(new Vector3(playerDir.x, 0, playerDir.z));
+        transform.rotation = Quaternion.Lerp(transform.rotation, rot, faceTargetSpeed * Time.deltaTime);
+    }
+    //==========================================================================================
+    // Function, Rotate Gun
+    //==========================================================================================
+    void rotateGun()
+    {
+        Quaternion rot = Quaternion.LookRotation(playerDir);
+        gunPivot.rotation = Quaternion.Lerp(gunPivot.rotation, rot, shootRate * Time.deltaTime);
     }
     //==========================================================================================
     // Function, TakeDamage
@@ -103,7 +106,7 @@ public class playerController : MonoBehaviour, IDamage {
         if (HP <= 0)
         {
             if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolve()); }
-            gameManager.instance.youLose();
+            gameManager.instance.updateGameGoal(-1);
         }
         else
         {
@@ -111,28 +114,10 @@ public class playerController : MonoBehaviour, IDamage {
         }
     }
     //==========================================================================================
-    // Function, OnDeath
-    //==========================================================================================
-    public void onDeath(bool death)
-    {
-        if (death)
-        {
-            return;
-        }
-        Dissolver dissolver = GetComponent<Dissolver>();
-        if (dissolver != null)
-        {
-            dissolver.StartCoroutine(dissolver.dissolve());
-        }
-        gameManager.instance.youLose();
-    }
-
-
-    //==========================================================================================
-    // Function, flashRed
+    // Function, Flash
     //==========================================================================================
     IEnumerator flashRed()
-    {  
+    {
         //model.material.color = Color.red;
         //yield return new WaitForSeconds(0.1f);
         //model.material.color = colorOrig;
@@ -147,5 +132,5 @@ public class playerController : MonoBehaviour, IDamage {
     //==========================================================================================
 }
 //==============================================================================================
-// End of Player Controller .cs
+// End of Enemy AI .cs
 //==============================================================================================

@@ -19,14 +19,16 @@ public class MobSpawner : MonoBehaviour, IDamage
     [SerializeField] GameObject Enemy;
     [SerializeField] Transform[] spawnPoint;
     [SerializeField]float spawnRate;
-    [SerializeField] int maxEnemies;
     [SerializeField] float spawnRadius;
 
-    // to view the amount of objects currently spawned
-   [SerializeField] int currentEnemies = 0;
+
+    public int maxEnemies;
+    public int currentEnemies = 0;
 
     float timer = 0f;
 
+    public bool isWaveActive = false;
+    
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -39,7 +41,7 @@ public class MobSpawner : MonoBehaviour, IDamage
     {
         timer += Time.deltaTime;
 
-        if(timer >= spawnRate && currentEnemies < maxEnemies)
+        if(timer >= spawnRate && isWaveActive && currentEnemies < maxEnemies)
         {
 
             SpawnObject();
@@ -63,6 +65,13 @@ public class MobSpawner : MonoBehaviour, IDamage
 
         Instantiate(Enemy, Spawn, center.rotation);
         currentEnemies++;
+
+        if(currentEnemies > maxEnemies)
+        {
+
+            isWaveActive = false;
+
+        }
 
     }
 

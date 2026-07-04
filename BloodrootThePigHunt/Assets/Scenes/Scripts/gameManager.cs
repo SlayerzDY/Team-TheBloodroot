@@ -6,7 +6,8 @@ using System.Collections;
 //==============================================================================================
 // Declare Game Manager
 //==============================================================================================
-public class gameManager : MonoBehaviour {
+public class gameManager : MonoBehaviour
+{
     //==========================================================================================
     // Define Variables
     //==========================================================================================
@@ -16,24 +17,28 @@ public class gameManager : MonoBehaviour {
     [SerializeField] GameObject menuWin;
     [SerializeField] GameObject menuLose;
     [SerializeField] GameObject menuMain;
-
+    [SerializeField] GameObject menuInteract;
+     
     public bool isPaused = false;
     public GameObject player;
     public playerController playerController;
 
+    private float timer = 0;
     private float timeScaleOrig;
     private int gameGoalCount;
     //==========================================================================================
-    // Function, Awake, Pre Start
+    // Function, Awake, Pre Start 
     //==========================================================================================
-    void Awake() {
+    void Awake()
+    {
         // Create world static singleton instance of the game manager
         instance = this;
     }
     //==========================================================================================
     // Function, Start
     //==========================================================================================
-    void Start() {
+    void Start()
+    {
         timeScaleOrig = Time.timeScale;
         player = GameObject.FindWithTag("Player");
         playerController = player.GetComponent<playerController>();
@@ -41,21 +46,28 @@ public class gameManager : MonoBehaviour {
     //==========================================================================================
     // Function, Update
     //==========================================================================================
-    void Update() {
-        if(Input.GetButtonDown("Cancel")) {
-            if (menuActive == null) {
+    void Update()
+    {
+        if (Input.GetButtonDown("Cancel"))
+        {
+            if (menuActive == null)
+            {
                 statePause();
                 menuActive = menuPause;
                 menuActive.SetActive(true);
-            } else {
+            }
+            else
+            {
                 if (menuActive == menuPause) { stateUnpause(); }
             }
         }
+        timer += Time.deltaTime;
     }
     //==========================================================================================
     // Function, StatePause
     //==========================================================================================
-    public void statePause() {
+    public void statePause()
+    {
         isPaused = true;
         Time.timeScale = 0;
         Cursor.visible = true;
@@ -64,7 +76,8 @@ public class gameManager : MonoBehaviour {
     //==========================================================================================
     // Function, StateUnpause
     //==========================================================================================
-    public void stateUnpause() {
+    public void stateUnpause()
+    {
         isPaused = false;
         Time.timeScale = timeScaleOrig;
         Cursor.visible = false;
@@ -75,9 +88,11 @@ public class gameManager : MonoBehaviour {
     //==========================================================================================
     // Function, Update Game Goal
     //==========================================================================================
-    public void updateGameGoal(int amount) {
+    public void updateGameGoal(int amount)
+    {
         gameGoalCount += amount;
-        if (gameGoalCount <= 0) {
+        if (gameGoalCount <= 0)
+        {
             // You win the game
             youWin();
         }
@@ -85,7 +100,8 @@ public class gameManager : MonoBehaviour {
     //==========================================================================================
     // Function, Lose
     //==========================================================================================
-    public void youLose() {
+    public void youLose()
+    {
         statePause();
         menuActive = menuLose;
         menuActive.SetActive(true);
@@ -93,12 +109,56 @@ public class gameManager : MonoBehaviour {
     //==========================================================================================
     // Function, Win
     //==========================================================================================
-    public void youWin() {
+    public void youWin()
+    {
         statePause();
         menuActive = menuWin;
         menuActive.SetActive(true);
     }
     //==========================================================================================
+    // Function, Interact Display
+    //==========================================================================================
+    public void InteractDisplay(bool isOn)
+    {
+        if (isOn)
+        {
+            menuActive = menuInteract;
+            menuActive.SetActive(true);
+        }
+        else
+        {
+            if (menuActive != null)
+            {
+                menuActive.SetActive(false);
+                menuActive = null;
+            }
+        }
+    }
+    //
+
+    //==========================================================================================
+    // Function, StartNextWave
+    //==========================================================================================
+
+    public void StartNextWave(int enemiesInWave)
+    {
+
+        MobSpawner spawner = FindAnyObjectByType<MobSpawner>();
+
+        if(spawner != null)
+        {
+
+            spawner.maxEnemies = enemiesInWave;
+
+            spawner.currentEnemies = 0;
+
+            spawner.isWaveActive = true;
+
+        }
+
+    }
+
+
 }
 //==============================================================================================
 // End of Game Manager
