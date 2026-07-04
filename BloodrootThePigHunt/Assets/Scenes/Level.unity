@@ -280,7 +280,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e8e5b82893e0094ab6bbefcd583ab8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BloodMoonWaveDirector
-  firstBloodMoonWave: 1
+  firstBloodMoonWave: 2
   wavesBetweenBloodMoons: 3
   modifiers:
   - displayName: Stampede
@@ -309,12 +309,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 30099690}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 46.57587, y: 0, z: -59.72118}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1452776926}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &32211178
 PrefabInstance:
@@ -3880,37 +3880,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d5766de86ef020f4d93c32f5de1f640f, type: 3}
---- !u!1 &1177253068
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1177253069}
-  m_Layer: 0
-  m_Name: Corn Field
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1177253069
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1177253068}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -28.094383, y: 0, z: -11.850529}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1202966077
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4856,6 +4825,7 @@ MonoBehaviour:
   timeBetweenWaves: 5
   startingEnemyCount: 3
   enemiesAddedPerWave: 2
+  mobSpawner: {fileID: 1584553384}
   bloodMoonDirector: {fileID: 30099691}
 --- !u!4 &1452776926
 Transform:
@@ -4869,7 +4839,9 @@ Transform:
   m_LocalPosition: {x: 46.57587, y: 0, z: -59.72118}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1584553383}
+  - {fileID: 30099692}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1468913412
@@ -5432,6 +5404,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1584553383}
+  - component: {fileID: 1584553385}
   - component: {fileID: 1584553384}
   m_Layer: 0
   m_Name: TestObject
@@ -5449,12 +5422,12 @@ Transform:
   m_GameObject: {fileID: 1584553381}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -37.350002, y: 1, z: 25.59999}
+  m_LocalPosition: {x: -13.425873, y: 1.7, z: 36.42117}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1275959101}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1452776926}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1584553384
 MonoBehaviour:
@@ -5471,11 +5444,24 @@ MonoBehaviour:
   Enemy: {fileID: 7791680660320909169, guid: f07200c1e7570da41a4cb102a86c160b, type: 3}
   spawnPoint:
   - {fileID: 1275959101}
-  spawnRate: 5
+  spawnRate: 2
   spawnRadius: 5
   maxEnemies: 0
   currentEnemies: 0
   isWaveActive: 0
+--- !u!114 &1584553385
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1584553381}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cc9e461a9a93d44db2f36e62ece6b7b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::waveTrigger
+  manager: {fileID: 1452776925}
 --- !u!1001 &1589609155
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8097,8 +8083,6 @@ SceneRoots:
   m_Roots:
   - {fileID: 410087041}
   - {fileID: 832575519}
-  - {fileID: 1177253069}
-  - {fileID: 1584553383}
   - {fileID: 2579923506988484472}
   - {fileID: 489900923}
   - {fileID: 9143793715526780768}
@@ -8107,5 +8091,4 @@ SceneRoots:
   - {fileID: 670386044}
   - {fileID: 1983471539}
   - {fileID: 1452776926}
-  - {fileID: 30099692}
   - {fileID: 679510760}

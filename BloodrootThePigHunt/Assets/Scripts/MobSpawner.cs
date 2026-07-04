@@ -13,7 +13,7 @@ using UnityEngine;
 
 //
 
-public class MobSpawner : MonoBehaviour, IDamage
+public class MobSpawner : MonoBehaviour
 {
 
     [SerializeField] GameObject Enemy;
@@ -23,7 +23,7 @@ public class MobSpawner : MonoBehaviour, IDamage
 
 
     public int maxEnemies;
-    public int currentEnemies = 0;
+    public int currentEnemies;
 
     float timer = 0f;
 
@@ -66,7 +66,7 @@ public class MobSpawner : MonoBehaviour, IDamage
         Instantiate(Enemy, Spawn, center.rotation);
         currentEnemies++;
 
-        if(currentEnemies > maxEnemies)
+        if(currentEnemies >= maxEnemies)
         {
 
             isWaveActive = false;
@@ -75,21 +75,5 @@ public class MobSpawner : MonoBehaviour, IDamage
 
     }
 
-    public void MobDied()
-    {
-
-        currentEnemies--;
-        Debug.Log(currentEnemies);
-
-    }
-
-    public void TakeDamage(int amount)
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public void onDeath(bool dead)
-    {
-        MobDied();
-    }
+  
 }
