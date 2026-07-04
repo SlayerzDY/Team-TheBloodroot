@@ -1,4 +1,6 @@
 using UnityEngine;
+using Bloodroot.Features.BloodMoon;
+
 
 // Instuctions:
 // 1. Create a empty 3D object
@@ -27,8 +29,13 @@ public class MobSpawner : MonoBehaviour
 
     float timer = 0f;
 
-    public bool isWaveActive = false;
-    
+    public bool isWaveActive;
+    private int enemiesInWave;
+    private int enemiesSpawnedThisWave;
+
+    private waveManager manager;
+    private BloodMoonModifier activeModifier;
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()

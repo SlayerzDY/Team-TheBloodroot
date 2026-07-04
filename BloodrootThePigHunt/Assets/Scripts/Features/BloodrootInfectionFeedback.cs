@@ -3,10 +3,10 @@ using UnityEngine;
 namespace Bloodroot.Features.Infection
 {
     [DisallowMultipleComponent]
-    [RequireComponent(typeof(BloodrootInfectionController))]
+    [RequireComponent(typeof(BloodRootInfectionController))]
     public sealed class BloodrootInfectionFeedback : MonoBehaviour
     {
-        [SerializeField] private BloodrootInfectionController infectionController;
+        [SerializeField] private BloodRootInfectionController infectionController;
         [SerializeField] private Camera targetCamera;
         [SerializeField] private CanvasGroup distortionOverlay;
         [SerializeField] private AudioSource heartbeatSource;
@@ -23,7 +23,7 @@ namespace Bloodroot.Features.Infection
 
         private void Reset()
         {
-            infectionController = GetComponent<BloodrootInfectionController>();
+            infectionController = GetComponent<BloodRootInfectionController>();
             targetCamera = GetComponentInChildren<Camera>();
         }
 
@@ -31,7 +31,7 @@ namespace Bloodroot.Features.Infection
         {
             if (infectionController == null)
             {
-                infectionController = GetComponent<BloodrootInfectionController>();
+                infectionController = GetComponent<BloodRootInfectionController>();
             }
 
             if (targetCamera != null)

@@ -1,16 +1,17 @@
-using System.Collections.Generic;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace Bloodroot.Features.Infection
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Collider))]
+
     public sealed class BloodrootInfectionZone : MonoBehaviour
     {
         [SerializeField, Min(0f)] private float infectionPerSecond = 20f;
 
-        private readonly HashSet<BloodrootInfectionController> playersInside =
-            new HashSet<BloodrootInfectionController>();
+        private readonly HashSet<BloodRootInfectionController> playersInside =
+            new HashSet<BloodRootInfectionController>();
 
         private void Reset()
         {
@@ -19,8 +20,8 @@ namespace Bloodroot.Features.Infection
 
         private void OnTriggerEnter(Collider other)
         {
-            BloodrootInfectionController infection =
-                other.GetComponentInParent<BloodrootInfectionController>();
+            BloodRootInfectionController infection =
+                other.GetComponentInParent<BloodRootInfectionController>();
 
             if (infection != null && playersInside.Add(infection))
             {
@@ -30,9 +31,8 @@ namespace Bloodroot.Features.Infection
 
         private void OnTriggerExit(Collider other)
         {
-            BloodrootInfectionController infection =
-                other.GetComponentInParent<BloodrootInfectionController>();
-
+            BloodRootInfectionController infection =
+                other.GetComponentInParent<BloodRootInfectionController>();
             if (infection != null && playersInside.Remove(infection))
             {
                 infection.ExitZone(this);
@@ -41,7 +41,7 @@ namespace Bloodroot.Features.Infection
 
         private void OnDisable()
         {
-            foreach (BloodrootInfectionController infection in playersInside)
+            foreach (BloodRootInfectionController infection in playersInside)
             {
                 if (infection != null)
                 {
@@ -51,5 +51,6 @@ namespace Bloodroot.Features.Infection
 
             playersInside.Clear();
         }
+
     }
 }

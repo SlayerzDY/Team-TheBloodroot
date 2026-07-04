@@ -5,15 +5,14 @@ using UnityEngine;
 
 public class waveManager : MonoBehaviour
 {
-    [SerializeField, Min(1)] private int totalWaves;
-    [SerializeField, Min(0f)] private float timeBetweenWaves;
+    [SerializeField, Min(1)] private int totalWaves = 20;
+    [SerializeField, Min(0f)] private float timeBetweenWaves = 5f;
 
     [Header("Wave Size")]
-    [SerializeField, Min(0)] private int startingEnemyCount;
-    [SerializeField, Min(0)] private int enemiesAddedPerWave;
+    [SerializeField, Min(0)] private int startingEnemyCount = 3;
+    [SerializeField, Min(0)] private int enemiesAddedPerWave = 2;
 
-    [Header("Connections")]
-    [SerializeField] private MobSpawner mobSpawner;
+    [Header("Blood Moon")]
     [SerializeField] private BloodMoonWaveDirector bloodMoonDirector;
 
     private bool encounterStarted;
@@ -22,7 +21,11 @@ public class waveManager : MonoBehaviour
     public int enemiesRemaining { get; private set; }
     public bool waveActive { get; private set; }
 
-    public BloodMoonModifier ActiveBloodMoonModifier { get; private set; }
+    public BloodMoonModifier ActiveBloodMoonModifier
+    {
+        get;
+        private set;
+    }
 
     public event Action<int, int, BloodMoonModifier> WaveStarted;
     public event Action<int> WaveCompleted;
@@ -30,11 +33,11 @@ public class waveManager : MonoBehaviour
 
     private void Awake()
     {
-        if (mobSpawner == null)
-            mobSpawner = FindAnyObjectByType<MobSpawner>();
-
         if (bloodMoonDirector == null)
-            bloodMoonDirector = FindAnyObjectByType<BloodMoonWaveDirector>();
+        {
+            bloodMoonDirector =
+                FindAnyObjectByType<BloodMoonWaveDirector>();
+        }
     }
 
     private void Start()
@@ -51,15 +54,20 @@ public class waveManager : MonoBehaviour
 
         encounterStarted = true;
         StartNextWave();
+
+        Debug.Log("Wave encounter started.");
     }
 
     private void StartNextWave()
     {
+        if (currentWave >= totalWaves)
+            return;
+
         int nextWave = currentWave + 1;
 
         int baseEnemyCount =
             startingEnemyCount +
-            (nextWave - 1) * enemiesAddedPerWave;
+            ((nextWave - 1) * enemiesAddedPerWave);
 
         StartWave(baseEnemyCount);
     }
@@ -69,25 +77,40 @@ public class waveManager : MonoBehaviour
         if (waveActive || currentWave >= totalWaves)
             return;
 
-        if (mobSpawner == null)
+        if (gameManager.instance == null)
         {
-            Debug.LogError("WaveManager cannot find MobSpawner.");
+            Debug.LogError(
+                "WaveManager cannot find GameManager.");
             return;
         }
 
         currentWave++;
 
-        ActiveBloodMoonModifier = bloodMoonDirector != null
-            ? bloodMoonDirector.BeginWave(currentWave)
-            : null;
+        ActiveBloodMoonModifier =
+            bloodMoonDirector != null
+                ? bloodMoonDirector.BeginWave(currentWave)
+                : null;
 
-        enemiesRemaining = ActiveBloodMoonModifier != null
-            ? ActiveBloodMoonModifier.ModifyEnemyCount(baseEnemyCount)
-            : Mathf.Max(0, baseEnemyCount);
+        if (ActiveBloodMoonModifier != null)
+        {
+            enemiesRemaining =
+                ActiveBloodMoonModifier.ModifyEnemyCount(
+                    baseEnemyCount);
+        }
+        else
+        {
+            enemiesRemaining =
+                Mathf.Max(0, baseEnemyCount);
+        }
 
         waveActive = true;
-        
-        gameManager.instance.StartNextWave(enemiesRemaining);
+
+        // GameManager resets and activates the existing MobSpawner.
+        if (enemiesRemaining > 0)
+        {
+            gameManager.instance.StartNextWave(
+                enemiesRemaining);
+        }
 
         WaveStarted?.Invoke(
             currentWave,
@@ -99,9 +122,12 @@ public class waveManager : MonoBehaviour
             $"{enemiesRemaining} enemies.");
 
         if (enemiesRemaining == 0)
+        {
             CompleteWave();
+        }
     }
 
+    // EnemyAI calls this once when an enemy dies.
     public void EnemyDefeated()
     {
         if (!waveActive)
@@ -110,22 +136,37 @@ public class waveManager : MonoBehaviour
         enemiesRemaining =
             Mathf.Max(0, enemiesRemaining - 1);
 
+        Debug.Log(
+            $"Enemy defeated. " +
+            $"{enemiesRemaining} enemies remaining.");
+
         if (enemiesRemaining == 0)
+        {
             CompleteWave();
+        }
     }
 
     private void CompleteWave()
     {
+        if (!waveActive)
+            return;
+
         waveActive = false;
 
-        bloodMoonDirector?.EndWave(currentWave);
+        if (bloodMoonDirector != null)
+        {
+            bloodMoonDirector.EndWave(currentWave);
+        }
 
         ActiveBloodMoonModifier = null;
 
         WaveCompleted?.Invoke(currentWave);
 
+        Debug.Log($"Wave {currentWave} completed.");
+
         if (currentWave >= totalWaves)
         {
+            Debug.Log("All waves completed.");
             AllWavesCompleted?.Invoke();
         }
         else
@@ -136,9 +177,9 @@ public class waveManager : MonoBehaviour
 
     private IEnumerator WaitForNextWave()
     {
-        yield return new WaitForSeconds(timeBetweenWaves);
+        yield return new WaitForSeconds(
+            timeBetweenWaves);
 
         StartNextWave();
-
     }
 }

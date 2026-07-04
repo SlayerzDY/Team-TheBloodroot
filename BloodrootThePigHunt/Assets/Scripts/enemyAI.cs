@@ -1,6 +1,7 @@
 //==============================================================================================
 // Using Unity Engine
 //==============================================================================================
+using Bloodroot.Features.BloodMoon;
 using UnityEngine;
 using System.Collections;
 using UnityEngine.AI;
@@ -22,21 +23,64 @@ public class EnemyAI : MonoBehaviour, IDamage
     [SerializeField] int gunRotateSpeed;
     [SerializeField] int faceTargetSpeed;
     [SerializeField] MobSpawner spawner;
+    [SerializeField] float damageMultiplier;
     Color colorOrig;
     Vector3 playerDir;
     float shootTimer;
     bool playerInTrigger;
+    waveManager manager;
+    bool isDead;
     //==========================================================================================
     // Function, Start
     //==========================================================================================
     void Start()
     {
-        colorOrig = model.material.color;
-        gameManager.instance.updateGameGoal(1);
+        if (model != null) 
+        { colorOrig = model.material.color; }
+
+        manager = FindAnyObjectByType<waveManager>();
+
+        ApplyBloodMoonModifier();
+
+        if (gameManager.instance != null)
+        { gameManager.instance.updateGameGoal(1); }
     }
+    //==========================================================================================
+    // Function, ApplyBloodMoonModifier
+    //==========================================================================================
+
+    private void ApplyBloodMoonModifier()
+    {
+        if (manager == null)
+            return;
+
+        BloodMoonModifier modifier =
+            manager.ActiveBloodMoonModifier;
+
+        // A null modifier means this is a normal wave.
+        if (modifier == null)
+            return;
+
+        HP = Mathf.Max(
+            1,
+            Mathf.CeilToInt(
+                modifier.ModifyHealth(HP)));
+
+        if (agent != null)
+        {
+            agent.speed =
+                modifier.ModifySpeed(agent.speed);
+        }
+
+        damageMultiplier =
+            modifier.ModifyDamage(1f);
+    }
+
     //==========================================================================================
     // Function, Update
     //==========================================================================================
+
+
     void Update()
     {
         // Shoot Mechanics
@@ -102,15 +146,70 @@ public class EnemyAI : MonoBehaviour, IDamage
     //==========================================================================================
     public void TakeDamage(int amount)
     {
+        if (isDead)
+            return;
+
         HP -= amount;
+
         if (HP <= 0)
         {
-            if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolve()); }
-            gameManager.instance.updateGameGoal(-1);
+            // Die reports the death to WaveManager,
+            // then starts the dissolve effect.
+            Die();
         }
         else
         {
             StartCoroutine(flashRed());
+        }
+    }
+
+    //==========================================================================================
+    // Function, Die
+    //==========================================================================================
+
+    private void Die()
+    {
+        // Prevent one enemy from being counted twice.
+        if (isDead)
+            return;
+
+        isDead = true;
+        playerInTrigger = false;
+
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.isStopped = true;
+        }
+
+        // This reduces enemiesRemaining and allows the
+        // WaveManager to start the following wave.
+        if (manager != null)
+        {
+            manager.EnemyDefeated();
+        }
+        else
+        {
+            Debug.LogWarning(
+                "Enemy could not report its death " +
+                "because WaveManager was not found.");
+        }
+
+        if (gameManager.instance != null)
+        {
+            gameManager.instance.updateGameGoal(-1);
+        }
+
+        Dissolver dissolver =
+            GetComponent<Dissolver>();
+
+        if (dissolver != null)
+        {
+            dissolver.StartCoroutine(
+                dissolver.dissolve());
+        }
+        else
+        {
+            Destroy(gameObject);
         }
     }
     //==========================================================================================
@@ -127,10 +226,13 @@ public class EnemyAI : MonoBehaviour, IDamage
 
     public void onDeath(bool dead)
     {
-        throw new System.NotImplementedException();
+        if (dead)
+        {
+            Die();
+        }
     }
-    //==========================================================================================
 }
+    //==========================================================================================
 //==============================================================================================
 // End of Enemy AI .cs
 //==============================================================================================

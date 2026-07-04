@@ -7,14 +7,19 @@ namespace Bloodroot.Features.BloodMoon
     public sealed class BloodMoonModifier
     {
         [SerializeField] private string displayName = "Blood Moon";
-        [SerializeField, TextArea] private string description;
-        [SerializeField, Min(0f)] private float enemyCount = 1f;
-        [SerializeField, Min(0f)] private float enemyHealth = -1f;
-        [SerializeField, Min(0f)] private float enemyDamage = 1f;
-        [SerializeField, Min(0f)] private float enemySpeed = 1f;
+        [SerializeField, TextArea] string description;
+        [SerializeField, Min(0f)] float enemyCount;
+        [SerializeField, Min(0f)] float enemyHealth;
+        [SerializeField, Min(0f)] float enemyDamage;
+        [SerializeField, Min(0f)] float enemySpeed;
 
         public string DisplayName => displayName;
         public string Description => description;
+
+        public BloodMoonModifier()
+        {
+
+        }
 
         public BloodMoonModifier(
             string displayName,

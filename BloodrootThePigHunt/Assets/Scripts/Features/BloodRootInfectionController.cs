@@ -1,26 +1,29 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
+using System.Collections.Generic;
+using System;
+using System.Runtime.CompilerServices;
 
 namespace Bloodroot.Features.Infection
 {
     [DisallowMultipleComponent]
-    public sealed class BloodrootInfectionController : MonoBehaviour
+
+
+    public sealed class BloodRootInfectionController : MonoBehaviour
     {
         [Header("Infection")]
         [SerializeField, Min(1f)] private float maxInfection = 100f;
         [SerializeField, Min(0f)] private float recoveryPerSecond = 15f;
-        [SerializeField, Min(0f)] private float recoveryDelay = 1f;
+        [SerializeField, Min(0f)] private float revoveryDelay = 1f;
 
         [Header("Damage")]
         [SerializeField, Range(0f, 1f)] private float damageThreshold = 0.8f;
         [SerializeField, Min(0)] private int damagePerTick = 5;
         [SerializeField, Min(0.1f)] private float damageInterval = 1f;
-        [Tooltip("Optional component implementing IDamage.")]
+        [Tooltip("Optional component implementing IDamage")]
         [SerializeField] private MonoBehaviour damageReceiver;
 
         private readonly Dictionary<BloodrootInfectionZone, float> activeZones =
-            new Dictionary<BloodrootInfectionZone, float>();
+               new Dictionary<BloodrootInfectionZone, float>();
 
         private IDamage damageTarget;
         private float currentInfection;
@@ -51,7 +54,7 @@ namespace Bloodroot.Features.Infection
             else
             {
                 timeOutsideZone += Time.deltaTime;
-                if (timeOutsideZone >= recoveryDelay)
+                if (timeOutsideZone >= revoveryDelay)
                 {
                     AddInfection(-recoveryPerSecond * Time.deltaTime);
                 }
@@ -67,7 +70,6 @@ namespace Bloodroot.Features.Infection
             {
                 return;
             }
-
             currentInfection = nextValue;
             InfectionChanged?.Invoke(NormalizedInfection);
         }
@@ -84,7 +86,7 @@ namespace Bloodroot.Features.Infection
 
         internal void ExitZone(BloodrootInfectionZone zone)
         {
-            activeZones.Remove(zone);
+            activeZones.Remove(zone); 
         }
 
         private float GetStrongestZoneRate()
@@ -99,6 +101,7 @@ namespace Bloodroot.Features.Infection
             }
 
             return strongestRate;
+
         }
 
         private void UpdateDamage(bool isInsideZone)
@@ -144,4 +147,6 @@ namespace Bloodroot.Features.Infection
             damageInterval = Mathf.Max(0.1f, damageInterval);
         }
     }
+
+
 }
