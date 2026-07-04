@@ -86,11 +86,8 @@ public class waveManager : MonoBehaviour
             : Mathf.Max(0, baseEnemyCount);
 
         waveActive = true;
-
-        mobSpawner.BeginWave(
-            enemiesRemaining,
-            this,
-            ActiveBloodMoonModifier);
+        
+        gameManager.instance.StartNextWave(enemiesRemaining);
 
         WaveStarted?.Invoke(
             currentWave,
@@ -121,7 +118,6 @@ public class waveManager : MonoBehaviour
     {
         waveActive = false;
 
-        mobSpawner?.EndWave();
         bloodMoonDirector?.EndWave(currentWave);
 
         ActiveBloodMoonModifier = null;
@@ -141,6 +137,8 @@ public class waveManager : MonoBehaviour
     private IEnumerator WaitForNextWave()
     {
         yield return new WaitForSeconds(timeBetweenWaves);
+
         StartNextWave();
+
     }
 }

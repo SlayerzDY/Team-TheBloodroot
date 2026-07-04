@@ -16,11 +16,6 @@ namespace Bloodroot.Features.BloodMoon
         public string DisplayName => displayName;
         public string Description => description;
 
-        public BloodMoonModifier()
-        {
-
-        }
-
         public BloodMoonModifier(
             string displayName,
             string description,
