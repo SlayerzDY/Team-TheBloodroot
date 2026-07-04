@@ -70,20 +70,30 @@ public class EnemyAI : MonoBehaviour, IDamage {
         }
         else
         {
-            currentState = State.Idle;
+            currentState = State.Chase;
         }
         switch (currentState)
         {
-            case State.Idle: Idle(); break;
-            case State.Chase: Chase(); break;
-            case State.Attack: Attack(); break;
+           
+            case State.Chase:
+                {
+                    Chase();
+                    break;
+                }
+            case State.Attack: 
+                { 
+                Attack(); 
+                  break;
+                
+                }
         }
 
         attackTimer += Time.deltaTime;
     }
     void Idle()
     {
-        // placeholder for idle animation
+        Vector3 dir = (player.position - transform.position).normalized;
+        transform.position += dir * (moveSpeed * 0.5f) * Time.deltaTime;
     }
 
     void Chase()

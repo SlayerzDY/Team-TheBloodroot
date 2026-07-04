@@ -51,8 +51,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3bc66fc50808454c8f340ae0b5200a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ButcherSowAI
-  heavyDamage: 12
-  heavyAttackRate: 12
+  heavyDamage: 15
+  heavyAttackRate: 1
 --- !u!114 &-8884014785440459085
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -65,12 +65,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89c0a281449f482488a5b4c518185516, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAI
-  HP: 2
-  moveSpeed: 10
-  detectionRange: 10
-  attackRange: 6
-  attackDamage: 8
-  attackRate: 3
+  HP: 30
+  moveSpeed: 7
+  detectionRange: 18
+  attackRange: 2.5
+  attackDamage: 15
+  attackRate: 2
   model: {fileID: 8059819927296918534}
   dissolver: {fileID: 8250807944334237410}
   spawner: {fileID: 0}
@@ -88,8 +88,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Dissolver
   dissolveMaterial: {fileID: -876546973899608171, guid: 2145ce6362bbe1941b7b08334c31e87d, type: 3}
   model: {fileID: 8059819927296918534}
-  dissolveDamage: {fileID: 8300000, guid: ad2395e6710ebf944bbcd30444b3a468, type: 3}
-  dissolveDeath: {fileID: 8300000, guid: 8fa41b62e422a3e44a4ea375b05052d4, type: 3}
+  dissolveDamage: {fileID: 8300000, guid: 230321f4bc38ac54b921bbf981fefbe8, type: 3}
+  dissolveDeath: {fileID: 8300000, guid: 2ee9099450593044794f46fbd065503c, type: 3}
   dissolveDuration: 2
   dissolveStrength: 0
   flashDuration: 0.1
