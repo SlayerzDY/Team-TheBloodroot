@@ -157,11 +157,14 @@ public class EnemyAI : MonoBehaviour, IDamage {
     IEnumerator flashRed()
     {
 
-            if (dissolver != null)
+            if (model != null)
             {
-                dissolver.StartCoroutine(dissolver.dissolveFlash());
+            model.material.color = Color.red;
+            yield return new WaitForSeconds(0.1f);
+            model.material.color = colorOrig;
+               
             }
-        yield return null;
+       
 
     }
 

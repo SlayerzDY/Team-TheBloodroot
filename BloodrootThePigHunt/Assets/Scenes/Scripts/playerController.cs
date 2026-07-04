@@ -140,10 +140,7 @@ public class playerController : MonoBehaviour, IDamage {
         yield return null;
     }
 
-    public void onDeath(bool dead)
-    {
-        throw new System.NotImplementedException();
-    }
+ 
     //==========================================================================================
 }
 //==============================================================================================
