@@ -279,7 +279,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 30099690}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9e8e5b82893e0094ab6bbefcd583ab8d, type: 3}
+  m_Script: {fileID: 11500000, guid: be37c8c90bb82c64a8a32d844afe9411, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BloodMoonWaveDirector
   firstBloodMoonWave: 2
@@ -327,7 +327,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 30099690}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 17d2b899ff589cc47a56223b00764ff4, type: 3}
+  m_Script: {fileID: 11500000, guid: de7fb973b5d3069468d273c96dce0cea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Features.BloodMoon.BloodMoonPresentation
   director: {fileID: 30099691}
@@ -4417,6 +4417,70 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3569933694165197769, guid: ac2590899b2f3aa4e81cf5b84f7a7544, type: 3}
   m_PrefabInstance: {fileID: 2579923506988484472}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &960884635
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 960884637}
+  - component: {fileID: 960884636}
+  m_Layer: 0
+  m_Name: Level NavMesh Surface
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &960884636
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 960884635}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshSurface
+  m_SerializedVersion: 0
+  m_AgentTypeID: 0
+  m_CollectObjects: 0
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 0, y: 2, z: 0}
+  m_LayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_UseGeometry: 1
+  m_DefaultArea: 0
+  m_GenerateLinks: 0
+  m_IgnoreNavMeshAgent: 1
+  m_IgnoreNavMeshObstacle: 1
+  m_OverrideTileSize: 0
+  m_TileSize: 256
+  m_OverrideVoxelSize: 0
+  m_VoxelSize: 0.16666667
+  m_MinRegionArea: 2
+  m_NavMeshData: {fileID: 23800000, guid: e6ef2babb95c41d42acdfb90d0a216cd, type: 2}
+  m_BuildHeightMesh: 0
+--- !u!4 &960884637
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 960884635}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &963140205 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3904139952142816868, guid: d5766de86ef020f4d93c32f5de1f640f, type: 3}
@@ -6791,7 +6855,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1452776924}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f165b7a064642ff489ba11af3f3953cf, type: 3}
+  m_Script: {fileID: 11500000, guid: b32cab2bfaccf9f4db5a3aba3f02eccd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::waveManager
   totalWaves: 20
@@ -7617,7 +7681,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb917da2757372e4192ffd7ae7f32f7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MobSpawner
-  Enemy: {fileID: 7791680660320909169, guid: f07200c1e7570da41a4cb102a86c160b, type: 3}
+  Enemy: {fileID: 5464231581442848068, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
   spawnPoint:
   - {fileID: 1275959101}
   spawnRate: 2
@@ -7634,7 +7698,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1584553381}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0cc9e461a9a93d44db2f36e62ece6b7b, type: 3}
+  m_Script: {fileID: 11500000, guid: 91ccaa8839c7b434396f338a85808a56, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::waveTrigger
   manager: {fileID: 1452776925}
@@ -9141,7 +9205,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1889288860}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0cc9e461a9a93d44db2f36e62ece6b7b, type: 3}
+  m_Script: {fileID: 11500000, guid: 91ccaa8839c7b434396f338a85808a56, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::waveTrigger
   manager: {fileID: 0}
@@ -9643,7 +9707,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1983471534}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0cc9e461a9a93d44db2f36e62ece6b7b, type: 3}
+  m_Script: {fileID: 11500000, guid: 91ccaa8839c7b434396f338a85808a56, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::waveTrigger
   manager: {fileID: 1452776925}
@@ -11303,3 +11367,4 @@ SceneRoots:
   - {fileID: 1776215955}
   - {fileID: 69226308}
   - {fileID: 435526968}
+  - {fileID: 960884637}
