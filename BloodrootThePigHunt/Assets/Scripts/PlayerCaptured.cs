@@ -53,7 +53,8 @@ public class PlayerCaptured : MonoBehaviour, IInteract {
     // Function, Release Object
     //==========================================================================================
     private void disable() {
-        Destroy(gameObject);
+        if (damageSound != null) { AudioSource.PlayClipAtPoint(damageSound, gameObject.transform.position); }
+        if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolve()); return; } else { Destroy(gameObject); }
     }
     //==========================================================================================
     // Function, Release Object
@@ -105,8 +106,6 @@ public class PlayerCaptured : MonoBehaviour, IInteract {
     // Function, Send Interact
     //==========================================================================================
     public void SendInteract(Collider target) {
-        if (damageSound != null) { AudioSource.PlayClipAtPoint(damageSound, gameObject.transform.position); }
-        if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolve()); return;  }
         disable();
     }
     //==========================================================================================
