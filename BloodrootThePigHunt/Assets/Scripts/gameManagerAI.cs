@@ -1,13 +1,11 @@
 using UnityEngine;
 using System.Collections.Generic;
-using NUnit.Framework;
-using System.Data;
 public class gameManagerAI : MonoBehaviour
 {
     public static gameManagerAI instance;
 
     [SerializeField] Transform player;
-    List<screecherPigAI> enemies = new List<screecherPigAI>();
+    List<enemyAI> enemies = new List<enemyAI>();
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -18,14 +16,14 @@ public class gameManagerAI : MonoBehaviour
     {
         return player;
     }
-    public void RegisterEnemy(screecherPigAI enemy)
+    public void RegisterEnemy(enemyAI enemy)
     {
         if (!enemies.Contains(enemy))
         {
             enemies.Add(enemy);
         }
     }
-    public void UnregisterEnemy(screecherPigAI enemy)
+    public void UnregisterEnemy(enemyAI enemy)
     {
         if (enemies.Contains(enemy))
         {
