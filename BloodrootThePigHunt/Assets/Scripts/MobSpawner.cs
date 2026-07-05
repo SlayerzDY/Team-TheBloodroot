@@ -69,9 +69,29 @@ public class MobSpawner : MonoBehaviour
     }
     void SpawnObject()
     {
+        if (Enemy == null)
+        {
+            Debug.LogError("MobSpawner cannot spawn because no enemy prefab is assigned.");
+            isWaveActive = false;
+            return;
+        }
+
+        if (spawnPoint == null || spawnPoint.Length == 0)
+        {
+            Debug.LogError("MobSpawner cannot spawn because it has no spawn points.");
+            isWaveActive = false;
+            return;
+        }
 
         int rando = Random.Range(0, spawnPoint.Length);
         Transform center = spawnPoint[rando];
+
+        if (center == null)
+        {
+            Debug.LogError("MobSpawner contains an empty spawn point reference.");
+            isWaveActive = false;
+            return;
+        }
 
         Vector2 randomCircle = Random.insideUnitCircle * spawnRadius;
         Vector3 randomOffset = new Vector3(randomCircle.x, 0, randomCircle.y);
