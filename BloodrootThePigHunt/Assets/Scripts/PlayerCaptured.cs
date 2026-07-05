@@ -14,7 +14,7 @@ using System.Collections;
 //==============================================================================================
 // Declare Player Captured 
 //==============================================================================================
-public class PlayerCaptured : MonoBehaviour {
+public class PlayerCaptured : MonoBehaviour, IInteract {
     //==========================================================================================
     // Define Variables
     //==========================================================================================
@@ -28,7 +28,7 @@ public class PlayerCaptured : MonoBehaviour {
     void OnTriggerEnter(Collider other) {
         if (!(other is CapsuleCollider) && other.CompareTag("Enemy")) return;
         if (other.CompareTag("Enemy")) {
-            if (other.GetComponent<EnemyAI>() != null) {
+            if (other.GetComponent<enemyAI>() != null) {
                 StartCoroutine(holdObject(other.gameObject));
             }
         }
@@ -48,6 +48,12 @@ public class PlayerCaptured : MonoBehaviour {
             yield return null;
         }
         StartCoroutine(releaseObject(entity));
+    }
+    //==========================================================================================
+    // Function, Release Object
+    //==========================================================================================
+    private void disable() {
+        Destroy(gameObject);
     }
     //==========================================================================================
     // Function, Release Object
@@ -72,7 +78,7 @@ public class PlayerCaptured : MonoBehaviour {
             }
         }
         if (entity.tag == "Enemy") {
-            EnemyAI enemyAI = entity.GetComponent<EnemyAI>();
+            enemyAI enemyAI = entity.GetComponent<enemyAI>();
             if (enemyAI != null) {
                 enemyAI.enabled = false;
             }
@@ -89,11 +95,19 @@ public class PlayerCaptured : MonoBehaviour {
             }
         }
         if (entity.tag == "Enemy") {
-            EnemyAI enemyAI = entity.GetComponent<EnemyAI>();
+            enemyAI enemyAI = entity.GetComponent<enemyAI>();
             if (enemyAI != null) {
                 enemyAI.enabled = true;
             }
         }
+    }
+    //==========================================================================================
+    // Function, Send Interact
+    //==========================================================================================
+    public void SendInteract(Collider target) {
+        if (damageSound != null) { AudioSource.PlayClipAtPoint(damageSound, gameObject.transform.position); }
+        if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolve()); return;  }
+        disable();
     }
     //==========================================================================================
 }

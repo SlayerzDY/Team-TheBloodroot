@@ -82,6 +82,8 @@ public class Damage : MonoBehaviour
     {
         // Safety Check, Ensure isnt another trigger
         if (other.isTrigger) { return; }
+        if (!(other is CapsuleCollider)) { return; }
+        // Safety Check, Ensure is Capsule Collider
         // Get Damage Interface from other object
         IDamage dmg = other.GetComponent<IDamage>();
         // Checks isnt DOT Damage, if not then apply damage to the other object
@@ -107,6 +109,7 @@ public class Damage : MonoBehaviour
     {
         // Safety Check, Ensure isnt another trigger
         if (other.isTrigger) { return; }
+        if (!(other is CapsuleCollider)) { return; }
         // Get Damage Interface from other object
         IDamage dmg = other.GetComponent<IDamage>();
         // DOT Damage

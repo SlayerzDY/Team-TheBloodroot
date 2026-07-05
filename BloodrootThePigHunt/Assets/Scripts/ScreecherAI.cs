@@ -1,0 +1,25 @@
+using UnityEngine;
+using System.Collections.Generic;
+
+public class ScreecherAI  : MonoBehaviour 
+{
+    [SerializeField] float alertRadius;
+
+    void AlertNearby()
+    {
+        Collider[] hits = Physics.OverlapSphere(transform.position, alertRadius);
+        foreach (Collider collider in hits)
+        {
+            enemyAI ai = collider.GetComponent<enemyAI>();
+            if (ai != null && ai != this)
+            {
+                ai.Alert(transform.position);
+            }
+        }
+    }
+
+    public void Scream()
+    {
+        AlertNearby();
+    }
+}

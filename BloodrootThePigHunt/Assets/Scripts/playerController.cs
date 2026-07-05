@@ -88,11 +88,12 @@ public class playerController : MonoBehaviour, IDamage {
         shootTimer = 0;
         RaycastHit hit;
         if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, shootDist, ~ignoreLayer)) {
+            if (hit.collider.CompareTag("Player")) { return; }
+            if (!(hit.collider is CapsuleCollider)) { return; }
             Debug.Log(hit.collider.name);
             IDamage dmg = hit.collider.GetComponent<IDamage>();
             if (dmg != null) { dmg.TakeDamage(shootDamage); }
         }
-        
     }
     //==========================================================================================
     // Function, TakeDamage
@@ -111,7 +112,25 @@ public class playerController : MonoBehaviour, IDamage {
         }
     }
     //==========================================================================================
-    // Function, TakeDamage
+    // Function, OnDeath
+    //==========================================================================================
+    public void onDeath(bool death)
+    {
+        if (death)
+        {
+            return;
+        }
+        Dissolver dissolver = GetComponent<Dissolver>();
+        if (dissolver != null)
+        {
+            dissolver.StartCoroutine(dissolver.dissolve());
+        }
+        gameManager.instance.youLose();
+    }
+
+
+    //==========================================================================================
+    // Function, flashRed
     //==========================================================================================
     IEnumerator flashRed()
     {  
@@ -122,10 +141,7 @@ public class playerController : MonoBehaviour, IDamage {
         yield return null;
     }
 
-    public void onDeath(bool dead)
-    {
-        throw new System.NotImplementedException();
-    }
+ 
     //==========================================================================================
 }
 //==============================================================================================

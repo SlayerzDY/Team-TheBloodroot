@@ -5,10 +5,11 @@ using Bloodroot.Features.BloodMoon;
 using UnityEngine;
 using System.Collections;
 using UnityEngine.AI;
+using System.Collections.Generic;
 //==============================================================================================
 // Declare Enemy AI
 //==============================================================================================
-public class EnemyAI : MonoBehaviour, IDamage
+public class enemyAI : MonoBehaviour, IDamage
 {
     //==========================================================================================
     // Declare Variables
@@ -23,18 +24,25 @@ public class EnemyAI : MonoBehaviour, IDamage
     [SerializeField] int gunRotateSpeed;
     [SerializeField] int faceTargetSpeed;
     [SerializeField] MobSpawner spawner;
-    [SerializeField] float damageMultiplier;
+    [SerializeField] float damageMultiplier;  
+    [SerializeField] bool isMelee;
+    [SerializeField] int meleeDamage;
+    [SerializeField] float meleeRange;
     Color colorOrig;
     Vector3 playerDir;
     float shootTimer;
     bool playerInTrigger;
     waveManager manager;
+    BoarBruteAI boarBrute;
+    float chargeCooldown = 5f;
+    float chargeCooldownTimer;
     bool isDead;
     //==========================================================================================
     // Function, Start
     //==========================================================================================
     void Start()
     {
+        boarBrute = GetComponent<BoarBruteAI>();
         if (model != null) 
         { colorOrig = model.material.color; }
 
@@ -81,20 +89,53 @@ public class EnemyAI : MonoBehaviour, IDamage
     //==========================================================================================
 
 
+ 
+
     void Update()
     {
-        // Shoot Mechanics
         if (playerInTrigger)
         {
+          if(!boarBrute.charging)
             agent.SetDestination(gameManager.instance.player.transform.position);
-            shootTimer += Time.deltaTime;
             playerDir = gameManager.instance.player.transform.position - transform.position;
-            rotateGun();
             faceTarget();
-            if (shootTimer >= shootRate)
+
+            if (boarBrute != null && !boarBrute.charging)
             {
-                shoot();
+                chargeCooldownTimer += Time.deltaTime;
+                if (chargeCooldownTimer >= chargeCooldown && playerDir.magnitude > meleeRange * 2f)
+                {
+                    boarBrute.StartCharge();
+                    chargeCooldownTimer = 0f;
+                }
             }
+            if (isMelee && !boarBrute.charging)
+            {
+                shootTimer += Time.deltaTime;
+                if (shootTimer >= shootRate && playerDir.magnitude <= meleeRange)
+                {
+                    MeleeAttack();
+                }
+            }
+            else
+            {
+                shootTimer += Time.deltaTime;
+                rotateGun();
+                if (shootTimer >= shootRate)
+                {
+                    shoot();
+                }
+            }
+        }
+    }
+
+    void MeleeAttack()
+    {
+        shootTimer = 0;
+        IDamage dmg = gameManager.instance.player.GetComponent<IDamage>();
+        if (dmg != null)
+        {
+            dmg.TakeDamage(meleeDamage);
         }
     }
     //==========================================================================================
@@ -123,7 +164,12 @@ public class EnemyAI : MonoBehaviour, IDamage
     void shoot()
     {
         shootTimer = 0;
-        Instantiate(bullet, shootPos.position, gunPivot.rotation);
+       GameObject spawnedBullet = Instantiate(bullet, shootPos.position, gunPivot.rotation);
+        Damage dmg = spawnedBullet.GetComponent<Damage>();
+        if(dmg != null)
+        {
+            dmg.SetDamageMultiplier(damageMultiplier);
+        }
     }
     //==========================================================================================
     // Function, Face Target
@@ -162,7 +208,16 @@ public class EnemyAI : MonoBehaviour, IDamage
             StartCoroutine(flashRed());
         }
     }
+    //==========================================================================================
+    // Function, Alert
+    //==========================================================================================
+    public void Alert(Vector3 pos)
+    {
+        if (isDead)
+            return;
 
+        playerInTrigger = true;
+    }
     //==========================================================================================
     // Function, Die
     //==========================================================================================

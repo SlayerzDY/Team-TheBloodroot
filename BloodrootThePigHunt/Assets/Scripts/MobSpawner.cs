@@ -36,7 +36,6 @@ public class MobSpawner : MonoBehaviour
     private waveManager manager;
     private BloodMoonModifier activeModifier;
 
-
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -60,6 +59,14 @@ public class MobSpawner : MonoBehaviour
         
     }
 
+    public void MobDied()
+    {
+        currentEnemies--;
+        if (currentEnemies < 0)
+        {
+            currentEnemies = 0;
+        }
+    }
     void SpawnObject()
     {
 
