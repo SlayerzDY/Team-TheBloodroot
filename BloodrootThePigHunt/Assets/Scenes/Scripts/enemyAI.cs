@@ -95,8 +95,10 @@ public class enemyAI : MonoBehaviour, IDamage
     {
         if (playerInTrigger)
         {
-          if(!boarBrute.charging)
-            agent.SetDestination(gameManager.instance.player.transform.position);
+            if (boarBrute == null || !boarBrute.charging)
+            {
+                agent.SetDestination(gameManager.instance.player.transform.position);
+            }
             playerDir = gameManager.instance.player.transform.position - transform.position;
             faceTarget();
 
@@ -109,7 +111,7 @@ public class enemyAI : MonoBehaviour, IDamage
                     chargeCooldownTimer = 0f;
                 }
             }
-            if (isMelee && !boarBrute.charging)
+            if (isMelee &&(boarBrute == null || !boarBrute.charging))
             {
                 shootTimer += Time.deltaTime;
                 if (shootTimer >= shootRate && playerDir.magnitude <= meleeRange)
