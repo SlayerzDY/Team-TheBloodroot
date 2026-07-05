@@ -1,4 +1,4 @@
-//==============================================================================================
+﻿//==============================================================================================
 // Using Unity Engine
 //==============================================================================================
 using UnityEngine;
@@ -12,6 +12,10 @@ public class playerController : MonoBehaviour, IDamage {
     //==========================================================================================
     [SerializeField] CharacterController controller;
     [SerializeField] LayerMask ignoreLayer;
+    // Controls
+    [SerializeField] int sens;
+    [SerializeField] int lockVertMin, lockVertMax;
+    float camRotX, camRotY;
     // Player Stats
     [SerializeField] int HP;
     [SerializeField] int speed;
@@ -23,6 +27,9 @@ public class playerController : MonoBehaviour, IDamage {
     [SerializeField] int shootDamage;
     [SerializeField] int shootDist;
     [SerializeField] float shootRate;
+    [SerializeField] Transform gunPivot;
+    [SerializeField] Transform shootPos;
+    [SerializeField] GameObject bullet;
     int jumpCount;
     int HPOrig;
     float shootTimer;
@@ -40,6 +47,7 @@ public class playerController : MonoBehaviour, IDamage {
     void Update() {
         movement();
         sprint();
+        rotateGun();
     }
     //==========================================================================================
     // Function, Movement
@@ -61,7 +69,25 @@ public class playerController : MonoBehaviour, IDamage {
         Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * shootDist, Color.red);
     }
     //==========================================================================================
-    // Function, Movement
+    // Function, Rotate Gun
+    //==========================================================================================
+    void rotateGun()
+    {
+        if (gameManager.instance != null && !gameManager.instance.isPaused)
+        {
+            float mouseX = Input.GetAxisRaw("Mouse X") * sens;
+            float mouseY = Input.GetAxisRaw("Mouse Y") * sens;
+            camRotX -= mouseY;
+            camRotX = Mathf.Clamp(camRotX, lockVertMin, lockVertMax);
+            transform.Rotate(Vector3.up * mouseX);
+            Vector3 cameraLookDir = Camera.main.transform.forward;
+            Vector3 localLookDir = transform.InverseTransformDirection(cameraLookDir);
+            Quaternion targetLocalRot = Quaternion.LookRotation(localLookDir);
+            gunPivot.localRotation = Quaternion.Lerp(gunPivot.localRotation, targetLocalRot, shootRate * Time.deltaTime);
+        }
+    }
+    //==========================================================================================
+    // Function, Sprint
     //==========================================================================================
     void sprint() {
         if(Input.GetButtonDown("Sprint")) {
@@ -86,14 +112,7 @@ public class playerController : MonoBehaviour, IDamage {
     //==========================================================================================
     void shoot() {
         shootTimer = 0;
-        RaycastHit hit;
-        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, shootDist, ~ignoreLayer)) {
-            if (hit.collider.CompareTag("Player")) { return; }
-            if (!(hit.collider is CapsuleCollider)) { return; }
-            Debug.Log(hit.collider.name);
-            IDamage dmg = hit.collider.GetComponent<IDamage>();
-            if (dmg != null) { dmg.TakeDamage(shootDamage); }
-        }
+        Instantiate(bullet, shootPos.position, gunPivot.rotation);
     }
     //==========================================================================================
     // Function, TakeDamage

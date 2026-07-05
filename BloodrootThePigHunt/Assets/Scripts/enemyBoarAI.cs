@@ -95,14 +95,22 @@ public class enemyAI : MonoBehaviour, IDamage
     {
         if (playerInTrigger)
         {
-            if (boarBrute == null || !boarBrute.charging)
+            bool isCharging =
+                boarBrute != null && boarBrute.charging;
+
+            if (!isCharging &&
+                agent != null &&
+                agent.isActiveAndEnabled &&
+                agent.isOnNavMesh)
             {
-                agent.SetDestination(gameManager.instance.player.transform.position);
+                agent.SetDestination(
+                    gameManager.instance.player.transform.position);
             }
+
             playerDir = gameManager.instance.player.transform.position - transform.position;
             faceTarget();
 
-            if (boarBrute != null && !boarBrute.charging)
+            if (boarBrute != null && !isCharging)
             {
                 chargeCooldownTimer += Time.deltaTime;
                 if (chargeCooldownTimer >= chargeCooldown && playerDir.magnitude > meleeRange * 2f)
@@ -111,16 +119,23 @@ public class enemyAI : MonoBehaviour, IDamage
                     chargeCooldownTimer = 0f;
                 }
             }
-            if (isMelee &&(boarBrute == null || !boarBrute.charging))
+
+            if (isMelee)
             {
-                shootTimer += Time.deltaTime;
-                if (shootTimer >= shootRate && playerDir.magnitude <= meleeRange)
+                if (!isCharging)
                 {
-                    MeleeAttack();
+                    shootTimer += Time.deltaTime;
+                    if (shootTimer >= shootRate && playerDir.magnitude <= meleeRange)
+                    {
+                        MeleeAttack();
+                    }
                 }
             }
             else
             {
+                if (gunPivot == null || shootPos == null || bullet == null)
+                    return;
+
                 shootTimer += Time.deltaTime;
                 rotateGun();
                 if (shootTimer >= shootRate)

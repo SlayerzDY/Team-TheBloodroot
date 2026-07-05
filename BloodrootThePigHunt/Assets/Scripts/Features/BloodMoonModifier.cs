@@ -4,7 +4,8 @@ using System;
 namespace Bloodroot.Features.BloodMoon
 {
     
-    public sealed class BloodMoonModifier : MonoBehaviour
+    [Serializable]
+    public sealed class BloodMoonModifier
     {
         [SerializeField] private string displayName = "Blood Moon";
         [SerializeField, TextArea] string description;
