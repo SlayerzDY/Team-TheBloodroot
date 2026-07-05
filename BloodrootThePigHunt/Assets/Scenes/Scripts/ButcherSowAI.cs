@@ -1,30 +1,21 @@
 using UnityEngine;
 
-public class BoarBruteAI : MonoBehaviour
+public class ButcherSowAI : MonoBehaviour
 {
-    [SerializeField] float chargeSpeed;
-    [SerializeField] float chargeTime;
-    bool charging = false;
-    float timer;
-
+    [SerializeField] int heavyDamage;
+    [SerializeField] float heavyAttackRate;
+    float heavyTimer;
     void Update()
     {
-        if (charging)
+        heavyTimer += Time.deltaTime;
+    }
+    public void HeavyAttack(IDamage target)
+    {
+        if (heavyTimer >= heavyAttackRate)
         {
-            timer += Time.deltaTime;
-
-            // Move forward fast
-            transform.position += transform.forward * chargeSpeed * Time.deltaTime;
-
-            if (timer >= chargeTime)
-            {
-                charging = false;
-                timer = 0f;
-            }
+            target.TakeDamage(heavyDamage);
+            heavyTimer = 0f;
         }
     }
-    public void StartCharge() { 
-    
-        charging = true;
-    }
+
 }

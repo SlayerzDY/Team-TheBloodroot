@@ -28,7 +28,7 @@ public class PlayerCaptured : MonoBehaviour, IInteract {
     void OnTriggerEnter(Collider other) {
         if (!(other is CapsuleCollider) && other.CompareTag("Enemy")) return;
         if (other.CompareTag("Enemy")) {
-            if (other.GetComponent<EnemyAI>() != null) {
+            if (other.GetComponent<enemyAI>() != null) {
                 StartCoroutine(holdObject(other.gameObject));
             }
         }
@@ -78,7 +78,7 @@ public class PlayerCaptured : MonoBehaviour, IInteract {
             }
         }
         if (entity.tag == "Enemy") {
-            EnemyAI enemyAI = entity.GetComponent<EnemyAI>();
+            enemyAI enemyAI = entity.GetComponent<enemyAI>();
             if (enemyAI != null) {
                 enemyAI.enabled = false;
             }
@@ -95,7 +95,7 @@ public class PlayerCaptured : MonoBehaviour, IInteract {
             }
         }
         if (entity.tag == "Enemy") {
-            EnemyAI enemyAI = entity.GetComponent<EnemyAI>();
+            enemyAI enemyAI = entity.GetComponent<enemyAI>();
             if (enemyAI != null) {
                 enemyAI.enabled = true;
             }

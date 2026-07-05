@@ -1,192 +1,293 @@
 //==============================================================================================
 // Using Unity Engine
 //==============================================================================================
+using Bloodroot.Features.BloodMoon;
 using UnityEngine;
 using System.Collections;
-using UnityEditor;
+using UnityEngine.AI;
+using System.Collections.Generic;
 //==============================================================================================
 // Declare Enemy AI
 //==============================================================================================
-public class EnemyAI : MonoBehaviour, IDamage {
+public class enemyAI : MonoBehaviour, IDamage
+{
     //==========================================================================================
     // Declare Variables
     //==========================================================================================
     [SerializeField] int HP;
-    [SerializeField] float moveSpeed;
-    [SerializeField] float detectionRange;
-    [SerializeField] float attackRange;
-    [SerializeField] int attackDamage;
-    [SerializeField] float attackRate;
     [SerializeField] Renderer model;
-    [SerializeField] Dissolver dissolver;
+    [SerializeField] NavMeshAgent agent;
+    [SerializeField] GameObject bullet;
+    [SerializeField] Transform gunPivot;
+    [SerializeField] Transform shootPos;
+    [SerializeField] float shootRate;
+    [SerializeField] int gunRotateSpeed;
+    [SerializeField] int faceTargetSpeed;
     [SerializeField] MobSpawner spawner;
-
-    Transform player;
+    [SerializeField] float damageMultiplier;  
+    [SerializeField] bool isMelee;
+    [SerializeField] int meleeDamage;
+    [SerializeField] float meleeRange;
     Color colorOrig;
-    float attackTimer;
-
-    enum State { 
-        Idle,Chase,Attack,Dead
-    }
-    State currentState = State.Idle;
+    Vector3 playerDir;
+    float shootTimer;
+    bool playerInTrigger;
+    waveManager manager;
+    BoarBruteAI boarBrute;
+    float chargeCooldown = 5f;
+    float chargeCooldownTimer;
+    bool isDead;
     //==========================================================================================
     // Function, Start
     //==========================================================================================
     void Start()
     {
-        if (model != null)
+        boarBrute = GetComponent<BoarBruteAI>();
+        if (model != null) 
+        { colorOrig = model.material.color; }
+
+        manager = FindAnyObjectByType<waveManager>();
+
+        ApplyBloodMoonModifier();
+
+        if (gameManager.instance != null)
+        { gameManager.instance.updateGameGoal(1); }
+    }
+    //==========================================================================================
+    // Function, ApplyBloodMoonModifier
+    //==========================================================================================
+
+    private void ApplyBloodMoonModifier()
+    {
+        if (manager == null)
+            return;
+
+        BloodMoonModifier modifier =
+            manager.ActiveBloodMoonModifier;
+
+        // A null modifier means this is a normal wave.
+        if (modifier == null)
+            return;
+
+        HP = Mathf.Max(
+            1,
+            Mathf.CeilToInt(
+                modifier.ModifyHealth(HP)));
+
+        if (agent != null)
         {
-            colorOrig = model.material.color;
-        }
-        if (dissolver == null)
-        {
-            dissolver = GetComponent<Dissolver>();
-        }
-        if (spawner == null)
-        {
-            spawner = FindAnyObjectByType<MobSpawner>();
+            agent.speed =
+                modifier.ModifySpeed(agent.speed);
         }
 
-        player = gameManager.instance.player.transform;
+        damageMultiplier =
+            modifier.ModifyDamage(1f);
     }
+
     //==========================================================================================
     // Function, Update
     //==========================================================================================
-    void Update() {
 
-        if (currentState == State.Dead)
-        {
-            return;
-        }
-        float dist = Vector3.Distance(transform.position, player.position);
 
-        if (dist <= attackRange)
-        {
-            currentState = State.Attack;
-        }
-        else if (dist <= detectionRange)
-        {
-            currentState = State.Chase;
-        }
-        else
-        {
-            currentState = State.Chase;
-        }
-        switch (currentState)
-        {
-           
-            case State.Chase:
-                {
-                    Chase();
-                    break;
-                }
-            case State.Attack: 
-                { 
-                Attack(); 
-                  break;
-                
-                }
-        }
+ 
 
-        attackTimer += Time.deltaTime;
-    }
-    void Idle()
+    void Update()
     {
-        Vector3 dir = (player.position - transform.position).normalized;
-        transform.position += dir * (moveSpeed * 0.5f) * Time.deltaTime;
-    }
-
-    void Chase()
-    {
-        Vector3 dir = (player.position - transform.position).normalized;
-        transform.position += dir * moveSpeed * Time.deltaTime;
-    }
-
-    void Attack()
-    {
-        if (attackTimer >= attackRate)
+        if (playerInTrigger)
         {
-            IDamage dmg = player.GetComponent<IDamage>();
-            if (dmg != null)
+          if(!boarBrute.charging)
+            agent.SetDestination(gameManager.instance.player.transform.position);
+            playerDir = gameManager.instance.player.transform.position - transform.position;
+            faceTarget();
+
+            if (boarBrute != null && !boarBrute.charging)
             {
-                dmg.TakeDamage(attackDamage);
+                chargeCooldownTimer += Time.deltaTime;
+                if (chargeCooldownTimer >= chargeCooldown && playerDir.magnitude > meleeRange * 2f)
+                {
+                    boarBrute.StartCharge();
+                    chargeCooldownTimer = 0f;
+                }
             }
-            attackTimer = 0f;
+            if (isMelee && !boarBrute.charging)
+            {
+                shootTimer += Time.deltaTime;
+                if (shootTimer >= shootRate && playerDir.magnitude <= meleeRange)
+                {
+                    MeleeAttack();
+                }
+            }
+            else
+            {
+                shootTimer += Time.deltaTime;
+                rotateGun();
+                if (shootTimer >= shootRate)
+                {
+                    shoot();
+                }
+            }
         }
     }
 
-    public void Alert(Vector3 pos)
+    void MeleeAttack()
     {
-        if (currentState == State.Dead)
+        shootTimer = 0;
+        IDamage dmg = gameManager.instance.player.GetComponent<IDamage>();
+        if (dmg != null)
         {
-            return;
+            dmg.TakeDamage(meleeDamage);
         }
-        currentState = State.Chase;
+    }
+    //==========================================================================================
+    // Function, On Trigger Enter
+    //==========================================================================================
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            playerInTrigger = true;
+        }
+    }
+    //==========================================================================================
+    // Function, On Trigger Exit
+    //==========================================================================================
+    void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            playerInTrigger = false;
+        }
+    }
+    //==========================================================================================
+    // Function, Shoot
+    //==========================================================================================
+    void shoot()
+    {
+        shootTimer = 0;
+       GameObject spawnedBullet = Instantiate(bullet, shootPos.position, gunPivot.rotation);
+        Damage dmg = spawnedBullet.GetComponent<Damage>();
+        if(dmg != null)
+        {
+            dmg.SetDamageMultiplier(damageMultiplier);
+        }
+    }
+    //==========================================================================================
+    // Function, Face Target
+    //==========================================================================================
+    void faceTarget()
+    {
+        Quaternion rot = Quaternion.LookRotation(new Vector3(playerDir.x, 0, playerDir.z));
+        transform.rotation = Quaternion.Lerp(transform.rotation, rot, faceTargetSpeed * Time.deltaTime);
+    }
+    //==========================================================================================
+    // Function, Rotate Gun
+    //==========================================================================================
+    void rotateGun()
+    {
+        Quaternion rot = Quaternion.LookRotation(playerDir);
+        gunPivot.rotation = Quaternion.Lerp(gunPivot.rotation, rot, shootRate * Time.deltaTime);
     }
     //==========================================================================================
     // Function, TakeDamage
     //==========================================================================================
     public void TakeDamage(int amount)
     {
+        if (isDead)
+            return;
+
         HP -= amount;
+
         if (HP <= 0)
         {
+            // Die reports the death to WaveManager,
+            // then starts the dissolve effect.
             Die();
-
         }
         else
         {
             StartCoroutine(flashRed());
         }
     }
-        
-      //==========================================================================================
-     // Function, Die
-      //==========================================================================================
-            void Die()
-           {
-                currentState = State.Dead;
+    //==========================================================================================
+    // Function, Alert
+    //==========================================================================================
+    public void Alert(Vector3 pos)
+    {
+        if (isDead)
+            return;
 
-                if (spawner != null)
-                {
-                    spawner.MobDied();
-                }
+        playerInTrigger = true;
+    }
+    //==========================================================================================
+    // Function, Die
+    //==========================================================================================
 
-                if (dissolver != null)
-                {
-                    dissolver.StartCoroutine(dissolver.dissolve());
-                }
-                else
-                {
-                    Destroy(gameObject);
-                }
+    private void Die()
+    {
+        // Prevent one enemy from being counted twice.
+        if (isDead)
+            return;
 
-            }
+        isDead = true;
+        playerInTrigger = false;
 
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.isStopped = true;
+        }
 
+        // This reduces enemiesRemaining and allows the
+        // WaveManager to start the following wave.
+        if (manager != null)
+        {
+            manager.EnemyDefeated();
+        }
+        else
+        {
+            Debug.LogWarning(
+                "Enemy could not report its death " +
+                "because WaveManager was not found.");
+        }
+
+        if (gameManager.instance != null)
+        {
+            gameManager.instance.updateGameGoal(-1);
+        }
+
+        Dissolver dissolver =
+            GetComponent<Dissolver>();
+
+        if (dissolver != null)
+        {
+            dissolver.StartCoroutine(
+                dissolver.dissolve());
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+    //==========================================================================================
+    // Function, Flash
+    //==========================================================================================
     IEnumerator flashRed()
     {
-
-            if (model != null)
-            {
-            model.material.color = Color.red;
-            yield return new WaitForSeconds(0.1f);
-            model.material.color = colorOrig;
-               
-            }
-       
-
+        //model.material.color = Color.red;
+        //yield return new WaitForSeconds(0.1f);
+        //model.material.color = colorOrig;
+        if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolveFlash()); }
+        yield return null;
     }
 
     public void onDeath(bool dead)
     {
-        if (!dead)
+        if (dead)
         {
             Die();
         }
     }
-    //==========================================================================================
 }
+    //==========================================================================================
 //==============================================================================================
 // End of Enemy AI .cs
 //==============================================================================================

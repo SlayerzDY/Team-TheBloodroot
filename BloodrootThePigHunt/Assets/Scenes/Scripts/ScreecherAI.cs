@@ -10,7 +10,7 @@ public class ScreecherAI  : MonoBehaviour
         Collider[] hits = Physics.OverlapSphere(transform.position, alertRadius);
         foreach (Collider collider in hits)
         {
-            EnemyAI ai = collider.GetComponent<EnemyAI>();
+            enemyAI ai = collider.GetComponent<enemyAI>();
             if (ai != null && ai != this)
             {
                 ai.Alert(transform.position);

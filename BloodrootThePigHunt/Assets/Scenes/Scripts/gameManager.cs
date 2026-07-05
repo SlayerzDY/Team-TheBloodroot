@@ -91,7 +91,7 @@ public class gameManager : MonoBehaviour
     //==========================================================================================
     public void updateGameGoal(int amount)
     {
-        //gameGoalCount += amount;
+        gameGoalCount += amount;
         if (gameGoalCount >= 10)
         {
             // You win the game
