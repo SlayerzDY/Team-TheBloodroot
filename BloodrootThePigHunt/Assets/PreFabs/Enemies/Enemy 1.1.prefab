@@ -526,7 +526,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8112398099157542644}
-  - component: {fileID: 4981215536250779719}
+  - component: {fileID: 3084798653978895228}
   - component: {fileID: -1313171426562838978}
   - component: {fileID: 6986632289804971165}
   - component: {fileID: 6515721808002073225}
@@ -557,7 +557,7 @@ Transform:
   - {fileID: 4446749787455840186}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4981215536250779719
+--- !u!114 &3084798653978895228
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -566,20 +566,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 7791680660320909169}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 69630da5816b6ce4f965b84a53cb65f2, type: 3}
+  m_Script: {fileID: 11500000, guid: 0b8b171a50897bd4eba5d356a5c5219a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyAI
-  HP: 3
-  model: {fileID: 6515721808002073225}
-  agent: {fileID: 1747808689273605746}
-  bullet: {fileID: 5433222104674597542, guid: 8b8a21829e51d6e4fb34ce4540b9e2d9, type: 3}
-  gunPivot: {fileID: 4446749787455840186}
-  shootPos: {fileID: 4270699528705787131}
-  shootRate: 0.5
-  gunRotateSpeed: 2
-  faceTargetSpeed: 1
+  m_EditorClassIdentifier: Assembly-CSharp::enemyAI
+  HP: 0
+  model: {fileID: 0}
+  agent: {fileID: 0}
+  bullet: {fileID: 0}
+  gunPivot: {fileID: 0}
+  shootPos: {fileID: 0}
+  shootRate: 0
+  gunRotateSpeed: 0
+  faceTargetSpeed: 0
   spawner: {fileID: 0}
-  damageMultiplier: 1
+  damageMultiplier: 0
+  isMelee: 0
+  meleeDamage: 0
+  meleeRange: 0
 --- !u!114 &-1313171426562838978
 MonoBehaviour:
   m_ObjectHideFlags: 0

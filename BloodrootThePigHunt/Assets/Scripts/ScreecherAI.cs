@@ -12,7 +12,7 @@ public class ScreecherAI  : MonoBehaviour
 
      void Update()
     {
-        // cooldown for scream
+       
         if (screamTimer > 0)
             screamTimer -= Time.deltaTime;
     }
@@ -33,6 +33,10 @@ public class ScreecherAI  : MonoBehaviour
     {
         if (screamVFX != null)
             Instantiate(screamVFX, transform.position, Quaternion.identity);
+    }
+    public bool CanScream()
+    {
+        return screamTimer <= 0f;
     }
 
     // Call this when the screecher scream

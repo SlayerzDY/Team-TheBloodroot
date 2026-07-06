@@ -95,6 +95,9 @@ public class enemyAI : MonoBehaviour, IDamage
     {
         if (playerInTrigger)
         {
+            ScreecherAI screecher = GetComponent<ScreecherAI>();
+            if (screecher != null)
+                screecher.Scream();
             bool isCharging =
                 boarBrute != null && boarBrute.charging;
 
@@ -108,8 +111,18 @@ public class enemyAI : MonoBehaviour, IDamage
             }
 
             playerDir = gameManager.instance.player.transform.position - transform.position;
-            faceTarget();
 
+            if (screecher != null)
+            {
+                float distance = playerDir.magnitude;
+
+                
+                if (distance <= 10f && screecher.CanScream())
+                {
+                    screecher.Scream();
+                }
+                faceTarget();
+            }
             if (boarBrute != null && !isCharging)
             {
                 chargeCooldownTimer += Time.deltaTime;
