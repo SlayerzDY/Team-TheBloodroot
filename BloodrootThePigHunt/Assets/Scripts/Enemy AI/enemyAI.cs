@@ -87,10 +87,6 @@ public class enemyAI : MonoBehaviour, IDamage
     //==========================================================================================
     // Function, Update
     //==========================================================================================
-
-
- 
-
     void Update()
     {
         if (playerInTrigger)
@@ -116,7 +112,7 @@ public class enemyAI : MonoBehaviour, IDamage
             {
                 float distance = playerDir.magnitude;
 
-                
+            
                 if (distance <= 10f && screecher.CanScream())
                 {
                     screecher.Scream();
