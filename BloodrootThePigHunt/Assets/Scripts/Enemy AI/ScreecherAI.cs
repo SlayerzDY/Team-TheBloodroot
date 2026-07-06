@@ -1,5 +1,8 @@
-using UnityEngine;
+﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
+
+
 
 public class ScreecherAI  : MonoBehaviour 
 {
@@ -9,11 +12,11 @@ public class ScreecherAI  : MonoBehaviour
     public GameObject screamVFX;
 
 
-
      void Update()
     {
        
         if (screamTimer > 0)
+     
             screamTimer -= Time.deltaTime;
     }
 
