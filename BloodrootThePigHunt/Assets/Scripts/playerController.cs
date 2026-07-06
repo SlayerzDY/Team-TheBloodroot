@@ -76,7 +76,7 @@ public class playerController : MonoBehaviour, IDamage {
         if (gameManager.instance != null && !gameManager.instance.isPaused)
         {
             Quaternion cameraWorldRot = Camera.main.transform.rotation;
-            gunPivot.rotation = Quaternion.Lerp(gunPivot.rotation, cameraWorldRot, shootRate * Time.deltaTime);
+            gunPivot.rotation = Quaternion.Lerp(gunPivot.rotation, cameraWorldRot, sens * Time.deltaTime);
         }
     }
     //==========================================================================================
