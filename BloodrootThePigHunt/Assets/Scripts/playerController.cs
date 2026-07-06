@@ -75,15 +75,8 @@ public class playerController : MonoBehaviour, IDamage {
     {
         if (gameManager.instance != null && !gameManager.instance.isPaused)
         {
-            float mouseX = Input.GetAxisRaw("Mouse X") * sens;
-            float mouseY = Input.GetAxisRaw("Mouse Y") * sens;
-            camRotX -= mouseY;
-            camRotX = Mathf.Clamp(camRotX, lockVertMin, lockVertMax);
-            transform.Rotate(Vector3.up * mouseX);
-            Vector3 cameraLookDir = Camera.main.transform.forward;
-            Vector3 localLookDir = transform.InverseTransformDirection(cameraLookDir);
-            Quaternion targetLocalRot = Quaternion.LookRotation(localLookDir);
-            gunPivot.localRotation = Quaternion.Lerp(gunPivot.localRotation, targetLocalRot, shootRate * Time.deltaTime);
+            Quaternion cameraWorldRot = Camera.main.transform.rotation;
+            gunPivot.rotation = Quaternion.Lerp(gunPivot.rotation, cameraWorldRot, shootRate * Time.deltaTime);
         }
     }
     //==========================================================================================

@@ -22,18 +22,22 @@ public class PlayerCaptured : MonoBehaviour, IInteract {
     [SerializeField] float releaseTime = 5f;
     [SerializeField] AudioClip damageSound;
     float elapsedTime = 0f;
+    bool isTriggered = false;
     //==========================================================================================
     // Function, Update
     //==========================================================================================
     void OnTriggerEnter(Collider other) {
-        if (!(other is CapsuleCollider) && other.CompareTag("Enemy")) return;
-        if (other.CompareTag("Enemy")) {
-            if (other.GetComponent<enemyAI>() != null) {
+        if (!isTriggered) {
+            if (!(other is CapsuleCollider) && other.CompareTag("Enemy")) return;
+            isTriggered = true;
+            if (other.CompareTag("Enemy")) {
+                if (other.GetComponent<enemyAI>() != null) {
+                    StartCoroutine(holdObject(other.gameObject));
+                }
+            }
+            if (other.CompareTag("Player")) {
                 StartCoroutine(holdObject(other.gameObject));
             }
-        }
-        if (other.CompareTag("Player")) {
-            StartCoroutine(holdObject(other.gameObject));
         }
     }
     //==========================================================================================
@@ -53,7 +57,6 @@ public class PlayerCaptured : MonoBehaviour, IInteract {
     // Function, Release Object
     //==========================================================================================
     private void disable() {
-        if (damageSound != null) { AudioSource.PlayClipAtPoint(damageSound, gameObject.transform.position); }
         if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolve()); return; } else { Destroy(gameObject); }
     }
     //==========================================================================================
@@ -66,20 +69,27 @@ public class PlayerCaptured : MonoBehaviour, IInteract {
             yield return null;
         }
         enableMovement(entity);
-        Destroy(gameObject);
+        disable();
     }
     //==========================================================================================
     // Function, Disable Movement
     //==========================================================================================
     void disableMovement(GameObject entity) {
+        Damage dmg = this.GetComponent<Damage>();
         if (entity.tag == gameManager.instance.player.tag) {
             playerController playerCtrl = entity.GetComponent<playerController>();
+            if (dmg != null) {
+                dmg.enabled = false;
+            }
             if (playerCtrl != null) {
                 playerCtrl.enabled = false;
             }
         }
         if (entity.tag == "Enemy") {
             enemyAI enemyAI = entity.GetComponent<enemyAI>();
+            if (dmg != null) {
+                dmg.enabled = false;
+            }
             if (enemyAI != null) {
                 enemyAI.enabled = false;
             }
@@ -106,6 +116,8 @@ public class PlayerCaptured : MonoBehaviour, IInteract {
     // Function, Send Interact
     //==========================================================================================
     public void SendInteract(Collider target) {
+        if (damageSound != null) { AudioSource.PlayClipAtPoint(damageSound, gameObject.transform.position); }
+        isTriggered = true;
         disable();
     }
     //==========================================================================================
