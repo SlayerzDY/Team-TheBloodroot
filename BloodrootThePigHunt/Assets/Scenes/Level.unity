@@ -2956,6 +2956,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8710734601291140226, guid: 688e51737cb73334da21e0c827d5e85d, type: 3}
+      propertyPath: sens
+      value: 15
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -3484,13 +3488,13 @@ Terrain:
   serializedVersion: 6
   m_TerrainData: {fileID: 15600000, guid: 46394b7137acb5d49b117008bfe1482e, type: 2}
   m_TreeDistance: 100
-  m_TreeBillboardDistance: 30
-  m_TreeCrossFadeLength: 5
-  m_TreeMaximumFullLODCount: 25
-  m_DetailObjectDistance: 40
+  m_TreeBillboardDistance: 50
+  m_TreeCrossFadeLength: 2
+  m_TreeMaximumFullLODCount: 15
+  m_DetailObjectDistance: 15
   m_DetailObjectDensity: 1
   m_HeightmapPixelError: 5
-  m_SplatMapDistance: 500
+  m_SplatMapDistance: 200
   m_HeightmapMinimumLODSimplification: 0
   m_HeightmapMaximumLOD: 0
   m_ShadowCastingMode: 2
@@ -4453,7 +4457,7 @@ MonoBehaviour:
   m_Center: {x: 0, y: 2, z: 0}
   m_LayerMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 1
   m_UseGeometry: 1
   m_DefaultArea: 0
   m_GenerateLinks: 0
@@ -4464,7 +4468,7 @@ MonoBehaviour:
   m_OverrideVoxelSize: 0
   m_VoxelSize: 0.16666667
   m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 23800000, guid: e6ef2babb95c41d42acdfb90d0a216cd, type: 2}
+  m_NavMeshData: {fileID: 23800000, guid: 6f136a7fefe4db54b93fff26e891419d, type: 2}
   m_BuildHeightMesh: 0
 --- !u!4 &960884637
 Transform:
