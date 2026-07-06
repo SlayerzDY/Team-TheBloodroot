@@ -21,6 +21,9 @@ namespace Bloodroot.Features.BloodMoon
 
         private Color normalLightColor;
         private float bannerHideTime;
+        private float normalLightIntese;
+
+        
 
         private void Reset()
         {
@@ -37,6 +40,7 @@ namespace Bloodroot.Features.BloodMoon
             if (sceneLight != null)
             {
                 normalLightColor = sceneLight.color;
+                normalLightIntese = sceneLight.intensity;
             }
 
             if (announcementBanner != null)
@@ -81,6 +85,8 @@ namespace Bloodroot.Features.BloodMoon
             if (sceneLight != null)
             {
                 sceneLight.color = bloodMoonColor;
+
+                sceneLight.intensity = 2.4f;
             }
             if (announcementBanner !=null)
             {
@@ -99,6 +105,8 @@ namespace Bloodroot.Features.BloodMoon
             if (sceneLight != null)
             {
                 sceneLight.color = normalLightColor;
+
+                sceneLight.intensity = normalLightIntese;
             }
 
             if (announcementBanner != null)
