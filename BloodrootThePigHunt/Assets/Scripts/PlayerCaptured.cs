@@ -44,7 +44,7 @@ public class PlayerCaptured : MonoBehaviour, IInteract {
     // Function, Hold Object
     //==========================================================================================
     IEnumerator holdObject(GameObject entity) {
-        if (damageSound != null) { AudioSource.PlayClipAtPoint(damageSound, gameObject.transform.position); }
+        if (damageSound != null) { AudioSource.PlayClipAtPoint(damageSound, gameObject.transform.position, 0.35f); }
         disableMovement(entity);
         float timer = 0f;
         while (timer < holdTime) {
@@ -116,7 +116,7 @@ public class PlayerCaptured : MonoBehaviour, IInteract {
     // Function, Send Interact
     //==========================================================================================
     public void SendInteract(Collider target) {
-        if (damageSound != null) { AudioSource.PlayClipAtPoint(damageSound, gameObject.transform.position); }
+        if (damageSound != null) { AudioSource.PlayClipAtPoint(damageSound, gameObject.transform.position, 0.35f); }
         isTriggered = true;
         disable();
     }

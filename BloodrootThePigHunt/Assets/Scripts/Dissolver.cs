@@ -34,6 +34,10 @@ public class Dissolver : MonoBehaviour {
     [SerializeField] Renderer model;
     [SerializeField] AudioClip dissolveDamage;
     [SerializeField] AudioClip dissolveDeath;
+    [SerializeField, Range(0f, 1f)] float damageVolume = 0.25f;
+    [SerializeField, Range(0f, 1f)] float deathVolume = 0.35f;
+    [SerializeField, Min(0.1f)] float maxDamageSoundTime = 0.6f;
+    [SerializeField, Min(0.1f)] float maxDeathSoundTime = 1.25f;
     [SerializeField] float dissolveDuration = 10f;
     [SerializeField] float dissolveStrength = 0;
     [SerializeField] float flashDuration = 0.5f;
@@ -59,7 +63,7 @@ public class Dissolver : MonoBehaviour {
     //==========================================================================================
     public IEnumerator dissolve()
     {
-        if (dissolveDeath != null) { AudioSource.PlayClipAtPoint(dissolveDeath, gameObject.transform.position); }
+        PlayShortClip(dissolveDeath, deathVolume, maxDeathSoundTime);
         Renderer[] allRenderers = GetComponentsInChildren<Renderer>();
         for (int i = 0; i < allRenderers.Length; i++)
         {
@@ -80,7 +84,7 @@ public class Dissolver : MonoBehaviour {
     // Function, dissolveFlash
     //==========================================================================================
     public IEnumerator dissolveFlash() {
-        if (dissolveDeath != null) { AudioSource.PlayClipAtPoint(dissolveDamage, gameObject.transform.position); }
+        PlayShortClip(dissolveDamage, damageVolume, maxDamageSoundTime);
         Renderer[] allRenderers = GetComponentsInChildren<Renderer>();
         Material[][] originalMaterials = new Material[allRenderers.Length][];
         for (int i = 0; i < allRenderers.Length; i++) {
@@ -110,6 +114,25 @@ public class Dissolver : MonoBehaviour {
         for (int i = 0; i < allRenderers.Length; i++) {
             allRenderers[i].materials = originalMaterials[i];
         }
+    }
+
+    void PlayShortClip(AudioClip clip, float volume, float maxSeconds)
+    {
+        if (clip == null || volume <= 0f)
+        {
+            return;
+        }
+
+        GameObject soundObject = new GameObject("Dissolve Sound");
+        soundObject.transform.position = transform.position;
+
+        AudioSource source = soundObject.AddComponent<AudioSource>();
+        source.clip = clip;
+        source.volume = volume;
+        source.spatialBlend = 1f;
+        source.Play();
+
+        Destroy(soundObject, Mathf.Min(clip.length, maxSeconds));
     }
     //==========================================================================================
 }

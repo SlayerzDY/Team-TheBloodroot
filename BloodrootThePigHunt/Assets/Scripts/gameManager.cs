@@ -27,6 +27,7 @@ public class gameManager : MonoBehaviour
     private float timer = 0;
     private float timeScaleOrig;
     private int gameGoalCount;
+    private bool waveManagerControlsWin;
     //==========================================================================================
     // Function, Awake, Pre Start 
     //==========================================================================================
@@ -43,6 +44,7 @@ public class gameManager : MonoBehaviour
         timeScaleOrig = Time.timeScale;
         player = GameObject.FindWithTag("Player");
         playerController = player.GetComponent<playerController>();
+        waveManagerControlsWin = FindAnyObjectByType<waveManager>() != null;
     }
     //==========================================================================================
     // Function, Update
@@ -92,6 +94,10 @@ public class gameManager : MonoBehaviour
     public void updateGameGoal(int amount)
     {
         gameGoalCount += amount;
+
+        if (waveManagerControlsWin)
+            return;
+
         if (gameGoalCount >= 10)
         {
             // You win the game
