@@ -2,6 +2,7 @@ using UnityEngine;
 using Bloodroot.Features.BloodMoon;
 
 
+
 // Instuctions:
 // 1. Create a empty 3D object
 // 2. Create another empty and emplace that as a child under your object
@@ -66,16 +67,18 @@ public class MobSpawner : MonoBehaviour
             return;
         }
 
-        if(timer >= spawnRate && isWaveActive && currentEnemies < maxEnemies)
-        {
+        float currentSpawnRate = spawnRate;
 
+        if(manager != null)
+        {
+            currentSpawnRate = Mathf.Max(0.3f, spawnRate - (manager.currentWave * 0.05f));
+        }
+        if(timer >= currentSpawnRate && isWaveActive && currentEnemies < maxEnemies)
+        {
             SpawnObject();
 
-            // reset timer
             timer = 0f;
-
         }
-        
     }
 
     public void MobDied()
@@ -140,6 +143,13 @@ public class MobSpawner : MonoBehaviour
 
         GameObject spawnedEnemy =
             Instantiate(enemyToSpawn, Spawn, Rotation);
+
+        enemyAI enemy = spawnedEnemy.GetComponent<enemyAI>();
+
+        if(enemy != null)
+        {
+            enemy.InitializeEnemy(manager.currentWave);
+        }
 
         if (manager == null)
         {
@@ -214,5 +224,13 @@ public class MobSpawner : MonoBehaviour
         return true;
     }
 
-  
+  public void StartWave(int totalEnemies)
+    {
+        enemiesInWave = totalEnemies;
+        enemiesSpawnedThisWave = 0;
+        currentEnemies = 0;
+        maxEnemies = Mathf.Min(10 + manager.currentWave, totalEnemies);
+
+        isWaveActive = true;
+    }
 }

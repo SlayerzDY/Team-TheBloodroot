@@ -14,7 +14,7 @@ public class enemyAI : MonoBehaviour, IDamage
     //==========================================================================================
     // Declare Variables
     //==========================================================================================
-    [SerializeField] int HP;
+    [SerializeField] float HP;
     [SerializeField] Renderer model;
     [SerializeField] NavMeshAgent agent;
     [SerializeField] GameObject bullet;
@@ -26,8 +26,10 @@ public class enemyAI : MonoBehaviour, IDamage
     [SerializeField] MobSpawner spawner;
     [SerializeField] float damageMultiplier;  
     [SerializeField] bool isMelee;
-    [SerializeField] int meleeDamage;
+    [SerializeField] float meleeDamage;
     [SerializeField] float meleeRange;
+    [SerializeField] float healthGrowth = 1.15f;
+    [SerializeField] float damageGrowth = 1.08f;
     Color colorOrig;
     Vector3 playerDir;
     float shootTimer;
@@ -170,7 +172,7 @@ public class enemyAI : MonoBehaviour, IDamage
         IDamage dmg = gameManager.instance.player.GetComponent<IDamage>();
         if (dmg != null)
         {
-            dmg.TakeDamage(meleeDamage);
+            dmg.TakeDamage(Mathf.RoundToInt(meleeDamage));
         }
     }
     //==========================================================================================
@@ -339,8 +341,19 @@ public class enemyAI : MonoBehaviour, IDamage
             Die();
         }
     }
-}
     //==========================================================================================
+    // Function, InitializeEnemy
+    //==========================================================================================
+    public void InitializeEnemy(int wave)
+    {
+        HP = 10 * Mathf.Pow(healthGrowth, wave - 1);
+
+        meleeDamage = 3 *Mathf.Pow(damageGrowth, wave - 1);
+
+    }
+}
+
+//==========================================================================================
 //==============================================================================================
 // End of Enemy AI .cs
 //==============================================================================================
