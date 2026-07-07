@@ -14,7 +14,7 @@ using System.Collections;
 //==============================================================================================
 // Declare Player Captured 
 //==============================================================================================
-public class PlayerCaptured : MonoBehaviour {
+public class PlayerCaptured : MonoBehaviour, IInteract {
     //==========================================================================================
     // Define Variables
     //==========================================================================================
@@ -22,25 +22,29 @@ public class PlayerCaptured : MonoBehaviour {
     [SerializeField] float releaseTime = 5f;
     [SerializeField] AudioClip damageSound;
     float elapsedTime = 0f;
+    bool isTriggered = false;
     //==========================================================================================
     // Function, Update
     //==========================================================================================
     void OnTriggerEnter(Collider other) {
-        if (!(other is CapsuleCollider) && other.CompareTag("Enemy")) return;
-        if (other.CompareTag("Enemy")) {
-            if (other.GetComponent<EnemyAI>() != null) {
+        if (!isTriggered) {
+            if (!(other is CapsuleCollider) && other.CompareTag("Enemy")) return;
+            isTriggered = true;
+            if (other.CompareTag("Enemy")) {
+                if (other.GetComponent<enemyAI>() != null) {
+                    StartCoroutine(holdObject(other.gameObject));
+                }
+            }
+            if (other.CompareTag("Player")) {
                 StartCoroutine(holdObject(other.gameObject));
             }
-        }
-        if (other.CompareTag("Player")) {
-            StartCoroutine(holdObject(other.gameObject));
         }
     }
     //==========================================================================================
     // Function, Hold Object
     //==========================================================================================
     IEnumerator holdObject(GameObject entity) {
-        if (damageSound != null) { AudioSource.PlayClipAtPoint(damageSound, gameObject.transform.position); }
+        if (damageSound != null) { AudioSource.PlayClipAtPoint(damageSound, gameObject.transform.position, 0.35f); }
         disableMovement(entity);
         float timer = 0f;
         while (timer < holdTime) {
@@ -52,6 +56,12 @@ public class PlayerCaptured : MonoBehaviour {
     //==========================================================================================
     // Function, Release Object
     //==========================================================================================
+    private void disable() {
+        if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolve()); return; } else { Destroy(gameObject); }
+    }
+    //==========================================================================================
+    // Function, Release Object
+    //==========================================================================================
     IEnumerator releaseObject(GameObject entity) {
         float timer = 0f;
         while (timer < releaseTime) {
@@ -59,20 +69,27 @@ public class PlayerCaptured : MonoBehaviour {
             yield return null;
         }
         enableMovement(entity);
-        Destroy(gameObject);
+        disable();
     }
     //==========================================================================================
     // Function, Disable Movement
     //==========================================================================================
     void disableMovement(GameObject entity) {
+        Damage dmg = this.GetComponent<Damage>();
         if (entity.tag == gameManager.instance.player.tag) {
             playerController playerCtrl = entity.GetComponent<playerController>();
+            if (dmg != null) {
+                dmg.enabled = false;
+            }
             if (playerCtrl != null) {
                 playerCtrl.enabled = false;
             }
         }
         if (entity.tag == "Enemy") {
-            EnemyAI enemyAI = entity.GetComponent<EnemyAI>();
+            enemyAI enemyAI = entity.GetComponent<enemyAI>();
+            if (dmg != null) {
+                dmg.enabled = false;
+            }
             if (enemyAI != null) {
                 enemyAI.enabled = false;
             }
@@ -89,11 +106,19 @@ public class PlayerCaptured : MonoBehaviour {
             }
         }
         if (entity.tag == "Enemy") {
-            EnemyAI enemyAI = entity.GetComponent<EnemyAI>();
+            enemyAI enemyAI = entity.GetComponent<enemyAI>();
             if (enemyAI != null) {
                 enemyAI.enabled = true;
             }
         }
+    }
+    //==========================================================================================
+    // Function, Send Interact
+    //==========================================================================================
+    public void SendInteract(Collider target) {
+        if (damageSound != null) { AudioSource.PlayClipAtPoint(damageSound, gameObject.transform.position, 0.35f); }
+        isTriggered = true;
+        disable();
     }
     //==========================================================================================
 }

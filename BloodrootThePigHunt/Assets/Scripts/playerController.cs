@@ -1,4 +1,4 @@
-//==============================================================================================
+﻿//==============================================================================================
 // Using Unity Engine
 //==============================================================================================
 using UnityEngine;
@@ -12,6 +12,10 @@ public class playerController : MonoBehaviour, IDamage {
     //==========================================================================================
     [SerializeField] CharacterController controller;
     [SerializeField] LayerMask ignoreLayer;
+    // Controls
+    [SerializeField] int sens;
+    [SerializeField] int lockVertMin, lockVertMax;
+    float camRotX, camRotY;
     // Player Stats
     [SerializeField] int HP;
     [SerializeField] int speed;
@@ -23,6 +27,9 @@ public class playerController : MonoBehaviour, IDamage {
     [SerializeField] int shootDamage;
     [SerializeField] int shootDist;
     [SerializeField] float shootRate;
+    [SerializeField] Transform gunPivot;
+    [SerializeField] Transform shootPos;
+    [SerializeField] GameObject bullet;
     int jumpCount;
     int HPOrig;
     float shootTimer;
@@ -40,6 +47,7 @@ public class playerController : MonoBehaviour, IDamage {
     void Update() {
         movement();
         sprint();
+        rotateGun();
     }
     //==========================================================================================
     // Function, Movement
@@ -61,7 +69,18 @@ public class playerController : MonoBehaviour, IDamage {
         Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * shootDist, Color.red);
     }
     //==========================================================================================
-    // Function, Movement
+    // Function, Rotate Gun
+    //==========================================================================================
+    void rotateGun()
+    {
+        if (gameManager.instance != null && !gameManager.instance.isPaused)
+        {
+            Quaternion cameraWorldRot = Camera.main.transform.rotation;
+            gunPivot.rotation = Quaternion.Lerp(gunPivot.rotation, cameraWorldRot, sens * Time.deltaTime);
+        }
+    }
+    //==========================================================================================
+    // Function, Sprint
     //==========================================================================================
     void sprint() {
         if(Input.GetButtonDown("Sprint")) {
@@ -86,13 +105,7 @@ public class playerController : MonoBehaviour, IDamage {
     //==========================================================================================
     void shoot() {
         shootTimer = 0;
-        RaycastHit hit;
-        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, shootDist, ~ignoreLayer)) {
-            Debug.Log(hit.collider.name);
-            IDamage dmg = hit.collider.GetComponent<IDamage>();
-            if (dmg != null) { dmg.TakeDamage(shootDamage); }
-        }
-        
+        Instantiate(bullet, shootPos.position, gunPivot.rotation);
     }
     //==========================================================================================
     // Function, TakeDamage
@@ -111,7 +124,25 @@ public class playerController : MonoBehaviour, IDamage {
         }
     }
     //==========================================================================================
-    // Function, TakeDamage
+    // Function, OnDeath
+    //==========================================================================================
+    public void onDeath(bool death)
+    {
+        if (death)
+        {
+            return;
+        }
+        Dissolver dissolver = GetComponent<Dissolver>();
+        if (dissolver != null)
+        {
+            dissolver.StartCoroutine(dissolver.dissolve());
+        }
+        gameManager.instance.youLose();
+    }
+
+
+    //==========================================================================================
+    // Function, flashRed
     //==========================================================================================
     IEnumerator flashRed()
     {  
@@ -122,10 +153,7 @@ public class playerController : MonoBehaviour, IDamage {
         yield return null;
     }
 
-    public void onDeath(bool dead)
-    {
-        throw new System.NotImplementedException();
-    }
+ 
     //==========================================================================================
 }
 //==============================================================================================

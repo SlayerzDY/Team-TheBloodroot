@@ -3,10 +3,12 @@
 //==============================================================================================
 using UnityEngine;
 using System.Collections;
+using Bloodroot.Features.BloodMoon;
 //==============================================================================================
 // Declare Game Manager
 //==============================================================================================
-public class gameManager : MonoBehaviour {
+public class gameManager : MonoBehaviour
+{
     //==========================================================================================
     // Define Variables
     //==========================================================================================
@@ -16,7 +18,8 @@ public class gameManager : MonoBehaviour {
     [SerializeField] GameObject menuWin;
     [SerializeField] GameObject menuLose;
     [SerializeField] GameObject menuMain;
-
+    [SerializeField] GameObject menuInteract;
+     
     public bool isPaused = false;
     public GameObject player;
     public playerController playerController;
@@ -24,31 +27,40 @@ public class gameManager : MonoBehaviour {
     private float timer = 0;
     private float timeScaleOrig;
     private int gameGoalCount;
+    private bool waveManagerControlsWin;
     //==========================================================================================
     // Function, Awake, Pre Start 
     //==========================================================================================
-    void Awake() {
+    void Awake()
+    {
         // Create world static singleton instance of the game manager
         instance = this;
     }
     //==========================================================================================
     // Function, Start
     //==========================================================================================
-    void Start() {
+    void Start()
+    {
         timeScaleOrig = Time.timeScale;
         player = GameObject.FindWithTag("Player");
         playerController = player.GetComponent<playerController>();
+        waveManagerControlsWin = FindAnyObjectByType<waveManager>() != null;
     }
     //==========================================================================================
     // Function, Update
     //==========================================================================================
-    void Update() {
-        if(Input.GetButtonDown("Cancel")) {
-            if (menuActive == null) {
+    void Update()
+    {
+        if (Input.GetButtonDown("Cancel"))
+        {
+            if (menuActive == null)
+            {
                 statePause();
                 menuActive = menuPause;
                 menuActive.SetActive(true);
-            } else {
+            }
+            else
+            {
                 if (menuActive == menuPause) { stateUnpause(); }
             }
         }
@@ -57,7 +69,8 @@ public class gameManager : MonoBehaviour {
     //==========================================================================================
     // Function, StatePause
     //==========================================================================================
-    public void statePause() {
+    public void statePause()
+    {
         isPaused = true;
         Time.timeScale = 0;
         Cursor.visible = true;
@@ -66,7 +79,8 @@ public class gameManager : MonoBehaviour {
     //==========================================================================================
     // Function, StateUnpause
     //==========================================================================================
-    public void stateUnpause() {
+    public void stateUnpause()
+    {
         isPaused = false;
         Time.timeScale = timeScaleOrig;
         Cursor.visible = false;
@@ -77,9 +91,15 @@ public class gameManager : MonoBehaviour {
     //==========================================================================================
     // Function, Update Game Goal
     //==========================================================================================
-    public void updateGameGoal(int amount) {
+    public void updateGameGoal(int amount)
+    {
         gameGoalCount += amount;
-        if (gameGoalCount <= 0) {
+
+        if (waveManagerControlsWin)
+            return;
+
+        if (gameGoalCount >= 10)
+        {
             // You win the game
             youWin();
         }
@@ -87,7 +107,8 @@ public class gameManager : MonoBehaviour {
     //==========================================================================================
     // Function, Lose
     //==========================================================================================
-    public void youLose() {
+    public void youLose()
+    {
         statePause();
         menuActive = menuLose;
         menuActive.SetActive(true);
@@ -95,12 +116,59 @@ public class gameManager : MonoBehaviour {
     //==========================================================================================
     // Function, Win
     //==========================================================================================
-    public void youWin() {
+    public void youWin()
+    {
         statePause();
         menuActive = menuWin;
         menuActive.SetActive(true);
     }
     //==========================================================================================
+    // Function, Interact Display
+    //==========================================================================================
+    public void InteractDisplay(bool isOn)
+    {
+        if (isOn)
+        {
+            menuActive = menuInteract;
+            menuActive.SetActive(true);
+        }
+        else
+        {
+            if (menuActive != null)
+            {
+                if (menuActive == menuInteract)
+                {
+                    menuActive.SetActive(false);
+                    menuActive = null;
+                }
+            }
+        }
+    }
+    //
+
+    //==========================================================================================
+    // Function, StartNextWave
+    //==========================================================================================
+
+    public void StartNextWave(int enemyNum)
+    {
+
+        MobSpawner spawner = FindAnyObjectByType<MobSpawner>();
+
+        if(spawner != null)
+        {
+
+            spawner.maxEnemies = enemyNum;
+
+            spawner.currentEnemies = 0;
+
+            spawner.isWaveActive = true;
+
+        }
+
+    }
+
+
 }
 //==============================================================================================
 // End of Game Manager

@@ -5,7 +5,8 @@ using UnityEngine;
 //==============================================================================================
 // Declare Camera Controller
 //==============================================================================================
-public class cameraController : MonoBehaviour {
+public class cameraController : MonoBehaviour
+{
     //==========================================================================================
     // Define Variables
     //==========================================================================================
@@ -15,15 +16,18 @@ public class cameraController : MonoBehaviour {
     //==========================================================================================
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     //==========================================================================================
-    void Start() {
+    void Start()
+    {
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
     }
     //==========================================================================================
-    // Update is called once per frame 
+    // Update is called once per frame
     //==========================================================================================
-    void Update() { 
-        if (!gameManager.instance.isPaused) {
+    void Update()
+    {
+        if (!gameManager.instance.isPaused)
+        {
             float mouseX = Input.GetAxisRaw("Mouse X") * sens;
             float mouseY = Input.GetAxisRaw("Mouse Y") * sens;
             camRotX -= mouseY;
