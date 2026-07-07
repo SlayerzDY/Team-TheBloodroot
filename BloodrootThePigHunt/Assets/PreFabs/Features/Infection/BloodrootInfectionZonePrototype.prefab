@@ -10,7 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 64025652699190159}
   - component: {fileID: 3038183410062950152}
-  m_Layer: 0
+  - component: {fileID: 8270956613231563370}
+  m_Layer: 12
   m_Name: Blood Glow 3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -97,6 +98,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &8270956613231563370
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 682812402790446199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &683487104298513176
 GameObject:
   m_ObjectHideFlags: 0
@@ -108,7 +138,7 @@ GameObject:
   - component: {fileID: 8321315023651850777}
   - component: {fileID: 7505357528318247366}
   - component: {fileID: 78908694472287794}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 4A
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -198,7 +228,7 @@ GameObject:
   - component: {fileID: 3056339781036113392}
   - component: {fileID: 5102308556730938174}
   - component: {fileID: 1879917871345062679}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 8B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -288,7 +318,7 @@ GameObject:
   - component: {fileID: 2793840626866125516}
   - component: {fileID: 1018541661689537163}
   - component: {fileID: 2740374699087619283}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 7A
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -378,7 +408,7 @@ GameObject:
   - component: {fileID: 2481344959420652026}
   - component: {fileID: 8580372226875761801}
   - component: {fileID: 85447593950494068}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 7B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -468,7 +498,7 @@ GameObject:
   - component: {fileID: 4968228382939538191}
   - component: {fileID: 7319545106120817546}
   - component: {fileID: 2193071080924501470}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 5B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -558,7 +588,7 @@ GameObject:
   - component: {fileID: 1995802036112583807}
   - component: {fileID: 1943784019055759722}
   - component: {fileID: 5242316914949971974}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 2A
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -648,7 +678,7 @@ GameObject:
   - component: {fileID: 842834571062176798}
   - component: {fileID: 1359138726766110589}
   - component: {fileID: 592586209293906817}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 5 Branch
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -738,7 +768,7 @@ GameObject:
   - component: {fileID: 4310308648203274007}
   - component: {fileID: 3650214033391358743}
   - component: {fileID: 8054622459426401635}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Raised Infection Core
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -828,7 +858,7 @@ GameObject:
   - component: {fileID: 2623613981681971912}
   - component: {fileID: 5673912422821438932}
   - component: {fileID: 1432575817462536219}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 3 Branch
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -918,7 +948,7 @@ GameObject:
   - component: {fileID: 3078028496691622309}
   - component: {fileID: 2919187462599215075}
   - component: {fileID: 5581021402830593335}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root Spire 3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1009,7 +1039,7 @@ GameObject:
   - component: {fileID: 8430824646652684759}
   - component: {fileID: 3681507035959779329}
   - component: {fileID: 6799999999999999999}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: BloodrootInfectionZonePrototype
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1104,7 +1134,7 @@ GameObject:
   - component: {fileID: 6217020453066912849}
   - component: {fileID: 3325525034177646781}
   - component: {fileID: 6746897664139639540}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 3A
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1194,7 +1224,7 @@ GameObject:
   - component: {fileID: 2321398858736932230}
   - component: {fileID: 3503446312882477019}
   - component: {fileID: 1419141852672775467}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root Spire 5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1284,7 +1314,7 @@ GameObject:
   - component: {fileID: 8122025618811492155}
   - component: {fileID: 2068869780778879248}
   - component: {fileID: 8681226445146878223}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 7 Branch
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1374,7 +1404,7 @@ GameObject:
   - component: {fileID: 2243784070317196593}
   - component: {fileID: 4093119746480451193}
   - component: {fileID: 2564775311361209984}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root Spire 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1464,7 +1494,7 @@ GameObject:
   - component: {fileID: 8292968968563145965}
   - component: {fileID: 4149454416464868412}
   - component: {fileID: 6817060550408545049}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 9 Branch
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1554,7 +1584,7 @@ GameObject:
   - component: {fileID: 6304730897375483363}
   - component: {fileID: 8680715624357597535}
   - component: {fileID: 1324326983645129218}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 6B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1644,7 +1674,7 @@ GameObject:
   - component: {fileID: 7558524038026476232}
   - component: {fileID: 7172906359265882711}
   - component: {fileID: 4442222583671622497}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 4B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1734,7 +1764,7 @@ GameObject:
   - component: {fileID: 3030705923443131511}
   - component: {fileID: 1225154731974275120}
   - component: {fileID: 125001717652527002}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 1B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1824,7 +1854,7 @@ GameObject:
   - component: {fileID: 4172987552050279124}
   - component: {fileID: 3735345059178977710}
   - component: {fileID: 1708248417348135186}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 6 Branch
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1912,7 +1942,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 754365101352458678}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Visuals
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1953,7 +1983,7 @@ GameObject:
   - component: {fileID: 4011005800906958165}
   - component: {fileID: 6621018315880019506}
   - component: {fileID: 6419876169411215526}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root Spire 6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2043,7 +2073,7 @@ GameObject:
   - component: {fileID: 7026564961124441686}
   - component: {fileID: 8500781196878560434}
   - component: {fileID: 6539464771721021551}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 8 Branch
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2132,7 +2162,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1929748738135286186}
   - component: {fileID: 3977078758394302048}
-  m_Layer: 0
+  - component: {fileID: 3334856205069578136}
+  m_Layer: 12
   m_Name: Blood Glow 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2219,6 +2250,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &3334856205069578136
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4573492815082780558}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &4678371494228524821
 GameObject:
   m_ObjectHideFlags: 0
@@ -2230,7 +2290,7 @@ GameObject:
   - component: {fileID: 2059643814538067822}
   - component: {fileID: 3334027159497781123}
   - component: {fileID: 4027617473643681053}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 9A
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2320,7 +2380,7 @@ GameObject:
   - component: {fileID: 3149050730074414084}
   - component: {fileID: 5912071125465384943}
   - component: {fileID: 5645139062889877731}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 8A
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2410,7 +2470,7 @@ GameObject:
   - component: {fileID: 7257977189912823569}
   - component: {fileID: 1425120709028948446}
   - component: {fileID: 6860797552980671294}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 5A
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2499,7 +2559,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1185889148106385116}
   - component: {fileID: 7544224503539888704}
-  m_Layer: 0
+  - component: {fileID: 4372661170974204036}
+  m_Layer: 12
   m_Name: Blood Glow 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2586,6 +2647,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &4372661170974204036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4783289514394159329}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &5119952945153162733
 GameObject:
   m_ObjectHideFlags: 0
@@ -2597,7 +2687,7 @@ GameObject:
   - component: {fileID: 3339113082563813012}
   - component: {fileID: 1577568594074865603}
   - component: {fileID: 3722146573961242504}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root Spire 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2687,7 +2777,7 @@ GameObject:
   - component: {fileID: 5262354716121544649}
   - component: {fileID: 483452099429446462}
   - component: {fileID: 578393090532514629}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root Spire 4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2777,7 +2867,7 @@ GameObject:
   - component: {fileID: 3159372945416501359}
   - component: {fileID: 4854681406782544339}
   - component: {fileID: 4972373390847698766}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 9B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2867,7 +2957,7 @@ GameObject:
   - component: {fileID: 5498662731362842853}
   - component: {fileID: 9089763192302397904}
   - component: {fileID: 901856412664840260}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 10A
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2957,7 +3047,7 @@ GameObject:
   - component: {fileID: 5407472840984724965}
   - component: {fileID: 8297319877598628166}
   - component: {fileID: 2741364111231465899}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 4 Branch
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3047,7 +3137,7 @@ GameObject:
   - component: {fileID: 7284259345566931834}
   - component: {fileID: 5938306427040911376}
   - component: {fileID: 5615870443428436838}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Corrupted Ground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3137,7 +3227,7 @@ GameObject:
   - component: {fileID: 2991561868017669493}
   - component: {fileID: 519413717431011705}
   - component: {fileID: 3328570779543841395}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 3B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3227,7 +3317,7 @@ GameObject:
   - component: {fileID: 2658951564995956083}
   - component: {fileID: 8872701061841473723}
   - component: {fileID: 4199993474534190079}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Bloodroot Heart
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3317,7 +3407,7 @@ GameObject:
   - component: {fileID: 5509948192948997505}
   - component: {fileID: 6312324489403111653}
   - component: {fileID: 2881059848163536401}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Bloodroot Embers
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8153,7 +8243,7 @@ GameObject:
   - component: {fileID: 7102552381240149190}
   - component: {fileID: 1394329969252734511}
   - component: {fileID: 6677406922595246032}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 2B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8243,7 +8333,7 @@ GameObject:
   - component: {fileID: 2161416067864481389}
   - component: {fileID: 2014762243451884060}
   - component: {fileID: 1866184886334632243}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 10B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8333,7 +8423,7 @@ GameObject:
   - component: {fileID: 4023997024350923341}
   - component: {fileID: 4163851377278288521}
   - component: {fileID: 3981567609842147842}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 2 Branch
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8423,7 +8513,7 @@ GameObject:
   - component: {fileID: 7313440961637977805}
   - component: {fileID: 7767435305388552971}
   - component: {fileID: 2347178092373075891}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 1A
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8511,7 +8601,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7058493500975686233}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root Network
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8581,7 +8671,7 @@ GameObject:
   - component: {fileID: 6073931738822905743}
   - component: {fileID: 2787687668863973360}
   - component: {fileID: 4328926502541029709}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 6A
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8671,7 +8761,7 @@ GameObject:
   - component: {fileID: 9211486264334176084}
   - component: {fileID: 3322010948748235597}
   - component: {fileID: 4410001915104722045}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 1 Branch
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8761,7 +8851,7 @@ GameObject:
   - component: {fileID: 2362721141094652767}
   - component: {fileID: 8544684485166041780}
   - component: {fileID: 8085562331639404323}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Root 10 Branch
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8851,7 +8941,7 @@ GameObject:
   - component: {fileID: 3030232264684944551}
   - component: {fileID: 5631316918232260362}
   - component: {fileID: 8560191886097477456}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Low Red Mist
   m_TagString: Untagged
   m_Icon: {fileID: 0}

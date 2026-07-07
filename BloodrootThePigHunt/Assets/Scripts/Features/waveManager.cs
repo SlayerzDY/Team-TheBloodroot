@@ -37,6 +37,9 @@ public class waveManager : MonoBehaviour
 
     private bool encounterStarted;
     private bool curseWarningStarted;
+
+    public event Action CurseStarted;
+
     private int regularPigsKilled;
     private int regularPigsNeededToTriggerCurse;
     private int enemiesExpectedThisWave;
@@ -110,6 +113,7 @@ public class waveManager : MonoBehaviour
 
         curseWarningStarted = true;
         encounterStarted = true;
+        CurseStarted?.Invoke();
         StartNextWave();
 
         Debug.Log("Wave encounter started.");
