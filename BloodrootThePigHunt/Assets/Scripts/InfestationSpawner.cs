@@ -17,7 +17,21 @@ using UnityEngine.AI;
 
 public class InfestationSpawner : MonoBehaviour
 {
-    [SerializeField] GameObject infestation;
+    // makes the struct serializable, basically just makes it so I can make it into a serlized field
+    // this is going to be used to add chance to trap spawns
+    [System.Serializable]
+    public struct TrapConfig
+    {
+
+        public GameObject prefab;
+
+        [Range(1, 100)] public int spawnWeight;
+
+    }
+
+    //[SerializeField] GameObject infestation;
+    [SerializeField] private TrapConfig[] traps;
+
     [SerializeField] private float clearanceRadius = 2f;
     [SerializeField] private float WithinArea = 1.0f;
 
@@ -68,6 +82,39 @@ public class InfestationSpawner : MonoBehaviour
 
     }
 
+    private GameObject GetWeight()
+    {
+
+        // basically just reused shawns code that he put on mob spawner that I changed to make certain enemies on certain waves
+        //this one actually should hopefully grab a random weight and use that as a basis to spawn different traps
+        int Weight = 0;
+
+        for (int i = 0; i < traps.Length; i++)
+        {
+
+            Weight += traps[i].spawnWeight;
+
+        }
+
+        int RandomIndex = Random.Range(0, Weight);
+        int currentWeight = 0;
+
+        for (int i = 0; i < traps.Length; i++) {
+
+            currentWeight += traps[i].spawnWeight;
+
+            if(RandomIndex < currentWeight)
+            {
+
+                return traps[i].prefab;
+
+            }
+
+        }
+
+        return traps[0].prefab;
+
+    }
     public void SpawnAndClear(int Zones)
     {
 
@@ -136,7 +183,9 @@ public class InfestationSpawner : MonoBehaviour
                 if (spotFound)
                 {
 
-                    GameObject ILoathZone = Instantiate(infestation, spawnPos, Quaternion.identity, transform);
+                    GameObject theWinner = GetWeight();
+
+                    GameObject ILoathZone = Instantiate(theWinner, spawnPos, Quaternion.identity, transform);
 
                     activeZones.Add(ILoathZone);
 
@@ -144,10 +193,11 @@ public class InfestationSpawner : MonoBehaviour
                 // could cause issues if spawner is not set corectly. Ex: can spawn things outside of nav mesh
                 else
                 {
+                    GameObject theWinner = GetWeight();
 
                     Transform center2 = spawnPoints[Random.Range(0, spawnPoints.Length)];
 
-                    GameObject IhateZones = Instantiate(infestation, center2.position, Quaternion.identity, transform);
+                    GameObject IhateZones = Instantiate(theWinner, center2.position, Quaternion.identity, transform);
 
                     activeZones.Add(IhateZones);
                 }

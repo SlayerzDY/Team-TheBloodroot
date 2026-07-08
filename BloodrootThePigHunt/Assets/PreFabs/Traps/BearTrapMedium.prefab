@@ -51,7 +51,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3865add71eef4754e9ac44b0909da539, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Interact
-  InteractRange: 0
+  InteractRange: 2
   InteractLayer:
     serializedVersion: 2
     m_Bits: 1024
@@ -105,6 +105,10 @@ MonoBehaviour:
   model: {fileID: 8204202309931736455}
   dissolveDamage: {fileID: 8300000, guid: ad2395e6710ebf944bbcd30444b3a468, type: 3}
   dissolveDeath: {fileID: 8300000, guid: 8fa41b62e422a3e44a4ea375b05052d4, type: 3}
+  damageVolume: 0.25
+  deathVolume: 0.35
+  maxDamageSoundTime: 0.6
+  maxDeathSoundTime: 1.25
   dissolveDuration: 2
   dissolveStrength: 0
   flashDuration: 0.1
