@@ -195,6 +195,9 @@ public class waveManager : MonoBehaviour
                 enemiesRemaining);
         }
 
+        MobSpawner spawner = FindAnyObjectByType<MobSpawner>();
+        spawner.StartWave(enemiesExpectedThisWave);
+
         RefreshWaveUI();
 
         WaveStarted?.Invoke(

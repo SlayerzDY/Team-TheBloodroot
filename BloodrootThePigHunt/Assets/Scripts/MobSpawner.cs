@@ -176,16 +176,17 @@ public class MobSpawner : MonoBehaviour
     {
         if (enemies != null && enemies.Length > 0)
         {
-            int startIndex = Random.Range(0, enemies.Length);
+            int allowedMobs = Mathf.Min(manager.currentWave, enemies.Length);
 
-            for (int i = 0; i < enemies.Length; i++)
+            int startIndex = Random.Range(0, allowedMobs);
+
+            if (enemies[startIndex] != null)
             {
-                GameObject enemy = enemies[(startIndex + i) % enemies.Length];
-                if (enemy != null)
-                {
-                    return enemy;
-                }
+
+                return enemies[startIndex];
+
             }
+          
         }
 
         return Enemy;

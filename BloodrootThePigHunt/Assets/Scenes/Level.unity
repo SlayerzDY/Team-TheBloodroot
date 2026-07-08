@@ -3082,6 +3082,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3525040997257689981, guid: b2f315e2baa683f46a472605e11151ae, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6573199182274784927, guid: b2f315e2baa683f46a472605e11151ae, type: 3}
       propertyPath: m_Name
       value: UI
@@ -5398,7 +5402,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1275959101}
-  - component: {fileID: 1275959102}
   m_Layer: 0
   m_Name: SpawnPoint
   m_TagString: Untagged
@@ -5421,27 +5424,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1584553383}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1275959102
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1275959100}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0dbc5bab64b9f864fa576428feab5ff0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::InfestationSpawner
-  infestation: {fileID: 0}
-  clearanceRadius: 2
-  WithinArea: 1
-  avoidanceLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  spawnPoints: []
-  spawnRadius: 0
-  zoneAmount: 3
 --- !u!4 &1276846336 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3904139952142816868, guid: d5766de86ef020f4d93c32f5de1f640f, type: 3}
@@ -6187,7 +6169,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b32cab2bfaccf9f4db5a3aba3f02eccd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::waveManager
-  totalWaves: 20
+  totalWaves: 3
   timeBetweenWaves: 5
   startingEnemyCount: 3
   enemiesAddedPerWave: 2
@@ -6920,8 +6902,8 @@ MonoBehaviour:
   Enemy: {fileID: 5464231581442848068, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
   enemies:
   - {fileID: 5464231581442848068, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
-  - {fileID: 2486310311355277485, guid: fbd7a0d02c2da08428098efcf05b9a5e, type: 3}
   - {fileID: 8769039292492642325, guid: d6ba5ca32b5322249bd5e3aae8960a82, type: 3}
+  - {fileID: 2486310311355277485, guid: fbd7a0d02c2da08428098efcf05b9a5e, type: 3}
   regularPig: {fileID: 6400000000000000001, guid: 9bd9d91575d646d4abaf79a6ec9d8f31, type: 3}
   regularPigsOnScreen: 4
   spawnPoint:
