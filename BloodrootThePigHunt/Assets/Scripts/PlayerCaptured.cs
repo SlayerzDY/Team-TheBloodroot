@@ -3,6 +3,7 @@
 //==============================================================================================
 using UnityEngine;
 using System.Collections;
+using UnityEngine.AI;
 //==============================================================================================
 // Instructions for Using the Dissolve Script
 //==============================================================================================
@@ -88,12 +89,15 @@ public class PlayerCaptured : MonoBehaviour, IInteract {
             }
         }
         if (entity.tag == "Enemy") {
+            // needed to disable nave mesh agent to stop ai
             enemyAI enemyAI = entity.GetComponent<enemyAI>();
+            NavMeshAgent enemyAI2 = entity.GetComponent<NavMeshAgent>();
             if (dmg != null) {
                 dmg.enabled = false;
             }
             if (enemyAI != null) {
                 enemyAI.enabled = false;
+                enemyAI2.enabled = false;
             }
         }    
     }
@@ -109,8 +113,10 @@ public class PlayerCaptured : MonoBehaviour, IInteract {
         }
         if (entity.tag == "Enemy") {
             enemyAI enemyAI = entity.GetComponent<enemyAI>();
+            NavMeshAgent enemyAI2 = entity.GetComponent<NavMeshAgent>();
             if (enemyAI != null) {
                 enemyAI.enabled = true;
+                enemyAI2.enabled = true;
             }
         }
     }
