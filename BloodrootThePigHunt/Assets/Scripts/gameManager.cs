@@ -133,27 +133,9 @@ public class gameManager : MonoBehaviour
     //==========================================================================================
     // Function, Interact Display
     //==========================================================================================
-    public void InteractDisplay(bool isOn)
-    {
-        if (isOn)
-        {
-            menuActive = menuInteract;
-            menuActive.SetActive(true);
-        }
-        else
-        {
-            if (menuActive != null)
-            {
-                if (menuActive == menuInteract)
-                {
-                    menuActive.SetActive(false);
-                    menuActive = null;
-                }
-            }
-        }
+    public void InteractDisplay(bool isOn) {
+        menuInteract.SetActive(isOn);
     }
-    //
-
     //==========================================================================================
     // Function, StartNextWave
     //==========================================================================================
