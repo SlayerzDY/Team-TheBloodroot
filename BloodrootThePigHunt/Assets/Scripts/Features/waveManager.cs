@@ -13,8 +13,8 @@ public class waveManager : MonoBehaviour
     [SerializeField, Min(0f)] private float timeBetweenWaves = 5f;
 
     [Header("Wave Size")]
-    [SerializeField, Min(0)] private int startingEnemyCount = 3;
-    [SerializeField, Min(0)] private int enemiesAddedPerWave = 2;
+    [SerializeField, Min(0)] private int startingEnemyCount = 6;
+    [SerializeField, Min(0)] private int enemiesAddedPerWave = 3;
 
     [Header("Blood Moon")]
     [SerializeField] private BloodMoonWaveDirector bloodMoonDirector;
@@ -194,6 +194,9 @@ public class waveManager : MonoBehaviour
             gameManager.instance.StartNextWave(
                 enemiesRemaining);
         }
+
+        MobSpawner spawner = FindAnyObjectByType<MobSpawner>();
+        spawner.StartWave(enemiesExpectedThisWave);
 
         RefreshWaveUI();
 

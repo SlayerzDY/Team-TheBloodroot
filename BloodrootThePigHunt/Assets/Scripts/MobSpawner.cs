@@ -2,6 +2,7 @@ using UnityEngine;
 using Bloodroot.Features.BloodMoon;
 
 
+
 // Instuctions:
 // 1. Create a empty 3D object
 // 2. Create another empty and emplace that as a child under your object
@@ -35,7 +36,7 @@ public class MobSpawner : MonoBehaviour
 
     public bool isWaveActive;
     private int enemiesInWave;
-    private int enemiesSpawnedThisWave;
+    //private int enemiesSpawnedThisWave;
 
     private waveManager manager;
     private BloodMoonModifier activeModifier;
@@ -66,16 +67,18 @@ public class MobSpawner : MonoBehaviour
             return;
         }
 
-        if(timer >= spawnRate && isWaveActive && currentEnemies < maxEnemies)
-        {
+        float currentSpawnRate = spawnRate;
 
+        if(manager != null)
+        {
+            currentSpawnRate = Mathf.Max(0.3f, spawnRate - (manager.currentWave * 0.05f));
+        }
+        if(timer >= currentSpawnRate && isWaveActive && currentEnemies < maxEnemies)
+        {
             SpawnObject();
 
-            // reset timer
             timer = 0f;
-
         }
-        
     }
 
     public void MobDied()
@@ -141,6 +144,13 @@ public class MobSpawner : MonoBehaviour
         GameObject spawnedEnemy =
             Instantiate(enemyToSpawn, Spawn, Rotation);
 
+        enemyAI enemy = spawnedEnemy.GetComponent<enemyAI>();
+
+        if(enemy != null)
+        {
+            enemy.InitializeEnemy(manager.currentWave);
+        }
+
         if (manager == null)
         {
             manager = FindAnyObjectByType<waveManager>();
@@ -162,20 +172,24 @@ public class MobSpawner : MonoBehaviour
 
     }
 
+    // matt here made it so this only spaws certain enemies per wave should have left it to shawns old design but update to change values of how rare
+    //certain enemeis are per wave but I don't exactly knowo how to do that and I don't have thee time right this minute
+    // maybe for prototype 2 if need this can be changed to that
     GameObject GetEnemyToSpawn()
     {
         if (enemies != null && enemies.Length > 0)
         {
-            int startIndex = Random.Range(0, enemies.Length);
+            int allowedMobs = Mathf.Min(manager.currentWave, enemies.Length);
 
-            for (int i = 0; i < enemies.Length; i++)
+            int startIndex = Random.Range(0, allowedMobs);
+
+            if (enemies[startIndex] != null)
             {
-                GameObject enemy = enemies[(startIndex + i) % enemies.Length];
-                if (enemy != null)
-                {
-                    return enemy;
-                }
+
+                return enemies[startIndex];
+
             }
+          
         }
 
         return Enemy;
@@ -214,5 +228,13 @@ public class MobSpawner : MonoBehaviour
         return true;
     }
 
-  
+  public void StartWave(int totalEnemies)
+    {
+        enemiesInWave = totalEnemies;
+       // enemiesSpawnedThisWave = 0;
+        currentEnemies = 0;
+        maxEnemies = Mathf.Min(10 + manager.currentWave, totalEnemies);
+
+        isWaveActive = true;
+    }
 }

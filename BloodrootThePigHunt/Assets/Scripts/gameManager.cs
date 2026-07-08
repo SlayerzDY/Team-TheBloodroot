@@ -4,6 +4,8 @@
 using UnityEngine;
 using System.Collections;
 using Bloodroot.Features.BloodMoon;
+using TMPro;
+using UnityEngine.UI;
 //==============================================================================================
 // Declare Game Manager
 //==============================================================================================
@@ -19,7 +21,11 @@ public class gameManager : MonoBehaviour
     [SerializeField] GameObject menuLose;
     [SerializeField] GameObject menuMain;
     [SerializeField] GameObject menuInteract;
-     
+    [SerializeField] TMP_Text gameGoalCountText;
+
+    public Image playerHPBAR;
+    public GameObject playerDamageScreen;
+
     public bool isPaused = false;
     public GameObject player;
     public playerController playerController;
@@ -98,6 +104,8 @@ public class gameManager : MonoBehaviour
         if (waveManagerControlsWin)
             return;
 
+       gameGoalCountText.text = gameGoalCount.ToString("F0");
+
         if (gameGoalCount >= 10)
         {
             // You win the game
@@ -153,18 +161,11 @@ public class gameManager : MonoBehaviour
     public void StartNextWave(int enemyNum)
     {
 
-        MobSpawner spawner = FindAnyObjectByType<MobSpawner>();
+        waveManager manager = FindAnyObjectByType<waveManager>();
 
-        if(spawner != null)
-        {
+        int aliveLimit = 6 + manager.currentWave * 2;
 
-            spawner.maxEnemies = enemyNum;
-
-            spawner.currentEnemies = 0;
-
-            spawner.isWaveActive = true;
-
-        }
+        manager.StartWave(enemyNum);
 
     }
 

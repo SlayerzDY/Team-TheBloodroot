@@ -40,6 +40,7 @@ public class playerController : MonoBehaviour, IDamage {
     //==========================================================================================
     void Start() {
         HPOrig = HP;
+        updatePlayerUI();
     }
     //==========================================================================================
     // Update is called once per frame
@@ -113,6 +114,8 @@ public class playerController : MonoBehaviour, IDamage {
     public void TakeDamage(int amount)
     {
         HP -= amount;
+        updatePlayerUI();
+        StartCoroutine(flashDamage());  
         if (HP <= 0)
         {
             if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolve()); }
@@ -153,8 +156,26 @@ public class playerController : MonoBehaviour, IDamage {
         yield return null;
     }
 
- 
+
     //==========================================================================================
+
+    public void updatePlayerUI()
+    {
+        //fixed
+        gameManager.instance.playerHPBAR.fillAmount = (float)HP / HPOrig;
+
+    }
+
+    IEnumerator flashDamage()
+    {
+
+        gameManager.instance.playerDamageScreen.SetActive(true);
+
+        yield return new WaitForSeconds(0.1f);
+
+        gameManager.instance.playerDamageScreen.SetActive(false);
+
+    }
 }
 //==============================================================================================
 // End of Player Controller .cs
