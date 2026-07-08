@@ -21,7 +21,7 @@ public class PlayerCaptured : MonoBehaviour, IInteract {
     [SerializeField] float holdTime = 5f;
     [SerializeField] float releaseTime = 5f;
     [SerializeField] AudioClip damageSound;
-    float elapsedTime = 0f;
+    //float elapsedTime = 0f;
     bool isTriggered = false;
     //==========================================================================================
     // Function, Update
@@ -29,13 +29,15 @@ public class PlayerCaptured : MonoBehaviour, IInteract {
     void OnTriggerEnter(Collider other) {
         if (!isTriggered) {
             if (!(other is CapsuleCollider) && other.CompareTag("Enemy")) return;
-            isTriggered = true;
+            //istriggered was placed to early and causing premature lockage of bear traps maybe due to the floor or something else but should be fixed now
             if (other.CompareTag("Enemy")) {
                 if (other.GetComponent<enemyAI>() != null) {
+                    isTriggered = true;
                     StartCoroutine(holdObject(other.gameObject));
                 }
             }
             if (other.CompareTag("Player")) {
+                isTriggered = true;
                 StartCoroutine(holdObject(other.gameObject));
             }
         }

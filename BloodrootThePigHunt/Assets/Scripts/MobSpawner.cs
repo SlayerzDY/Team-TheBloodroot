@@ -36,7 +36,7 @@ public class MobSpawner : MonoBehaviour
 
     public bool isWaveActive;
     private int enemiesInWave;
-    private int enemiesSpawnedThisWave;
+    //private int enemiesSpawnedThisWave;
 
     private waveManager manager;
     private BloodMoonModifier activeModifier;
@@ -172,6 +172,9 @@ public class MobSpawner : MonoBehaviour
 
     }
 
+    // matt here made it so this only spaws certain enemies per wave should have left it to shawns old design but update to change values of how rare
+    //certain enemeis are per wave but I don't exactly knowo how to do that and I don't have thee time right this minute
+    // maybe for prototype 2 if need this can be changed to that
     GameObject GetEnemyToSpawn()
     {
         if (enemies != null && enemies.Length > 0)
@@ -228,7 +231,7 @@ public class MobSpawner : MonoBehaviour
   public void StartWave(int totalEnemies)
     {
         enemiesInWave = totalEnemies;
-        enemiesSpawnedThisWave = 0;
+       // enemiesSpawnedThisWave = 0;
         currentEnemies = 0;
         maxEnemies = Mathf.Min(10 + manager.currentWave, totalEnemies);
 

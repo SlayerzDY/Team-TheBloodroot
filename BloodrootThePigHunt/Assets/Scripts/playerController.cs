@@ -115,7 +115,7 @@ public class playerController : MonoBehaviour, IDamage {
     {
         HP -= amount;
         updatePlayerUI();
-        flashDamage();
+        StartCoroutine(flashDamage());  
         if (HP <= 0)
         {
             if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolve()); }
@@ -161,7 +161,7 @@ public class playerController : MonoBehaviour, IDamage {
 
     public void updatePlayerUI()
     {
-        //why broke
+        //fixed
         gameManager.instance.playerHPBAR.fillAmount = (float)HP / HPOrig;
 
     }

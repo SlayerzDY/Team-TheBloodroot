@@ -53,7 +53,8 @@ public class InfestationSpawner : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-
+        // there is probably a better way to make this better like just changing trigger curse to a boolean but 
+        // this works for now but would be better to change later for expanded use
         waveManager = FindAnyObjectByType<waveManager>();
 
         if (waveManager != null)
