@@ -59,6 +59,8 @@ public class enemyAI : MonoBehaviour, IDamage
 
     private void ApplyBloodMoonModifier()
     {
+        damageMultiplier = 1f;
+
         if (manager == null)
             return;
 
@@ -82,6 +84,10 @@ public class enemyAI : MonoBehaviour, IDamage
 
         damageMultiplier =
             modifier.ModifyDamage(1f);
+
+        meleeDamage =
+            Mathf.Max(0, Mathf.CeilToInt(
+                modifier.ModifyDamage(meleeDamage)));
     }
 
     //==========================================================================================
@@ -89,6 +95,9 @@ public class enemyAI : MonoBehaviour, IDamage
     //==========================================================================================
     void Update()
     {
+        if (isDead)
+            return;
+
         if (playerInTrigger)
         {
             ScreecherAI screecher = GetComponent<ScreecherAI>();
@@ -190,7 +199,21 @@ public class enemyAI : MonoBehaviour, IDamage
     void shoot()
     {
         shootTimer = 0;
-       GameObject spawnedBullet = Instantiate(bullet, shootPos.position, gunPivot.rotation);
+
+        Quaternion bulletRotation = gunPivot.rotation;
+        if (gameManager.instance != null && gameManager.instance.player != null)
+        {
+            Vector3 bulletDir =
+                gameManager.instance.player.transform.position -
+                shootPos.position;
+
+            if (bulletDir.sqrMagnitude > 0.001f)
+            {
+                bulletRotation = Quaternion.LookRotation(bulletDir);
+            }
+        }
+
+        GameObject spawnedBullet = Instantiate(bullet, shootPos.position, bulletRotation);
         Damage dmg = spawnedBullet.GetComponent<Damage>();
         if(dmg != null)
         {
@@ -211,7 +234,7 @@ public class enemyAI : MonoBehaviour, IDamage
     void rotateGun()
     {
         Quaternion rot = Quaternion.LookRotation(playerDir);
-        gunPivot.rotation = Quaternion.Lerp(gunPivot.rotation, rot, shootRate * Time.deltaTime);
+        gunPivot.rotation = Quaternion.Lerp(gunPivot.rotation, rot, gunRotateSpeed * Time.deltaTime);
     }
     //==========================================================================================
     // Function, TakeDamage
@@ -257,6 +280,11 @@ public class enemyAI : MonoBehaviour, IDamage
         isDead = true;
         playerInTrigger = false;
 
+        foreach (Collider enemyCollider in GetComponentsInChildren<Collider>())
+        {
+            enemyCollider.enabled = false;
+        }
+
         if (agent != null && agent.isOnNavMesh)
         {
             agent.isStopped = true;
@@ -264,15 +292,14 @@ public class enemyAI : MonoBehaviour, IDamage
 
         // This reduces enemiesRemaining and allows the
         // WaveManager to start the following wave.
-        if (manager != null)
+        if (manager == null)
         {
-            manager.EnemyDefeated();
+            manager = FindAnyObjectByType<waveManager>();
         }
-        else
+
+        if (manager != null && manager.waveActive)
         {
-            Debug.LogWarning(
-                "Enemy could not report its death " +
-                "because WaveManager was not found.");
+            manager.EnemyDefeated(gameObject);
         }
 
         if (gameManager.instance != null)

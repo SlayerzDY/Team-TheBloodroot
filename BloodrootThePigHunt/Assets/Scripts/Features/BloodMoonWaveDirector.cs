@@ -9,8 +9,14 @@ using Bloodroot.Features.BloodMoon;
 public sealed class BloodMoonWaveDirector : MonoBehaviour
 {
 
+    [Header("Fixed Blood Moon Schedule")]
+    [SerializeField] bool useFixedBloodMoonSchedule = true;
     [SerializeField, Min(1)] int firstBloodMoonWave;
     [SerializeField, Min(1)] int wavesBetweenBloodMoons;
+
+    [Header("Random Blood Moon Chance")]
+    [SerializeField, Range(0f, 100f)] float randomBloodMoonChancePercent;
+
     [SerializeField] private List<BloodMoonModifier> modifiers = new List<BloodMoonModifier>();
 
     private BloodMoonModifier activeModifier;
@@ -45,7 +51,8 @@ public sealed class BloodMoonWaveDirector : MonoBehaviour
 
     public bool IsBloodMoonWave(int waveNumber)
     {
-        return waveNumber >= firstBloodMoonWave && 
+        return useFixedBloodMoonSchedule &&
+            waveNumber >= firstBloodMoonWave &&
             (waveNumber - firstBloodMoonWave) % wavesBetweenBloodMoons == 0;
     }
 
@@ -54,16 +61,46 @@ public sealed class BloodMoonWaveDirector : MonoBehaviour
         ClearModifier();
         activeWaveNumber = waveNumber;
 
-        if (!IsBloodMoonWave(waveNumber) || modifiers.Count == 0)
+        bool scheduledBloodMoon =
+            IsBloodMoonWave(waveNumber);
+
+        bool randomBloodMoon =
+            !scheduledBloodMoon && RollRandomBloodMoon();
+
+        if ((!scheduledBloodMoon && !randomBloodMoon) ||
+            modifiers.Count == 0)
         {
             NormalWaveStarted?.Invoke(waveNumber);
             return null;
         }
 
-        int bloodMoonNumber = (waveNumber - firstBloodMoonWave) / wavesBetweenBloodMoons;
-        activeModifier = modifiers[bloodMoonNumber % modifiers.Count];
+        int modifierIndex =
+            GetModifierIndex(waveNumber, scheduledBloodMoon);
+
+        activeModifier = modifiers[modifierIndex];
         BloodMoonStarted?.Invoke(waveNumber, activeModifier);
         return activeModifier;
+    }
+
+    private bool RollRandomBloodMoon()
+    {
+        if (randomBloodMoonChancePercent <= 0f)
+            return false;
+
+        return UnityEngine.Random.Range(0f, 100f) < randomBloodMoonChancePercent;
+    }
+
+    private int GetModifierIndex(int waveNumber, bool scheduledBloodMoon)
+    {
+        if (scheduledBloodMoon)
+        {
+            int bloodMoonNumber =
+                (waveNumber - firstBloodMoonWave) / wavesBetweenBloodMoons;
+
+            return bloodMoonNumber % modifiers.Count;
+        }
+
+        return (waveNumber - 1) % modifiers.Count;
     }
 
     public void EndWave(int waveNumber)
@@ -94,6 +131,10 @@ public sealed class BloodMoonWaveDirector : MonoBehaviour
     {
         firstBloodMoonWave = Mathf.Max(1, firstBloodMoonWave);
         wavesBetweenBloodMoons = Mathf.Max(1, wavesBetweenBloodMoons);
+        randomBloodMoonChancePercent = Mathf.Clamp(
+            randomBloodMoonChancePercent,
+            0f,
+            100f);
     }
 
 }

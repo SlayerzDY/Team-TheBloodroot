@@ -19,6 +19,9 @@ public class MobSpawner : MonoBehaviour
 {
 
     [SerializeField] GameObject Enemy;
+    [SerializeField] GameObject[] enemies;
+    [SerializeField] GameObject regularPig;
+    [SerializeField, Min(0)] int regularPigsOnScreen = 4;
     [SerializeField] Transform[] spawnPoint;
     [SerializeField]float spawnRate;
     [SerializeField] float spawnRadius;
@@ -26,6 +29,7 @@ public class MobSpawner : MonoBehaviour
 
     public int maxEnemies;
     public int currentEnemies;
+    public int currentRegularPigs;
 
     float timer = 0f;
 
@@ -39,13 +43,28 @@ public class MobSpawner : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-
+        manager = FindAnyObjectByType<waveManager>();
     }
 
     // Update is called once per frame
     void Update()
     {
         timer += Time.deltaTime;
+
+        if (manager == null)
+        {
+            manager = FindAnyObjectByType<waveManager>();
+        }
+
+        if (manager != null && manager.ShouldSpawnRegularPigs)
+        {
+            if (currentRegularPigs < regularPigsOnScreen)
+            {
+                SpawnRegularPig();
+            }
+
+            return;
+        }
 
         if(timer >= spawnRate && isWaveActive && currentEnemies < maxEnemies)
         {
@@ -67,37 +86,71 @@ public class MobSpawner : MonoBehaviour
             currentEnemies = 0;
         }
     }
+
+    public void RegularPigDied()
+    {
+        currentRegularPigs--;
+        if (currentRegularPigs < 0)
+        {
+            currentRegularPigs = 0;
+        }
+    }
+
+    void SpawnRegularPig()
+    {
+        if (regularPig == null)
+        {
+            Debug.LogError("MobSpawner cannot spawn regular pigs because no regular pig prefab is assigned.");
+            return;
+        }
+
+        if (!TryGetSpawnPoint(out Vector3 Spawn, out Quaternion Rotation))
+            return;
+
+        GameObject spawnedPig =
+            Instantiate(regularPig, Spawn, Rotation);
+
+        RegularHog hog =
+            spawnedPig.GetComponent<RegularHog>();
+
+        if (hog != null)
+        {
+            hog.SetSpawner(this);
+            hog.SetManager(manager);
+        }
+
+        currentRegularPigs++;
+    }
+
     void SpawnObject()
     {
-        if (Enemy == null)
+        GameObject enemyToSpawn = GetEnemyToSpawn();
+
+        if (enemyToSpawn == null)
         {
             Debug.LogError("MobSpawner cannot spawn because no enemy prefab is assigned.");
             isWaveActive = false;
             return;
         }
 
-        if (spawnPoint == null || spawnPoint.Length == 0)
+        if (!TryGetSpawnPoint(out Vector3 Spawn, out Quaternion Rotation))
         {
-            Debug.LogError("MobSpawner cannot spawn because it has no spawn points.");
-            isWaveActive = false;
             return;
         }
 
-        int rando = Random.Range(0, spawnPoint.Length);
-        Transform center = spawnPoint[rando];
+        GameObject spawnedEnemy =
+            Instantiate(enemyToSpawn, Spawn, Rotation);
 
-        if (center == null)
+        if (manager == null)
         {
-            Debug.LogError("MobSpawner contains an empty spawn point reference.");
-            isWaveActive = false;
-            return;
+            manager = FindAnyObjectByType<waveManager>();
         }
 
-        Vector2 randomCircle = Random.insideUnitCircle * spawnRadius;
-        Vector3 randomOffset = new Vector3(randomCircle.x, 0, randomCircle.y);
-        Vector3 Spawn = center.position + randomOffset;
+        if (manager != null)
+        {
+            manager.EnemySpawned(spawnedEnemy);
+        }
 
-        Instantiate(Enemy, Spawn, center.rotation);
         currentEnemies++;
 
         if(currentEnemies >= maxEnemies)
@@ -107,6 +160,58 @@ public class MobSpawner : MonoBehaviour
 
         }
 
+    }
+
+    GameObject GetEnemyToSpawn()
+    {
+        if (enemies != null && enemies.Length > 0)
+        {
+            int startIndex = Random.Range(0, enemies.Length);
+
+            for (int i = 0; i < enemies.Length; i++)
+            {
+                GameObject enemy = enemies[(startIndex + i) % enemies.Length];
+                if (enemy != null)
+                {
+                    return enemy;
+                }
+            }
+        }
+
+        return Enemy;
+    }
+
+    bool TryGetSpawnPoint(out Vector3 Spawn, out Quaternion Rotation)
+    {
+        Spawn = transform.position;
+        Rotation = transform.rotation;
+
+        if (spawnPoint == null || spawnPoint.Length == 0)
+        {
+            Debug.LogError("MobSpawner cannot spawn because it has no spawn points.");
+            isWaveActive = false;
+            return false;
+        }
+
+        int rando = Random.Range(0, spawnPoint.Length);
+        Transform center = spawnPoint[rando];
+
+        if (center == null)
+        {
+            Debug.LogError("MobSpawner contains an empty spawn point reference.");
+            isWaveActive = false;
+            return false;
+        }
+
+        Vector2 randomCircle =
+            Random.insideUnitCircle * spawnRadius;
+
+        Vector3 randomOffset =
+            new Vector3(randomCircle.x, 0, randomCircle.y);
+
+        Spawn = center.position + randomOffset;
+        Rotation = center.rotation;
+        return true;
     }
 
   

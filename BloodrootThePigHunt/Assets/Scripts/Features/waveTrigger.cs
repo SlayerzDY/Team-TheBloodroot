@@ -2,14 +2,22 @@ using UnityEngine;
 
 public class waveTrigger : MonoBehaviour
 {
-
     [SerializeField] waveManager manager;
+    [SerializeField] bool startOnPlayerTrigger;
 
     private bool hasTriggered;
 
+    private void Awake()
+    {
+        if (manager == null)
+        {
+            manager = FindAnyObjectByType<waveManager>();
+        }
+    }
+
     private void OnTriggerEnter(Collider other)
     {
-        if (hasTriggered)
+        if (!startOnPlayerTrigger || hasTriggered)
             return;
 
         if (!other.CompareTag("Player"))
@@ -17,14 +25,12 @@ public class waveTrigger : MonoBehaviour
 
         if (manager == null)
         {
-            Debug.LogWarning("Wave Manager has not been assigned.");
+            Debug.LogWarning(
+                "Wave Manager has not been assigned.");
             return;
         }
 
         hasTriggered = true;
         manager.BeginEncounter();
-
-        GetComponent<Collider>().enabled = false;
-
     }
 }
