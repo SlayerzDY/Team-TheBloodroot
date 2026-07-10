@@ -28,6 +28,7 @@ public class PlayerCaptured : MonoBehaviour, IInteract {
     // Function, Update
     //==========================================================================================
     void OnTriggerEnter(Collider other) {
+        if (isTriggered) { gameObject.GetComponent<Damage>().enabled = false; }
         if (!isTriggered) {
             if (!(other is CapsuleCollider) && other.CompareTag("Enemy")) return;
             //istriggered was placed to early and causing premature lockage of bear traps maybe due to the floor or something else but should be fixed now
