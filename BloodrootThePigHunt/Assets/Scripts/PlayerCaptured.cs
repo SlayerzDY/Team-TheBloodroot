@@ -3,6 +3,7 @@
 //==============================================================================================
 using UnityEngine;
 using System.Collections;
+using UnityEngine.AI;
 //==============================================================================================
 // Instructions for Using the Dissolve Script
 //==============================================================================================
@@ -21,21 +22,24 @@ public class PlayerCaptured : MonoBehaviour, IInteract {
     [SerializeField] float holdTime = 5f;
     [SerializeField] float releaseTime = 5f;
     [SerializeField] AudioClip damageSound;
-    float elapsedTime = 0f;
+    //float elapsedTime = 0f;
     bool isTriggered = false;
     //==========================================================================================
     // Function, Update
     //==========================================================================================
     void OnTriggerEnter(Collider other) {
+        if (isTriggered) { gameObject.GetComponent<Damage>().enabled = false; }
         if (!isTriggered) {
             if (!(other is CapsuleCollider) && other.CompareTag("Enemy")) return;
-            isTriggered = true;
+            //istriggered was placed to early and causing premature lockage of bear traps maybe due to the floor or something else but should be fixed now
             if (other.CompareTag("Enemy")) {
                 if (other.GetComponent<enemyAI>() != null) {
+                    isTriggered = true;
                     StartCoroutine(holdObject(other.gameObject));
                 }
             }
             if (other.CompareTag("Player")) {
+                isTriggered = true;
                 StartCoroutine(holdObject(other.gameObject));
             }
         }
@@ -86,12 +90,15 @@ public class PlayerCaptured : MonoBehaviour, IInteract {
             }
         }
         if (entity.tag == "Enemy") {
+            // needed to disable nave mesh agent to stop ai
             enemyAI enemyAI = entity.GetComponent<enemyAI>();
+            NavMeshAgent enemyAI2 = entity.GetComponent<NavMeshAgent>();
             if (dmg != null) {
                 dmg.enabled = false;
             }
             if (enemyAI != null) {
                 enemyAI.enabled = false;
+                enemyAI2.enabled = false;
             }
         }    
     }
@@ -107,8 +114,10 @@ public class PlayerCaptured : MonoBehaviour, IInteract {
         }
         if (entity.tag == "Enemy") {
             enemyAI enemyAI = entity.GetComponent<enemyAI>();
+            NavMeshAgent enemyAI2 = entity.GetComponent<NavMeshAgent>();
             if (enemyAI != null) {
                 enemyAI.enabled = true;
+                enemyAI2.enabled = true;
             }
         }
     }

@@ -279,6 +279,8 @@ MonoBehaviour:
   isMelee: 1
   meleeDamage: 3
   meleeRange: 3
+  healthGrowth: 1.15
+  damageGrowth: 1.08
 --- !u!114 &780659847076678213
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -295,6 +297,10 @@ MonoBehaviour:
   model: {fileID: 1789756216634893366}
   dissolveDamage: {fileID: 8300000, guid: 230321f4bc38ac54b921bbf981fefbe8, type: 3}
   dissolveDeath: {fileID: 8300000, guid: 2ee9099450593044794f46fbd065503c, type: 3}
+  damageVolume: 0.25
+  deathVolume: 0.35
+  maxDamageSoundTime: 0.6
+  maxDeathSoundTime: 1.25
   dissolveDuration: 2
   dissolveStrength: 0
   flashDuration: 0.1

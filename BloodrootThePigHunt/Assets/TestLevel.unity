@@ -702,7 +702,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8112398099157542644, guid: f07200c1e7570da41a4cb102a86c160b, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.15
+      value: -0.01
       objectReference: {fileID: 0}
     - target: {fileID: 8112398099157542644, guid: f07200c1e7570da41a4cb102a86c160b, type: 3}
       propertyPath: m_LocalPosition.z
@@ -788,6 +788,8 @@ MonoBehaviour:
   isMelee: 0
   meleeDamage: 0
   meleeRange: 0
+  healthGrowth: 1.15
+  damageGrowth: 1.08
 --- !u!4 &1314244993
 Transform:
   m_ObjectHideFlags: 0
@@ -834,6 +836,8 @@ MonoBehaviour:
   isMelee: 0
   meleeDamage: 0
   meleeRange: 0
+  healthGrowth: 1.15
+  damageGrowth: 1.08
 --- !u!1001 &1585340379
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1214,7 +1218,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4190179351161707122, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -15.605172
+      value: -13.25
       objectReference: {fileID: 0}
     - target: {fileID: 4190179351161707122, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
       propertyPath: m_LocalPosition.y

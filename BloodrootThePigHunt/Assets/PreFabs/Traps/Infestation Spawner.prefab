@@ -25,7 +25,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 538930258288199506}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 81.9, y: 0, z: 100}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -48,12 +48,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0dbc5bab64b9f864fa576428feab5ff0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InfestationSpawner
-  infestation: {fileID: 2747646458510456870, guid: 63747c5ee0a1e05458819a12ed7ed74a, type: 3}
+  traps:
+  - prefab: {fileID: 2747646458510456870, guid: 63747c5ee0a1e05458819a12ed7ed74a, type: 3}
+    spawnWeight: 50
+  - prefab: {fileID: 8805823926485247629, guid: 6b4f276bb73a97c4db166e5934b35d02, type: 3}
+    spawnWeight: 25
+  - prefab: {fileID: 8805823926485247629, guid: 70f42d2d12f4a164685688ac7fdeeccb, type: 3}
+    spawnWeight: 15
+  - prefab: {fileID: 8805823926485247629, guid: 04f1d5182bf023048b5d448d5f21f7c8, type: 3}
+    spawnWeight: 10
   clearanceRadius: 5
   WithinArea: 1
   avoidanceLayer:
     serializedVersion: 2
-    m_Bits: 12424
+    m_Bits: 14472
   spawnPoints:
   - {fileID: 7478230104255757162}
   - {fileID: 6545990934285760648}

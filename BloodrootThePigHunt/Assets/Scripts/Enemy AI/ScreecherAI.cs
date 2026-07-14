@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-
+using System.Collections;
 
 
 public class ScreecherAI  : MonoBehaviour 
@@ -34,8 +34,9 @@ public class ScreecherAI  : MonoBehaviour
     }
     void SpawnVFX()
     {
-        if (screamVFX != null)
+        if (screamVFX != null) {
             Instantiate(screamVFX, transform.position, Quaternion.identity);
+        }    
     }
     public bool CanScream()
     {

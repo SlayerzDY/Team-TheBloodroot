@@ -4,6 +4,8 @@
 using UnityEngine;
 using System.Collections;
 using Bloodroot.Features.BloodMoon;
+using TMPro;
+using UnityEngine.UI;
 //==============================================================================================
 // Declare Game Manager
 //==============================================================================================
@@ -19,7 +21,11 @@ public class gameManager : MonoBehaviour
     [SerializeField] GameObject menuLose;
     [SerializeField] GameObject menuMain;
     [SerializeField] GameObject menuInteract;
-     
+    [SerializeField] TMP_Text gameGoalCountText;
+
+    public Image playerHPBAR;
+    public GameObject playerDamageScreen;
+
     public bool isPaused = false;
     public GameObject player;
     public playerController playerController;
@@ -98,6 +104,8 @@ public class gameManager : MonoBehaviour
         if (waveManagerControlsWin)
             return;
 
+       gameGoalCountText.text = gameGoalCount.ToString("F0");
+
         if (gameGoalCount >= 10)
         {
             // You win the game
@@ -125,27 +133,9 @@ public class gameManager : MonoBehaviour
     //==========================================================================================
     // Function, Interact Display
     //==========================================================================================
-    public void InteractDisplay(bool isOn)
-    {
-        if (isOn)
-        {
-            menuActive = menuInteract;
-            menuActive.SetActive(true);
-        }
-        else
-        {
-            if (menuActive != null)
-            {
-                if (menuActive == menuInteract)
-                {
-                    menuActive.SetActive(false);
-                    menuActive = null;
-                }
-            }
-        }
+    public void InteractDisplay(bool isOn) {
+        menuInteract.SetActive(isOn);
     }
-    //
-
     //==========================================================================================
     // Function, StartNextWave
     //==========================================================================================
@@ -157,13 +147,7 @@ public class gameManager : MonoBehaviour
 
         if(spawner != null)
         {
-
-            spawner.maxEnemies = enemyNum;
-
-            spawner.currentEnemies = 0;
-
-            spawner.isWaveActive = true;
-
+            spawner.StartWave(enemyNum);
         }
 
     }

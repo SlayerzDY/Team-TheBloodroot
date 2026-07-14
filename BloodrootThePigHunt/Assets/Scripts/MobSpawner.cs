@@ -2,6 +2,7 @@ using UnityEngine;
 using Bloodroot.Features.BloodMoon;
 
 
+
 // Instuctions:
 // 1. Create a empty 3D object
 // 2. Create another empty and emplace that as a child under your object
@@ -35,7 +36,7 @@ public class MobSpawner : MonoBehaviour
 
     public bool isWaveActive;
     private int enemiesInWave;
-    private int enemiesSpawnedThisWave;
+    //private int enemiesSpawnedThisWave;
 
     private waveManager manager;
     private BloodMoonModifier activeModifier;
@@ -66,16 +67,18 @@ public class MobSpawner : MonoBehaviour
             return;
         }
 
-        if(timer >= spawnRate && isWaveActive && currentEnemies < maxEnemies)
-        {
+        float currentSpawnRate = spawnRate;
 
+        if(manager != null)
+        {
+            currentSpawnRate = Mathf.Max(0.3f, spawnRate - (manager.currentWave * 0.05f));
+        }
+        if(timer >= currentSpawnRate && isWaveActive && currentEnemies < maxEnemies)
+        {
             SpawnObject();
 
-            // reset timer
             timer = 0f;
-
         }
-        
     }
 
     public void MobDied()
@@ -146,6 +149,13 @@ public class MobSpawner : MonoBehaviour
             manager = FindAnyObjectByType<waveManager>();
         }
 
+        enemyAI enemy = spawnedEnemy.GetComponent<enemyAI>();
+
+        if(enemy != null && manager != null)
+        {
+            enemy.InitializeEnemy(manager.currentWave);
+        }
+
         if (manager != null)
         {
             manager.EnemySpawned(spawnedEnemy);
@@ -214,5 +224,14 @@ public class MobSpawner : MonoBehaviour
         return true;
     }
 
-  
+  public void StartWave(int totalEnemies)
+    {
+        enemiesInWave = totalEnemies;
+       // enemiesSpawnedThisWave = 0;
+        currentEnemies = 0;
+        maxEnemies = Mathf.Max(0, totalEnemies);
+
+        isWaveActive = maxEnemies > 0;
+        timer = 0f;
+    }
 }
