@@ -6,7 +6,7 @@ using System.Collections;
 //==============================================================================================
 // Declare Player Controller
 //==============================================================================================
-public class playerController : MonoBehaviour, IDamage {
+public class playerController : MonoBehaviour, IDamage, IPickupGun {
     //==========================================================================================
     // Define Variables
     //==========================================================================================
@@ -24,6 +24,7 @@ public class playerController : MonoBehaviour, IDamage {
     [SerializeField] int jumpMax;
     [SerializeField] int gravity;
     // Weapon Stats
+    [SerializeField] GameObject gunModel;
     [SerializeField] int shootDamage;
     [SerializeField] int shootDist;
     [SerializeField] float shootRate;
@@ -176,6 +177,20 @@ public class playerController : MonoBehaviour, IDamage {
         gameManager.instance.playerDamageScreen.SetActive(false);
 
     }
+    //==========================================================================================
+    // Function, get Gun Stats
+    //==========================================================================================
+    public void getGunStats(gunStats gun) {
+        // Assign Stats
+        shootDamage = gun.shootDamage;
+        shootDist = gun.shootDistance;
+        shootRate = gun.shootRate;
+        // Assign Visuals
+        gunModel.GetComponent<MeshFilter>().sharedMesh = gun.gunModel.GetComponent<MeshFilter>().sharedMesh;
+        gunModel.GetComponent<MeshRenderer>().sharedMaterial = gun.gunModel.GetComponent<MeshRenderer>().sharedMaterial;
+
+    }
+    //==============================================================================================
 }
 //==============================================================================================
 // End of Player Controller .cs
