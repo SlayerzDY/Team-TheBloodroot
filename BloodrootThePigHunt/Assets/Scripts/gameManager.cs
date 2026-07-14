@@ -143,11 +143,12 @@ public class gameManager : MonoBehaviour
     public void StartNextWave(int enemyNum)
     {
 
-        waveManager manager = FindAnyObjectByType<waveManager>();
+        MobSpawner spawner = FindAnyObjectByType<MobSpawner>();
 
-        int aliveLimit = 6 + manager.currentWave * 2;
-
-        manager.StartWave(enemyNum);
+        if(spawner != null)
+        {
+            spawner.StartWave(enemyNum);
+        }
 
     }
 
