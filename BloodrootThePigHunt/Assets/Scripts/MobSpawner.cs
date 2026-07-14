@@ -144,16 +144,16 @@ public class MobSpawner : MonoBehaviour
         GameObject spawnedEnemy =
             Instantiate(enemyToSpawn, Spawn, Rotation);
 
-        enemyAI enemy = spawnedEnemy.GetComponent<enemyAI>();
-
-        if(enemy != null)
-        {
-            enemy.InitializeEnemy(manager.currentWave);
-        }
-
         if (manager == null)
         {
             manager = FindAnyObjectByType<waveManager>();
+        }
+
+        enemyAI enemy = spawnedEnemy.GetComponent<enemyAI>();
+
+        if(enemy != null && manager != null)
+        {
+            enemy.InitializeEnemy(manager.currentWave);
         }
 
         if (manager != null)
@@ -172,24 +172,20 @@ public class MobSpawner : MonoBehaviour
 
     }
 
-    // matt here made it so this only spaws certain enemies per wave should have left it to shawns old design but update to change values of how rare
-    //certain enemeis are per wave but I don't exactly knowo how to do that and I don't have thee time right this minute
-    // maybe for prototype 2 if need this can be changed to that
     GameObject GetEnemyToSpawn()
     {
         if (enemies != null && enemies.Length > 0)
         {
-            int allowedMobs = Mathf.Min(manager.currentWave, enemies.Length);
+            int startIndex = Random.Range(0, enemies.Length);
 
-            int startIndex = Random.Range(0, allowedMobs);
-
-            if (enemies[startIndex] != null)
+            for (int i = 0; i < enemies.Length; i++)
             {
-
-                return enemies[startIndex];
-
+                GameObject enemy = enemies[(startIndex + i) % enemies.Length];
+                if (enemy != null)
+                {
+                    return enemy;
+                }
             }
-          
         }
 
         return Enemy;
@@ -233,8 +229,9 @@ public class MobSpawner : MonoBehaviour
         enemiesInWave = totalEnemies;
        // enemiesSpawnedThisWave = 0;
         currentEnemies = 0;
-        maxEnemies = Mathf.Min(10 + manager.currentWave, totalEnemies);
+        maxEnemies = Mathf.Max(0, totalEnemies);
 
-        isWaveActive = true;
+        isWaveActive = maxEnemies > 0;
+        timer = 0f;
     }
 }
