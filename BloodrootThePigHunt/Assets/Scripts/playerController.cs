@@ -48,7 +48,8 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
     // Update is called once per frame
     //==========================================================================================
     void Update() {
-        movement();
+        if (!gameManager.instance.isPaused)
+            movement();
         sprint();
         rotateGun();
     }
