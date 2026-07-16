@@ -192,10 +192,7 @@ public class enemyAI : MonoBehaviour, IDamage
                     shoot();
                 }
             }
-        } else if (!playerInTrigger) {
-            checkRoam();
-        }
-        else if (playerInTrigger && !canSeePlayer()) {
+        } else {
             checkRoam();
         }
     }
