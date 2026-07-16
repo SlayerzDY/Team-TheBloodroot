@@ -184,8 +184,7 @@ public class enemyAI : MonoBehaviour, IDamage
             }
             else
             {
-                if (gunPivot == null || shootPos == null || bullet == null)
-                    return;
+                if (gunPivot == null || shootPos == null || bullet == null) { return; }
                 shootTimer += Time.deltaTime;
                 rotateGun();
                 if (shootTimer >= shootRate)
