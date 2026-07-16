@@ -17,6 +17,11 @@ public class enemyAI : MonoBehaviour, IDamage
     [SerializeField] float HP;
     [SerializeField] Renderer model;
     [SerializeField] NavMeshAgent agent;
+    [SerializeField] int FOV;
+    // Roam Stats
+    [SerializeField] int roamDist;
+    [SerializeField] int roamPauseTime;
+    // Weapon Stats
     [SerializeField] GameObject bullet;
     [SerializeField] Transform gunPivot;
     [SerializeField] Transform shootPos;
@@ -32,6 +37,7 @@ public class enemyAI : MonoBehaviour, IDamage
     [SerializeField] float damageGrowth = 1.08f;
     Color colorOrig;
     Vector3 playerDir;
+    Vector3 startingPos;
     float shootTimer;
     bool playerInTrigger;
     waveManager manager;
@@ -39,21 +45,46 @@ public class enemyAI : MonoBehaviour, IDamage
     float chargeCooldown = 5f;
     float chargeCooldownTimer;
     bool isDead;
+    float angleToPlayer;
+    float roamTimer;
+    float stoppingDistanceOrig;
     //==========================================================================================
     // Function, Start
     //==========================================================================================
     void Start()
     {
         boarBrute = GetComponent<BoarBruteAI>();
-        if (model != null) 
-        { colorOrig = model.material.color; }
-
+        if (model != null) { colorOrig = model.material.color; }
         manager = FindAnyObjectByType<waveManager>();
-
         ApplyBloodMoonModifier();
-
-        if (gameManager.instance != null)
-        { gameManager.instance.updateGameGoal(1); }
+        if (gameManager.instance != null) { 
+            gameManager.instance.updateGameGoal(1);
+            startingPos = transform.position;
+            stoppingDistanceOrig = agent.stoppingDistance;
+        }
+    }
+    //==========================================================================================
+    // Function, Roam
+    //==========================================================================================
+    void checkRoam()
+    {
+        if (agent.remainingDistance < 0.01f)
+        {
+            roamTimer += Time.deltaTime;
+            if (roamTimer > roamPauseTime) { roam(); }
+        }
+    }
+    //==========================================================================================
+    // Function, Roam
+    //==========================================================================================
+    void roam() {
+        roamTimer = 0;
+        agent.stoppingDistance = 0;
+        Vector3 ranPos = Random.insideUnitSphere * roamDist;
+        ranPos += startingPos;
+        NavMeshHit hit;
+        NavMesh.SamplePosition(ranPos, out hit, roamDist, 1);
+        agent.SetDestination(hit.position);
     }
     //==========================================================================================
     // Function, ApplyBloodMoonModifier
@@ -155,7 +186,6 @@ public class enemyAI : MonoBehaviour, IDamage
             {
                 if (gunPivot == null || shootPos == null || bullet == null)
                     return;
-
                 shootTimer += Time.deltaTime;
                 rotateGun();
                 if (shootTimer >= shootRate)
@@ -163,6 +193,11 @@ public class enemyAI : MonoBehaviour, IDamage
                     shoot();
                 }
             }
+        } else if (!playerInTrigger) {
+            checkRoam();
+        }
+        else if (playerInTrigger && !canSeePlayer()) {
+            checkRoam();
         }
     }
 
@@ -193,6 +228,7 @@ public class enemyAI : MonoBehaviour, IDamage
         if (other.CompareTag("Player"))
         {
             playerInTrigger = false;
+            agent.stoppingDistance = 0;
         }
     }
     //==========================================================================================
@@ -351,9 +387,33 @@ public class enemyAI : MonoBehaviour, IDamage
         meleeDamage = 3 *Mathf.Pow(damageGrowth, wave - 1);
 
     }
+    //==========================================================================================
+    // Function, Can See Player
+    //==========================================================================================
+    bool canSeePlayer() {
+        shootTimer += Time.deltaTime;
+        playerDir = gameManager.instance.player.transform.position - transform.position;
+        angleToPlayer = Vector3.Angle(playerDir, transform.forward);
+        Debug.DrawRay(transform.position, playerDir, Color.red);
+        // Hey I see you!!
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position, playerDir, out hit)) {
+            if (hit.collider.CompareTag("Player") && angleToPlayer <= FOV) {
+                agent.SetDestination(gameManager.instance.player.transform.position);
+                rotateGun();
+                faceTarget();
+                if (shootTimer >= shootRate) {
+                    shoot();
+                }
+                agent.stoppingDistance = stoppingDistanceOrig;
+                return true;
+            }
+        }
+        agent.stoppingDistance = 0;
+        return false;
+    }
+    //==========================================================================================
 }
-
-//==========================================================================================
 //==============================================================================================
 // End of Enemy AI .cs
 //==============================================================================================

@@ -549,6 +549,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4267635195327849160, guid: f07200c1e7570da41a4cb102a86c160b, type: 3}
+      propertyPath: roamDist
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 4267635195327849160, guid: f07200c1e7570da41a4cb102a86c160b, type: 3}
+      propertyPath: roamPauseTime
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 7791680660320909169, guid: f07200c1e7570da41a4cb102a86c160b, type: 3}
       propertyPath: m_Name
       value: Enemy 1.0 (1)
@@ -748,6 +756,9 @@ MonoBehaviour:
   HP: 0
   model: {fileID: 0}
   agent: {fileID: 0}
+  FOV: 0
+  roamDist: 0
+  roamPauseTime: 0
   bullet: {fileID: 0}
   gunPivot: {fileID: 0}
   shootPos: {fileID: 0}
