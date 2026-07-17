@@ -193,7 +193,7 @@ public class enemyAI : MonoBehaviour, IDamage
                 }
             }
         } else {
-            checkRoam();
+            checkRoam(); 
         }
     }
 
