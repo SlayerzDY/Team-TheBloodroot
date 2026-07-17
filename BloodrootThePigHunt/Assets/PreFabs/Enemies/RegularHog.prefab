@@ -33,7 +33,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 281832892072429182}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6400000000000000003
@@ -53,6 +54,8 @@ MonoBehaviour:
   wanderRadius: 10
   directionChangeTime: 2
   destinationReachDistance: 1
+  fleeDistance: 12
+  fleeWeight: 0.75
   movingSounds:
   - {fileID: 8300000, guid: a85c2e2282b4460eaed9986fadedcc0f, type: 3}
   deathSound: {fileID: 8300000, guid: acb7b5c6d0184091a8a1607d66194d49, type: 3}
@@ -79,6 +82,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -161,3 +165,65 @@ NavMeshAgent:
   m_BaseOffset: 1
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!1001 &1922192806288147072
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 6400000000000000002}
+    m_Modifications:
+    - target: {fileID: 1820656745700279550, guid: 15e9e899759a1024fa2da36f259ddd44, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1820656745700279550, guid: 15e9e899759a1024fa2da36f259ddd44, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1820656745700279550, guid: 15e9e899759a1024fa2da36f259ddd44, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1820656745700279550, guid: 15e9e899759a1024fa2da36f259ddd44, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 1820656745700279550, guid: 15e9e899759a1024fa2da36f259ddd44, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 1820656745700279550, guid: 15e9e899759a1024fa2da36f259ddd44, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1820656745700279550, guid: 15e9e899759a1024fa2da36f259ddd44, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1820656745700279550, guid: 15e9e899759a1024fa2da36f259ddd44, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 1820656745700279550, guid: 15e9e899759a1024fa2da36f259ddd44, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1820656745700279550, guid: 15e9e899759a1024fa2da36f259ddd44, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5005988054484551945, guid: 15e9e899759a1024fa2da36f259ddd44, type: 3}
+      propertyPath: m_Name
+      value: PigIcon
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 15e9e899759a1024fa2da36f259ddd44, type: 3}
+--- !u!4 &281832892072429182 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1820656745700279550, guid: 15e9e899759a1024fa2da36f259ddd44, type: 3}
+  m_PrefabInstance: {fileID: 1922192806288147072}
+  m_PrefabAsset: {fileID: 0}

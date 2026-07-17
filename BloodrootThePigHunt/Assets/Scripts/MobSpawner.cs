@@ -172,19 +172,23 @@ public class MobSpawner : MonoBehaviour
 
     }
 
+    // DO NOT CHANGE THIS SHAWN
+    // THIS MAKES IT SO ONLY CERTAIN MOBS SPAWN PER WAVE
+    // also do not delete comments as they can be helpful for future people and give me a way to communicate without 
+    // directly having to ping you 1000 times for an answer
     GameObject GetEnemyToSpawn()
     {
         if (enemies != null && enemies.Length > 0)
         {
-            int startIndex = Random.Range(0, enemies.Length);
+            int allowedMobs = Mathf.Min(manager.currentWave, enemies.Length);
 
-            for (int i = 0; i < enemies.Length; i++)
+            int startIndex = Random.Range(0, allowedMobs);
+
+            if (enemies[startIndex] != null)
             {
-                GameObject enemy = enemies[(startIndex + i) % enemies.Length];
-                if (enemy != null)
-                {
-                    return enemy;
-                }
+
+                return enemies[startIndex];
+
             }
         }
 

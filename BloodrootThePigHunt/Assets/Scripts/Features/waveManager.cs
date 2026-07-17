@@ -22,7 +22,19 @@ public class waveManager : MonoBehaviour
     [Header("Wave UI")]
     [SerializeField] private TMP_Text waveNumberText;
     [SerializeField] private TMP_Text enemyTypeText;
+    [SerializeField] private TMP_Text waveTitleText;
     [SerializeField] private bool createMissingWaveUI = true;
+
+    [Header("Wave Title Cards")]
+    [SerializeField, Min(0f)] private float titleCardSeconds = 3f;
+    [SerializeField] private Color normalTitleColor = Color.white;
+    [SerializeField] private Color bloodMoonTitleColor = new Color(0.9f, 0.1f, 0.1f);
+
+    [Header("Wave Audio")]
+    [SerializeField] private AudioSource waveAudioSource;
+    [SerializeField] private AudioClip waveStartClip;
+    [SerializeField] private AudioClip bloodMoonStartClip;
+    [SerializeField] private AudioClip waveCompleteClip;
 
     [Header("Hog Hunt Intro")]
     [SerializeField] private bool useHogHuntIntro = true;
@@ -45,6 +57,7 @@ public class waveManager : MonoBehaviour
     private int enemiesExpectedThisWave;
     private Coroutine countdownRoutine;
     private Coroutine curseWarningRoutine;
+    private Coroutine titleCardRoutine;
 
     private readonly Dictionary<string, int> enemiesByType =
         new Dictionary<string, int>();
@@ -78,6 +91,11 @@ public class waveManager : MonoBehaviour
             bloodMoonDirector =
                 FindAnyObjectByType<BloodMoonWaveDirector>();
         }
+
+        if (waveAudioSource == null)
+        {
+            waveAudioSource = GetComponent<AudioSource>();
+        }
     }
 
     private void OnValidate()
@@ -97,6 +115,7 @@ public class waveManager : MonoBehaviour
 
         SetupHogHunt();
         SetupWaveUI();
+        HideTitleCard();
         RefreshWaveUI();
     }
 
@@ -191,11 +210,34 @@ public class waveManager : MonoBehaviour
         // GameManager resets and activates the existing MobSpawner.
         if (enemiesRemaining > 0)
         {
-            gameManager.instance.StartNextWave(
-                enemiesRemaining);
+            bool spawnerStarted =
+                gameManager.instance.StartNextWave(
+                    enemiesRemaining);
+
+            if (!spawnerStarted)
+            {
+                Debug.LogError(
+                    "WaveManager could not start the spawner. " +
+                    "This wave was stopped so the game does not get stuck.");
+
+                waveActive = false;
+                enemiesRemaining = 0;
+                enemiesExpectedThisWave = 0;
+
+                if (bloodMoonDirector != null)
+                {
+                    bloodMoonDirector.EndWave(currentWave);
+                }
+
+                ActiveBloodMoonModifier = null;
+                RefreshWaveUI();
+                return;
+            }
         }
 
         RefreshWaveUI();
+        ShowWaveTitleCard();
+        PlayWaveStartSound();
 
         WaveStarted?.Invoke(
             currentWave,
@@ -283,6 +325,7 @@ public class waveManager : MonoBehaviour
 
         WaveCompleted?.Invoke(currentWave);
         RefreshWaveUI();
+        PlayWaveSound(waveCompleteClip);
 
         Debug.Log($"Wave {currentWave} completed.");
 
@@ -359,7 +402,9 @@ public class waveManager : MonoBehaviour
         if (!createMissingWaveUI)
             return;
 
-        if (waveNumberText != null && enemyTypeText != null)
+        if (waveNumberText != null &&
+            enemyTypeText != null &&
+            waveTitleText != null)
             return;
 
         Canvas canvas = CreateWaveCanvas();
@@ -390,6 +435,26 @@ public class waveManager : MonoBehaviour
                     new Vector2(560f, 260f),
                     22f,
                     TextAlignmentOptions.TopLeft);
+        }
+
+        if (waveTitleText == null)
+        {
+            waveTitleText =
+                CreateUIText(
+                    "Wave Title Card Text",
+                    canvas.transform,
+                    new Vector2(0.5f, 0.5f),
+                    new Vector2(0.5f, 0.5f),
+                    new Vector2(0f, 120f),
+                    new Vector2(1000f, 260f),
+                    48f,
+                    TextAlignmentOptions.Center);
+
+            RectTransform titleRect =
+                waveTitleText.GetComponent<RectTransform>();
+
+            titleRect.pivot =
+                new Vector2(0.5f, 0.5f);
         }
     }
 
@@ -448,10 +513,79 @@ public class waveManager : MonoBehaviour
         text.color = Color.white;
         text.alignment = alignment;
         text.enableWordWrapping = true;
+        text.richText = true;
         text.overflowMode = TextOverflowModes.Truncate;
         text.raycastTarget = false;
 
         return text;
+    }
+
+    private void ShowWaveTitleCard()
+    {
+        if (waveTitleText == null)
+            return;
+
+        string titleText;
+        Color titleColor;
+
+        if (ActiveBloodMoonModifier != null)
+        {
+            titleText =
+                $"BLOOD MOON\nWave {currentWave}: " +
+                $"{ActiveBloodMoonModifier.DisplayName}\n" +
+                $"<size=55%>{ActiveBloodMoonModifier.Description}</size>";
+
+            titleColor = bloodMoonTitleColor;
+        }
+        else
+        {
+            titleText =
+                $"Wave {currentWave}\n" +
+                $"<size=60%>{GetWaveSubtitle()}</size>";
+
+            titleColor = normalTitleColor;
+        }
+
+        ShowTitleCard(titleText, titleColor);
+    }
+
+    private void ShowTitleCard(string message, Color color)
+    {
+        if (waveTitleText == null)
+            return;
+
+        if (titleCardRoutine != null)
+        {
+            StopCoroutine(titleCardRoutine);
+            titleCardRoutine = null;
+        }
+
+        waveTitleText.text = message;
+        waveTitleText.color = color;
+        waveTitleText.gameObject.SetActive(true);
+
+        if (titleCardSeconds > 0f)
+        {
+            titleCardRoutine =
+                StartCoroutine(HideTitleCardAfterDelay());
+        }
+    }
+
+    private IEnumerator HideTitleCardAfterDelay()
+    {
+        yield return new WaitForSeconds(titleCardSeconds);
+
+        titleCardRoutine = null;
+        HideTitleCard();
+    }
+
+    private void HideTitleCard()
+    {
+        if (waveTitleText == null)
+            return;
+
+        waveTitleText.text = string.Empty;
+        waveTitleText.gameObject.SetActive(false);
     }
 
     private void RefreshWaveUI()
@@ -486,7 +620,7 @@ public class waveManager : MonoBehaviour
             else if (waveActive)
             {
                 waveNumberText.text =
-                    $"Wave {currentWave}";
+                    GetWaveHeaderText();
             }
             else if (currentWave > 0)
             {
@@ -546,6 +680,21 @@ public class waveManager : MonoBehaviour
             enemyTypeBuilder.AppendLine(
                 $"Enemies Remaining: {enemiesRemaining}/{enemiesExpectedThisWave}");
 
+            if (ActiveBloodMoonModifier != null)
+            {
+                enemyTypeBuilder.AppendLine(
+                    $"Blood Moon: {ActiveBloodMoonModifier.DisplayName}");
+
+                if (!string.IsNullOrWhiteSpace(
+                        ActiveBloodMoonModifier.Description))
+                {
+                    enemyTypeBuilder.AppendLine(
+                        ActiveBloodMoonModifier.Description);
+                }
+
+                enemyTypeBuilder.AppendLine();
+            }
+
             if (enemiesByType.Count == 0)
             {
                 enemyTypeBuilder.Append(
@@ -569,6 +718,27 @@ public class waveManager : MonoBehaviour
 
         enemyTypeText.text =
             enemyTypeBuilder.ToString();
+    }
+
+    private string GetWaveHeaderText()
+    {
+        if (ActiveBloodMoonModifier == null)
+            return $"Wave {currentWave}";
+
+        return
+            $"Blood Moon Wave {currentWave}\n" +
+            ActiveBloodMoonModifier.DisplayName;
+    }
+
+    private string GetWaveSubtitle()
+    {
+        if (currentWave >= totalWaves)
+            return "Final Wave";
+
+        if (currentWave == 1)
+            return "The first charge";
+
+        return "The herd is growing";
     }
 
     private void ShowNextWaveCountdown(float timeLeft)
@@ -596,6 +766,29 @@ public class waveManager : MonoBehaviour
             enemyTypeText.text =
                 string.Empty;
         }
+    }
+
+    private void PlayWaveStartSound()
+    {
+        if (ActiveBloodMoonModifier != null &&
+            bloodMoonStartClip != null)
+        {
+            PlayWaveSound(bloodMoonStartClip);
+            return;
+        }
+
+        PlayWaveSound(waveStartClip);
+    }
+
+    private void PlayWaveSound(AudioClip clip)
+    {
+        if (waveAudioSource == null ||
+            clip == null)
+        {
+            return;
+        }
+
+        waveAudioSource.PlayOneShot(clip);
     }
 
     private string GetEnemyTypeName(GameObject enemy)

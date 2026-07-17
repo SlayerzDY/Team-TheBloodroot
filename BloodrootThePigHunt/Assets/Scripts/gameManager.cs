@@ -140,15 +140,21 @@ public class gameManager : MonoBehaviour
     // Function, StartNextWave
     //==========================================================================================
 
-    public void StartNextWave(int enemyNum)
+    public bool StartNextWave(int enemyNum)
     {
 
         MobSpawner spawner = FindAnyObjectByType<MobSpawner>();
 
-        if(spawner != null)
+        if(spawner == null)
         {
-            spawner.StartWave(enemyNum);
+            Debug.LogError(
+                "GameManager cannot start the next wave because no MobSpawner was found.");
+
+            return false;
         }
+
+        spawner.StartWave(enemyNum);
+        return true;
 
     }
 

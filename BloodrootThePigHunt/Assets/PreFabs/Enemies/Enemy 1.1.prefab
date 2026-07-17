@@ -572,6 +572,9 @@ MonoBehaviour:
   HP: 10
   model: {fileID: 6515721808002073225}
   agent: {fileID: 1747808689273605746}
+  FOV: 45
+  roamDist: 30
+  roamPauseTime: 3
   bullet: {fileID: 5433222104674597542, guid: 8b8a21829e51d6e4fb34ce4540b9e2d9, type: 3}
   gunPivot: {fileID: 4446749787455840186}
   shootPos: {fileID: 4270699528705787131}
@@ -580,9 +583,11 @@ MonoBehaviour:
   faceTargetSpeed: 1
   spawner: {fileID: 0}
   damageMultiplier: 1
-  isMelee: 1
+  isMelee: 0
   meleeDamage: 1
   meleeRange: 2.5
+  healthGrowth: 1.15
+  damageGrowth: 1.08
 --- !u!114 &-1313171426562838978
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -599,6 +604,10 @@ MonoBehaviour:
   model: {fileID: 6515721808002073225}
   dissolveDamage: {fileID: 8300000, guid: ad2395e6710ebf944bbcd30444b3a468, type: 3}
   dissolveDeath: {fileID: 8300000, guid: 8fa41b62e422a3e44a4ea375b05052d4, type: 3}
+  damageVolume: 0.25
+  deathVolume: 0.35
+  maxDamageSoundTime: 0.6
+  maxDeathSoundTime: 1.25
   dissolveDuration: 3
   dissolveStrength: 0
   flashDuration: 0.25

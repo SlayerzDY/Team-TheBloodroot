@@ -3,6 +3,7 @@
 //==============================================================================================
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 //==============================================================================================
 // Declare Player Controller
 //==============================================================================================
@@ -24,15 +25,15 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
     [SerializeField] int jumpMax;
     [SerializeField] int gravity;
     // Weapon Stats
+    [SerializeField] List<gunStats> gunInv = new List<gunStats>();
     [SerializeField] GameObject gunModel;
-    [SerializeField] int shootDamage;
-    [SerializeField] int shootDist;
-    [SerializeField] float shootRate;
+       
     [SerializeField] Transform gunPivot;
     [SerializeField] Transform shootPos;
     [SerializeField] GameObject bullet;
     int jumpCount;
     int HPOrig;
+    int gunInvPos;
     float shootTimer;
     Vector3 moveDir;
     Vector3 playerVel;
@@ -47,7 +48,8 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
     // Update is called once per frame
     //==========================================================================================
     void Update() {
-        movement();
+        if (!gameManager.instance.isPaused)
+            movement();
         sprint();
         rotateGun();
     }
@@ -55,7 +57,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
     // Function, Movement
     //==========================================================================================
     void movement() {
-        
+        selectGun();
         if (controller.isGrounded) {
             playerVel.y = 0;
             jumpCount = 0;
@@ -67,8 +69,10 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
         controller.Move(playerVel * Time.deltaTime);
         playerVel.y -= gravity * Time.deltaTime;
         shootTimer += Time.deltaTime;
-        if (Input.GetButton("Fire1") && shootTimer > shootRate) { shoot(); }
-        Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * shootDist, Color.red);
+        if (Input.GetButton("Fire1") && gunInv.Count > 0 && shootTimer > gunInv[gunInvPos].shootRate) { shoot(); }
+        if (gunInv.Count > 0) {
+            Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * gunInv[gunInvPos].shootDistance, Color.red);
+        }
     }
     //==========================================================================================
     // Function, Rotate Gun
@@ -180,15 +184,36 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
     //==========================================================================================
     // Function, get Gun Stats
     //==========================================================================================
-    public void getGunStats(gunStats gun) {
-        // Assign Stats
-        shootDamage = gun.shootDamage;
-        shootDist = gun.shootDistance;
-        shootRate = gun.shootRate;
+    public void getGunStats(gunStats gun)
+    {
+        gunInv.Add(gun);
+        gunInvPos = gunInv.Count - 1;
+        changeGun();
+    }
+    //==========================================================================================
+    // Function, Change Gun
+    //==========================================================================================
+    void changeGun()
+    {
         // Assign Visuals
-        gunModel.GetComponent<MeshFilter>().sharedMesh = gun.gunModel.GetComponent<MeshFilter>().sharedMesh;
-        gunModel.GetComponent<MeshRenderer>().sharedMaterial = gun.gunModel.GetComponent<MeshRenderer>().sharedMaterial;
-
+        gunModel.GetComponent<MeshFilter>().sharedMesh = gunInv[gunInvPos].gunModel.GetComponent<MeshFilter>().sharedMesh;
+        gunModel.GetComponent<MeshRenderer>().sharedMaterial = gunInv[gunInvPos].gunModel.GetComponent<MeshRenderer>().sharedMaterial;
+    }
+    //==========================================================================================
+    // Function, Select Gun
+    //==========================================================================================
+    void selectGun()
+    {
+        if (Input.GetAxis("Mouse ScrollWheel") > 0 && gunInvPos < gunInv.Count - 1)
+        {
+            gunInvPos++;
+            changeGun();
+        }
+        else if (Input.GetAxis("Mouse ScrollWheel") > 0 && gunInvPos > 0)
+        {
+            gunInvPos--;
+            changeGun();
+        }
     }
     //==============================================================================================
 }
