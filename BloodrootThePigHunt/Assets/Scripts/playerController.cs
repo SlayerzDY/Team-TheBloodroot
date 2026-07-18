@@ -27,7 +27,6 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
        
     //[SerializeField] Transform gunPivot;
     [SerializeField] Transform shootPos;
-    [SerializeField] GameObject bullet;
     int jumpCount;
     int HPOrig;
     int gunInvPos;
@@ -98,7 +97,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
     void shoot() {
         shootTimer = 0;
         gunInv[gunInvPos].ammoCurr--;
-        Instantiate(bullet, shootPos.position, shootPos.rotation);
+        Instantiate(gunInv[gunInvPos].bullet, shootPos.position, shootPos.rotation);
     }
 
     //==========================================================================================

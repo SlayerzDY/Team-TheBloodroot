@@ -50,26 +50,22 @@ public class Dissolver : MonoBehaviour
     //==========================================================================================
     // Function, dissolve
     //==========================================================================================
-    public IEnumerator dissolve(bool playerDeath = false)
-    {
-        if (playerDeath)
-        {
+    public IEnumerator dissolve(bool playerDeath = false) {
+        if (playerDeath) {
             StartCoroutine(dissolveFlash(true));
             yield break;
         }
         Renderer[] allRenderers = GetComponentsInChildren<Renderer>();
-        for (int i = 0; i < allRenderers.Length; i++)
-        {
+        for (int i = 0; i < allRenderers.Length; i++) {
             allRenderers[i].sharedMaterial = dissolveMaterial;
         }
         float elapsedTime = 0;
         dissolveMaterial.SetColor("_Color", colorOrig);
-        while (elapsedTime < dissolveDuration)
-        {
+        while (elapsedTime < dissolveDuration) {
             elapsedTime += Time.deltaTime;
             dissolveStrength = Mathf.Lerp(0f, 1f, elapsedTime / dissolveDuration);
             dissolveMaterial.SetFloat("_DissolveStrength", dissolveStrength);
-
+            yield return null;
         }
         Destroy(gameObject);
     }
