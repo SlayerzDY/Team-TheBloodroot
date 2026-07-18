@@ -14,6 +14,14 @@ public class buttonFunctions : MonoBehaviour {
         gameManager.instance.stateUnpause();
     }
     //==========================================================================================
+    // Function, Respawn
+    //==========================================================================================
+    public void respawn()
+    {
+        gameManager.instance.playerController.spawnPlayer();
+        gameManager.instance.stateUnpause();
+    }
+    //==========================================================================================
     // Function, Restart
     //==========================================================================================
     public void restart() {
