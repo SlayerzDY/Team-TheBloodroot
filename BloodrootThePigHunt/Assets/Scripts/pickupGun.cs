@@ -36,7 +36,7 @@ public class pickupGun : MonoBehaviour, IInteract {
             pick.getGunStats(gun);
         }
         Dissolver dissolve = other.GetComponent<Dissolver>();
-        if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolve()); } else { Destroy(gameObject); }
+        if (gameObject.GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolve()); } else { Destroy(gameObject); }
     }
     //==========================================================================================
 }

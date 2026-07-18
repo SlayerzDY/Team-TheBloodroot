@@ -36,7 +36,7 @@ public class Interact : MonoBehaviour, IInteract {
         } else { 
             if (gameManager.instance != null) { gameManager.instance.menuInteractable.SetActive(true); }
             interactObject.collider.gameObject.SendMessage("SendInteract", interactObject.collider, SendMessageOptions.DontRequireReceiver);
-            Debug.Log(interactObject.collider.name);
+            //Debug.Log(interactObject.collider.name);
         }
     }
 
