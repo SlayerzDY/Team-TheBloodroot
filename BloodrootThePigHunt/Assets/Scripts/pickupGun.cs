@@ -27,15 +27,15 @@ public class pickupGun : MonoBehaviour, IInteract {
     //==========================================================================================
     // Function, On Send Interact
     //------------------------------------------------------------------------------------------
-    public void SendInteract(Collider target) {
-        IPickupGun pick = target.GetComponent<IPickupGun>();
-        Debug.Log(target.gameObject.name);
+    public void SendInteract(Collider other) {
+        IPickupGun pick = gameManager.instance.player.GetComponent<IPickupGun>();
+
         if (pick != null)
         {
             gun.ammoCurr = gun.ammoMax;
             pick.getGunStats(gun);
         }
-        Dissolver dissolve = target.GetComponent<Dissolver>();
+        Dissolver dissolve = other.GetComponent<Dissolver>();
         if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolve()); } else { Destroy(gameObject); }
     }
     //==========================================================================================

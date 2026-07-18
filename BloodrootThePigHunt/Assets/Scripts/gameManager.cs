@@ -22,8 +22,8 @@ public class gameManager : MonoBehaviour
     [SerializeField] GameObject menuWin;
     [SerializeField] GameObject menuLose;
     [SerializeField] GameObject menuMain;
-    [SerializeField] GameObject menuInteract;
     [SerializeField] TMP_Text gameGoalCountText;
+    public GameObject menuInteractable;
     // Public Variables
     public GameObject checkpointPopup;
     public Image playerHPBAR;
@@ -130,12 +130,6 @@ public class gameManager : MonoBehaviour
         statePause();
         menuActive = menuWin;
         menuActive.SetActive(true);
-    }
-    //==========================================================================================
-    // Function, Interact Display
-    //==========================================================================================
-    public void InteractDisplay(bool isOn) {
-        menuInteract.SetActive(isOn);
     }
     //==========================================================================================
     // Function, StartNextWave
