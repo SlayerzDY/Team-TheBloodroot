@@ -78,7 +78,8 @@ public class Dissolver : MonoBehaviour
     //==========================================================================================
     public IEnumerator dissolveFlash(bool playerDeath = false)
     {
-        if (playerDeath) { flashEndStrength = 1f; }
+        float cacheflashEndStrength = gameManager.instance.player.GetComponent<Dissolver>().flashEndStrength;
+        if (playerDeath) { gameManager.instance.player.GetComponent<Dissolver>().flashEndStrength = 1f; }
         ;
         Renderer[] allRenderers = GetComponentsInChildren<Renderer>();
         Material[][] originalMaterials = new Material[allRenderers.Length][];
@@ -115,6 +116,7 @@ public class Dissolver : MonoBehaviour
         {
             allRenderers[i].materials = originalMaterials[i];
         }
+        gameManager.instance.player.GetComponent<Dissolver>().flashEndStrength = cacheflashEndStrength;
     }
     //==========================================================================================
 }
