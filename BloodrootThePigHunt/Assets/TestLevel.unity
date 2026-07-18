@@ -268,20 +268,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5481335174263331887, guid: 1a6452ba64165aa4a976f0fa695408c4, type: 3}
-      propertyPath: m_NavMeshData
-      value: 
-      objectReference: {fileID: 23800000, guid: ef330179761ca90428e58bb95618d139, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1a6452ba64165aa4a976f0fa695408c4, type: 3}
---- !u!1 &298768308 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1068641340826568658, guid: b2f315e2baa683f46a472605e11151ae, type: 3}
-  m_PrefabInstance: {fileID: 997735074}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &341061834
 GameObject:
   m_ObjectHideFlags: 0
@@ -509,38 +500,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 688e51737cb73334da21e0c827d5e85d, type: 3}
---- !u!1 &529801886 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8805823926485247629, guid: 845369da7c3c40344919221fc66c08be, type: 3}
-  m_PrefabInstance: {fileID: 599055729}
-  m_PrefabAsset: {fileID: 0}
---- !u!54 &529801892
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 529801886}
-  serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 0
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
 --- !u!1001 &599055729
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -596,10 +555,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 8805823926485247629, guid: 845369da7c3c40344919221fc66c08be, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 529801892}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 845369da7c3c40344919221fc66c08be, type: 3}
 --- !u!1001 &777831612
 PrefabInstance:
@@ -609,14 +565,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 4267635195327849160, guid: f07200c1e7570da41a4cb102a86c160b, type: 3}
-      propertyPath: roamDist
-      value: 30
-      objectReference: {fileID: 0}
-    - target: {fileID: 4267635195327849160, guid: f07200c1e7570da41a4cb102a86c160b, type: 3}
-      propertyPath: roamPauseTime
-      value: 3
-      objectReference: {fileID: 0}
     - target: {fileID: 7791680660320909169, guid: f07200c1e7570da41a4cb102a86c160b, type: 3}
       propertyPath: m_Name
       value: Enemy 1.0 (1)
@@ -678,10 +626,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Checkpoint 1.0
       objectReference: {fileID: 0}
-    - target: {fileID: 3592205702293815862, guid: 20363e2c59793c542a591c679855fa7d, type: 3}
-      propertyPath: m_TagString
-      value: Interact
-      objectReference: {fileID: 0}
     - target: {fileID: 5320378725145273663, guid: 20363e2c59793c542a591c679855fa7d, type: 3}
       propertyPath: m_LocalPosition.x
       value: -14.706178
@@ -739,10 +683,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: UI
       objectReference: {fileID: 0}
-    - target: {fileID: 6587296884773713169, guid: b2f315e2baa683f46a472605e11151ae, type: 3}
-      propertyPath: menuInteractable
-      value: 
-      objectReference: {fileID: 298768308}
     - target: {fileID: 6885391319124359300, guid: b2f315e2baa683f46a472605e11151ae, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -1325,10 +1265,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Pickup - Rifle
       objectReference: {fileID: 0}
-    - target: {fileID: 6286820560004373319, guid: d34e35594392833469ecd3be381256c8, type: 3}
-      propertyPath: InteractRange
-      value: 300
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1381,10 +1317,6 @@ PrefabInstance:
     - target: {fileID: 1718637848490634143, guid: de5f096efd9425e4599eadb08a4f9336, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5262209580985372115, guid: de5f096efd9425e4599eadb08a4f9336, type: 3}
-      propertyPath: InteractRange
-      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 6060178824178885857, guid: de5f096efd9425e4599eadb08a4f9336, type: 3}
       propertyPath: m_Name
@@ -1442,10 +1374,6 @@ PrefabInstance:
     - target: {fileID: 2029532291056271860, guid: d735c77958dcb8d44bef4492f896649a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2338809271670824494, guid: d735c77958dcb8d44bef4492f896649a, type: 3}
-      propertyPath: InteractRange
-      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 7176198429719991731, guid: d735c77958dcb8d44bef4492f896649a, type: 3}
       propertyPath: m_Name

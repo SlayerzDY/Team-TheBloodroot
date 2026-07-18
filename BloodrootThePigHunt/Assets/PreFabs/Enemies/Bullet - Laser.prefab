@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2108990204882630989}
   - component: {fileID: 6754858024530372558}
   m_Layer: 0
-  m_Name: Bullet - Friend
+  m_Name: Bullet - Laser
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -49,11 +49,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 0
   rb: {fileID: 2108990204882630989}
-  damageAmount: 2
+  damageAmount: 1
   damageRate: 0
   bulletSpeed: 50
   bulletDestroyTime: 3
-  hitEffect: {fileID: 5584602140419805224, guid: 25246989ef8fb1e49a5425378d295c10, type: 3}
+  hitEffect: {fileID: 5584602140419805224, guid: 965221b72cdf3694ba411a9830b83587, type: 3}
 --- !u!135 &842533775542283392
 SphereCollider:
   m_ObjectHideFlags: 0

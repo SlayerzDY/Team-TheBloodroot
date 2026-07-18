@@ -49,9 +49,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 0
   rb: {fileID: 2108990204882630989}
-  damageAmount: 1
+  damageAmount: 2
   damageRate: 0
-  bulletSpeed: 25
+  bulletSpeed: 50
   bulletDestroyTime: 3
   hitEffect: {fileID: 5584602140419805224, guid: 965221b72cdf3694ba411a9830b83587, type: 3}
 --- !u!135 &842533775542283392
@@ -155,7 +155,7 @@ TrailRenderer:
   m_PreviewTimeScale: 1
   m_Parameters:
     serializedVersion: 3
-    widthMultiplier: 1
+    widthMultiplier: 0.1
     widthCurve:
       serializedVersion: 2
       m_Curve:
