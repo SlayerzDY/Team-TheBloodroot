@@ -25,7 +25,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
     [SerializeField] List<gunStats> gunInv = new List<gunStats>();
     [SerializeField] GameObject gunModel;
        
-    [SerializeField] Transform gunPivot;
+    //[SerializeField] Transform gunPivot;
     [SerializeField] Transform shootPos;
     [SerializeField] GameObject bullet;
     int jumpCount;
@@ -69,6 +69,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
         if (gunInv.Count > 0) {
             Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * gunInv[gunInvPos].shootDistance, Color.red);
         }
+        reload();
     }
     //==========================================================================================
     // Function, Sprint
@@ -96,7 +97,24 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
     //==========================================================================================
     void shoot() {
         shootTimer = 0;
-        Instantiate(bullet, shootPos.position, gunPivot.rotation);
+        gunInv[gunInvPos].ammoCurr--;
+        Instantiate(bullet, shootPos.position, shootPos.rotation);
+    }
+
+    //==========================================================================================
+    // Function, Rload
+    //==========================================================================================
+
+    void reload()
+    {
+
+        if (Input.GetButtonDown("Reload") && gunInv.Count > 0)
+        {
+
+            gunInv[gunInvPos].ammoCurr = gunInv[gunInvPos].ammoMax;
+
+        }
+
     }
     //==========================================================================================
     // Function, TakeDamage
