@@ -65,7 +65,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
         controller.Move(playerVel * Time.deltaTime);
         playerVel.y -= gravity * Time.deltaTime;
         shootTimer += Time.deltaTime;
-        if (Input.GetButton("Fire1") && gunInv.Count > 0 && shootTimer > gunInv[gunInvPos].shootRate) { shoot(); }
+        if (Input.GetButton("Fire1") && gunInv.Count > 0 && gunInv[gunInvPos].ammoCurr > 0 && shootTimer > gunInv[gunInvPos].shootRate) { shoot(); }
         if (gunInv.Count > 0) {
             Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * gunInv[gunInvPos].shootDistance, Color.red);
         }
@@ -149,22 +149,15 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
 
     //==========================================================================================
 
-    public void updatePlayerUI()
-    {
+    public void updatePlayerUI() {
         //fixed
         gameManager.instance.playerHPBAR.fillAmount = (float)HP / HPOrig;
-
     }
 
-    IEnumerator flashDamage()
-    {
-
+    IEnumerator flashDamage() {
         gameManager.instance.playerDamageScreen.SetActive(true);
-
         yield return new WaitForSeconds(0.1f);
-
         gameManager.instance.playerDamageScreen.SetActive(false);
-
     }
     //==========================================================================================
     // Function, get Gun Stats

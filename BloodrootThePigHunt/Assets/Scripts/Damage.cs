@@ -80,6 +80,10 @@ public class Damage : MonoBehaviour
     //==========================================================================================
     private void OnTriggerEnter(Collider other)
     {
+        if (hitEffect != null)
+        {
+            Instantiate(hitEffect, transform.position, Quaternion.identity);
+        }
         // Safety Check, Ensure isnt another trigger
         if (other.isTrigger) { return; }
         if (!(other is CapsuleCollider)) { return; }
@@ -95,10 +99,6 @@ public class Damage : MonoBehaviour
         // Checks if the damage type is bullet, if so then apply hit effect and destroy the bullet
         if (type == damageType.bullet)
         {
-            if (hitEffect != null)
-            {
-                Instantiate(hitEffect, transform.position, Quaternion.identity);
-            }
             Destroy(gameObject);
         }
     }
