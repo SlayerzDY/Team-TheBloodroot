@@ -14,7 +14,9 @@ public class gameManager : MonoBehaviour
     //==========================================================================================
     // Define Variables
     //==========================================================================================
+    // Game Manager Instance, Creates Singleton
     public static gameManager instance;
+    // Serialize Fields
     [SerializeField] GameObject menuActive;
     [SerializeField] GameObject menuPause;
     [SerializeField] GameObject menuWin;
@@ -22,14 +24,14 @@ public class gameManager : MonoBehaviour
     [SerializeField] GameObject menuMain;
     [SerializeField] GameObject menuInteract;
     [SerializeField] TMP_Text gameGoalCountText;
-
+    // Public Variables
     public Image playerHPBAR;
     public GameObject playerDamageScreen;
-
     public bool isPaused = false;
     public GameObject player;
     public playerController playerController;
-
+    public GameObject playerSpawnPos;
+    // Private Variables
     private float timer = 0;
     private float timeScaleOrig;
     private int gameGoalCount;
@@ -48,9 +50,7 @@ public class gameManager : MonoBehaviour
     void Start()
     {
         timeScaleOrig = Time.timeScale;
-        player = GameObject.FindWithTag("Player");
-        playerController = player.GetComponent<playerController>();
-        waveManagerControlsWin = FindAnyObjectByType<waveManager>() != null;
+        updatePlayer();
     }
     //==========================================================================================
     // Function, Update
@@ -157,8 +157,17 @@ public class gameManager : MonoBehaviour
         return true;
 
     }
-
-
+    //==========================================================================================
+    // Function, Update Player
+    //==========================================================================================
+    public void updatePlayer()
+    {
+        player = GameObject.FindWithTag("Player");
+        playerController = player.GetComponent<playerController>();
+        waveManagerControlsWin = FindAnyObjectByType<waveManager>() != null;
+        playerSpawnPos = GameObject.FindWithTag("PlayerSpawnPos");
+    }
+    //==========================================================================================
 }
 //==============================================================================================
 // End of Game Manager

@@ -42,7 +42,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
     //==========================================================================================
     void Start() {
         HPOrig = HP;
-        updatePlayerUI();
+        spawnPlayer();
     }
     //==========================================================================================
     // Update is called once per frame
@@ -123,7 +123,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
         StartCoroutine(flashDamage());  
         if (HP <= 0)
         {
-            if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolve()); }
+            if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolve(true)); }
             gameManager.instance.youLose();
         }
         else
@@ -214,6 +214,15 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
             gunInvPos--;
             changeGun();
         }
+    }
+    //==========================================================================================
+    // Function, Spawn Player
+    //==========================================================================================
+    public void spawnPlayer() {
+        controller.transform.position = gameManager.instance.playerSpawnPos.transform.position;
+        Physics.SyncTransforms();
+        HP = HPOrig;
+        updatePlayerUI();
     }
     //==============================================================================================
 }
