@@ -13,9 +13,6 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
     //==========================================================================================
     [SerializeField] CharacterController controller;
     [SerializeField] LayerMask ignoreLayer;
-    // Controls
-    [SerializeField] int sens;
-    [SerializeField] int lockVertMin, lockVertMax;
     float camRotX, camRotY;
     // Player Stats
     [SerializeField] int HP;
@@ -51,7 +48,6 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
         if (!gameManager.instance.isPaused)
             movement();
         sprint();
-        rotateGun();
     }
     //==========================================================================================
     // Function, Movement
@@ -72,17 +68,6 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
         if (Input.GetButton("Fire1") && gunInv.Count > 0 && shootTimer > gunInv[gunInvPos].shootRate) { shoot(); }
         if (gunInv.Count > 0) {
             Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * gunInv[gunInvPos].shootDistance, Color.red);
-        }
-    }
-    //==========================================================================================
-    // Function, Rotate Gun
-    //==========================================================================================
-    void rotateGun()
-    {
-        if (gameManager.instance != null && !gameManager.instance.isPaused)
-        {
-            Quaternion cameraWorldRot = Camera.main.transform.rotation;
-            gunPivot.rotation = Quaternion.Lerp(gunPivot.rotation, cameraWorldRot, sens * Time.deltaTime);
         }
     }
     //==========================================================================================

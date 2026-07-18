@@ -25,6 +25,7 @@ public class gameManager : MonoBehaviour
     [SerializeField] GameObject menuInteract;
     [SerializeField] TMP_Text gameGoalCountText;
     // Public Variables
+    public GameObject checkpointPopup;
     public Image playerHPBAR;
     public GameObject playerDamageScreen;
     public bool isPaused = false;
@@ -162,9 +163,9 @@ public class gameManager : MonoBehaviour
     //==========================================================================================
     public void updatePlayer()
     {
+        timeScaleOrig = Time.timeScale;
         player = GameObject.FindWithTag("Player");
         playerController = player.GetComponent<playerController>();
-        waveManagerControlsWin = FindAnyObjectByType<waveManager>() != null;
         playerSpawnPos = GameObject.FindWithTag("PlayerSpawnPos");
     }
     //==========================================================================================
