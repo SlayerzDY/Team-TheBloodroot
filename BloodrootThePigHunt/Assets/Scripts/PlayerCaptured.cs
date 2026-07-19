@@ -61,7 +61,7 @@ public class PlayerCaptured : MonoBehaviour, IInteract {
     // Function, Release Object
     //==========================================================================================
     private void disable() {
-        if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolve()); return; } else { Destroy(gameObject); }
+        if (gameObject.GetComponent<Dissolver>() != null) { gameObject.GetComponent<Dissolver>().StartCoroutine(gameObject.GetComponent<Dissolver>().dissolve()); return; } else { Destroy(gameObject); }
     }
     //==========================================================================================
     // Function, Release Object

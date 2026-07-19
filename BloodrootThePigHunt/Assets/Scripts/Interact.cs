@@ -18,22 +18,26 @@ public class Interact : MonoBehaviour, IInteract {
     // Function, Update
     //==========================================================================================
     void Update() {
-        if (Input.GetButtonDown("Interact")) { TryToInteract(); }
-        if (!Input.GetButtonDown("Interact")) DisplayInteract();
+        if (Input.GetButtonDown("Interact")) { TryToInteract(); } else { DisplayInteract(); }
     }
     //==========================================================================================
     // Function, Interact
     //==========================================================================================
     void IInteract.SendInteract(Collider target) {
-        // Do Nothing
+        // Do Nothing Meant to be overridden
     }
     //==========================================================================================
     // Function, TryToInteract
     //==========================================================================================
     void TryToInteract() {
         DrawRaycast();
-        if (!IsInteractable()) { return; }
-        interactObject.collider.gameObject.SendMessage("SendInteract", interactObject.collider, SendMessageOptions.DontRequireReceiver);
+        if (!IsInteractable()) { 
+            return; 
+        } else { 
+            if (gameManager.instance != null) { gameManager.instance.menuInteractable.SetActive(true); }
+            interactObject.collider.gameObject.SendMessage("SendInteract", interactObject.collider, SendMessageOptions.DontRequireReceiver);
+            //Debug.Log(interactObject.collider.name);
+        }
     }
 
     //==========================================================================================
@@ -42,21 +46,18 @@ public class Interact : MonoBehaviour, IInteract {
     void DisplayInteract() {
         DrawRaycast();
         if (!IsInteractable()) {
-            if (gameManager.instance != null) { gameManager.instance.InteractDisplay(false); }
-            return;
-        }
-        if (IsInteractable()) {
-            if (gameManager.instance != null) { gameManager.instance.InteractDisplay(true); }
-            return;
+            if (gameManager.instance != null) { gameManager.instance.menuInteractable.SetActive(false); }
+        } else {
+            if (gameManager.instance != null) { gameManager.instance.menuInteractable.SetActive(true); }
         }
     }
     //==========================================================================================
     // Function, Draw Raycast
     //==========================================================================================
     void DrawRaycast() {
-        //Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * InteractRange, Color.green);
+        Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * InteractRange, Color.green);
         if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out interactObject, InteractRange, InteractLayer)) {
-            // Debug.Log(interactObject.collider.name);
+            
         } else {
             interactObject = new RaycastHit();
         }

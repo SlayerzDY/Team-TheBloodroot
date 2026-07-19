@@ -35,7 +35,11 @@ public class Damage : MonoBehaviour
     [SerializeField] int bulletSpeed;
     [SerializeField] int bulletDestroyTime;
     [SerializeField] ParticleSystem hitEffect;
+    [SerializeField] AudioClip soundEffect;
+    [SerializeField] float soundEffectVolume;
     bool isDamaging;
+    bool isPlayerBullet;
+    bool countedPlayerHit;
 
     // Keep the prefab's configured value so Blood Moon scaling always starts from base damage. This
     // avoids stacking a new multiplier on top of a value that was already changed. It also makes this
@@ -61,6 +65,11 @@ public class Damage : MonoBehaviour
             0,
             Mathf.RoundToInt(baseDamageAmount * Mathf.Max(0f, multiplier)));
     }
+
+    public void SetPlayerBullet(bool value)
+    {
+        isPlayerBullet = value;
+    }
     //==========================================================================================
     // Function, Start
     //==========================================================================================
@@ -78,8 +87,17 @@ public class Damage : MonoBehaviour
     //==========================================================================================
     // Function, On Trigger Enter
     //==========================================================================================
-    private void OnTriggerEnter(Collider other)
-    {
+    private void OnTriggerEnter(Collider other) {
+        if (hitEffect != null) {
+            if (other.CompareTag("Untagged") || string.IsNullOrEmpty(other.tag))
+            {
+                if (soundEffect != null) {
+                    float randomShotVolume = Random.Range(-soundEffectVolume * 0.9f, soundEffectVolume * 0.9f);
+                    AudioSource.PlayClipAtPoint(soundEffect, gameObject.transform.position, (soundEffectVolume + randomShotVolume));
+                }
+            }
+            Instantiate(hitEffect, transform.position, Quaternion.identity);
+        }
         // Safety Check, Ensure isnt another trigger
         if (other.isTrigger) { return; }
         if (!(other is CapsuleCollider)) { return; }
@@ -89,16 +107,20 @@ public class Damage : MonoBehaviour
         // Checks isnt DOT Damage, if not then apply damage to the other object
         if (dmg != null && type != damageType.DOT)
         {
+            if (type == damageType.bullet &&
+                isPlayerBullet &&
+                !countedPlayerHit)
+            {
+                countedPlayerHit = true;
+                ScoreboardManager.GetOrCreate().AddShotHit();
+            }
+
             // Regular Damage
             dmg.TakeDamage(damageAmount);
         }
         // Checks if the damage type is bullet, if so then apply hit effect and destroy the bullet
         if (type == damageType.bullet)
         {
-            if (hitEffect != null)
-            {
-                Instantiate(hitEffect, transform.position, Quaternion.identity);
-            }
             Destroy(gameObject);
         }
     }

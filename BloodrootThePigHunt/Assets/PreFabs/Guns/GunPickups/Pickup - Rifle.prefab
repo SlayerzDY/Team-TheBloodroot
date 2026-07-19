@@ -14,9 +14,10 @@ GameObject:
   - component: {fileID: 5476094855316375040}
   - component: {fileID: 6114296871595495589}
   - component: {fileID: 2775238010009479314}
-  m_Layer: 0
+  - component: {fileID: 8922761481140796967}
+  m_Layer: 10
   m_Name: Pickup - Rifle
-  m_TagString: Untagged
+  m_TagString: Interact
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -63,12 +64,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Dissolver
   dissolveMaterial: {fileID: 2100000, guid: 5c357d2d49026a741ac452c015da1536, type: 2}
   model: {fileID: 6114296871595495589}
-  dissolveDamage: {fileID: 8300000, guid: ad2395e6710ebf944bbcd30444b3a468, type: 3}
-  dissolveDeath: {fileID: 8300000, guid: 8fa41b62e422a3e44a4ea375b05052d4, type: 3}
-  damageVolume: 0.25
-  deathVolume: 0.35
-  maxDamageSoundTime: 0.6
-  maxDeathSoundTime: 1.25
   dissolveDuration: 3
   dissolveStrength: 0
   flashDuration: 0.1
@@ -151,4 +146,25 @@ SphereCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Radius: 1.3826311
+  m_Center: {x: 0.016660038, y: -0.24138336, z: -0.04827386}
+--- !u!135 &8922761481140796967
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2850511467302896961}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 1
   m_Center: {x: 0.016660038, y: -0.24138336, z: -0.04827386}

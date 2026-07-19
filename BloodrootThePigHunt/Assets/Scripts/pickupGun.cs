@@ -10,6 +10,7 @@ public class pickupGun : MonoBehaviour, IInteract {
     // Define Variables
     //==========================================================================================
     [SerializeField] gunStats gun;
+    bool pickedUp;
     //==========================================================================================
     // Define Functions
     //==========================================================================================
@@ -17,26 +18,67 @@ public class pickupGun : MonoBehaviour, IInteract {
     //------------------------------------------------------------------------------------------
     private void OnTriggerEnter(Collider other) {
         IPickupGun pick = other.GetComponent<IPickupGun>();
-        if (pick != null) {
-            gun.ammoCurr = gun.ammoMax;
-            pick.getGunStats(gun); 
+        if (pick == null)
+        {
+            pick = other.GetComponentInParent<IPickupGun>();
         }
-        Dissolver dissolve = other.GetComponent <Dissolver>();
-        if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolve()); } else { Destroy(gameObject); }
+
+        giveGunToPlayer(pick);
     }
     //==========================================================================================
     // Function, On Send Interact
     //------------------------------------------------------------------------------------------
-    public void SendInteract(Collider target) {
-        IPickupGun pick = target.GetComponent<IPickupGun>();
-        Debug.Log(target.gameObject.name);
-        if (pick != null)
+    public void SendInteract(Collider other) {
+        IPickupGun pick = null;
+
+        if (gameManager.instance != null && gameManager.instance.player != null)
         {
-            gun.ammoCurr = gun.ammoMax;
-            pick.getGunStats(gun);
+            pick = gameManager.instance.player.GetComponent<IPickupGun>();
         }
-        Dissolver dissolve = target.GetComponent<Dissolver>();
-        if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolve()); } else { Destroy(gameObject); }
+
+        if (pick == null)
+        {
+            playerController player =
+                FindAnyObjectByType<playerController>();
+
+            if (player != null)
+            {
+                pick = player;
+            }
+        }
+
+        giveGunToPlayer(pick);
+    }
+    //==========================================================================================
+    // Function, Give Gun To Player
+    //------------------------------------------------------------------------------------------
+    void giveGunToPlayer(IPickupGun pick)
+    {
+        if (pickedUp || pick == null || gun == null)
+        {
+            return;
+        }
+
+        pickedUp = true;
+        gun.ammoCurr = gun.ammoMax;
+        pick.getGunStats(gun);
+        removePickup();
+    }
+    //==========================================================================================
+    // Function, Remove Pickup
+    //------------------------------------------------------------------------------------------
+    void removePickup()
+    {
+        Dissolver dissolve = GetComponent<Dissolver>();
+
+        if (dissolve != null)
+        {
+            dissolve.StartCoroutine(dissolve.dissolve());
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
     //==========================================================================================
 }
