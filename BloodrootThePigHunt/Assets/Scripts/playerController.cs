@@ -108,7 +108,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     //==========================================================================================
     void jump() {
         if (Input.GetButtonDown("Jump") && jumpCount < jumpMax) {
-            playRandomSound(jumpEffects, jumpSoundVolume);
+            StartCoroutine(playRandomSound(jumpEffects, jumpSoundVolume));
             playerVel.y = jumpSpeed;
             jumpCount++;
         }
