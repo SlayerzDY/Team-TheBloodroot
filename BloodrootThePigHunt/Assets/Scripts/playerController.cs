@@ -122,13 +122,27 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         gunInv[gunInvPos].ammoCurr--;
         ScoreboardManager.GetOrCreate().AddShotFired();
         updatePlayerAmmo();
+
         if (gunInv[gunInvPos].shootSound.Count() > 0) {
             int randomInt = Random.Range(0, gunInv[gunInvPos].shootSound.Count());
             float randomShotVolume = Random.Range(-gunInv[gunInvPos].shootSoundVolume * 0.9f, gunInv[gunInvPos].shootSoundVolume * 0.9f);
             AudioSource.PlayClipAtPoint(gunInv[gunInvPos].shootSound[randomInt], gameObject.transform.position, (gunInv[gunInvPos].shootSoundVolume + randomShotVolume)); 
         }
-        GameObject bullet =
-            Instantiate(gunInv[gunInvPos].bullet, shootPos.position, shootPos.rotation);
+
+        //Cursor aimer for guns should just get the middle of the monitor then instantiate the bullet
+        Ray aimRay = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+        Vector3 TargetPos;
+        if (Physics.Raycast(aimRay, out RaycastHit hit, gunInv[gunInvPos].shootDistance))
+        {
+            TargetPos = hit.point;
+        }
+        else { 
+            TargetPos = aimRay.GetPoint(gunInv[gunInvPos].shootDistance);
+        }
+        Vector3 shootDir = (TargetPos - shootPos.position).normalized;
+
+        GameObject bullet = 
+            Instantiate(gunInv[gunInvPos].bullet, shootPos.position, Quaternion.LookRotation(shootDir));
 
         Damage bulletDamage =
             bullet.GetComponent<Damage>();

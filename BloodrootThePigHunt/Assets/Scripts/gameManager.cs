@@ -46,6 +46,7 @@ public class gameManager : MonoBehaviour
     {
         // Create world static singleton instance of the game manager
         instance = this;
+        updatePlayer();
     }
     //==========================================================================================
     // Function, Start
@@ -54,7 +55,6 @@ public class gameManager : MonoBehaviour
     {
         timeScaleOrig = Time.timeScale;
         ScoreboardManager.GetOrCreate();
-        updatePlayer();
         setupPlayerHUD();
 
         if (playerController != null)
