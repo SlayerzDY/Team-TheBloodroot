@@ -8,11 +8,16 @@ public class TruckEscapeEnding : MonoBehaviour
     [Header("Setup")]
     [SerializeField] private waveManager manager;
     [SerializeField] private string playerTag = "Player";
+    [SerializeField] private bool requireTruckKey = true;
 
     [Header("Optional UI")]
     [SerializeField] private TMP_Text messageText;
     [SerializeField, TextArea] private string lockedMessage =
         "Survive the final wave before escaping.";
+    [SerializeField, TextArea] private string missingKeyMessage =
+        "Find the truck key before escaping.";
+    [SerializeField, TextArea] private string keyCollectedMessage =
+        "Truck key found.";
     [SerializeField, TextArea] private string readyMessage =
         "The woods are quiet... get back to the truck.";
     [SerializeField, TextArea] private string escapeMessage =
@@ -20,7 +25,28 @@ public class TruckEscapeEnding : MonoBehaviour
     [SerializeField] private bool hideMessageUntilReady = true;
 
     private bool escapeReady;
+    private bool truckKeyCollected;
     private bool gameEnded;
+
+    public bool HasTruckKey =>
+        !requireTruckKey || truckKeyCollected;
+
+    public void CollectTruckKey()
+    {
+        if (truckKeyCollected)
+            return;
+
+        truckKeyCollected = true;
+        Debug.Log("Truck key collected.");
+
+        if (escapeReady)
+        {
+            ShowMessage(readyMessage);
+            return;
+        }
+
+        ShowMessage(keyCollectedMessage);
+    }
 
     private void Reset()
     {
@@ -103,6 +129,12 @@ public class TruckEscapeEnding : MonoBehaviour
             return;
         }
 
+        if (!HasTruckKey)
+        {
+            ShowMessage(missingKeyMessage);
+            return;
+        }
+
         EndGameAtTruck();
     }
 
@@ -146,7 +178,10 @@ public class TruckEscapeEnding : MonoBehaviour
 
         if (escapeReady)
         {
-            ShowMessage(readyMessage);
+            ShowMessage(
+                HasTruckKey
+                    ? readyMessage
+                    : missingKeyMessage);
             return;
         }
 
