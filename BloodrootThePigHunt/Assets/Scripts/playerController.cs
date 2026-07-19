@@ -27,6 +27,10 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
     [SerializeField] GameObject gunModel;
     [SerializeField] AudioClip[] hurtEffects;
     [Range(0f, 1f)] [SerializeField] float hurtSoundVolume;
+    [SerializeField] AudioClip[] deathEffects;
+    [Range(0f, 1f)][SerializeField] float deathSoundVolume;
+    [SerializeField] AudioClip[] jumpEffects;
+    [Range(0f, 1f)][SerializeField] float jumpSoundVolume;
 
     //[SerializeField] Transform gunPivot;
     [SerializeField] Transform shootPos;
@@ -36,7 +40,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
     float shootTimer;
     Vector3 moveDir;
     Vector3 playerVel;
-    private bool hurtSoundPlaying;
+    private bool soundPlaying = false;
     //==========================================================================================
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     //==========================================================================================
@@ -89,9 +93,9 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
     //==========================================================================================
     void jump() {
         if (Input.GetButtonDown("Jump") && jumpCount < jumpMax) {
+            playRandomSound(jumpEffects, jumpSoundVolume);
             playerVel.y = jumpSpeed;
             jumpCount++;
-
         }
     }
 
@@ -140,22 +144,22 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
         else
         {
             StartCoroutine(flashRed());
-            StartCoroutine(playHurtSound());
+            StartCoroutine(playRandomSound(hurtEffects, hurtSoundVolume));
         }
     }
     //==========================================================================================
     // Function, Play Hurt Sound
     //==========================================================================================
-    IEnumerator playHurtSound() {
-        if (!hurtSoundPlaying) {
-            hurtSoundPlaying = true;
-            if (hurtEffects.Count() > 0) {
-                int randomInt = Random.Range(0, hurtEffects.Count());
-                float randomVolume = Random.Range(-hurtSoundVolume * 0.9f, hurtSoundVolume * 0.9f);
-                AudioSource.PlayClipAtPoint(hurtEffects[randomInt], gameObject.transform.position, (hurtSoundVolume + randomVolume));
-                yield return new WaitForSeconds(hurtEffects[randomInt].length);
+    IEnumerator playRandomSound(AudioClip[] array, float volume) {
+        if (!soundPlaying) {
+            soundPlaying = true;
+            if (array.Count() > 0) {
+                int randomInt = Random.Range(0, array.Count());
+                float randomVolume = Random.Range(-volume * 0.9f, volume * 0.9f);
+                AudioSource.PlayClipAtPoint(array[randomInt], gameObject.transform.position, (volume + randomVolume));
+                yield return new WaitForSeconds(array[randomInt].length);
             }
-            hurtSoundPlaying = false;
+            soundPlaying = false;
         }
     }
     //==========================================================================================
@@ -170,6 +174,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
         Dissolver dissolver = GetComponent<Dissolver>();
         if (dissolver != null)
         {
+            playRandomSound(deathEffects, deathSoundVolume);
             dissolver.StartCoroutine(dissolver.dissolve());
         }
         gameManager.instance.youLose();
