@@ -28,7 +28,7 @@ public class waveManager : MonoBehaviour
     [Header("Wave Title Cards")]
     [SerializeField, Min(0f)] private float titleCardSeconds = 3f;
     [SerializeField] private Color normalTitleColor = Color.white;
-    [SerializeField] private Color bloodMoonTitleColor = new Color(0.9f, 0.1f, 0.1f);
+    [SerializeField] private Color bloodMoonTitleColor = new Color(1f, 0.25f, 0.12f);
 
     [Header("Wave Audio")]
     [SerializeField] private AudioSource waveAudioSource;
@@ -418,7 +418,10 @@ public class waveManager : MonoBehaviour
         if (waveNumberText != null &&
             enemyTypeText != null &&
             waveTitleText != null)
+        {
+            SetupWaveTitleReadability();
             return;
+        }
 
         Canvas canvas = CreateWaveCanvas();
 
@@ -458,9 +461,9 @@ public class waveManager : MonoBehaviour
                     canvas.transform,
                     new Vector2(0.5f, 1f),
                     new Vector2(0.5f, 1f),
-                    new Vector2(0f, -120f),
-                    new Vector2(560f, 105f),
-                    24f,
+                    new Vector2(0f, -55f),
+                    new Vector2(860f, 190f),
+                    34f,
                     TextAlignmentOptions.Center);
 
             RectTransform titleRect =
@@ -469,6 +472,8 @@ public class waveManager : MonoBehaviour
             titleRect.pivot =
                 new Vector2(0.5f, 1f);
         }
+
+        SetupWaveTitleReadability();
     }
 
     private Canvas CreateWaveCanvas()
@@ -533,6 +538,52 @@ public class waveManager : MonoBehaviour
         return text;
     }
 
+    private void SetupWaveTitleReadability()
+    {
+        if (waveTitleText == null)
+            return;
+
+        RectTransform titleRect =
+            waveTitleText.GetComponent<RectTransform>();
+
+        titleRect.anchorMin =
+            new Vector2(0.5f, 1f);
+        titleRect.anchorMax =
+            new Vector2(0.5f, 1f);
+        titleRect.pivot =
+            new Vector2(0.5f, 1f);
+        titleRect.anchoredPosition =
+            new Vector2(0f, -55f);
+        titleRect.sizeDelta =
+            new Vector2(860f, 190f);
+
+        waveTitleText.fontSize = 34f;
+        waveTitleText.fontSizeMin = 20f;
+        waveTitleText.fontSizeMax = 36f;
+        waveTitleText.enableAutoSizing = true;
+        waveTitleText.fontStyle = FontStyles.Bold;
+        waveTitleText.alignment = TextAlignmentOptions.Center;
+        waveTitleText.overflowMode = TextOverflowModes.Overflow;
+        waveTitleText.enableWordWrapping = true;
+        waveTitleText.outlineWidth = 0.18f;
+        waveTitleText.outlineColor = Color.black;
+
+        Shadow shadow =
+            waveTitleText.GetComponent<Shadow>();
+
+        if (shadow == null)
+        {
+            shadow =
+                waveTitleText.gameObject.AddComponent<Shadow>();
+        }
+
+        shadow.effectColor =
+            new Color(0f, 0f, 0f, 0.85f);
+        shadow.effectDistance =
+            new Vector2(3f, -3f);
+        shadow.useGraphicAlpha = true;
+    }
+
     private void ShowWaveTitleCard()
     {
         if (waveTitleText == null)
@@ -544,17 +595,25 @@ public class waveManager : MonoBehaviour
         if (ActiveBloodMoonModifier != null)
         {
             titleText =
-                $"BLOOD MOON\nWave {currentWave}: " +
-                $"{ActiveBloodMoonModifier.DisplayName}\n" +
-                $"<size=55%>{ActiveBloodMoonModifier.Description}</size>";
+                "<size=115%>BLOOD MOON</size>\n" +
+                $"<size=92%>Wave {currentWave}: " +
+                $"{ActiveBloodMoonModifier.DisplayName}</size>";
+
+            if (!string.IsNullOrWhiteSpace(
+                    ActiveBloodMoonModifier.Description))
+            {
+                titleText +=
+                    "\n" +
+                    $"<size=68%>{ActiveBloodMoonModifier.Description}</size>";
+            }
 
             titleColor = bloodMoonTitleColor;
         }
         else
         {
             titleText =
-                $"Wave {currentWave}\n" +
-                $"<size=60%>{GetWaveSubtitle()}</size>";
+                $"<size=105%>Wave {currentWave}</size>\n" +
+                $"<size=75%>{GetWaveSubtitle()}</size>";
 
             titleColor = normalTitleColor;
         }
