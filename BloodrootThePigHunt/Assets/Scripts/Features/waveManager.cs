@@ -446,18 +446,18 @@ public class waveManager : MonoBehaviour
                 CreateUIText(
                     "Wave Title Card Text",
                     canvas.transform,
-                    new Vector2(0.5f, 0.5f),
-                    new Vector2(0.5f, 0.5f),
-                    new Vector2(0f, 120f),
-                    new Vector2(1000f, 260f),
-                    48f,
+                    new Vector2(0.5f, 1f),
+                    new Vector2(0.5f, 1f),
+                    new Vector2(0f, -120f),
+                    new Vector2(560f, 105f),
+                    24f,
                     TextAlignmentOptions.Center);
 
             RectTransform titleRect =
                 waveTitleText.GetComponent<RectTransform>();
 
             titleRect.pivot =
-                new Vector2(0.5f, 0.5f);
+                new Vector2(0.5f, 1f);
         }
     }
 
