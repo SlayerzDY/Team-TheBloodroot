@@ -461,7 +461,7 @@ public class waveManager : MonoBehaviour
                     canvas.transform,
                     new Vector2(0.5f, 1f),
                     new Vector2(0.5f, 1f),
-                    new Vector2(0f, -38f),
+                    new Vector2(0f, -58f),
                     new Vector2(760f, 120f),
                     24f,
                     TextAlignmentOptions.Center);
@@ -553,7 +553,7 @@ public class waveManager : MonoBehaviour
         titleRect.pivot =
             new Vector2(0.5f, 1f);
         titleRect.anchoredPosition =
-            new Vector2(0f, -38f);
+            new Vector2(0f, -58f);
         titleRect.sizeDelta =
             new Vector2(760f, 120f);
 
