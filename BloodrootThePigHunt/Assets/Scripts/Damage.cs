@@ -35,6 +35,8 @@ public class Damage : MonoBehaviour
     [SerializeField] int bulletSpeed;
     [SerializeField] int bulletDestroyTime;
     [SerializeField] ParticleSystem hitEffect;
+    [SerializeField] AudioClip soundEffect;
+    [SerializeField] float soundEffectVolume;
     bool isDamaging;
 
     // Keep the prefab's configured value so Blood Moon scaling always starts from base damage. This
@@ -78,10 +80,15 @@ public class Damage : MonoBehaviour
     //==========================================================================================
     // Function, On Trigger Enter
     //==========================================================================================
-    private void OnTriggerEnter(Collider other)
-    {
-        if (hitEffect != null)
-        {
+    private void OnTriggerEnter(Collider other) {
+        if (hitEffect != null) {
+            if (other.CompareTag("Untagged") || string.IsNullOrEmpty(other.tag))
+            {
+                if (soundEffect != null) {
+                    float randomShotVolume = Random.Range(-soundEffectVolume * 0.9f, soundEffectVolume * 0.9f);
+                    AudioSource.PlayClipAtPoint(soundEffect, gameObject.transform.position, (soundEffectVolume + randomShotVolume));
+                }
+            }
             Instantiate(hitEffect, transform.position, Quaternion.identity);
         }
         // Safety Check, Ensure isnt another trigger
