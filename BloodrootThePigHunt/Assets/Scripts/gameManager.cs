@@ -55,6 +55,12 @@ public class gameManager : MonoBehaviour
         timeScaleOrig = Time.timeScale;
         ScoreboardManager.GetOrCreate();
         updatePlayer();
+        setupPlayerHUD();
+
+        if (playerController != null)
+        {
+            playerController.updatePlayerAmmo();
+        }
     }
     //==========================================================================================
     // Function, Update
@@ -166,6 +172,73 @@ public class gameManager : MonoBehaviour
         player = GameObject.FindWithTag("Player");
         playerController = player.GetComponent<playerController>();
         playerSpawnPos = GameObject.FindWithTag("PlayerSpawnPos");
+    }
+    //==========================================================================================
+    // Function, Setup Player HUD
+    //==========================================================================================
+    void setupPlayerHUD()
+    {
+        if (AmmoCount != null && FlashlightCount != null)
+            return;
+
+        GameObject canvasObject = new GameObject("Player HUD Canvas");
+
+        Canvas canvas = canvasObject.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 15;
+
+        CanvasScaler scaler = canvasObject.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920f, 1080f);
+
+        canvasObject.AddComponent<GraphicRaycaster>();
+
+        if (AmmoCount == null)
+        {
+            AmmoCount = createPlayerHUDText(
+                "Ammo Count",
+                canvas.transform,
+                new Vector2(25f, 90f),
+                "0 / 0");
+        }
+
+        if (FlashlightCount == null)
+        {
+            FlashlightCount = createPlayerHUDText(
+                "Flashlight Count",
+                canvas.transform,
+                new Vector2(25f, 55f),
+                "Flashlight: --");
+        }
+    }
+    //==========================================================================================
+    // Function, Create Player HUD Text
+    //==========================================================================================
+    TextMeshProUGUI createPlayerHUDText(
+        string objectName,
+        Transform parent,
+        Vector2 anchoredPosition,
+        string startText)
+    {
+        GameObject textObject = new GameObject(objectName);
+        textObject.transform.SetParent(parent, false);
+
+        TextMeshProUGUI text = textObject.AddComponent<TextMeshProUGUI>();
+
+        RectTransform rect = text.GetComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0f, 0f);
+        rect.anchorMax = new Vector2(0f, 0f);
+        rect.pivot = new Vector2(0f, 0f);
+        rect.anchoredPosition = anchoredPosition;
+        rect.sizeDelta = new Vector2(360f, 35f);
+
+        text.text = startText;
+        text.fontSize = 24f;
+        text.color = Color.white;
+        text.alignment = TextAlignmentOptions.Left;
+        text.raycastTarget = false;
+
+        return text;
     }
     //==========================================================================================
 }

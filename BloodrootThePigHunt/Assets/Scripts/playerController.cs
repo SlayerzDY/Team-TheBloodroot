@@ -223,12 +223,22 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     //==========================================================================================
     public void updatePlayerUI() {
         //fixed
+        if (gameManager.instance == null || gameManager.instance.playerHPBAR == null)
+        {
+            return;
+        }
+
         gameManager.instance.playerHPBAR.fillAmount = (float)HP / HPOrig;
     }
     //==========================================================================================
     // Function, get Gun Stats
     //==========================================================================================
     public void updatePlayerAmmo() {
+        if (gameManager.instance == null || gameManager.instance.AmmoCount == null)
+        {
+            return;
+        }
+
         if (gunInv.Count > 0)
         {
             gameManager.instance.AmmoCount.text = $"{gunInv[gunInvPos].ammoCurr} / {gunInv[gunInvPos].ammoMax}";
