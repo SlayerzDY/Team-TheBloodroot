@@ -8,7 +8,7 @@ using System.Linq;
 //==============================================================================================
 // Declare Player Controller
 //==============================================================================================
-public class playerController : MonoBehaviour, IDamage, IPickupGun {
+public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlashlight {
     //==========================================================================================
     // Define Variables
     //==========================================================================================
@@ -31,6 +31,19 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
     [Range(0f, 1f)][SerializeField] float deathSoundVolume;
     [SerializeField] AudioClip[] jumpEffects;
     [Range(0f, 1f)][SerializeField] float jumpSoundVolume;
+    // Flashlight Stats
+    [SerializeField] flashlightStats flashlight;
+    [SerializeField] string flashlightButton = "Fire2";
+    [SerializeField] KeyCode flashlightKey = KeyCode.F;
+    Vector3 flashlightHoldPosition = new Vector3(0.75f, -0.85f, -0.9f);
+    Vector3 flashlightLightPosition = new Vector3(0, -0.05f, 0.15f);
+    GameObject flashlightModel;
+    GameObject flashlightLightObject;
+    Light flashlightLight;
+    bool hasFlashlight;
+    bool flashlightOn;
+    float flashlightFlickerTimer;
+    float lowBatterySoundTimer;
 
     //[SerializeField] Transform gunPivot;
     [SerializeField] Transform shootPos;
@@ -52,8 +65,10 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
     // Update is called once per frame
     //==========================================================================================
     void Update() {
-        if (!gameManager.instance.isPaused)
+        if (!gameManager.instance.isPaused) {
             movement();
+            useFlashlight();
+        }
         sprint();
     }
     //==========================================================================================
@@ -226,6 +241,241 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
         gunInv.Add(gun);
         gunInvPos = gunInv.Count - 1;
         changeGun();
+    }
+    //==========================================================================================
+    // Function, get Flashlight Stats
+    //==========================================================================================
+    public void getFlashlightStats(flashlightStats light)
+    {
+        flashlight = light;
+        hasFlashlight = true;
+        flashlightOn = true;
+        equipFlashlight();
+        updateFlashlightUI();
+        Debug.Log("Flashlight picked up. Press F or Fire2 to toggle it.");
+    }
+    //==========================================================================================
+    // Function, Equip Flashlight
+    //==========================================================================================
+    void equipFlashlight()
+    {
+        if (flashlightModel != null)
+        {
+            Destroy(flashlightModel);
+        }
+
+        if (flashlightLightObject != null)
+        {
+            Destroy(flashlightLightObject);
+        }
+
+        Transform flashlightParent = Camera.main != null ? Camera.main.transform : transform;
+
+        if (flashlight.flashlightModel != null)
+        {
+            flashlightModel = Instantiate(flashlight.flashlightModel, flashlightParent);
+            updateFlashlightModelPosition();
+        }
+        else
+        {
+            flashlightModel = new GameObject("Flashlight");
+            flashlightModel.transform.SetParent(flashlightParent);
+            flashlightModel.transform.localScale = Vector3.one;
+            updateFlashlightModelPosition();
+        }
+
+        flashlightLightObject = new GameObject("Flashlight Beam");
+        flashlightLightObject.transform.SetParent(flashlightParent);
+        flashlightLightObject.transform.localPosition = flashlightLightPosition;
+        flashlightLightObject.transform.localRotation = Quaternion.identity;
+        flashlightLightObject.transform.localScale = Vector3.one;
+        flashlightLight = flashlightLightObject.AddComponent<Light>();
+
+        flashlightLight.type = LightType.Spot;
+        flashlightLight.color = new Color(1f, 0.92f, 0.72f);
+        flashlightLight.renderMode = LightRenderMode.ForcePixel;
+        flashlightLight.cullingMask = ~0;
+        flashlightLight.enabled = flashlightOn;
+        updateFlashlightLight();
+    }
+    //==========================================================================================
+    // Function, Use Flashlight
+    //==========================================================================================
+    void useFlashlight()
+    {
+        if (!hasFlashlight || flashlight == null)
+        {
+            return;
+        }
+
+        if (flashlightButtonPressed())
+        {
+            toggleFlashlight();
+        }
+
+        updateFlashlightModelPosition();
+
+        if (!flashlightOn)
+        {
+            return;
+        }
+
+        flashlight.batteryCurr -= flashlight.batteryDrainRate * Time.deltaTime;
+
+        if (flashlight.batteryCurr <= 0)
+        {
+            flashlight.batteryCurr = 0;
+            turnFlashlightOff();
+        }
+
+        updateFlashlightLight();
+        updateFlashlightUI();
+    }
+    //==========================================================================================
+    // Function, Toggle Flashlight
+    //==========================================================================================
+    void toggleFlashlight()
+    {
+        if (flashlight.batteryCurr <= 0)
+        {
+            turnFlashlightOff();
+            return;
+        }
+
+        flashlightOn = !flashlightOn;
+
+        if (flashlightLight != null)
+        {
+            flashlightLight.enabled = flashlightOn;
+        }
+
+        updateFlashlightLight();
+        Debug.Log(flashlightOn ? "Flashlight turned on." : "Flashlight turned off.");
+
+        if (flashlight.toggleSound.Count() > 0)
+        {
+            StartCoroutine(playRandomSound(flashlight.toggleSound, flashlight.flashlightSoundVolume));
+        }
+
+        updateFlashlightUI();
+    }
+    //==========================================================================================
+    // Function, Flashlight Button Pressed
+    //==========================================================================================
+    bool flashlightButtonPressed()
+    {
+        bool pressed = Input.GetKeyDown(flashlightKey);
+
+        if (!string.IsNullOrEmpty(flashlightButton))
+        {
+            try
+            {
+                pressed = pressed || Input.GetButtonDown(flashlightButton);
+            }
+            catch (System.ArgumentException)
+            {
+                flashlightButton = "";
+            }
+        }
+
+        return pressed;
+    }
+    //==========================================================================================
+    // Function, Update Flashlight Model Position
+    //==========================================================================================
+    void updateFlashlightModelPosition()
+    {
+        if (flashlightModel == null)
+        {
+            return;
+        }
+
+        flashlightModel.transform.localPosition = flashlightHoldPosition;
+        flashlightModel.transform.localRotation = Quaternion.identity;
+    }
+    //==========================================================================================
+    // Function, Turn Flashlight Off
+    //==========================================================================================
+    void turnFlashlightOff()
+    {
+        flashlightOn = false;
+
+        if (flashlightLight != null)
+        {
+            flashlightLight.enabled = false;
+        }
+
+        updateFlashlightLight();
+        updateFlashlightUI();
+    }
+    //==========================================================================================
+    // Function, Update Flashlight Light
+    //==========================================================================================
+    void updateFlashlightLight()
+    {
+        if (flashlightLight == null || flashlight == null)
+        {
+            return;
+        }
+
+        flashlightLight.range = flashlight.lightRange;
+        flashlightLight.spotAngle = flashlight.lightAngle;
+
+        if (!flashlightOn)
+        {
+            flashlightLight.intensity = 0;
+            return;
+        }
+
+        float batteryPercent = flashlight.batteryCurr / Mathf.Max(flashlight.batteryMax, 1);
+        bool lowBattery = batteryPercent <= flashlight.lowBatteryPercent;
+        bool bloodMoonActive = isBloodMoonActive();
+        bool shouldFlicker = lowBattery || bloodMoonActive;
+
+        if (shouldFlicker && Time.time >= flashlightFlickerTimer)
+        {
+            float flickerChance = lowBattery ? 0.45f : flashlight.bloodMoonFlickerChance;
+            bool flickerOff = Random.Range(0f, 1f) < flickerChance;
+            flashlightLight.intensity = flickerOff ? flashlight.lightIntensity * 0.2f : flashlight.lightIntensity;
+            flashlightFlickerTimer = Time.time + 0.08f;
+        }
+        else if (!shouldFlicker)
+        {
+            flashlightLight.intensity = flashlight.lightIntensity;
+        }
+
+        if (lowBattery && Time.time >= lowBatterySoundTimer && flashlight.batteryLowSound.Count() > 0)
+        {
+            StartCoroutine(playRandomSound(flashlight.batteryLowSound, flashlight.flashlightSoundVolume));
+            lowBatterySoundTimer = Time.time + 3;
+        }
+    }
+    //==========================================================================================
+    // Function, Is Blood Moon Active
+    //==========================================================================================
+    bool isBloodMoonActive()
+    {
+        waveManager manager = FindAnyObjectByType<waveManager>();
+        return manager != null && manager.ActiveBloodMoonModifier != null;
+    }
+    //==========================================================================================
+    // Function, Update Flashlight UI
+    //==========================================================================================
+    void updateFlashlightUI()
+    {
+        if (gameManager.instance == null || gameManager.instance.FlashlightCount == null)
+        {
+            return;
+        }
+
+        if (!hasFlashlight || flashlight == null)
+        {
+            gameManager.instance.FlashlightCount.text = "Flashlight: --";
+            return;
+        }
+
+        string lightState = flashlightOn ? "On" : "Off";
+        gameManager.instance.FlashlightCount.text = $"Flashlight: {flashlight.batteryCurr:F0}% {lightState}";
     }
     //==========================================================================================
     // Function, Change Gun

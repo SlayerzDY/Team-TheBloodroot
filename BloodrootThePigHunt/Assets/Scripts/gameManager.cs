@@ -27,6 +27,7 @@ public class gameManager : MonoBehaviour
     // Public Variables
     public GameObject checkpointPopup;
     public TextMeshProUGUI AmmoCount;
+    public TextMeshProUGUI FlashlightCount;
     public Image playerHPBAR;
     public GameObject playerDamageScreen;
     public bool isPaused = false;
