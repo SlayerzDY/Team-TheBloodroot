@@ -10,6 +10,11 @@ public class ScoreboardManager : MonoBehaviour
     [SerializeField] GameObject scoreboardPanel;
     [SerializeField] TMP_Text scoreboardText;
 
+    [Header("Runtime UI Layout")]
+    [SerializeField] Vector2 scoreboardSize = new Vector2(500f, 500f);
+    [SerializeField] float rightSideMargin = 35f;
+    [SerializeField] float verticalOffset = 0f;
+
     int regularHogsKilled;
     int enemyPigsKilled;
     int shotsFired;
@@ -170,19 +175,19 @@ public class ScoreboardManager : MonoBehaviour
             panelObject.GetComponent<RectTransform>();
 
         panelRect.anchorMin =
-            new Vector2(0.5f, 0.5f);
+            new Vector2(1f, 0.5f);
 
         panelRect.anchorMax =
-            new Vector2(0.5f, 0.5f);
+            new Vector2(1f, 0.5f);
 
         panelRect.pivot =
-            new Vector2(0.5f, 0.5f);
+            new Vector2(1f, 0.5f);
 
         panelRect.anchoredPosition =
-            Vector2.zero;
+            new Vector2(-rightSideMargin, verticalOffset);
 
         panelRect.sizeDelta =
-            new Vector2(680f, 520f);
+            scoreboardSize;
 
         GameObject textObject =
             new GameObject(
@@ -196,7 +201,7 @@ public class ScoreboardManager : MonoBehaviour
         scoreboardText =
             textObject.AddComponent<TextMeshProUGUI>();
 
-        scoreboardText.fontSize = 28f;
+        scoreboardText.fontSize = 24f;
         scoreboardText.alignment = TextAlignmentOptions.TopLeft;
         scoreboardText.color = Color.white;
         scoreboardText.enableWordWrapping = true;
