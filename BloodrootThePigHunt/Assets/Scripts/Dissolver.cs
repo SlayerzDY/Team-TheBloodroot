@@ -72,35 +72,31 @@ public class Dissolver : MonoBehaviour
     //==========================================================================================
     // Function, dissolveFlash
     //==========================================================================================
-    public IEnumerator dissolveFlash(bool playerDeath = false)
-    {
+    public IEnumerator dissolveFlash(bool playerDeath = false) {
         float cacheflashEndStrength = gameManager.instance.player.GetComponent<Dissolver>().flashEndStrength;
         if (playerDeath) { gameManager.instance.player.GetComponent<Dissolver>().flashEndStrength = 1f; }
-        ;
         Renderer[] allRenderers = GetComponentsInChildren<Renderer>();
         Material[][] originalMaterials = new Material[allRenderers.Length][];
-        for (int i = 0; i < allRenderers.Length; i++)
-        {
+        for (int i = 0; i < allRenderers.Length; i++) {
             originalMaterials[i] = allRenderers[i].sharedMaterials;
             Material[] dissolveSetup = new Material[originalMaterials[i].Length];
-            for (int j = 0; j < dissolveSetup.Length; j++)
-            {
+            for (int j = 0; j < dissolveSetup.Length; j++) {
                 dissolveSetup[j] = dissolveMaterial;
             }
-            allRenderers[i].materials = dissolveSetup;
+            allRenderers[i].sharedMaterials = dissolveSetup;
         }
         dissolveMaterial.SetColor("_Color", colorOrig);
         float elapsedTime = 0;
-        while (elapsedTime < flashDuration)
-        {
+        // Flash In
+        while (elapsedTime < flashDuration) {
             elapsedTime += Time.deltaTime;
             dissolveStrength = Mathf.Lerp(flashStartStrength, flashEndStrength, elapsedTime / flashDuration);
             dissolveMaterial.SetFloat("_DissolveStrength", dissolveStrength);
             yield return null;
         }
+        // Flash Out
         elapsedTime = 0;
-        while (elapsedTime < flashDuration)
-        {
+        while (elapsedTime < flashDuration) {
             elapsedTime += Time.deltaTime;
             dissolveStrength = Mathf.Lerp(flashEndStrength, flashStartStrength, elapsedTime / flashDuration);
             dissolveMaterial.SetFloat("_DissolveStrength", dissolveStrength);
@@ -108,9 +104,9 @@ public class Dissolver : MonoBehaviour
         }
         dissolveStrength = 0f;
         dissolveMaterial.SetFloat("_DissolveStrength", dissolveStrength);
-        for (int i = 0; i < allRenderers.Length; i++)
-        {
-            allRenderers[i].materials = originalMaterials[i];
+        // Restore the original materials back
+        for (int i = 0; i < allRenderers.Length; i++) {
+            allRenderers[i].sharedMaterials = originalMaterials[i];
         }
         gameManager.instance.player.GetComponent<Dissolver>().flashEndStrength = cacheflashEndStrength;
     }
