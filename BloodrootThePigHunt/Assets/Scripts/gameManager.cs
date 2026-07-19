@@ -53,6 +53,7 @@ public class gameManager : MonoBehaviour
     void Start()
     {
         timeScaleOrig = Time.timeScale;
+        ScoreboardManager.GetOrCreate();
         updatePlayer();
     }
     //==========================================================================================
@@ -120,6 +121,7 @@ public class gameManager : MonoBehaviour
     //==========================================================================================
     public void youLose()
     {
+        ScoreboardManager.GetOrCreate().ShowFinalScore(false);
         statePause();
         menuActive = menuLose;
         menuActive.SetActive(true);
@@ -129,6 +131,7 @@ public class gameManager : MonoBehaviour
     //==========================================================================================
     public void youWin()
     {
+        ScoreboardManager.GetOrCreate().ShowFinalScore(true);
         statePause();
         menuActive = menuWin;
         menuActive.SetActive(true);

@@ -315,6 +315,8 @@ public class waveManager : MonoBehaviour
             return;
 
         waveActive = false;
+        bool completedBloodMoon =
+            ActiveBloodMoonModifier != null;
 
         if (bloodMoonDirector != null)
         {
@@ -323,6 +325,7 @@ public class waveManager : MonoBehaviour
 
         ActiveBloodMoonModifier = null;
 
+        ScoreboardManager.GetOrCreate().AddWaveSurvived(completedBloodMoon);
         WaveCompleted?.Invoke(currentWave);
         RefreshWaveUI();
         PlayWaveSound(waveCompleteClip);

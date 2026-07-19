@@ -120,13 +120,23 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     void shoot() {
         shootTimer = 0;
         gunInv[gunInvPos].ammoCurr--;
+        ScoreboardManager.GetOrCreate().AddShotFired();
         updatePlayerAmmo();
         if (gunInv[gunInvPos].shootSound.Count() > 0) {
             int randomInt = Random.Range(0, gunInv[gunInvPos].shootSound.Count());
             float randomShotVolume = Random.Range(-gunInv[gunInvPos].shootSoundVolume * 0.9f, gunInv[gunInvPos].shootSoundVolume * 0.9f);
             AudioSource.PlayClipAtPoint(gunInv[gunInvPos].shootSound[randomInt], gameObject.transform.position, (gunInv[gunInvPos].shootSoundVolume + randomShotVolume)); 
         }
-        Instantiate(gunInv[gunInvPos].bullet, shootPos.position, shootPos.rotation);
+        GameObject bullet =
+            Instantiate(gunInv[gunInvPos].bullet, shootPos.position, shootPos.rotation);
+
+        Damage bulletDamage =
+            bullet.GetComponent<Damage>();
+
+        if (bulletDamage != null)
+        {
+            bulletDamage.SetPlayerBullet(true);
+        }
     }
     //==========================================================================================
     // Function, Rload
@@ -148,6 +158,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     //==========================================================================================
     public void TakeDamage(int amount)
     {
+        ScoreboardManager.GetOrCreate().AddDamageTaken(amount);
         HP -= amount;
         updatePlayerUI();
         StartCoroutine(flashDamage());  

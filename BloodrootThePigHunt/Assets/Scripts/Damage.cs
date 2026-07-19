@@ -38,6 +38,8 @@ public class Damage : MonoBehaviour
     [SerializeField] AudioClip soundEffect;
     [SerializeField] float soundEffectVolume;
     bool isDamaging;
+    bool isPlayerBullet;
+    bool countedPlayerHit;
 
     // Keep the prefab's configured value so Blood Moon scaling always starts from base damage. This
     // avoids stacking a new multiplier on top of a value that was already changed. It also makes this
@@ -62,6 +64,11 @@ public class Damage : MonoBehaviour
         damageAmount = Mathf.Max(
             0,
             Mathf.RoundToInt(baseDamageAmount * Mathf.Max(0f, multiplier)));
+    }
+
+    public void SetPlayerBullet(bool value)
+    {
+        isPlayerBullet = value;
     }
     //==========================================================================================
     // Function, Start
@@ -100,6 +107,14 @@ public class Damage : MonoBehaviour
         // Checks isnt DOT Damage, if not then apply damage to the other object
         if (dmg != null && type != damageType.DOT)
         {
+            if (type == damageType.bullet &&
+                isPlayerBullet &&
+                !countedPlayerHit)
+            {
+                countedPlayerHit = true;
+                ScoreboardManager.GetOrCreate().AddShotHit();
+            }
+
             // Regular Damage
             dmg.TakeDamage(damageAmount);
         }
