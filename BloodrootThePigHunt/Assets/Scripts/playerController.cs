@@ -4,6 +4,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 //==============================================================================================
 // Declare Player Controller
 //==============================================================================================
@@ -97,6 +98,11 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
     void shoot() {
         shootTimer = 0;
         gunInv[gunInvPos].ammoCurr--;
+        updatePlayerAmmo();
+        if (gunInv[gunInvPos].shootSound.Count() > 0) {
+            int randomInt = Random.Range(0, gunInv[gunInvPos].shootSound.Count());
+            AudioSource.PlayClipAtPoint(gunInv[gunInvPos].shootSound[randomInt], gameObject.transform.position, gunInv[gunInvPos].shootSoundVolume); 
+        }
         Instantiate(gunInv[gunInvPos].bullet, shootPos.position, shootPos.rotation);
     }
 
@@ -111,7 +117,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
         {
 
             gunInv[gunInvPos].ammoCurr = gunInv[gunInvPos].ammoMax;
-
+            updatePlayerAmmo();
         }
 
     }
@@ -162,15 +168,27 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
         if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolveFlash()); }
         yield return null;
     }
-
-
     //==========================================================================================
-
+    // Function, Update Player UI
+    //==========================================================================================
     public void updatePlayerUI() {
         //fixed
         gameManager.instance.playerHPBAR.fillAmount = (float)HP / HPOrig;
     }
-
+    //==========================================================================================
+    // Function, get Gun Stats
+    //==========================================================================================
+    public void updatePlayerAmmo() {
+        if (gunInv.Count > 0)
+        {
+            gameManager.instance.AmmoCount.text = $"{gunInv[gunInvPos].ammoCurr} / {gunInv[gunInvPos].ammoMax}";
+        } else {
+            gameManager.instance.AmmoCount.text = "0 / 0";
+        }
+    }
+    //==========================================================================================
+    // Function, Flash Damage
+    //==========================================================================================
     IEnumerator flashDamage() {
         gameManager.instance.playerDamageScreen.SetActive(true);
         yield return new WaitForSeconds(0.1f);
@@ -191,6 +209,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
     void changeGun()
     {
         // Assign Visuals
+        updatePlayerAmmo();
         gunModel.GetComponent<MeshFilter>().sharedMesh = gunInv[gunInvPos].gunModel.GetComponent<MeshFilter>().sharedMesh;
         gunModel.GetComponent<MeshRenderer>().sharedMaterial = gunInv[gunInvPos].gunModel.GetComponent<MeshRenderer>().sharedMaterial;
     }
@@ -217,6 +236,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
         controller.transform.position = gameManager.instance.playerSpawnPos.transform.position;
         Physics.SyncTransforms();
         HP = HPOrig;
+        updatePlayerAmmo();
         updatePlayerUI();
     }
     //==============================================================================================

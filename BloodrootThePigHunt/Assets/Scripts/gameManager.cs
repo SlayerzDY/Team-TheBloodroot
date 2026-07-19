@@ -26,6 +26,7 @@ public class gameManager : MonoBehaviour
     public GameObject menuInteractable;
     // Public Variables
     public GameObject checkpointPopup;
+    public TextMeshProUGUI AmmoCount;
     public Image playerHPBAR;
     public GameObject playerDamageScreen;
     public bool isPaused = false;
