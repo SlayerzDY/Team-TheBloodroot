@@ -36,6 +36,11 @@ public class waveManager : MonoBehaviour
     [SerializeField] private AudioClip bloodMoonStartClip;
     [SerializeField] private AudioClip waveCompleteClip;
 
+    [Header("Truck Escape Ending")]
+    [SerializeField] private bool useTruckEscapeEnding;
+    [SerializeField, TextArea] private string truckEscapeMessage =
+        "All Waves Cleared\nGet back to the truck.";
+
     [Header("Hog Hunt Intro")]
     [SerializeField] private bool useHogHuntIntro = true;
     [SerializeField, Min(1)] private int minRegularPigKills = 3;
@@ -68,6 +73,8 @@ public class waveManager : MonoBehaviour
     public int currentWave { get; private set; }
     public int enemiesRemaining { get; private set; }
     public bool waveActive { get; private set; }
+    public bool FinalWaveCleared { get; private set; }
+    public bool UseTruckEscapeEnding => useTruckEscapeEnding;
     public bool EncounterStarted => encounterStarted;
     public bool ShouldSpawnRegularPigs =>
         useHogHuntIntro && !encounterStarted && !curseWarningStarted;
@@ -112,6 +119,7 @@ public class waveManager : MonoBehaviour
         currentWave = 0;
         enemiesRemaining = 0;
         waveActive = false;
+        FinalWaveCleared = false;
 
         SetupHogHunt();
         SetupWaveUI();
@@ -335,10 +343,12 @@ public class waveManager : MonoBehaviour
         if (currentWave >= totalWaves)
         {
             Debug.Log("All waves completed.");
+            FinalWaveCleared = true;
             AllWavesCompleted?.Invoke();
             ShowAllWavesCleared();
 
-            if (gameManager.instance != null)
+            if (!useTruckEscapeEnding &&
+                gameManager.instance != null)
             {
                 gameManager.instance.youWin();
             }
@@ -761,7 +771,9 @@ public class waveManager : MonoBehaviour
         if (waveNumberText != null)
         {
             waveNumberText.text =
-                "All Waves Cleared";
+                useTruckEscapeEnding
+                    ? truckEscapeMessage
+                    : "All Waves Cleared";
         }
 
         if (enemyTypeText != null)
