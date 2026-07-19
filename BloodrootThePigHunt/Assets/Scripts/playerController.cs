@@ -352,6 +352,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
 
         if (!flashlightOn)
         {
+            rechargeFlashlight();
             return;
         }
 
@@ -364,6 +365,22 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         }
 
         updateFlashlightLight();
+        updateFlashlightUI();
+    }
+    //==========================================================================================
+    // Function, Recharge Flashlight
+    //==========================================================================================
+    void rechargeFlashlight()
+    {
+        if (flashlight.batteryRechargeRate <= 0 || flashlight.batteryCurr >= flashlight.batteryMax)
+        {
+            updateFlashlightUI();
+            return;
+        }
+
+        flashlight.batteryCurr += flashlight.batteryRechargeRate * Time.deltaTime;
+        flashlight.batteryCurr = Mathf.Min(flashlight.batteryCurr, flashlight.batteryMax);
+
         updateFlashlightUI();
     }
     //==========================================================================================

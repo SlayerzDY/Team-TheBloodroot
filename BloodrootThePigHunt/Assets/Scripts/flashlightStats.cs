@@ -14,6 +14,7 @@ public class flashlightStats : ScriptableObject {
     [Range(1, 100)] public float batteryCurr;
     [Range(1, 100)] public float batteryMax;
     [Range(.1f, 10)] public float batteryDrainRate;
+    [Range(0, 25)] public float batteryRechargeRate;
     [Range(1, 100)] public float batteryPickupAmount;
     [Range(0, 10)] public float lightIntensity;
     [Range(1, 100)] public float lightRange;
