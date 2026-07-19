@@ -4,6 +4,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 //==============================================================================================
 // Declare Player Controller
 //==============================================================================================
@@ -15,16 +16,18 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
     [SerializeField] LayerMask ignoreLayer;
     float camRotX, camRotY;
     // Player Stats
-    [SerializeField] int HP;
-    [SerializeField] int speed;
-    [SerializeField] int sprintMod;
-    [SerializeField] int jumpSpeed;
-    [SerializeField] int jumpMax;
+    [Range(1, 1000)] [SerializeField] int HP;
+    [Range(1, 100)] [SerializeField] int speed;
+    [Range(1, 10)] [SerializeField] int sprintMod;
+    [Range(1, 10)] [SerializeField] int jumpSpeed;
+    [Range(1, 10)] [SerializeField] int jumpMax;
     [SerializeField] int gravity;
     // Weapon Stats
     [SerializeField] List<gunStats> gunInv = new List<gunStats>();
     [SerializeField] GameObject gunModel;
-       
+    [SerializeField] AudioClip[] hurtEffects;
+    [Range(0f, 1f)] [SerializeField] float hurtSoundVolume;
+
     //[SerializeField] Transform gunPivot;
     [SerializeField] Transform shootPos;
     int jumpCount;
@@ -33,6 +36,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
     float shootTimer;
     Vector3 moveDir;
     Vector3 playerVel;
+    private bool hurtSoundPlaying;
     //==========================================================================================
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     //==========================================================================================
@@ -97,23 +101,28 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
     void shoot() {
         shootTimer = 0;
         gunInv[gunInvPos].ammoCurr--;
+        updatePlayerAmmo();
+        if (gunInv[gunInvPos].shootSound.Count() > 0) {
+            int randomInt = Random.Range(0, gunInv[gunInvPos].shootSound.Count());
+            float randomShotVolume = Random.Range(-gunInv[gunInvPos].shootSoundVolume * 0.9f, gunInv[gunInvPos].shootSoundVolume * 0.9f);
+            AudioSource.PlayClipAtPoint(gunInv[gunInvPos].shootSound[randomInt], gameObject.transform.position, (gunInv[gunInvPos].shootSoundVolume + randomShotVolume)); 
+        }
         Instantiate(gunInv[gunInvPos].bullet, shootPos.position, shootPos.rotation);
     }
-
     //==========================================================================================
     // Function, Rload
     //==========================================================================================
 
-    void reload()
-    {
-
-        if (Input.GetButtonDown("Reload") && gunInv.Count > 0)
-        {
-
+    void reload() {
+        if (Input.GetButtonDown("Reload") && gunInv.Count > 0) {
+            if (gunInv[gunInvPos].reloadSound.Count() > 0) {
+                int randomInt = Random.Range(0, gunInv[gunInvPos].shootSound.Count());
+                float randomShotVolume = Random.Range(-gunInv[gunInvPos].shootSoundVolume * 0.9f, gunInv[gunInvPos].shootSoundVolume * 0.9f);
+                AudioSource.PlayClipAtPoint(gunInv[gunInvPos].reloadSound[randomInt], gameObject.transform.position, (gunInv[gunInvPos].shootSoundVolume + randomShotVolume));
+            }
             gunInv[gunInvPos].ammoCurr = gunInv[gunInvPos].ammoMax;
-
+            updatePlayerAmmo();
         }
-
     }
     //==========================================================================================
     // Function, TakeDamage
@@ -131,6 +140,22 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
         else
         {
             StartCoroutine(flashRed());
+            StartCoroutine(playHurtSound());
+        }
+    }
+    //==========================================================================================
+    // Function, Play Hurt Sound
+    //==========================================================================================
+    IEnumerator playHurtSound() {
+        if (!hurtSoundPlaying) {
+            hurtSoundPlaying = true;
+            if (hurtEffects.Count() > 0) {
+                int randomInt = Random.Range(0, hurtEffects.Count());
+                float randomVolume = Random.Range(-hurtSoundVolume * 0.9f, hurtSoundVolume * 0.9f);
+                AudioSource.PlayClipAtPoint(hurtEffects[randomInt], gameObject.transform.position, (hurtSoundVolume + randomVolume));
+                yield return new WaitForSeconds(hurtEffects[randomInt].length);
+            }
+            hurtSoundPlaying = false;
         }
     }
     //==========================================================================================
@@ -162,15 +187,27 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
         if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolveFlash()); }
         yield return null;
     }
-
-
     //==========================================================================================
-
+    // Function, Update Player UI
+    //==========================================================================================
     public void updatePlayerUI() {
         //fixed
         gameManager.instance.playerHPBAR.fillAmount = (float)HP / HPOrig;
     }
-
+    //==========================================================================================
+    // Function, get Gun Stats
+    //==========================================================================================
+    public void updatePlayerAmmo() {
+        if (gunInv.Count > 0)
+        {
+            gameManager.instance.AmmoCount.text = $"{gunInv[gunInvPos].ammoCurr} / {gunInv[gunInvPos].ammoMax}";
+        } else {
+            gameManager.instance.AmmoCount.text = "0 / 0";
+        }
+    }
+    //==========================================================================================
+    // Function, Flash Damage
+    //==========================================================================================
     IEnumerator flashDamage() {
         gameManager.instance.playerDamageScreen.SetActive(true);
         yield return new WaitForSeconds(0.1f);
@@ -191,6 +228,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
     void changeGun()
     {
         // Assign Visuals
+        updatePlayerAmmo();
         gunModel.GetComponent<MeshFilter>().sharedMesh = gunInv[gunInvPos].gunModel.GetComponent<MeshFilter>().sharedMesh;
         gunModel.GetComponent<MeshRenderer>().sharedMaterial = gunInv[gunInvPos].gunModel.GetComponent<MeshRenderer>().sharedMaterial;
     }
@@ -217,6 +255,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun {
         controller.transform.position = gameManager.instance.playerSpawnPos.transform.position;
         Physics.SyncTransforms();
         HP = HPOrig;
+        updatePlayerAmmo();
         updatePlayerUI();
     }
     //==============================================================================================

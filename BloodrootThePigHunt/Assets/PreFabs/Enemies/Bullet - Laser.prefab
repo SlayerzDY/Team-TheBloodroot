@@ -54,6 +54,8 @@ MonoBehaviour:
   bulletSpeed: 50
   bulletDestroyTime: 3
   hitEffect: {fileID: 5584602140419805224, guid: 965221b72cdf3694ba411a9830b83587, type: 3}
+  soundEffect: {fileID: 8300000, guid: 5dd9394a011d8584bbe6ccef7f9b484b, type: 3}
+  soundEffectVolume: 0.1
 --- !u!135 &842533775542283392
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -128,7 +130,7 @@ TrailRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a217f32cd7765344bb5c38420b2dde70, type: 2}
+  - {fileID: 2100000, guid: 687cf3e1fcde4f94da88de64153bf577, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -173,7 +175,7 @@ TrailRenderer:
       m_RotationOrder: 4
     colorGradient:
       serializedVersion: 2
-      key0: {r: 1, g: 1, b: 1, a: 1}
+      key0: {r: 0, g: 0.9616326, b: 1, a: 1}
       key1: {r: 1, g: 1, b: 1, a: 1}
       key2: {r: 0, g: 0, b: 0, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}
@@ -198,7 +200,7 @@ TrailRenderer:
       atime6: 0
       atime7: 0
       m_Mode: 0
-      m_ColorSpace: -1
+      m_ColorSpace: 0
       m_NumColorKeys: 2
       m_NumAlphaKeys: 2
     numCornerVertices: 0

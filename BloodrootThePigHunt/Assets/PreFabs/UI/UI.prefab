@@ -422,7 +422,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1359993458922230127
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2112,8 +2112,9 @@ MonoBehaviour:
   menuWin: {fileID: 2948344646326536840}
   menuLose: {fileID: 7086992469718103497}
   menuMain: {fileID: 0}
-  menuInteract: {fileID: 701768318657575118}
   gameGoalCountText: {fileID: 8031494219967674828}
+  menuInteractable: {fileID: 701768318657575118}
+  checkpointPopup: {fileID: 0}
   playerHPBAR: {fileID: 1411499489902191747}
   playerDamageScreen: {fileID: 1444502448621085331}
   isPaused: 0
