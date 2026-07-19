@@ -461,9 +461,9 @@ public class waveManager : MonoBehaviour
                     canvas.transform,
                     new Vector2(0.5f, 1f),
                     new Vector2(0.5f, 1f),
-                    new Vector2(0f, -55f),
-                    new Vector2(860f, 190f),
-                    34f,
+                    new Vector2(0f, -38f),
+                    new Vector2(760f, 120f),
+                    24f,
                     TextAlignmentOptions.Center);
 
             RectTransform titleRect =
@@ -553,19 +553,19 @@ public class waveManager : MonoBehaviour
         titleRect.pivot =
             new Vector2(0.5f, 1f);
         titleRect.anchoredPosition =
-            new Vector2(0f, -55f);
+            new Vector2(0f, -38f);
         titleRect.sizeDelta =
-            new Vector2(860f, 190f);
+            new Vector2(760f, 120f);
 
-        waveTitleText.fontSize = 34f;
-        waveTitleText.fontSizeMin = 20f;
-        waveTitleText.fontSizeMax = 36f;
+        waveTitleText.fontSize = 24f;
+        waveTitleText.fontSizeMin = 12f;
+        waveTitleText.fontSizeMax = 26f;
         waveTitleText.enableAutoSizing = true;
         waveTitleText.fontStyle = FontStyles.Bold;
         waveTitleText.alignment = TextAlignmentOptions.Center;
-        waveTitleText.overflowMode = TextOverflowModes.Overflow;
+        waveTitleText.overflowMode = TextOverflowModes.Truncate;
         waveTitleText.enableWordWrapping = true;
-        waveTitleText.outlineWidth = 0.18f;
+        waveTitleText.outlineWidth = 0.12f;
         waveTitleText.outlineColor = Color.black;
 
         Shadow shadow =
@@ -580,7 +580,7 @@ public class waveManager : MonoBehaviour
         shadow.effectColor =
             new Color(0f, 0f, 0f, 0.85f);
         shadow.effectDistance =
-            new Vector2(3f, -3f);
+            new Vector2(2f, -2f);
         shadow.useGraphicAlpha = true;
     }
 
@@ -595,8 +595,8 @@ public class waveManager : MonoBehaviour
         if (ActiveBloodMoonModifier != null)
         {
             titleText =
-                "<size=115%>BLOOD MOON</size>\n" +
-                $"<size=92%>Wave {currentWave}: " +
+                "<size=95%>BLOOD MOON</size>\n" +
+                $"<size=74%>Wave {currentWave}: " +
                 $"{ActiveBloodMoonModifier.DisplayName}</size>";
 
             if (!string.IsNullOrWhiteSpace(
@@ -604,7 +604,7 @@ public class waveManager : MonoBehaviour
             {
                 titleText +=
                     "\n" +
-                    $"<size=68%>{ActiveBloodMoonModifier.Description}</size>";
+                    $"<size=52%>{ActiveBloodMoonModifier.Description}</size>";
             }
 
             titleColor = bloodMoonTitleColor;
@@ -612,8 +612,8 @@ public class waveManager : MonoBehaviour
         else
         {
             titleText =
-                $"<size=105%>Wave {currentWave}</size>\n" +
-                $"<size=75%>{GetWaveSubtitle()}</size>";
+                $"<size=88%>Wave {currentWave}</size>\n" +
+                $"<size=58%>{GetWaveSubtitle()}</size>";
 
             titleColor = normalTitleColor;
         }
