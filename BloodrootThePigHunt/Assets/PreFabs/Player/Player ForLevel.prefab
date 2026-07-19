@@ -67,8 +67,24 @@ MonoBehaviour:
   gravity: 35
   gunInv: []
   gunModel: {fileID: 1066978495516895627}
-  hurtEffects: []
-  hurtSoundVolume: 0
+  hurtEffects:
+  - {fileID: 8300000, guid: 7d5183fac52d6af48aed08a209b4021b, type: 3}
+  - {fileID: 8300000, guid: 7ecd4de074eb0354990ea41b0bfe5dba, type: 3}
+  - {fileID: 8300000, guid: ee0c04d40f67ece4eac5817d629fb0ea, type: 3}
+  hurtSoundVolume: 0.5
+  deathEffects:
+  - {fileID: 8300000, guid: 26184e98a99511d46819b0af8706cb2d, type: 3}
+  - {fileID: 8300000, guid: f4197fb37368f5b4d8a344bb3aead7d6, type: 3}
+  - {fileID: 8300000, guid: 39edbe6c9d884e542864d0230ac62c87, type: 3}
+  deathSoundVolume: 0.5
+  jumpEffects:
+  - {fileID: 8300000, guid: 6eb83c21794e40e42824873069585820, type: 3}
+  - {fileID: 8300000, guid: 2d99f035fc00f814eaa385c3dbd7d4cd, type: 3}
+  - {fileID: 8300000, guid: ab7642e6007b2b64a8d5a56bced5cacf, type: 3}
+  jumpSoundVolume: 0.5
+  flashlight: {fileID: 0}
+  flashlightButton: Fire2
+  flashlightKey: 102
   shootPos: {fileID: 1463361488324195338}
 --- !u!114 &5866416298092808745
 MonoBehaviour:
@@ -245,6 +261,8 @@ MonoBehaviour:
   targetCamera: {fileID: 3261428443401425}
   distortionOverlay: {fileID: 0}
   heartbeatSource: {fileID: 9110262877870075996}
+  overlayColor: {r: 0.85, g: 0, b: 0, a: 1}
+  overlaySortingOrder: -20
   maximumOverlayAlpha: 0.55
   maximumFovPulse: 3
   pulseSpeed: 3
