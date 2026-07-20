@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1697857348470259116}
+  - component: {fileID: 2786266271031063652}
   - component: {fileID: 7587202129913135225}
   m_Layer: 15
   m_Name: EnemyIcon
@@ -32,6 +33,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+--- !u!114 &2786266271031063652
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5452894286068576347}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b8b4f104a9738e4d83f07250b4b4433, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RadarIcons
+  spRender: {fileID: 7587202129913135225}
+  playerPos: {fileID: 0}
+  radarLine: {fileID: 0}
+  pingRadius: 40
+  fadeSpeed: 0.5
+  sweepWidth: 5
 --- !u!212 &7587202129913135225
 SpriteRenderer:
   serializedVersion: 3
