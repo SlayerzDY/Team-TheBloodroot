@@ -25,12 +25,14 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     // Weapon Stats
     [SerializeField] List<gunStats> gunInv = new List<gunStats>();
     [SerializeField] GameObject gunModel;
-    [SerializeField] AudioClip[] hurtEffects;
-    [Range(0f, 1f)] [SerializeField] float hurtSoundVolume;
-    [SerializeField] AudioClip[] deathEffects;
-    [Range(0f, 1f)][SerializeField] float deathSoundVolume;
-    [SerializeField] AudioClip[] jumpEffects;
-    [Range(0f, 1f)][SerializeField] float jumpSoundVolume;
+    [SerializeField] AudioClip[] audHurt;
+    [Range(0f, 1f)] [SerializeField] float audHurtVolume;
+    [SerializeField] AudioClip[] audDeath;
+    [Range(0f, 1f)][SerializeField] float audDeathVolume;
+    [SerializeField] AudioClip[] audJump;
+    [Range(0f, 1f)][SerializeField] float audJumpVolume;
+    [SerializeField] AudioClip[] audSteps;
+    [Range(0f, 1f)][SerializeField] float audStepsVolume;
     // Flashlight Stats
     [SerializeField] flashlightStats flashlight;
     [SerializeField] string flashlightButton = "Fire2";
@@ -53,7 +55,8 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     float shootTimer;
     Vector3 moveDir;
     Vector3 playerVel;
-    private bool soundPlaying = false;
+    bool isSprinting;
+    bool isPlayingSteps;
     //==========================================================================================
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     //==========================================================================================
@@ -79,6 +82,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         if (controller.isGrounded) {
             playerVel.y = 0;
             jumpCount = 0;
+            if (moveDir.magnitude > 0.3f && isPlayingSteps == false) { StartCoroutine(playSteps()); }
         }
         // kill after the plus to make Side Scroller
         moveDir = Input.GetAxis("Horizontal") * transform.right + Input.GetAxis("Vertical") * transform.forward;
@@ -104,11 +108,29 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         }
     }
     //==========================================================================================
+    // Function, Play Steps
+    //==========================================================================================
+    IEnumerator playSteps()
+    {
+        isPlayingSteps = true;
+        if (audSteps.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(audSteps[Random.Range(0, audSteps.Length)], audStepsVolume); }
+        if (isSprinting)
+        {
+            yield return new WaitForSeconds(0.3f);
+        }
+        else
+        {
+            yield return new WaitForSeconds(0.5f);
+        }
+        isPlayingSteps = false;
+    }
+    //==========================================================================================
     // Function, Movement
     //==========================================================================================
     void jump() {
         if (Input.GetButtonDown("Jump") && jumpCount < jumpMax) {
-            StartCoroutine(playRandomSound(jumpEffects, jumpSoundVolume));
+            //StartCoroutine(playRandomSound(jumpEffects, jumpSoundVolume));
+            if (audJump.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(audJump[Random.Range(0, audJump.Length)], audJumpVolume); }
             playerVel.y = jumpSpeed;
             jumpCount++;
         }
@@ -124,9 +146,10 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         updatePlayerAmmo();
 
         if (gunInv[gunInvPos].shootSound.Count() > 0) {
-            int randomInt = Random.Range(0, gunInv[gunInvPos].shootSound.Count());
-            float randomShotVolume = Random.Range(-gunInv[gunInvPos].shootSoundVolume * 0.9f, gunInv[gunInvPos].shootSoundVolume * 0.9f);
-            AudioSource.PlayClipAtPoint(gunInv[gunInvPos].shootSound[randomInt], gameObject.transform.position, (gunInv[gunInvPos].shootSoundVolume + randomShotVolume)); 
+            if (gunInv[gunInvPos].shootSound.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(gunInv[gunInvPos].shootSound[Random.Range(0, gunInv[gunInvPos].shootSound.Length)], gunInv[gunInvPos].shootSoundVolume); }
+            //int randomInt = Random.Range(0, gunInv[gunInvPos].shootSound.Count());
+            //float randomShotVolume = Random.Range(-gunInv[gunInvPos].shootSoundVolume * 0.9f, gunInv[gunInvPos].shootSoundVolume * 0.9f);
+            //AudioSource.PlayClipAtPoint(gunInv[gunInvPos].shootSound[randomInt], gameObject.transform.position, (gunInv[gunInvPos].shootSoundVolume + randomShotVolume)); 
         }
 
         //Cursor aimer for guns should just get the middle of the monitor then instantiate the bullet
@@ -158,11 +181,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
 
     void reload() {
         if (Input.GetButtonDown("Reload") && gunInv.Count > 0) {
-            if (gunInv[gunInvPos].reloadSound.Count() > 0) {
-                int randomInt = Random.Range(0, gunInv[gunInvPos].shootSound.Count());
-                float randomShotVolume = Random.Range(-gunInv[gunInvPos].shootSoundVolume * 0.9f, gunInv[gunInvPos].shootSoundVolume * 0.9f);
-                AudioSource.PlayClipAtPoint(gunInv[gunInvPos].reloadSound[randomInt], gameObject.transform.position, (gunInv[gunInvPos].shootSoundVolume + randomShotVolume));
-            }
+            if (gunInv[gunInvPos].reloadSound.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(gunInv[gunInvPos].reloadSound[Random.Range(0, gunInv[gunInvPos].reloadSound.Length)], gunInv[gunInvPos].reloadSoundVolume); }
             gunInv[gunInvPos].ammoCurr = gunInv[gunInvPos].ammoMax;
             updatePlayerAmmo();
         }
@@ -184,24 +203,23 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         else
         {
             StartCoroutine(flashRed());
-            StartCoroutine(playRandomSound(hurtEffects, hurtSoundVolume));
+            //StartCoroutine(playRandomSound(hurtEffects, hurtSoundVolume));
+            if (audHurt.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(audHurt[Random.Range(0, audHurt.Length)], audHurtVolume); }
         }
     }
     //==========================================================================================
     // Function, Play Hurt Sound
     //==========================================================================================
-    IEnumerator playRandomSound(AudioClip[] array, float volume) {
-        if (!soundPlaying) {
-            soundPlaying = true;
-            if (array.Count() > 0) {
-                int randomInt = Random.Range(0, array.Count());
-                float randomVolume = Random.Range(-volume * 0.9f, volume * 0.9f);
-                AudioSource.PlayClipAtPoint(array[randomInt], gameObject.transform.position, (volume + randomVolume));
-                yield return new WaitForSeconds(array[randomInt].length);
-            }
-            soundPlaying = false;
-        }
-    }
+//    IEnumerator playRandomSound(AudioClip[] array, float volume) {
+//        if (!soundPlaying) {
+//            soundPlaying = true;
+//            if (array.Count() > 0) {
+//audioManager.instance.audPlayer.PlayOneShot(audJump[Random.Range(0, audJump.Length)], audJumpVolume);
+//                yield return new WaitForSeconds(array[randomInt].length);
+//            }
+//            soundPlaying = false;
+//        }
+//    }
     //==========================================================================================
     // Function, OnDeath
     //==========================================================================================
@@ -214,7 +232,8 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         Dissolver dissolver = GetComponent<Dissolver>();
         if (dissolver != null)
         {
-            playRandomSound(deathEffects, deathSoundVolume);
+            //playRandomSound(deathEffects, deathSoundVolume);
+            if (audDeath.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(audDeath[Random.Range(0, audDeath.Length)], audDeathVolume); }
             dissolver.StartCoroutine(dissolver.dissolve());
         }
         gameManager.instance.youLose();
@@ -406,7 +425,8 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
 
         if (flashlight.toggleSound.Count() > 0)
         {
-            StartCoroutine(playRandomSound(flashlight.toggleSound, flashlight.flashlightSoundVolume));
+            //StartCoroutine(playRandomSound(flashlight.toggleSound, flashlight.flashlightSoundVolume));
+            if (flashlight.toggleSound.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(flashlight.toggleSound[Random.Range(0, flashlight.toggleSound.Length)], flashlight.flashlightSoundVolume); }
         }
 
         updateFlashlightUI();
@@ -498,7 +518,8 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
 
         if (lowBattery && Time.time >= lowBatterySoundTimer && flashlight.batteryLowSound.Count() > 0)
         {
-            StartCoroutine(playRandomSound(flashlight.batteryLowSound, flashlight.flashlightSoundVolume));
+            //StartCoroutine(playRandomSound(flashlight.batteryLowSound, flashlight.flashlightSoundVolume));
+            if (flashlight.batteryLowSound.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(flashlight.batteryLowSound[Random.Range(0, flashlight.batteryLowSound.Length)], flashlight.flashlightSoundVolume); }
             lowBatterySoundTimer = Time.time + 3;
         }
     }
