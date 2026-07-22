@@ -103,13 +103,37 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 5448223700837471630}
     m_Modifications:
+    - target: {fileID: 36246774015967658, guid: e1ce03fef491c0348b78803a7cc428bb, type: 3}
+      propertyPath: zoneAmount
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 36246774015967658, guid: e1ce03fef491c0348b78803a7cc428bb, type: 3}
+      propertyPath: spawnPoints.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 36246774015967658, guid: e1ce03fef491c0348b78803a7cc428bb, type: 3}
+      propertyPath: 'spawnPoints.Array.data[0]'
+      value: 
+      objectReference: {fileID: 5096653689424236011}
     - target: {fileID: 538930258288199506, guid: e1ce03fef491c0348b78803a7cc428bb, type: 3}
       propertyPath: m_Name
       value: Infestation Spawner
       objectReference: {fileID: 0}
+    - target: {fileID: 6545990934285760648, guid: e1ce03fef491c0348b78803a7cc428bb, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 5.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6545990934285760648, guid: e1ce03fef491c0348b78803a7cc428bb, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.57
+      objectReference: {fileID: 0}
+    - target: {fileID: 6545990934285760648, guid: e1ce03fef491c0348b78803a7cc428bb, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.2
+      objectReference: {fileID: 0}
     - target: {fileID: 6652718076606934348, guid: e1ce03fef491c0348b78803a7cc428bb, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 81.9
+      value: 92.1
       objectReference: {fileID: 0}
     - target: {fileID: 6652718076606934348, guid: e1ce03fef491c0348b78803a7cc428bb, type: 3}
       propertyPath: m_LocalPosition.y
@@ -117,7 +141,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6652718076606934348, guid: e1ce03fef491c0348b78803a7cc428bb, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 100
+      value: 68.9
       objectReference: {fileID: 0}
     - target: {fileID: 6652718076606934348, guid: e1ce03fef491c0348b78803a7cc428bb, type: 3}
       propertyPath: m_LocalRotation.w
@@ -148,12 +172,49 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 3403487210675412992, guid: e1ce03fef491c0348b78803a7cc428bb, type: 3}
+    - {fileID: 1728967794696363351, guid: e1ce03fef491c0348b78803a7cc428bb, type: 3}
+    - {fileID: 8967107596397805974, guid: e1ce03fef491c0348b78803a7cc428bb, type: 3}
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6975027932341373004, guid: e1ce03fef491c0348b78803a7cc428bb, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8660104687031834336}
   m_SourcePrefab: {fileID: 100100000, guid: e1ce03fef491c0348b78803a7cc428bb, type: 3}
 --- !u!4 &4625698485506578479 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6652718076606934348, guid: e1ce03fef491c0348b78803a7cc428bb, type: 3}
   m_PrefabInstance: {fileID: 2045473795603920227}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &5096653689424236011 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6545990934285760648, guid: e1ce03fef491c0348b78803a7cc428bb, type: 3}
+  m_PrefabInstance: {fileID: 2045473795603920227}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8984326554950958383 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6975027932341373004, guid: e1ce03fef491c0348b78803a7cc428bb, type: 3}
+  m_PrefabInstance: {fileID: 2045473795603920227}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &8660104687031834336
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8984326554950958383}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 75, y: 1, z: 125}
+  m_Center: {x: 0, y: 0, z: 0}

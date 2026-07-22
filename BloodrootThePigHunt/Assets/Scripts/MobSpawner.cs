@@ -1,5 +1,6 @@
-using UnityEngine;
 using Bloodroot.Features.BloodMoon;
+using UnityEngine;
+using UnityEngine.AI;
 
 
 
@@ -110,8 +111,11 @@ public class MobSpawner : MonoBehaviour
         if (!TryGetSpawnPoint(out Vector3 Spawn, out Quaternion Rotation))
             return;
 
+        NavMeshHit hit;
+        NavMesh.SamplePosition(Spawn, out hit, spawnRadius, 1);
+
         GameObject spawnedPig =
-            Instantiate(regularPig, Spawn, Rotation);
+            Instantiate(regularPig, hit.position, Rotation);    
 
         RegularHog hog =
             spawnedPig.GetComponent<RegularHog>();
@@ -141,8 +145,11 @@ public class MobSpawner : MonoBehaviour
             return;
         }
 
+        NavMeshHit hit;
+        NavMesh.SamplePosition(Spawn, out hit, spawnRadius, 1);
+
         GameObject spawnedEnemy =
-            Instantiate(enemyToSpawn, Spawn, Rotation);
+            Instantiate(enemyToSpawn, hit.position, Rotation);
 
         if (manager == null)
         {
@@ -217,13 +224,29 @@ public class MobSpawner : MonoBehaviour
             return false;
         }
 
-        Vector2 randomCircle =
-            Random.insideUnitCircle * spawnRadius;
+        BoxCollider box = center.GetComponent<BoxCollider>();
 
-        Vector3 randomOffset =
-            new Vector3(randomCircle.x, 0, randomCircle.y);
+        if (box != null)
+        {
+            Bounds bounds = box.bounds;
 
-        Spawn = center.position + randomOffset;
+            float x = Random.Range(bounds.min.x, bounds.max.x);
+            float z = Random.Range(bounds.min.z, bounds.max.z);
+
+            Spawn = new Vector3(x, center.position.y, z);
+        }
+        else
+        {
+            Spawn = center.position;
+        }
+
+        //Vector2 randomCircle =
+        //    Random.insideUnitCircle * spawnRadius;
+
+        //Vector3 randomOffset =
+        //    new Vector3(randomCircle.x, 0, randomCircle.y);
+
+        //Spawn = center.position + randomOffset;
         Rotation = center.rotation;
         return true;
     }

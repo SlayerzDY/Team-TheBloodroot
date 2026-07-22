@@ -150,11 +150,16 @@ public class InfestationSpawner : MonoBehaviour
                 {
                     Transform center = spawnPoints[Random.Range(0, spawnPoints.Length)];
 
-                    Vector2 offset = Random.insideUnitCircle * spawnRadius;
+                    Vector3 candidate = center.position;
+                    BoxCollider box = center.GetComponent<BoxCollider>();
 
-                    Vector3 candidate = center.position + new Vector3(offset.x, 0, offset.y);
-
-                    // candidate.y = 0f;
+                    if (box != null)
+                    {
+                        Bounds bounds = box.bounds;
+                        float x = Random.Range(bounds.min.x, bounds.max.x);
+                        float z = Random.Range(bounds.min.z, bounds.max.z);
+                        candidate = new Vector3(x, center.position.y, z);
+                    }
 
                     if (CurrentTerrain)
                     {
