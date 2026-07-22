@@ -162,17 +162,29 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         else { 
             TargetPos = aimRay.GetPoint(gunInv[gunInvPos].shootDistance);
         }
+
         Vector3 shootDir = (TargetPos - shootPos.position).normalized;
+        int mBullets = gunInv[gunInvPos].bulletCount;
+        float spread = gunInv[gunInvPos].spread;
 
-        GameObject bullet = 
-            Instantiate(gunInv[gunInvPos].bullet, shootPos.position, Quaternion.LookRotation(shootDir));
-
-        Damage bulletDamage =
-            bullet.GetComponent<Damage>();
-
-        if (bulletDamage != null)
+        for (int i = 0; i < mBullets; i++)
         {
-            bulletDamage.SetPlayerBullet(true);
+
+            Quaternion spreadRotate = Quaternion.Euler(Random.Range(-spread, spread), Random.Range(-spread, spread), 0);
+
+            Vector3 NewShootDir = spreadRotate * shootDir;
+
+            GameObject bullet =
+                Instantiate(gunInv[gunInvPos].bullet, shootPos.position, Quaternion.LookRotation(NewShootDir));
+
+            Damage bulletDamage =
+                bullet.GetComponent<Damage>();
+
+            if (bulletDamage != null)
+            {
+                bulletDamage.SetPlayerBullet(true);
+            }
+
         }
     }
     //==========================================================================================

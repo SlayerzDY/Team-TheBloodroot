@@ -52,7 +52,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3865add71eef4754e9ac44b0909da539, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Interact
-  InteractRange: 300
+  InteractRange: 4
   InteractLayer:
     serializedVersion: 2
     m_Bits: 1024
@@ -90,6 +90,8 @@ MonoBehaviour:
   bulletSpeed: 0
   bulletDestroyTime: 0
   hitEffect: {fileID: 0}
+  soundEffect: {fileID: 0}
+  soundEffectVolume: 0
 --- !u!114 &1020576846346886962
 MonoBehaviour:
   m_ObjectHideFlags: 0

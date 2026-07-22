@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Gun - Pistol
   m_EditorClassIdentifier: Assembly-CSharp::gunStats
   gunModel: {fileID: 5571641588984482722, guid: c303a18f1cbdd4156b139b9e5b35d6a9, type: 3}
-  shootDamage: 1
+  shootDamage: 3
   shootDistance: 150
   shootRate: 1
   ammoCurr: 9
@@ -25,3 +25,5 @@ MonoBehaviour:
   reloadSound:
   - {fileID: 8300000, guid: e06dcf32840ccef49bc17eb181573de8, type: 3}
   reloadSoundVolume: 0.2
+  bulletCount: 1
+  spread: 0
