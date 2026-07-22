@@ -1,9 +1,9 @@
 //==============================================================================================
 // Using Unity Engine
 //==============================================================================================
-using System.Collections;
 using UnityEngine;
-using UnityEngine.Audio;
+using System.Collections;
+using Unity.VisualScripting;
 //==============================================================================================
 // Instructions for Using the Dissolve Script
 //==============================================================================================
@@ -26,18 +26,13 @@ using UnityEngine.Audio;
 //==============================================================================================
 // Declare Dissolver
 //==============================================================================================
-public class Dissolver : MonoBehaviour {
+public class Dissolver : MonoBehaviour
+{
     //==========================================================================================
     // Declare Variables
     //==========================================================================================
     [SerializeField] Material dissolveMaterial;
     [SerializeField] Renderer model;
-    [SerializeField] AudioClip dissolveDamage;
-    [SerializeField] AudioClip dissolveDeath;
-    [SerializeField, Range(0f, 1f)] float damageVolume = 0.25f;
-    [SerializeField, Range(0f, 1f)] float deathVolume = 0.35f;
-    [SerializeField, Min(0.1f)] float maxDamageSoundTime = 0.6f;
-    [SerializeField, Min(0.1f)] float maxDeathSoundTime = 1.25f;
     [SerializeField] float dissolveDuration = 10f;
     [SerializeField] float dissolveStrength = 0;
     [SerializeField] float flashDuration = 0.5f;
@@ -48,31 +43,25 @@ public class Dissolver : MonoBehaviour {
     // Function, Start
     //==========================================================================================
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start() {
+    void Start()
+    {
         colorOrig = model.material.color;
-    }
-    //==========================================================================================
-    // Function, Update
-    //==========================================================================================
-    // Update is called once per frame
-    void Update() {
-        
     }
     //==========================================================================================
     // Function, dissolve
     //==========================================================================================
-    public IEnumerator dissolve()
-    {
-        PlayShortClip(dissolveDeath, deathVolume, maxDeathSoundTime);
+    public IEnumerator dissolve(bool playerDeath = false) {
+        if (playerDeath) {
+            StartCoroutine(dissolveFlash(true));
+            yield break;
+        }
         Renderer[] allRenderers = GetComponentsInChildren<Renderer>();
-        for (int i = 0; i < allRenderers.Length; i++)
-        {
+        for (int i = 0; i < allRenderers.Length; i++) {
             allRenderers[i].sharedMaterial = dissolveMaterial;
         }
         float elapsedTime = 0;
         dissolveMaterial.SetColor("_Color", colorOrig);
-        while (elapsedTime < dissolveDuration)
-        {
+        while (elapsedTime < dissolveDuration) {
             elapsedTime += Time.deltaTime;
             dissolveStrength = Mathf.Lerp(0f, 1f, elapsedTime / dissolveDuration);
             dissolveMaterial.SetFloat("_DissolveStrength", dissolveStrength);
@@ -83,8 +72,9 @@ public class Dissolver : MonoBehaviour {
     //==========================================================================================
     // Function, dissolveFlash
     //==========================================================================================
-    public IEnumerator dissolveFlash() {
-        PlayShortClip(dissolveDamage, damageVolume, maxDamageSoundTime);
+    public IEnumerator dissolveFlash(bool playerDeath = false) {
+        float cacheflashEndStrength = gameManager.instance.player.GetComponent<Dissolver>().flashEndStrength;
+        if (playerDeath) { gameManager.instance.player.GetComponent<Dissolver>().flashEndStrength = 1f; }
         Renderer[] allRenderers = GetComponentsInChildren<Renderer>();
         Material[][] originalMaterials = new Material[allRenderers.Length][];
         for (int i = 0; i < allRenderers.Length; i++) {
@@ -93,49 +83,35 @@ public class Dissolver : MonoBehaviour {
             for (int j = 0; j < dissolveSetup.Length; j++) {
                 dissolveSetup[j] = dissolveMaterial;
             }
-            allRenderers[i].materials = dissolveSetup;
+            allRenderers[i].sharedMaterials = dissolveSetup;
         }
         dissolveMaterial.SetColor("_Color", colorOrig);
         float elapsedTime = 0;
+        // Flash In
         while (elapsedTime < flashDuration) {
             elapsedTime += Time.deltaTime;
             dissolveStrength = Mathf.Lerp(flashStartStrength, flashEndStrength, elapsedTime / flashDuration);
             dissolveMaterial.SetFloat("_DissolveStrength", dissolveStrength);
             yield return null;
         }
+        // Flash Out
         elapsedTime = 0;
-        while (elapsedTime < flashDuration){
+        while (elapsedTime < flashDuration) {
             elapsedTime += Time.deltaTime;
             dissolveStrength = Mathf.Lerp(flashEndStrength, flashStartStrength, elapsedTime / flashDuration);
             dissolveMaterial.SetFloat("_DissolveStrength", dissolveStrength);
             yield return null;
         }
-        dissolveMaterial.SetFloat("_DissolveStrength", flashStartStrength);
+        dissolveStrength = 0f;
+        dissolveMaterial.SetFloat("_DissolveStrength", dissolveStrength);
+        // Restore the original materials back
         for (int i = 0; i < allRenderers.Length; i++) {
-            allRenderers[i].materials = originalMaterials[i];
+            allRenderers[i].sharedMaterials = originalMaterials[i];
         }
-    }
-
-    void PlayShortClip(AudioClip clip, float volume, float maxSeconds)
-    {
-        if (clip == null || volume <= 0f)
-        {
-            return;
-        }
-
-        GameObject soundObject = new GameObject("Dissolve Sound");
-        soundObject.transform.position = transform.position;
-
-        AudioSource source = soundObject.AddComponent<AudioSource>();
-        source.clip = clip;
-        source.volume = volume;
-        source.spatialBlend = 1f;
-        source.Play();
-
-        Destroy(soundObject, Mathf.Min(clip.length, maxSeconds));
+        gameManager.instance.player.GetComponent<Dissolver>().flashEndStrength = cacheflashEndStrength;
     }
     //==========================================================================================
 }
 //==============================================================================================
-// End of Dissolver .cs 
+// End of Dissolver .cs
 //==============================================================================================

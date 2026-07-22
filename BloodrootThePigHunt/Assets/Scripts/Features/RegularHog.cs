@@ -8,6 +8,8 @@ public class RegularHog : MonoBehaviour, IDamage
     [SerializeField, Min(1f)] float wanderRadius = 10f;
     [SerializeField, Min(0.1f)] float directionChangeTime = 2f;
     [SerializeField, Min(0.1f)] float destinationReachDistance = 1f;
+    [SerializeField, Min(0f)] float fleeDistance = 12f;
+    [SerializeField, Range(0f, 2f)] float fleeWeight = 0.75f;
 
     [Header("Sounds")]
     [SerializeField] AudioClip[] movingSounds;
@@ -145,6 +147,7 @@ public class RegularHog : MonoBehaviour, IDamage
             return;
 
         isDead = true;
+        ScoreboardManager.GetOrCreate().AddRegularHogKilled();
         PlayDeathSound();
 
         if (agent != null && agent.isOnNavMesh)
@@ -206,7 +209,10 @@ public class RegularHog : MonoBehaviour, IDamage
 
     private void PickNewDestination()
     {
-        directionTimer = directionChangeTime;
+        directionTimer =
+            Random.Range(
+                directionChangeTime * 0.75f,
+                directionChangeTime * 1.25f);
 
         if (agent == null || !agent.isOnNavMesh)
             return;
@@ -256,10 +262,21 @@ public class RegularHog : MonoBehaviour, IDamage
         if (awayFromPlayer.sqrMagnitude < 0.001f)
             return randomDirection.normalized;
 
+        float playerDistance =
+            awayFromPlayer.magnitude;
+
+        if (playerDistance > fleeDistance)
+            return randomDirection.normalized;
+
         awayFromPlayer.Normalize();
 
-        return
-            (awayFromPlayer * 1.5f + randomDirection * 0.5f).normalized;
+        Vector3 mixedDirection =
+            awayFromPlayer * fleeWeight + randomDirection;
+
+        if (mixedDirection.sqrMagnitude < 0.001f)
+            return randomDirection.normalized;
+
+        return mixedDirection.normalized;
     }
 
     private void PlayMovingSound()

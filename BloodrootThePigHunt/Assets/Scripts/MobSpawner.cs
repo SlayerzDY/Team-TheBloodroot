@@ -1,5 +1,6 @@
-using UnityEngine;
 using Bloodroot.Features.BloodMoon;
+using UnityEngine;
+using UnityEngine.AI;
 
 
 
@@ -110,8 +111,11 @@ public class MobSpawner : MonoBehaviour
         if (!TryGetSpawnPoint(out Vector3 Spawn, out Quaternion Rotation))
             return;
 
+        NavMeshHit hit;
+        NavMesh.SamplePosition(Spawn, out hit, spawnRadius, 1);
+
         GameObject spawnedPig =
-            Instantiate(regularPig, Spawn, Rotation);
+            Instantiate(regularPig, hit.position, Rotation);    
 
         RegularHog hog =
             spawnedPig.GetComponent<RegularHog>();
@@ -141,19 +145,22 @@ public class MobSpawner : MonoBehaviour
             return;
         }
 
+        NavMeshHit hit;
+        NavMesh.SamplePosition(Spawn, out hit, spawnRadius, 1);
+
         GameObject spawnedEnemy =
-            Instantiate(enemyToSpawn, Spawn, Rotation);
-
-        enemyAI enemy = spawnedEnemy.GetComponent<enemyAI>();
-
-        if(enemy != null)
-        {
-            enemy.InitializeEnemy(manager.currentWave);
-        }
+            Instantiate(enemyToSpawn, hit.position, Rotation);
 
         if (manager == null)
         {
             manager = FindAnyObjectByType<waveManager>();
+        }
+
+        enemyAI enemy = spawnedEnemy.GetComponent<enemyAI>();
+
+        if(enemy != null && manager != null)
+        {
+            enemy.InitializeEnemy(manager.currentWave);
         }
 
         if (manager != null)
@@ -172,9 +179,10 @@ public class MobSpawner : MonoBehaviour
 
     }
 
-    // matt here made it so this only spaws certain enemies per wave should have left it to shawns old design but update to change values of how rare
-    //certain enemeis are per wave but I don't exactly knowo how to do that and I don't have thee time right this minute
-    // maybe for prototype 2 if need this can be changed to that
+    // DO NOT CHANGE THIS SHAWN
+    // THIS MAKES IT SO ONLY CERTAIN MOBS SPAWN PER WAVE
+    // also do not delete comments as they can be helpful for future people and give me a way to communicate without 
+    // directly having to ping you 1000 times for an answer
     GameObject GetEnemyToSpawn()
     {
         if (enemies != null && enemies.Length > 0)
@@ -189,7 +197,6 @@ public class MobSpawner : MonoBehaviour
                 return enemies[startIndex];
 
             }
-          
         }
 
         return Enemy;
@@ -217,13 +224,29 @@ public class MobSpawner : MonoBehaviour
             return false;
         }
 
-        Vector2 randomCircle =
-            Random.insideUnitCircle * spawnRadius;
+        BoxCollider box = center.GetComponent<BoxCollider>();
 
-        Vector3 randomOffset =
-            new Vector3(randomCircle.x, 0, randomCircle.y);
+        if (box != null)
+        {
+            Bounds bounds = box.bounds;
 
-        Spawn = center.position + randomOffset;
+            float x = Random.Range(bounds.min.x, bounds.max.x);
+            float z = Random.Range(bounds.min.z, bounds.max.z);
+
+            Spawn = new Vector3(x, center.position.y, z);
+        }
+        else
+        {
+            Spawn = center.position;
+        }
+
+        //Vector2 randomCircle =
+        //    Random.insideUnitCircle * spawnRadius;
+
+        //Vector3 randomOffset =
+        //    new Vector3(randomCircle.x, 0, randomCircle.y);
+
+        //Spawn = center.position + randomOffset;
         Rotation = center.rotation;
         return true;
     }
@@ -233,8 +256,9 @@ public class MobSpawner : MonoBehaviour
         enemiesInWave = totalEnemies;
        // enemiesSpawnedThisWave = 0;
         currentEnemies = 0;
-        maxEnemies = Mathf.Min(10 + manager.currentWave, totalEnemies);
+        maxEnemies = Mathf.Max(0, totalEnemies);
 
-        isWaveActive = true;
+        isWaveActive = maxEnemies > 0;
+        timer = 0f;
     }
 }
