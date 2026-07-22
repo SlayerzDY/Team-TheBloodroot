@@ -48,11 +48,13 @@ public class enemyAI : MonoBehaviour, IDamage
     float angleToPlayer;
     float roamTimer;
     float stoppingDistanceOrig;
+    private bool isUnalived;
     //==========================================================================================
     // Function, Start
     //==========================================================================================
     void Start()
     {
+        isUnalived = false;
         boarBrute = GetComponent<BoarBruteAI>();
         if (model != null) { colorOrig = model.material.color; }
         manager = FindAnyObjectByType<waveManager>();
@@ -135,7 +137,7 @@ public class enemyAI : MonoBehaviour, IDamage
         {
             ScreecherAI screecher = GetComponent<ScreecherAI>();
             if (screecher != null)
-                screecher.Scream();
+                if (!isUnalived) { screecher.Scream(); }
             bool isCharging =
                 boarBrute != null && boarBrute.charging;
 
@@ -166,7 +168,7 @@ public class enemyAI : MonoBehaviour, IDamage
                 chargeCooldownTimer += Time.deltaTime;
                 if (chargeCooldownTimer >= chargeCooldown && playerDir.magnitude > meleeRange * 2f)
                 {
-                    boarBrute.StartCharge();
+                    if (!isUnalived) { boarBrute.StartCharge(); }
                     chargeCooldownTimer = 0f;
                 }
             }
@@ -178,7 +180,7 @@ public class enemyAI : MonoBehaviour, IDamage
                     shootTimer += Time.deltaTime;
                     if (shootTimer >= shootRate && playerDir.magnitude <= meleeRange)
                     {
-                        MeleeAttack();
+                        if (!isUnalived) { MeleeAttack(); }
                     }
                 }
             }
@@ -189,7 +191,7 @@ public class enemyAI : MonoBehaviour, IDamage
                 rotateGun();
                 if (shootTimer >= shootRate)
                 {
-                    shoot();
+                    if (!isUnalived) { shoot(); }
                 }
             }
         } else {
@@ -308,6 +310,7 @@ public class enemyAI : MonoBehaviour, IDamage
     private void Die()
     {
         // Prevent one enemy from being counted twice.
+        isUnalived = true;
         if (isDead)
             return;
 
