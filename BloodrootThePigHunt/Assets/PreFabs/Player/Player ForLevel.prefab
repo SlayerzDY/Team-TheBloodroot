@@ -67,21 +67,32 @@ MonoBehaviour:
   gravity: 35
   gunInv: []
   gunModel: {fileID: 1066978495516895627}
-  hurtEffects:
+  audHurt:
   - {fileID: 8300000, guid: 7d5183fac52d6af48aed08a209b4021b, type: 3}
   - {fileID: 8300000, guid: 7ecd4de074eb0354990ea41b0bfe5dba, type: 3}
   - {fileID: 8300000, guid: ee0c04d40f67ece4eac5817d629fb0ea, type: 3}
-  hurtSoundVolume: 0.5
-  deathEffects:
+  audHurtVolume: 0.1
+  audDeath:
   - {fileID: 8300000, guid: 26184e98a99511d46819b0af8706cb2d, type: 3}
   - {fileID: 8300000, guid: f4197fb37368f5b4d8a344bb3aead7d6, type: 3}
   - {fileID: 8300000, guid: 39edbe6c9d884e542864d0230ac62c87, type: 3}
-  deathSoundVolume: 0.5
-  jumpEffects:
+  audDeathVolume: 0.1
+  audJump:
   - {fileID: 8300000, guid: 6eb83c21794e40e42824873069585820, type: 3}
   - {fileID: 8300000, guid: 2d99f035fc00f814eaa385c3dbd7d4cd, type: 3}
   - {fileID: 8300000, guid: ab7642e6007b2b64a8d5a56bced5cacf, type: 3}
-  jumpSoundVolume: 0.5
+  audJumpVolume: 0.1
+  audSteps:
+  - {fileID: 8300000, guid: 49b8503a09a6cbe40a73f86e223bba19, type: 3}
+  - {fileID: 8300000, guid: d0b4340d80f7ae343b7411a69eeef5c4, type: 3}
+  - {fileID: 8300000, guid: 5c603298cda0be747b5df05bc2b29735, type: 3}
+  - {fileID: 8300000, guid: 10cf7a2d3173665489122d15fd6ba8dc, type: 3}
+  - {fileID: 8300000, guid: 8fcc7e0d6b0dee84f8012599899bd2f5, type: 3}
+  - {fileID: 8300000, guid: daa4a7c75ef8b384fa6880e57aa3d994, type: 3}
+  - {fileID: 8300000, guid: 7103945d56d9c6049b0d25077feb4ab8, type: 3}
+  - {fileID: 8300000, guid: 51927cdc7ee1a5f48b0cdb74ca53f0ba, type: 3}
+  - {fileID: 8300000, guid: 5b107ff74d7157a4c8cec4852cd3adcf, type: 3}
+  audStepsVolume: 0.025
   flashlight: {fileID: 0}
   flashlightButton: Fire2
   flashlightKey: 102
