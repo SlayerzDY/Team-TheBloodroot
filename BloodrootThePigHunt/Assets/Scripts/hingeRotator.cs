@@ -21,16 +21,22 @@ public class hingeRotator : MonoBehaviour, IInteract {
     [Range(0, 1)] public float audCloseSoundVolume;
     private bool isOpen;
     private Coroutine activeRotationRoutine;
+    private Quaternion initialRotation;
     //==========================================================================================
     // Declare Public Functions
+    //==========================================================================================
+    // Function, Awake
+    //------------------------------------------------------------------------------------------
+    private void Awake() {
+        initialRotation = transform.localRotation;
+    }
     //==========================================================================================
     // Function, Door Open
     //------------------------------------------------------------------------------------------
     IEnumerator hingeRotate() {
-        Debug.Log("Interacted With Door");
-        Quaternion targetRotation = Quaternion.Euler(isOpen ? endPosition : startPosition);
-
-        // Smoothly rotate until we are practically at the target rotation
+        Quaternion closedRot = initialRotation * Quaternion.Euler(startPosition);
+        Quaternion openRot = initialRotation * Quaternion.Euler(endPosition);
+        Quaternion targetRotation = isOpen ? openRot : closedRot;
         while (Quaternion.Angle(transform.localRotation, targetRotation) > 0.01f)
         {
             transform.localRotation = Quaternion.RotateTowards(
@@ -40,23 +46,16 @@ public class hingeRotator : MonoBehaviour, IInteract {
             );
             yield return null;
         }
-
-        // Snap precisely to target at the end
         transform.localRotation = targetRotation;
         activeRotationRoutine = null;
     }
     //==========================================================================================
     // Function, Send Interact
     //==========================================================================================
-    public void SendInteract(Collider target)
-    {
-        // Stop any active rotation to prevent weird overlapping movement
-        if (activeRotationRoutine != null)
-        {
+    public void SendInteract(Collider target) {
+        if (activeRotationRoutine != null){
             StopCoroutine(activeRotationRoutine);
         }
-
-        // Toggle state and start coroutine
         isOpen = !isOpen;
         activeRotationRoutine = StartCoroutine(hingeRotate());
     }
