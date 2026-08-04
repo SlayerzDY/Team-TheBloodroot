@@ -140,6 +140,7 @@ public class enemyAI : MonoBehaviour, IDamage
                 if (!isUnalived) { screecher.Scream(); }
             bool isCharging =
                 boarBrute != null && boarBrute.charging;
+                
 
             if (!isCharging &&
                 agent != null &&
