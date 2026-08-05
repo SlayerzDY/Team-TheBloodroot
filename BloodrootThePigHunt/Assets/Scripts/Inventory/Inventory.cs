@@ -31,11 +31,13 @@ public class Inventory : MonoBehaviour {
     //==========================================================================================
     // Function, Add Item
     //------------------------------------------------------------------------------------------
-    public void AddItem(ItemStats item) {
+    public void AddItem(ItemStats item, GameObject objectSpawn) {
         if (currItemAmount >= inventorySize) {
-            Vector3 frontPosition = transform.position + (transform.forward * distance);
-            Quaternion localRotation = transform.localRotation;
-            Instantiate(item, frontPosition, localRotation);
+            Vector3 frontPosition = gameManager.instance.player.transform.position + (gameManager.instance.player.transform.forward * distance);
+            Quaternion localRotation = gameManager.instance.player.transform.localRotation;
+            objectSpawn.GetComponent<Item>().item = item;
+            objectSpawn.GetComponent<Item>().canInteract = true;
+            Instantiate(objectSpawn, frontPosition, localRotation);
             return;
         }
         for (int i = 0; i < inventoryItems.Length; i++) {
