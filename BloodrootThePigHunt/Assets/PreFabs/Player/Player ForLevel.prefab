@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 553067051677788182}
   - component: {fileID: 7458372834616254395}
+  - component: {fileID: 2698765273304631564}
   - component: {fileID: 5866416298092808745}
   - component: {fileID: 5493130786481807139}
   - component: {fileID: 3270623143389209324}
@@ -97,6 +98,21 @@ MonoBehaviour:
   flashlightButton: Fire2
   flashlightKey: 102
   shootPos: {fileID: 1463361488324195338}
+--- !u!114 &2698765273304631564
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 849375705957438419}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31526dd496f5e8044a586f45c8b3209f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory
+  inventorySize: 10
+  inventoryItems: []
+  distance: 5
 --- !u!114 &5866416298092808745
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -109,7 +125,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3865add71eef4754e9ac44b0909da539, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Interact
-  InteractRange: 4
+  InteractRange: 2
   InteractLayer:
     serializedVersion: 2
     m_Bits: 5120
