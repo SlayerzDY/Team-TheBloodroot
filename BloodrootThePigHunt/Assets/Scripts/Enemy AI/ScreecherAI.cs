@@ -11,7 +11,6 @@ public class ScreecherAI  : MonoBehaviour
     float screamTimer;
     public GameObject screamVFX;
 
-
      void Update()
     {
        

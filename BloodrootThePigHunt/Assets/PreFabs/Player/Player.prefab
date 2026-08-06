@@ -239,17 +239,19 @@ MonoBehaviour:
   HP: 30
   speed: 5
   sprintMod: 3
-  jumpSpeed: 12
+  jumpSpeed: 10
   jumpMax: 2
   gravity: 35
   gunInv: []
   gunModel: {fileID: 7837986802194341080}
-  hurtEffects: []
-  hurtSoundVolume: 0
-  deathEffects: []
-  deathSoundVolume: 0
-  jumpEffects: []
-  jumpSoundVolume: 0
+  audHurt: []
+  audHurtVolume: 0
+  audDeath: []
+  audDeathVolume: 0
+  audJump: []
+  audJumpVolume: 0
+  audSteps: []
+  audStepsVolume: 0
   flashlight: {fileID: 0}
   flashlightButton: Fire2
   flashlightKey: 102
