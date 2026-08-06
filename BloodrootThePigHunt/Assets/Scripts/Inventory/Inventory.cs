@@ -3,6 +3,7 @@
 //==============================================================================================
 using System.Linq;
 using UnityEngine;
+using static UnityEditor.Progress;
 //==============================================================================================
 // Declare Inventory
 //==============================================================================================
@@ -31,22 +32,16 @@ public class Inventory : MonoBehaviour {
     //==========================================================================================
     // Function, Add Item
     //------------------------------------------------------------------------------------------
-    public void AddItem(ItemStats item, GameObject objectSpawn) {
+    public void AddItem(GameObject objectSpawn) {
+        // Safety Check, If not Item Return
+        if (objectSpawn.GetComponent<Item>() == null) { return; }
+        // Safety Check, If not ItemStats Return
+        if (objectSpawn.GetComponent<Item>().item == null) { return; }
         if (currItemAmount >= inventorySize) {
-            Vector3 frontPosition = gameManager.instance.player.transform.position + (gameManager.instance.player.transform.forward * distance);
-            Quaternion localRotation = gameManager.instance.player.transform.localRotation;
-            objectSpawn.GetComponent<Item>().item = item;
-            objectSpawn.GetComponent<Item>().canInteract = true;
-            Instantiate(objectSpawn, frontPosition, localRotation);
+            SpawnItem(objectSpawn);
             return;
         }
-        for (int i = 0; i < inventoryItems.Length; i++) {
-            if (inventoryItems[i] == null) {
-                inventoryItems[i] = item;
-                currItemAmount++;
-                break;
-            }
-        }
+        FindNextAvailableIndex(objectSpawn);
     }
     //==========================================================================================
     // Function, Remove Item
@@ -55,7 +50,58 @@ public class Inventory : MonoBehaviour {
 
     }
     //==========================================================================================
-    // Function, Assign Item
+    // Function, Spawn Item
+    //------------------------------------------------------------------------------------------
+    private void SpawnItem(GameObject objectSpawn) {
+        Vector3 frontPosition = gameManager.instance.player.transform.position + (gameManager.instance.player.transform.forward * distance);
+        Quaternion localRotation = gameManager.instance.player.transform.localRotation;
+        //objectSpawn.GetComponent<Item>().item = item;
+        objectSpawn.GetComponent<Item>().canInteract = true;
+        Instantiate(objectSpawn, frontPosition, localRotation);
+    }
+    //==========================================================================================
+    // Function, Spawn Item
+    //------------------------------------------------------------------------------------------
+    private void FindNextAvailableIndex(GameObject objectSpawn) {
+        ItemStats itemStats = objectSpawn.GetComponent<Item>().item;
+        for (int i = 0; i < inventoryItems.Length; i++) {
+            if (inventoryItems[i] == null) {
+                // Set Array Element to ItemStats and break
+                inventoryItems[i] = itemStats;
+                currItemAmount++;
+                break;
+            }
+            if (inventoryItems[i].name == itemStats.name) {
+                if ((itemStats.quantity + inventoryItems[i].quantity) > itemStats.stackSize) {
+                    // Handle overflow
+                    int cacheAmount = (itemStats.quantity + inventoryItems[i].quantity);
+                    int stackSize = itemStats.stackSize;
+                    inventoryItems[i] = itemStats;
+                    inventoryItems[i].quantity = stackSize;
+                    cacheAmount -= stackSize;
+                    currItemAmount++;
+                    while (cacheAmount > stackSize) {
+                        for (int j = 0; j < inventoryItems.Length; j++) {
+                            if (inventoryItems[j] == null) {
+                                inventoryItems[j] = itemStats;
+                                if (cacheAmount > stackSize) {
+                                    inventoryItems[j].quantity = stackSize;
+                                } else {
+                                    inventoryItems[j].quantity = cacheAmount;
+                                    break;
+                                }
+                                cacheAmount -= stackSize;
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    //==========================================================================================
+    // Function, Handle Overflow
     //------------------------------------------------------------------------------------------
 
     //==========================================================================================

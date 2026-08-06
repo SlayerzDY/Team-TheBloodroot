@@ -44,7 +44,7 @@ public class Item : MonoBehaviour, IInteract {
         if (gameManager.instance != null && gameManager.instance.player != null) {
             Inventory playerInv = gameManager.instance.player.GetComponent<Inventory>();
             if (playerInv == null) { return; }
-            playerInv.AddItem(item, target.gameObject);
+            playerInv.AddItem(target.gameObject);
             if (target.GetComponent<Dissolver>() != null) { target.GetComponent<Dissolver>().StartCoroutine(target.GetComponent<Dissolver>().dissolve()); }
         }
     }
