@@ -35,8 +35,6 @@ public class Inventory : MonoBehaviour {
     public void AddItem(GameObject objectSpawn) {
         // Safety Check, If not Item Return
         if (objectSpawn.GetComponent<Item>() == null) { return; }
-        // Safety Check, If not ItemStats Return
-        if (objectSpawn.GetComponent<Item>().item == null) { return; }
         if (currItemAmount >= inventorySize) {
             SpawnItem(objectSpawn);
             return;
@@ -60,50 +58,52 @@ public class Inventory : MonoBehaviour {
         Instantiate(objectSpawn, frontPosition, localRotation);
     }
     //==========================================================================================
-    // Function, Spawn Item
+    // Function, Find Next Available Index
     //------------------------------------------------------------------------------------------
     private void FindNextAvailableIndex(GameObject objectSpawn) {
         ItemStats itemStats = objectSpawn.GetComponent<Item>().item;
-        for (int i = 0; i < inventoryItems.Length; i++) {
-            if (inventoryItems[i] == null) {
-                // Set Array Element to ItemStats and break
-                inventoryItems[i] = itemStats;
-                currItemAmount++;
-                break;
-            }
-            if (inventoryItems[i].name == itemStats.name) {
-                if ((itemStats.quantity + inventoryItems[i].quantity) > itemStats.stackSize) {
-                    // Handle overflow
-                    int cacheAmount = (itemStats.quantity + inventoryItems[i].quantity);
-                    int stackSize = itemStats.stackSize;
-                    inventoryItems[i] = itemStats;
-                    inventoryItems[i].quantity = stackSize;
-                    cacheAmount -= stackSize;
-                    currItemAmount++;
-                    while (cacheAmount > stackSize) {
-                        for (int j = 0; j < inventoryItems.Length; j++) {
-                            if (inventoryItems[j] == null) {
-                                inventoryItems[j] = itemStats;
-                                if (cacheAmount > stackSize) {
-                                    inventoryItems[j].quantity = stackSize;
-                                } else {
-                                    inventoryItems[j].quantity = cacheAmount;
-                                    break;
-                                }
-                                cacheAmount -= stackSize;
-                                break;
-                            }
-                        }
-                    }
-                    break;
-                }
-            }
+        int remaining = itemStats.quantity;
+        // Top off the Existing Item Stack
+        for (int i = 0; i < inventoryItems.Length && remaining > 0; i++) {
+            if (IsSlotEmpty(i)) continue;
+            if (inventoryItems[i].itemName != itemStats.itemName) continue;
+            int space = itemStats.stackSize - inventoryItems[i].quantity;
+            if (space <= 0) continue;
+            int add = Mathf.Min(space, remaining);
+            inventoryItems[i].quantity += add;
+            remaining -= add;
+        }
+        // Assign to Empty Slots
+        for (int i = 0; i < inventoryItems.Length && remaining > 0; i++) {
+            if (!IsSlotEmpty(i)) continue;
+            int add = Mathf.Min(remaining, itemStats.stackSize);
+            inventoryItems[i] = CopyItem(itemStats, add);
+            remaining -= add;
+            currItemAmount++;
         }
     }
     //==========================================================================================
-    // Function, Handle Overflow
+    // Function, Is Slot Empty
     //------------------------------------------------------------------------------------------
-
+    private bool IsSlotEmpty(int index) {
+        return inventoryItems[index] == null || string.IsNullOrEmpty(inventoryItems[index].itemName);
+    }
+    //==========================================================================================
+    // Function, Copy Item
+    //------------------------------------------------------------------------------------------
+    private ItemStats CopyItem(ItemStats source, int qty) {
+        return new ItemStats {
+            itemName = source.itemName,
+            itemDescription = source.itemDescription,
+            icon = source.icon,
+            weight = source.weight,
+            quantity = qty,
+            stackSize = source.stackSize,
+            itemMesh = source.itemMesh,
+            pickupSound = source.pickupSound,
+            itemIncreases = source.itemIncreases
+        };
+    }
     //==========================================================================================
     // Function, Find Item
     //------------------------------------------------------------------------------------------

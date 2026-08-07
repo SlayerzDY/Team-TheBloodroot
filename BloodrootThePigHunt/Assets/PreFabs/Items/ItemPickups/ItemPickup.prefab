@@ -48,7 +48,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: faeb2d9d891020047b718b6eb7d14a24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Item
-  item: {fileID: 11400000, guid: 83080b75256dece4381de5854f4820cb, type: 2}
+  item:
+    itemName: ItemTest
+    itemDescription: ImAnItem
+    icon: {fileID: 0}
+    weight: 0.1
+    quantity: 1
+    stackSize: 1
+    itemMesh: {fileID: 817942340654339044}
+    pickupSound: []
+    itemIncreases: {fileID: 11400000, guid: 1fd5b603596412145bd58b5bbe757e2b, type: 2}
   canInteract: 1
 --- !u!114 &1807892849295950277
 MonoBehaviour:
