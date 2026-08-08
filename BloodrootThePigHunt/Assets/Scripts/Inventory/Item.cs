@@ -2,6 +2,7 @@
 // Using Unity Engine
 //==============================================================================================
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 //==============================================================================================
 // Declare Item
 //==============================================================================================
@@ -14,14 +15,27 @@ public class Item : MonoBehaviour, IInteract {
     //==========================================================================================
     // Declare Functions
     //==========================================================================================
-    // Start
+    //==========================================================================================
+    // Function, Validate (Construction Script)
     //------------------------------------------------------------------------------------------
     private void OnValidate() {
         ApplyMeshToSelf();
         canInteract = true;
+        //if (item != null && item.itemPickup == null &&
+        //    UnityEditor.PrefabUtility.GetPrefabAssetType(gameObject) == UnityEditor.PrefabAssetType.Regular &&
+        //    !UnityEditor.PrefabUtility.IsPartOfPrefabInstance(gameObject))
+        //{
+        //    item.itemPickup = gameObject;
+        //}
     }
     //==========================================================================================
-    // Start
+    // Function, Start
+    //------------------------------------------------------------------------------------------
+    public void Start() {
+        if (this.GetComponent<Dissolver>() != null) { this.GetComponent<Dissolver>().StartCoroutine(this.GetComponent<Dissolver>().dissolveReturn()); }
+    }
+    //==========================================================================================
+    // Function, Apply Mesh to Self
     //------------------------------------------------------------------------------------------
     public void ApplyMeshToSelf() {
         MeshFilter myFilter = GetComponent<MeshFilter>();

@@ -111,9 +111,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31526dd496f5e8044a586f45c8b3209f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Inventory
+  inventoryWeight: 0
+  weightThreshold: 150
   inventorySize: 10
   inventoryItems: []
-  distance: 5
+  distance: 2
+  genericPickupShell: {fileID: 817942340654339044, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
 --- !u!114 &5866416298092808745
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -126,7 +129,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3865add71eef4754e9ac44b0909da539, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Interact
-  InteractRange: 2
+  InteractRange: 3
   InteractLayer:
     serializedVersion: 2
     m_Bits: 5120

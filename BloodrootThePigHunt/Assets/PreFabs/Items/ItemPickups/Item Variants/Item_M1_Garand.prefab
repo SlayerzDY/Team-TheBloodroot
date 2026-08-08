@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 817942340654339044, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: m_Name
-      value: Ammo
+      value: Item_M1_Garand
       objectReference: {fileID: 0}
     - target: {fileID: 4559782537062358527, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: m_LocalPosition.x
@@ -59,18 +59,22 @@ PrefabInstance:
     - target: {fileID: 4822712193961387962, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: item.itemMesh
       value: 
-      objectReference: {fileID: 3248173222732208044}
+      objectReference: {fileID: 4698201593948852689, guid: 185ce04d44da342739f0bef843698e6c, type: 3}
     - target: {fileID: 4822712193961387962, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: item.itemName
-      value: Ammo
+      value: M1 Garand
       objectReference: {fileID: 0}
     - target: {fileID: 4822712193961387962, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: item.stackSize
       value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 4822712193961387962, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
+      propertyPath: item.itemPickup
+      value: 
+      objectReference: {fileID: 3248173222732208044}
+    - target: {fileID: 4822712193961387962, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: item.itemDescription
-      value: Im ammo!
+      value: Im an M1 Garand!
       objectReference: {fileID: 0}
     - target: {fileID: 4942448490666211775, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
