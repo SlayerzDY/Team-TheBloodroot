@@ -56,7 +56,7 @@ public class Inventory : MonoBehaviour {
     //==========================================================================================
     // Declare Functions
     //==========================================================================================
-    // Function, Add Item
+    // Function, Start
     //------------------------------------------------------------------------------------------
     public void Start() {
         // Initialize Inventory
@@ -75,16 +75,40 @@ public class Inventory : MonoBehaviour {
         FindNextAvailableIndex(objectSpawn);
     }
     //==========================================================================================
-    // Function, Remove Item
+    // Overload Function, Add Item (Index)
+    //------------------------------------------------------------------------------------------
+    public void AddItem(GameObject objectSpawn, int index)
+    {
+        // Safety Check, If not Item Return
+        if (objectSpawn.GetComponent<Item>() == null) { return; }
+        if (currItemAmount >= inventorySize)
+        {
+            SpawnItem(objectSpawn.GetComponent<Item>().item);
+            return;
+        }
+        FindNextAvailableIndex(objectSpawn, index);
+    }
+    //==========================================================================================
+    // Function, Remove Item    
     //------------------------------------------------------------------------------------------
     public void RemoveItem(GameObject item, bool spawnItem = true) {
         ItemStats itemStats = item.GetComponent<Item>()?.item;
         if (itemStats == null) { return; }
         if (spawnItem) { SpawnItem(item.GetComponent<Item>().item); }
-        KillItem(itemStats.itemName, itemStats.quantity);
+        KillItem(itemStats.itemName, itemStats.quantity, spawnItem);
     }
     //==========================================================================================
-    // Function Overload, Remove Item By String Name and Amount
+    // Overload Function, Remove Item By Index
+    //------------------------------------------------------------------------------------------
+    public void RemoveItem(GameObject item, bool spawnItem = true, int index = 0)
+    {
+        ItemStats itemStats = item.GetComponent<Item>()?.item;
+        if (itemStats == null) { return; }
+        if (spawnItem) { SpawnItem(item.GetComponent<Item>().item); }
+        KillItem(itemStats.itemName, itemStats.quantity, spawnItem, index);
+    }
+    //==========================================================================================
+    // Overload Function, Remove Item By String Name and Amount
     //------------------------------------------------------------------------------------------
     public void RemoveItem(string name, int amount = 0, bool spawnItem = true) {
         if (name == null) { return; }
@@ -92,7 +116,15 @@ public class Inventory : MonoBehaviour {
         KillItem(name, amount, spawnItem);
     }
     //==========================================================================================
-    // Function, Remove Item (by name/amount — for crafting, consuming, etc.)
+    // Overload Function, Remove Item By String Name and Amount and Index
+    //------------------------------------------------------------------------------------------
+    public void RemoveItem(string name, int amount = 0, bool spawnItem = true, int index = 0) {
+        if (name == null) { return; }
+        if (amount == 0) { return; }
+        KillItem(name, amount, spawnItem, index);
+    }
+    //==========================================================================================
+    // Function, Kill Item (by name/amount — for crafting, consuming, etc.)
     //------------------------------------------------------------------------------------------
     public void KillItem(string itemName, int amount, bool spawnItem = true) {
         int remaining = amount;
@@ -104,6 +136,27 @@ public class Inventory : MonoBehaviour {
             inventoryItems[i].quantity -= take;
             remaining -= take;
             if (inventoryItems[i].quantity <= 0) {
+                inventoryItems[i] = null;
+                currItemAmount--;
+            }
+        }
+    }
+    //==========================================================================================
+    // Overload Function, Kill Item Index
+    //------------------------------------------------------------------------------------------
+    public void KillItem(string itemName, int amount, bool spawnItem, int index = 0)
+    {
+        int remaining = amount;
+        for (int i = index; i < inventoryItems.Length && remaining > 0; i++)
+        {
+            if (IsSlotEmpty(i)) continue;
+            if (inventoryItems[i].itemName != itemName) continue;
+            if (spawnItem) { SpawnItem(inventoryItems[i]); }
+            int take = Mathf.Min(remaining, inventoryItems[i].quantity);
+            inventoryItems[i].quantity -= take;
+            remaining -= take;
+            if (inventoryItems[i].quantity <= 0)
+            {
                 inventoryItems[i] = null;
                 currItemAmount--;
             }
@@ -147,10 +200,75 @@ public class Inventory : MonoBehaviour {
         }
     }
     //==========================================================================================
+    // Function, Find Next Available Index Start Index
+    //------------------------------------------------------------------------------------------
+    private void FindNextAvailableIndex(GameObject objectSpawn, int index = 0)
+    {
+        ItemStats itemStats = objectSpawn.GetComponent<Item>().item;
+        int remaining = itemStats.quantity;
+        // Top off the Existing Item Stack
+        for (int i = index; i < inventoryItems.Length && remaining > 0; i++)
+        {
+            if (IsSlotEmpty(i)) continue;
+            if (inventoryItems[i].itemName != itemStats.itemName) continue;
+            int space = itemStats.stackSize - inventoryItems[i].quantity;
+            if (space <= 0) continue;
+            int add = Mathf.Min(space, remaining);
+            inventoryItems[i].quantity += add;
+            remaining -= add;
+        }
+        // Assign to Empty Slots
+        for (int i = index; i < inventoryItems.Length && remaining > 0; i++)
+        {
+            if (!IsSlotEmpty(i)) continue;
+            int add = Mathf.Min(remaining, itemStats.stackSize);
+            inventoryItems[i] = CopyItem(itemStats, add);
+            remaining -= add;
+            currItemAmount++;
+        }
+    }
+    //==========================================================================================
     // Function, Is Slot Empty
     //------------------------------------------------------------------------------------------
     public bool IsSlotEmpty(int index) {
         return inventoryItems[index] == null || string.IsNullOrEmpty(inventoryItems[index].itemName);
+    }
+    //==========================================================================================
+    // Function, Is Slot Not Empty
+    //------------------------------------------------------------------------------------------
+    public bool IsSlotNotEmpty(int index)
+    {
+        return inventoryItems[index] != null && !string.IsNullOrEmpty(inventoryItems[index].itemName);
+    }
+    //==========================================================================================
+    // Function, Is Valid Index
+    //------------------------------------------------------------------------------------------
+    public bool IsValidIndex(int index) {
+        return index >= 0 && index < inventoryItems.Length;
+    }
+    //==========================================================================================
+    // Function, Is Not Valid Index
+    //------------------------------------------------------------------------------------------
+    public bool IsNotValidIndex(int index) {
+        return index < 0 || index >= inventoryItems.Length;
+    }
+    //==========================================================================================
+    // Overload Function, Is Valid Item
+    //------------------------------------------------------------------------------------------
+    public bool IsValidIndex(GameObject target, int index = 0) {
+        if (target.GetComponent<Item>() == null) { return false; }
+        if (target.GetComponent<Item>().item.itemName == null) { return false; }
+        if (!IsSlotEmpty(index)) { return false; }
+        return true;
+    }
+    //==========================================================================================
+    // Overload Function, Is Valid Item
+    //------------------------------------------------------------------------------------------
+    public bool IsNotValidIndex(GameObject target, int index = 0) {
+        if (target.GetComponent<Item>() == null) { return true; }
+        if (target.GetComponent<Item>().item.itemName == null) { return true; }
+        if (!IsSlotEmpty(index)) { return true; }
+        return false;
     }
     //==========================================================================================
     // Function, Copy Item
@@ -172,19 +290,36 @@ public class Inventory : MonoBehaviour {
     // Function, Find Item
     //------------------------------------------------------------------------------------------
     public ItemStats FindItem(ItemStats item) {
-        foreach (ItemStats searchItem in inventoryItems) {
-            if (searchItem == item) {
-                return searchItem;
+        if (IsNotValidIndex(0)) { return null; }
+        for (int i = 0; i < inventoryItems.Length; i++) {
+            if (IsSlotEmpty(i)) { continue; }
+            if (inventoryItems[i].itemName == item.itemName) {
+                return inventoryItems[i];
             }
         }
         return null;
     }
     //==========================================================================================
+    // Function, Find Item Index
+    //------------------------------------------------------------------------------------------
+    public int FindItem(ItemStats item, int index = 0) {
+        if (IsNotValidIndex(index)) { return -1; }
+        for (int i = index; i < inventoryItems.Length; i++) {
+            if (IsSlotEmpty(i)) { continue; }
+            if (inventoryItems[i].itemName == item.itemName) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    //==========================================================================================
     // Function, Check Item
     //------------------------------------------------------------------------------------------
     public bool CheckItem(ItemStats item) {
-        foreach (ItemStats searchItem in inventoryItems) {
-            if (searchItem == item) {
+        if (IsNotValidIndex(0)) { return false; }
+        for (int i = 0; i < inventoryItems.Length; i++) {
+            if (IsSlotEmpty(i)) { continue; }
+            if (inventoryItems[i].itemName == item.itemName) {
                 // Do something
                 return true;
             }

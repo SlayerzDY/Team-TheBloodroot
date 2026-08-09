@@ -611,7 +611,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         {
             if (!inventory.IsSlotEmpty(i))
             {
-                inventory.RemoveItem(inventory.inventoryItems[i].itemName, 1);
+                inventory.RemoveItem(inventory.inventoryItems[i].itemName, 1, false);
                 break;
             }
         }
