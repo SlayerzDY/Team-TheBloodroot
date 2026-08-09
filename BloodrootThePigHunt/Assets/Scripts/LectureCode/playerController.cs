@@ -71,6 +71,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         if (!gameManager.instance.isPaused) {
             movement();
             useFlashlight();
+            if (Input.GetKeyDown(KeyCode.K)) { RemoveItemFromInventory(); }
         }
         sprint();
     }
@@ -597,6 +598,23 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         HP = HPOrig;
         updatePlayerAmmo();
         updatePlayerUI();
+    }
+    //==========================================================================================
+    // Function, Test Remove Item
+    //==========================================================================================
+    public void RemoveItemFromInventory()
+    {
+        Inventory inventory = GetComponent<Inventory>();
+        if (inventory == null) { return; }
+
+        for (int i = 0; i < inventory.inventoryItems.Length; i++)
+        {
+            if (!inventory.IsSlotEmpty(i))
+            {
+                inventory.RemoveItem(inventory.inventoryItems[i].itemName, 1, false);
+                break;
+            }
+        }
     }
     //==============================================================================================
 }

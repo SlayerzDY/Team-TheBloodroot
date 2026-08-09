@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 553067051677788182}
   - component: {fileID: 7458372834616254395}
+  - component: {fileID: 2698765273304631564}
   - component: {fileID: 5866416298092808745}
   - component: {fileID: 5493130786481807139}
   - component: {fileID: 3270623143389209324}
@@ -19,6 +20,7 @@ GameObject:
   - component: {fileID: 4071077010446742178}
   - component: {fileID: 8271922546407122483}
   - component: {fileID: 9110262877870075996}
+  - component: {fileID: -5048727749985177766}
   m_Layer: 3
   m_Name: Player ForLevel
   m_TagString: Player
@@ -97,6 +99,24 @@ MonoBehaviour:
   flashlightButton: Fire2
   flashlightKey: 102
   shootPos: {fileID: 1463361488324195338}
+--- !u!114 &2698765273304631564
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 849375705957438419}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31526dd496f5e8044a586f45c8b3209f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory
+  inventoryWeight: 0
+  weightThreshold: 150
+  inventorySize: 10
+  inventoryItems: []
+  distance: 2
+  genericPickupShell: {fileID: 817942340654339044, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
 --- !u!114 &5866416298092808745
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -109,7 +129,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3865add71eef4754e9ac44b0909da539, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Interact
-  InteractRange: 4
+  InteractRange: 3
   InteractLayer:
     serializedVersion: 2
     m_Bits: 5120
@@ -374,6 +394,28 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!95 &-5048727749985177766
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 849375705957438419}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: a53208845315ff94cb0c6341bce9348d, type: 3}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 1
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 1
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1066978495516895627
 GameObject:
   m_ObjectHideFlags: 0

@@ -70,6 +70,42 @@ public class Dissolver : MonoBehaviour
         Destroy(gameObject);
     }
     //==========================================================================================
+    // Function, dissolve return
+    //==========================================================================================
+    public IEnumerator dissolveReturn(bool playerDeath = false) {
+        Renderer[] allRenderers = GetComponentsInChildren<Renderer>();
+        Material[][] originalMaterials = new Material[allRenderers.Length][];
+        for (int i = 0; i < allRenderers.Length; i++) {
+            originalMaterials[i] = allRenderers[i].sharedMaterials;
+            Material[] dissolveSetup = new Material[originalMaterials[i].Length];
+            for (int j = 0; j < dissolveSetup.Length; j++) {
+                dissolveSetup[j] = dissolveMaterial;
+            }
+            allRenderers[i].sharedMaterials = dissolveSetup;
+        }
+        if (playerDeath) {
+            StartCoroutine(dissolveFlash(true));
+            yield break;
+        }
+        for (int i = 0; i < allRenderers.Length; i++) {
+            allRenderers[i].sharedMaterial = dissolveMaterial;
+        }
+        float elapsedTime = 0;
+        dissolveMaterial.SetColor("_Color", colorOrig);
+        while (elapsedTime < dissolveDuration) {
+            elapsedTime += Time.deltaTime;
+            dissolveStrength = Mathf.Lerp(1f, 0f, elapsedTime / dissolveDuration);
+            dissolveMaterial.SetFloat("_DissolveStrength", dissolveStrength);
+            yield return null;
+        }
+        dissolveStrength = 0f;
+        // Restore the original materials back
+        for (int i = 0; i < allRenderers.Length; i++) {
+            allRenderers[i].sharedMaterials = originalMaterials[i];
+            dissolveMaterial.SetFloat("_DissolveStrength", dissolveStrength);
+        }
+    }
+    //==========================================================================================
     // Function, dissolveFlash
     //==========================================================================================
     public IEnumerator dissolveFlash(bool playerDeath = false) {
