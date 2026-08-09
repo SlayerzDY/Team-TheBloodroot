@@ -25,7 +25,8 @@ using static UnityEditor.Progress;
  * itemMesh => The mesh of the item(will be used to display the item in the world)
  * pickupSound => The sound that will play when the item is picked up
  * itemIncreases => The hero stats that will be increased when the item is picked up
- * itemPickup => The prefab that will be spawned when the item is picked up(This should be set to self!
+ * itemPickup => The prefab that will be spawned when the item is picked up(This should 
+ * be set to self!
  * 
  * Creating a new Hero Stats Scriptable Object!
  * 1.) Go to Folder Prefabs/Items/ScriptablePowerup/
@@ -33,6 +34,56 @@ using static UnityEditor.Progress;
  * 3.) Paste your new Item_HeroStats prefab into the same folder
  * 4.) Fill out the ItemStats for the new Item_HeroStats prefab variant
  * 5.) Celebrate, you have created a new Item_HeroStats prefab variant
+ * 
+ * ***Comments Assisted by Gemini, Asked for this as my prompt***
+ * Can you give me two lists. One with private and one with public functions and a short 
+ * description of what each function does for my instructions. Head each entry with " * " 
+ * that way I can just paste it in
+ * Public Functions
+ * Start(): Initializes the inventory array size based on the configured inspector settings 
+ * when the script starts.
+ * AddItem(GameObject objectSpawn): Validates and adds an item GameObject to the next 
+ * available inventory slot or stacks it, spawning it into the world if full.
+ * AddItem(GameObject objectSpawn, int index): Adds an item GameObject starting search or 
+ * insertion at a specific inventory index.
+ * RemoveItem(GameObject item, bool spawnItem = true): Removes an item from the inventory 
+ * using its world GameObject reference and optionally spawns a drop.
+ * RemoveItem(GameObject item, bool spawnItem = true, int index = 0): Removes an item from 
+ * a specific inventory index using its world GameObject reference and optional drop behavior.
+ * RemoveItem(string name, int amount = 0, bool spawnItem = true, int index = 0): Master removal 
+ * method 
+ * by item name, quantity, drop toggle, and start index to clear inventory amounts cleanly.
+ * KillItem(string itemName, int amount, bool spawnItem = true): Reduces or clears item quantities 
+ * from the inventory by name across all matching slots.
+ * KillItem(string itemName, int amount, bool spawnItem, int index = 0): Overload to reduce or 
+ * clear item quantities starting from a specified index position.
+ * IsSlotEmpty(int index): Checks if a specific inventory slot index is null or contains an empty 
+ * item name.
+ * IsSlotNotEmpty(int index): Checks if a specific inventory slot index contains a valid item.
+ * IsValidIndex(int index): Validates whether an index falls within the active bounds of the 
+ * inventory array.
+ * IsNotValidIndex(int index): Validates whether an index falls outside the active bounds of the 
+ * inventory array.
+ * IsValidIndex(GameObject target, int index = 0): Validates if a target GameObject has a valid 
+ * item and points to an empty inventory slot at the specified index.
+ * IsNotValidIndex(GameObject target, int index = 0): Validates if a target GameObject lacks a 
+ * valid item or points to a non-empty slot.
+ * FindItem(ItemStats item): Searches the inventory for an item matching the given ItemStats 
+ * and returns its data instance.
+ * FindItem(ItemStats item, int index = 0): Searches the inventory starting from a specific 
+ * index for an item matching the given ItemStats and returns its array index.
+ * CheckItem(ItemStats item): Returns true if the specified ItemStats exists anywhere in the 
+ * inventory array.
+ * Private Functions
+ * SpawnItem(ItemStats objectSpawn): Instantiates a physical pickup world object in front of 
+ * the player using the provided item statistics.
+ * FindNextAvailableIndex(GameObject objectSpawn): Handles stacking items onto existing matches 
+ * or placing them into the next open inventory slot.
+ * FindNextAvailableIndex(GameObject objectSpawn, int index = 0): Handles stacking or placing 
+ * items starting the search from a designated slot index.
+ * CopyItem(ItemStats source, int qty): Clones an existing ItemStats object with a new specified 
+ * quantity to safely store runtime variations in the inventory array.
+ * ***Comments by Gemini Concluded***
 */
 //==============================================================================================
 // Declare Inventory
