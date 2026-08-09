@@ -10,8 +10,8 @@ namespace Bloodroot.Features.Infection
     {
         [SerializeField, Min(0f)] private float infectionPerSecond = 20f;
 
-        private readonly HashSet<BloodRootInfectionController> playersInside =
-            new HashSet<BloodRootInfectionController>();
+        private readonly Dictionary<BloodRootInfectionController, int> playerColliderCounts =
+            new Dictionary<BloodRootInfectionController, int>();
 
         private void Reset()
         {
@@ -23,7 +23,14 @@ namespace Bloodroot.Features.Infection
             BloodRootInfectionController infection =
                 other.GetComponentInParent<BloodRootInfectionController>();
 
-            if (infection != null && playersInside.Add(infection))
+            if (infection == null)
+            {
+                return;
+            }
+
+            playerColliderCounts.TryGetValue(infection, out int colliderCount);
+            playerColliderCounts[infection] = colliderCount + 1;
+            if (colliderCount == 0)
             {
                 infection.EnterZone(this, infectionPerSecond);
             }
@@ -33,15 +40,25 @@ namespace Bloodroot.Features.Infection
         {
             BloodRootInfectionController infection =
                 other.GetComponentInParent<BloodRootInfectionController>();
-            if (infection != null && playersInside.Remove(infection))
+            if (infection == null || !playerColliderCounts.TryGetValue(infection, out int colliderCount))
             {
+                return;
+            }
+
+            if (colliderCount > 1)
+            {
+                playerColliderCounts[infection] = colliderCount - 1;
+            }
+            else
+            {
+                playerColliderCounts.Remove(infection);
                 infection.ExitZone(this);
             }
         }
 
         private void OnDisable()
         {
-            foreach (BloodRootInfectionController infection in playersInside)
+            foreach (BloodRootInfectionController infection in playerColliderCounts.Keys)
             {
                 if (infection != null)
                 {
@@ -49,7 +66,7 @@ namespace Bloodroot.Features.Infection
                 }
             }
 
-            playersInside.Clear();
+            playerColliderCounts.Clear();
         }
 
     }
