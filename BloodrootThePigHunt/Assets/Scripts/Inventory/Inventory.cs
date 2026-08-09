@@ -1,6 +1,7 @@
 //==============================================================================================
 // Using Unity Engine
 //==============================================================================================
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using static UnityEditor.Progress;
@@ -39,7 +40,9 @@ using static UnityEditor.Progress;
  * Can you give me two lists. One with private and one with public functions and a short 
  * description of what each function does for my instructions. Head each entry with " * " 
  * that way I can just paste it in
+ * ==========================================================================================
  * Public Functions
+ * ==========================================================================================
  * Start(): Initializes the inventory array size based on the configured inspector settings 
  * when the script starts.
  * AddItem(GameObject objectSpawn): Validates and adds an item GameObject to the next 
@@ -57,6 +60,10 @@ using static UnityEditor.Progress;
  * from the inventory by name across all matching slots.
  * KillItem(string itemName, int amount, bool spawnItem, int index = 0): Overload to reduce or 
  * clear item quantities starting from a specified index position.
+ * RemoveMultipleItems(GameObject item, bool spawnItem = true): Validates and removes the total 
+ * accumulated quantity of a specified item GameObject from the inventory in a single pass.
+ * RemoveMultipleItems(string item, bool spawnItem = true): Validates and removes the total 
+ * accumulated quantity of a specified item by its string name from the inventory in a single pass.
  * IsSlotEmpty(int index): Checks if a specific inventory slot index is null or contains an empty 
  * item name.
  * IsSlotNotEmpty(int index): Checks if a specific inventory slot index contains a valid item.
@@ -70,11 +77,17 @@ using static UnityEditor.Progress;
  * valid item or points to a non-empty slot.
  * FindItem(ItemStats item): Searches the inventory for an item matching the given ItemStats 
  * and returns its data instance.
- * FindItem(ItemStats item, int index = 0): Searches the inventory starting from a specific 
- * index for an item matching the given ItemStats and returns its array index.
+ * FindItem(ItemStats item): Searches the inventory using an ItemStats reference, accumulates 
+ * the total quantity of matching items, and returns a key-value pair of the item and its total 
+ * count.
+ * FindItem(GameObject objectRef): Searches the inventory using a world GameObject reference, 
+ * extracts its item stats, accumulates the total matching quantity, and returns a key-value 
+ * pair of the item and its total count.
  * CheckItem(ItemStats item): Returns true if the specified ItemStats exists anywhere in the 
  * inventory array.
+ * ==========================================================================================
  * Private Functions
+ * ==========================================================================================
  * SpawnItem(ItemStats objectSpawn): Instantiates a physical pickup world object in front of 
  * the player using the provided item statistics.
  * FindNextAvailableIndex(GameObject objectSpawn): Handles stacking items onto existing matches 
@@ -101,6 +114,7 @@ public class Inventory : MonoBehaviour {
     [Range(1, 100)][SerializeField] float distance = 2.0f;
     // Private
     private ItemStats currItem;
+    private KeyValuePair<ItemStats, int> currItemQuantity;
     private ItemStats tempItem;
     private int currItemAmount;
     [SerializeField] private GameObject genericPickupShell;
@@ -151,8 +165,7 @@ public class Inventory : MonoBehaviour {
     //==========================================================================================
     // Overload Function, Remove Item By Index
     //------------------------------------------------------------------------------------------
-    public void RemoveItem(GameObject item, bool spawnItem = true, int index = 0)
-    {
+    public void RemoveItem(GameObject item, bool spawnItem = true, int index = 0) {
         ItemStats itemStats = item.GetComponent<Item>()?.item;
         if (itemStats == null) { return; }
         if (spawnItem) { SpawnItem(item.GetComponent<Item>().item); }
@@ -173,6 +186,31 @@ public class Inventory : MonoBehaviour {
         if (name == null) { return; }
         if (amount == 0) { return; }
         KillItem(name, amount, spawnItem, index);
+    }
+    //==========================================================================================
+    // Function, Remove Multiple Items
+    //------------------------------------------------------------------------------------------
+    public bool RemoveMultipleItems(GameObject item, bool spawnItem = true) {
+        ItemStats itemTest = item.GetComponent<Item>()?.item;
+        if (itemTest == null) { return false; }
+        currItemQuantity = FindItem(item);
+        if (currItemQuantity.Key == null) { return false; }
+        if (currItemQuantity.Value <= 0) { return false; }
+        KillItem(currItemQuantity.Key.itemName, currItemQuantity.Value, spawnItem);
+        return true;
+    }
+    //==========================================================================================
+    // Overload Function, Remove Multiple Items (by name)
+    //------------------------------------------------------------------------------------------
+    public bool RemoveMultipleItems(string item, bool spawnItem = true) {
+        ItemStats itemTest = new ItemStats();
+        itemTest.itemName = item;
+        if (itemTest == null) { return false; }
+        currItemQuantity = FindItem(itemTest);
+        if (currItemQuantity.Key == null) { return false; }
+        if (currItemQuantity.Value <= 0) { return false; }
+        KillItem(currItemQuantity.Key.itemName, currItemQuantity.Value, spawnItem);
+        return true;
     }
     //==========================================================================================
     // Function, Kill Item (by name/amount — for crafting, consuming, etc.)
@@ -338,17 +376,38 @@ public class Inventory : MonoBehaviour {
         };
     }
     //==========================================================================================
-    // Function, Find Item
+    // Function, Find Item Item Stats Reference
     //------------------------------------------------------------------------------------------
-    public ItemStats FindItem(ItemStats item) {
-        if (IsNotValidIndex(0)) { return null; }
+    public KeyValuePair<ItemStats, int> FindItem(ItemStats item) {
+        if (IsNotValidIndex(0)) { return new KeyValuePair<ItemStats, int>(null, 0); }
+        int foundQuantity = 0;
+        currItemQuantity = new KeyValuePair<ItemStats, int>(item, 0);
         for (int i = 0; i < inventoryItems.Length; i++) {
             if (IsSlotEmpty(i)) { continue; }
             if (inventoryItems[i].itemName == item.itemName) {
-                return inventoryItems[i];
+                foundQuantity += inventoryItems[i].quantity;
             }
         }
-        return null;
+        currItemQuantity = new KeyValuePair<ItemStats, int>(item, foundQuantity);
+        return currItemQuantity;
+    }
+    //==========================================================================================
+    // Overload Function, Find Item Object Reference
+    //------------------------------------------------------------------------------------------
+    public KeyValuePair<ItemStats, int> FindItem(GameObject objectRef) {
+        if (IsNotValidIndex(0)) { return new KeyValuePair<ItemStats, int>(null, 0); }
+        ItemStats item = objectRef.GetComponent<Item>()?.item;
+        if (item.itemName == null) { return new KeyValuePair<ItemStats, int>(null, 0); }
+        int foundQuantity = 0;
+        currItemQuantity = new KeyValuePair<ItemStats, int>(item, 0);
+        for (int i = 0; i < inventoryItems.Length; i++) {
+            if (IsSlotEmpty(i)) { continue; }
+            if (inventoryItems[i].itemName == item.itemName) {
+                foundQuantity += inventoryItems[i].quantity;
+            }
+        }
+        currItemQuantity = new KeyValuePair<ItemStats, int>(item, foundQuantity);
+        return currItemQuantity;
     }
     //==========================================================================================
     // Function, Find Item Index

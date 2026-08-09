@@ -602,16 +602,13 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     //==========================================================================================
     // Function, Test Remove Item
     //==========================================================================================
-    public void RemoveItemFromInventory()
-    {
+    public void RemoveItemFromInventory() {
         Inventory inventory = GetComponent<Inventory>();
         if (inventory == null) { return; }
-
-        for (int i = 0; i < inventory.inventoryItems.Length; i++)
-        {
-            if (!inventory.IsSlotEmpty(i))
-            {
-                inventory.RemoveItem(inventory.inventoryItems[i].itemName, 1, false);
+        for (int i = 0; i < inventory.inventoryItems.Length; i++) {
+            if (!inventory.IsSlotEmpty(i)) {
+                //inventory.RemoveItem(inventory.inventoryItems[i].itemName, 1, false);
+                inventory.RemoveMultipleItems("M1 Garand Ammo");
                 break;
             }
         }
