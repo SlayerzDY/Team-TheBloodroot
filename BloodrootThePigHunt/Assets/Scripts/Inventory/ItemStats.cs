@@ -2,23 +2,23 @@
 // Using Unity Engine
 //==============================================================================================
 using UnityEngine;
-[CreateAssetMenu]
 //==============================================================================================
 // Declare Item Stats
 //==============================================================================================
-public class ItemStats : ScriptableObject {
+[System.Serializable]
+public class ItemStats {
     //==========================================================================================
     // Define Variables
     //==========================================================================================
-    public string itemName;
-    public string itemDescription;
-    public Sprite icon;
+    [SerializeField] public string itemName;
+    [SerializeField] public string itemDescription;
+    [SerializeField] public Sprite icon;
     [Range(0.1f, 1000f)] public float weight;
     [Range(1, 99)] public int quantity;
     [Range(1, 99)] public int stackSize;
-    public GameObject itemMesh;
-    public AudioClip[] pickupSound;
-    public ItemHeroStats itemIncreases;
+    [SerializeField] public GameObject itemMesh;
+    [SerializeField] public AudioClip[] pickupSound;
+    [SerializeField] public ItemHeroStats itemIncreases;
     //==========================================================================================
 }
 //==============================================================================================
