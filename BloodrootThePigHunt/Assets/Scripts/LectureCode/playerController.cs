@@ -12,6 +12,9 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     //==========================================================================================
     // Define Variables
     //==========================================================================================
+    // Test Variables
+    [SerializeField] public GameObject testContainer; 
+
     [SerializeField] CharacterController controller;
     [SerializeField] LayerMask ignoreLayer;
     float camRotX, camRotY;
@@ -602,16 +605,14 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     //==========================================================================================
     // Function, Test Remove Item
     //==========================================================================================
-    public void RemoveItemFromInventory()
-    {
+    public void RemoveItemFromInventory() {
         Inventory inventory = GetComponent<Inventory>();
         if (inventory == null) { return; }
-
-        for (int i = 0; i < inventory.inventoryItems.Length; i++)
-        {
-            if (!inventory.IsSlotEmpty(i))
-            {
-                inventory.RemoveItem(inventory.inventoryItems[i].itemName, 1, false);
+        for (int i = 0; i < inventory.inventoryItems.Length; i++) {
+            if (!inventory.IsSlotEmpty(i)) {
+                //inventory.RemoveItem(inventory.inventoryItems[i].itemName, 1, false);
+                //inventory.RemoveMultipleItems("M1 Garand Ammo");
+                inventory.TransferToNewInventory(testContainer, "M1 Garand");
                 break;
             }
         }
