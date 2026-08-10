@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Bloodroot.Features.Infection
 {
@@ -11,11 +10,6 @@ namespace Bloodroot.Features.Infection
         [SerializeField] private Camera targetCamera;
         [SerializeField] private CanvasGroup distortionOverlay;
         [SerializeField] private AudioSource heartbeatSource;
-
-        [Header("Overlay")]
-        [SerializeField] private Color overlayColor =
-            new Color(0.85f, 0f, 0f, 1f);
-        [SerializeField] private int overlaySortingOrder = -20;
 
         [Header("Effect Strength")]
         [SerializeField, Range(0f, 1f)] private float maximumOverlayAlpha = 0.55f;
@@ -38,11 +32,6 @@ namespace Bloodroot.Features.Infection
             if (infectionController == null)
             {
                 infectionController = GetComponent<BloodRootInfectionController>();
-            }
-
-            if (distortionOverlay == null)
-            {
-                distortionOverlay = CreateDistortionOverlay();
             }
 
             if (targetCamera != null)
@@ -125,48 +114,6 @@ namespace Bloodroot.Features.Infection
         private void SetInfectionAmount(float amount)
         {
             infectionAmount = Mathf.Clamp01(amount);
-        }
-
-        private CanvasGroup CreateDistortionOverlay()
-        {
-            GameObject canvasObject =
-                new GameObject("Bloodroot Infection Overlay Canvas");
-
-            canvasObject.transform.SetParent(transform, false);
-
-            Canvas canvas =
-                canvasObject.AddComponent<Canvas>();
-
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = overlaySortingOrder;
-
-            CanvasGroup canvasGroup =
-                canvasObject.AddComponent<CanvasGroup>();
-
-            canvasGroup.alpha = 0f;
-            canvasGroup.blocksRaycasts = false;
-            canvasGroup.interactable = false;
-
-            GameObject imageObject =
-                new GameObject("Bloodroot Infection Red Overlay");
-
-            imageObject.transform.SetParent(canvasObject.transform, false);
-
-            Image image =
-                imageObject.AddComponent<Image>();
-
-            image.color = overlayColor;
-            image.raycastTarget = false;
-
-            RectTransform rect =
-                image.GetComponent<RectTransform>();
-
-            rect.anchorMin = Vector2.zero;
-            rect.anchorMax = Vector2.one;
-            rect.offsetMin = Vector2.zero;
-            rect.offsetMax = Vector2.zero;
-
-            return canvasGroup;
         }
 
         private void RestoreDefaults()

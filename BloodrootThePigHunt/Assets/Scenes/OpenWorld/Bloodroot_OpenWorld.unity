@@ -518,6 +518,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7650986}
+  - component: {fileID: 7650987}
   m_Layer: 0
   m_Name: Bloodroot Hollow Boss Systems
   m_TagString: Untagged
@@ -540,6 +541,26 @@ Transform:
   m_Children: []
   m_Father: {fileID: 757032330}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7650987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7650985}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6bd7eda6cd894402aa7efa7d50621533, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Campaign.CampaignAreaCompletionRelay
+  progression: {fileID: 1955614269}
+  area: 3
+  areaCompleted:
+    m_PersistentCalls:
+      m_Calls: []
+  completionRejected:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &8854454
 GameObject:
   m_ObjectHideFlags: 0
@@ -2495,13 +2516,50 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2032518536662187461, guid: 60c737ac1b0a8fc44b420cda11782a6e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 87996664}
   m_SourcePrefab: {fileID: 100100000, guid: 60c737ac1b0a8fc44b420cda11782a6e, type: 3}
 --- !u!4 &87996662 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3014666582355216705, guid: 60c737ac1b0a8fc44b420cda11782a6e, type: 3}
   m_PrefabInstance: {fileID: 87996661}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &87996663 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2032518536662187461, guid: 60c737ac1b0a8fc44b420cda11782a6e, type: 3}
+  m_PrefabInstance: {fileID: 87996661}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &87996664
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 87996663}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1001 &90487830
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13918,6 +13976,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 172943367}
+  - component: {fileID: 172943368}
   m_Layer: 0
   m_Name: Harrow Estate Mission Systems
   m_TagString: Untagged
@@ -13940,6 +13999,26 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1550931648}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &172943368
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 172943366}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6bd7eda6cd894402aa7efa7d50621533, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Campaign.CampaignAreaCompletionRelay
+  progression: {fileID: 1955614269}
+  area: 2
+  areaCompleted:
+    m_PersistentCalls:
+      m_Calls: []
+  completionRejected:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1001 &176949681
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -19918,9 +19997,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 225812423}
-  m_Layer: 0
+  - component: {fileID: 225812426}
+  - component: {fileID: 225812425}
+  - component: {fileID: 225812424}
+  - component: {fileID: 225812427}
+  m_Layer: 10
   m_Name: Return Truck (Travel Wiring Pending)
-  m_TagString: Untagged
+  m_TagString: Interact
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -19941,6 +20024,77 @@ Transform:
   - {fileID: 1256300500}
   m_Father: {fileID: 852052094}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &225812424
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 225812422}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87e5e5f3d676489b9d134c9ab0c292a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Campaign.CampaignTravelInteractable
+  sceneTravel: {fileID: 225812425}
+--- !u!114 &225812425
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 225812422}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 308662c1a46d4f329b60b12095fa1fa0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Campaign.CampaignSceneTravel
+  campaignState: {fileID: 0}
+  destinationSceneName: Farm_PrologueHub
+  spawnDestinationId: FarmHub
+  requireUnlockedArea: 0
+  requiredArea: 0
+--- !u!65 &225812426
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 225812422}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 4, y: 3, z: 7}
+  m_Center: {x: 0, y: 1.5, z: 0}
+--- !u!114 &225812427
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 225812422}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifier
+  m_SerializedVersion: 0
+  m_OverrideArea: 0
+  m_Area: 0
+  m_OverrideGenerateLinks: 0
+  m_GenerateLinks: 0
+  m_IgnoreFromBuild: 1
+  m_ApplyToChildren: 0
+  m_AffectedAgents: ffffffff
 --- !u!1001 &226053184
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -20554,6 +20708,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 249096607}
+  - component: {fileID: 249096608}
   m_Layer: 0
   m_Name: World Arrival Spawn
   m_TagString: Untagged
@@ -20576,6 +20731,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1043258469}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &249096608
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 249096606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc3b8ff6d0fc48e18b63b75b2bcf34cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Campaign.CampaignSpawnPoint
+  destinationId: BlackPinesArrival
+  arrivalTransform: {fileID: 249096607}
+  automaticallyPlacePlayer: 1
+  playerTag: Player
+  playerLookupTimeout: 5
 --- !u!1 &258910978
 GameObject:
   m_ObjectHideFlags: 0
@@ -29756,6 +29928,8 @@ GameObject:
   - component: {fileID: 468548404}
   - component: {fileID: 468548405}
   - component: {fileID: 468548406}
+  - component: {fileID: 468548408}
+  - component: {fileID: 468548407}
   m_Layer: 13
   m_Name: Locked Feedback Trigger
   m_TagString: Untagged
@@ -29826,6 +30000,42 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &468548407
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 468548403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ad9c83e02cd415cb5089a85e64ed9d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Campaign.CampaignLockedAreaFeedbackTrigger
+  lockedArea: 2
+  presenter: {fileID: 741097044}
+  playerTag: Player
+  lockedMessage: 
+--- !u!114 &468548408
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 468548403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifier
+  m_SerializedVersion: 0
+  m_OverrideArea: 0
+  m_Area: 0
+  m_OverrideGenerateLinks: 0
+  m_GenerateLinks: 0
+  m_IgnoreFromBuild: 1
+  m_ApplyToChildren: 0
+  m_AffectedAgents: ffffffff
 --- !u!1001 &468786162
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -41220,13 +41430,47 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4152675601064265431, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 741097044}
   m_SourcePrefab: {fileID: 100100000, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
 --- !u!224 &741097041 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 1856443771790681283, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
   m_PrefabInstance: {fileID: 741097040}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &741097042 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8031494219967674828, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
+  m_PrefabInstance: {fileID: 741097040}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &741097043 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4152675601064265431, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
+  m_PrefabInstance: {fileID: 741097040}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &741097044
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 741097043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4908ef9c785244329439603f3f2630da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Campaign.CampaignLockedAreaFeedbackPresenter
+  messageText: {fileID: 741097042}
+  messageCanvasGroup: {fileID: 0}
+  displaySeconds: 3
 --- !u!1001 &743463296
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -43277,6 +43521,8 @@ GameObject:
   - component: {fileID: 825454395}
   - component: {fileID: 825454396}
   - component: {fileID: 825454397}
+  - component: {fileID: 825454399}
+  - component: {fileID: 825454398}
   m_Layer: 13
   m_Name: Locked Feedback Trigger
   m_TagString: Untagged
@@ -43347,6 +43593,42 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &825454398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 825454394}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ad9c83e02cd415cb5089a85e64ed9d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Campaign.CampaignLockedAreaFeedbackTrigger
+  lockedArea: 3
+  presenter: {fileID: 741097044}
+  playerTag: Player
+  lockedMessage: 
+--- !u!114 &825454399
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 825454394}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifier
+  m_SerializedVersion: 0
+  m_OverrideArea: 0
+  m_Area: 0
+  m_OverrideGenerateLinks: 0
+  m_GenerateLinks: 0
+  m_IgnoreFromBuild: 1
+  m_ApplyToChildren: 0
+  m_AffectedAgents: ffffffff
 --- !u!1 &826606463
 GameObject:
   m_ObjectHideFlags: 0
@@ -44682,13 +44964,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 870848742}
+  - component: {fileID: 870848743}
   m_Layer: 0
   m_Name: Black Pines Mission Systems
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &870848742
 Transform:
   m_ObjectHideFlags: 0
@@ -44704,6 +44987,26 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1043258469}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &870848743
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 870848741}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6bd7eda6cd894402aa7efa7d50621533, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Campaign.CampaignAreaCompletionRelay
+  progression: {fileID: 1955614269}
+  area: 0
+  areaCompleted:
+    m_PersistentCalls:
+      m_Calls: []
+  completionRejected:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1001 &871475873
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -69471,6 +69774,50 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1709125784205181019, guid: 9b71593cb811a934dbd78a8ab9938290, type: 3}
   m_PrefabInstance: {fileID: 1370344332}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1371637645
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1371637647}
+  - component: {fileID: 1371637646}
+  m_Layer: 0
+  m_Name: __CAMPAIGN_STATE
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1371637646
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1371637645}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 842e0c9c2a654d58bd103f68c9916d10, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Campaign.CampaignStateService
+--- !u!4 &1371637647
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1371637645}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1373475183
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -74488,6 +74835,8 @@ GameObject:
   - component: {fileID: 1382867049}
   - component: {fileID: 1382867050}
   - component: {fileID: 1382867051}
+  - component: {fileID: 1382867053}
+  - component: {fileID: 1382867052}
   m_Layer: 13
   m_Name: Locked Feedback Trigger
   m_TagString: Untagged
@@ -74558,6 +74907,42 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &1382867052
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1382867048}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ad9c83e02cd415cb5089a85e64ed9d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Campaign.CampaignLockedAreaFeedbackTrigger
+  lockedArea: 1
+  presenter: {fileID: 741097044}
+  playerTag: Player
+  lockedMessage: 
+--- !u!114 &1382867053
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1382867048}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshModifier
+  m_SerializedVersion: 0
+  m_OverrideArea: 0
+  m_Area: 0
+  m_OverrideGenerateLinks: 0
+  m_GenerateLinks: 0
+  m_IgnoreFromBuild: 1
+  m_ApplyToChildren: 0
+  m_AffectedAgents: ffffffff
 --- !u!1001 &1384720446
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -81566,13 +81951,50 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2032518536662187461, guid: 60c737ac1b0a8fc44b420cda11782a6e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1538950639}
   m_SourcePrefab: {fileID: 100100000, guid: 60c737ac1b0a8fc44b420cda11782a6e, type: 3}
 --- !u!4 &1538950637 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3014666582355216705, guid: 60c737ac1b0a8fc44b420cda11782a6e, type: 3}
   m_PrefabInstance: {fileID: 1538950636}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1538950638 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2032518536662187461, guid: 60c737ac1b0a8fc44b420cda11782a6e, type: 3}
+  m_PrefabInstance: {fileID: 1538950636}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1538950639
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1538950638}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1001 &1548027710
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -83460,6 +83882,37 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 9166281976291975520, guid: e50124c9152a7c844a3a1d83ded10153, type: 3}
   m_PrefabInstance: {fileID: 1651347127}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1651658432
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1651658433}
+  m_Layer: 0
+  m_Name: __CAMPAIGN_FOUNDATION_SIGNATURE_V3
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1651658433
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1651658432}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1652636839
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -104968,6 +105421,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1955614268}
+  - component: {fileID: 1955614269}
   m_Layer: 0
   m_Name: OpenWorldProgressionManager (Component Pending)
   m_TagString: Untagged
@@ -104990,6 +105444,28 @@ Transform:
   m_Children: []
   m_Father: {fileID: 852052094}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1955614269
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1955614267}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d4ab1cfcb7a4f13ab715f9460d374b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Campaign.CampaignOpenWorldProgression
+  campaignState: {fileID: 1371637646}
+  areaBarriers:
+  - {fileID: 518517717}
+  - {fileID: 1392873827}
+  - {fileID: 399264020}
+  areaMissionRoots:
+  - {fileID: 870848741}
+  - {fileID: 2011037659}
+  - {fileID: 172943366}
+  - {fileID: 7650985}
 --- !u!1001 &1955829204
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -111300,6 +111776,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2011037660}
+  - component: {fileID: 2011037661}
   m_Layer: 0
   m_Name: Stillwater Mission Systems
   m_TagString: Untagged
@@ -111322,6 +111799,26 @@ Transform:
   m_Children: []
   m_Father: {fileID: 349909791}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2011037661
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2011037659}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6bd7eda6cd894402aa7efa7d50621533, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Campaign.CampaignAreaCompletionRelay
+  progression: {fileID: 1955614269}
+  area: 1
+  areaCompleted:
+    m_PersistentCalls:
+      m_Calls: []
+  completionRejected:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1001 &2011887328
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -114664,3 +115161,5 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 239708853}
+  - {fileID: 1371637647}
+  - {fileID: 1651658433}
