@@ -24,6 +24,7 @@ public class gameManager : MonoBehaviour
     [SerializeField] GameObject menuWin;
     [SerializeField] GameObject menuLose;
     [SerializeField] GameObject menuMain;
+    [SerializeField] GameObject menuRadar;
     [SerializeField] TMP_Text gameGoalCountText;
     public GameObject menuInteractable;
     // Public Variables
@@ -201,6 +202,12 @@ public class gameManager : MonoBehaviour
         spawner.StartWave(enemyNum);
         return true;
 
+    }
+    //==========================================================================================
+    // Function, Radar
+    //==========================================================================================
+    public void ActivateRadar(bool on = true) {
+        menuRadar.SetActive(on);
     }
     //==========================================================================================
     // Function, Update Player
