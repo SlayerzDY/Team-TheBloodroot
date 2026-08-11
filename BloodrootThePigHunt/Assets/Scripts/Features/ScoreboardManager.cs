@@ -1,6 +1,5 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class ScoreboardManager : MonoBehaviour
 {
@@ -9,11 +8,6 @@ public class ScoreboardManager : MonoBehaviour
     [Header("Optional UI")]
     [SerializeField] GameObject scoreboardPanel;
     [SerializeField] TMP_Text scoreboardText;
-
-    [Header("Runtime UI Layout")]
-    [SerializeField] Vector2 scoreboardSize = new Vector2(500f, 500f);
-    [SerializeField] float rightSideMargin = 35f;
-    [SerializeField] float verticalOffset = 0f;
 
     int regularHogsKilled;
     int enemyPigsKilled;
@@ -107,8 +101,6 @@ public class ScoreboardManager : MonoBehaviour
         }
 
         finalScoreShown = true;
-        BuildScoreboardUIIfNeeded();
-
         if (scoreboardPanel != null)
         {
             scoreboardPanel.SetActive(true);
@@ -131,98 +123,6 @@ public class ScoreboardManager : MonoBehaviour
         {
             scoreboardPanel.SetActive(false);
         }
-    }
-
-    void BuildScoreboardUIIfNeeded()
-    {
-        if (scoreboardPanel != null && scoreboardText != null)
-        {
-            return;
-        }
-
-        GameObject canvasObject =
-            new GameObject(
-                "Scoreboard Canvas",
-                typeof(RectTransform));
-
-        Canvas canvas =
-            canvasObject.AddComponent<Canvas>();
-
-        canvas.renderMode =
-            RenderMode.ScreenSpaceOverlay;
-
-        canvas.sortingOrder = 200;
-
-        canvasObject.AddComponent<CanvasScaler>();
-        canvasObject.AddComponent<GraphicRaycaster>();
-
-        GameObject panelObject =
-            new GameObject(
-                "Hunting License Scoreboard",
-                typeof(RectTransform));
-
-        panelObject.transform.SetParent(
-            canvas.transform,
-            false);
-
-        Image panelImage =
-            panelObject.AddComponent<Image>();
-
-        panelImage.color =
-            new Color(0f, 0f, 0f, 0.82f);
-
-        RectTransform panelRect =
-            panelObject.GetComponent<RectTransform>();
-
-        panelRect.anchorMin =
-            new Vector2(1f, 0.5f);
-
-        panelRect.anchorMax =
-            new Vector2(1f, 0.5f);
-
-        panelRect.pivot =
-            new Vector2(1f, 0.5f);
-
-        panelRect.anchoredPosition =
-            new Vector2(-rightSideMargin, verticalOffset);
-
-        panelRect.sizeDelta =
-            scoreboardSize;
-
-        GameObject textObject =
-            new GameObject(
-                "Hunting License Text",
-                typeof(RectTransform));
-
-        textObject.transform.SetParent(
-            panelObject.transform,
-            false);
-
-        scoreboardText =
-            textObject.AddComponent<TextMeshProUGUI>();
-
-        scoreboardText.fontSize = 24f;
-        scoreboardText.alignment = TextAlignmentOptions.TopLeft;
-        scoreboardText.color = Color.white;
-        scoreboardText.enableWordWrapping = true;
-
-        RectTransform textRect =
-            textObject.GetComponent<RectTransform>();
-
-        textRect.anchorMin =
-            new Vector2(0f, 0f);
-
-        textRect.anchorMax =
-            new Vector2(1f, 1f);
-
-        textRect.offsetMin =
-            new Vector2(35f, 30f);
-
-        textRect.offsetMax =
-            new Vector2(-35f, -30f);
-
-        scoreboardPanel =
-            panelObject;
     }
 
     string GetFinalScoreText(bool won)

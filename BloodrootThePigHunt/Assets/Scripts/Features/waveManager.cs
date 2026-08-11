@@ -2,10 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using Bloodroot.Campaign;
 using Bloodroot.Features.BloodMoon;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class waveManager : MonoBehaviour
 {
@@ -23,7 +23,6 @@ public class waveManager : MonoBehaviour
     [SerializeField] private TMP_Text waveNumberText;
     [SerializeField] private TMP_Text enemyTypeText;
     [SerializeField] private TMP_Text waveTitleText;
-    [SerializeField] private bool createMissingWaveUI = true;
 
     [Header("Wave Title Cards")]
     [SerializeField, Min(0f)] private float titleCardSeconds = 3f;
@@ -54,6 +53,7 @@ public class waveManager : MonoBehaviour
 
     private bool encounterStarted;
     private bool curseWarningStarted;
+    private bool completionOwnedExternally;
 
     public event Action CurseStarted;
 
@@ -76,6 +76,7 @@ public class waveManager : MonoBehaviour
     public bool FinalWaveCleared { get; private set; }
     public bool UseTruckEscapeEnding => useTruckEscapeEnding;
     public bool EncounterStarted => encounterStarted;
+    public bool CompletionOwnedExternally => completionOwnedExternally;
     public bool ShouldSpawnRegularPigs =>
         useHogHuntIntro && !encounterStarted && !curseWarningStarted;
     public bool HogHuntFinished =>
@@ -89,7 +90,14 @@ public class waveManager : MonoBehaviour
 
     public event Action<int, int, BloodMoonModifier> WaveStarted;
     public event Action<int> WaveCompleted;
+    public event Action<int, int, int> EnemyCountChanged;
+    public event Action<GameObject> EncounterEnemySpawned;
     public event Action AllWavesCompleted;
+
+    public void SetCompletionOwnedExternally(bool ownedExternally)
+    {
+        completionOwnedExternally = ownedExternally;
+    }
 
     private void Awake()
     {
@@ -122,7 +130,6 @@ public class waveManager : MonoBehaviour
         FinalWaveCleared = false;
 
         SetupHogHunt();
-        SetupWaveUI();
         HideTitleCard();
         RefreshWaveUI();
     }
@@ -140,7 +147,7 @@ public class waveManager : MonoBehaviour
 
         curseWarningStarted = true;
         encounterStarted = true;
-        CurseStarted?.Invoke();
+        CampaignEventUtility.Invoke(CurseStarted, this);
         StartNextWave();
 
         Debug.Log("Wave encounter started.");
@@ -247,10 +254,18 @@ public class waveManager : MonoBehaviour
         ShowWaveTitleCard();
         PlayWaveStartSound();
 
-        WaveStarted?.Invoke(
+        CampaignEventUtility.Invoke(
+            WaveStarted,
             currentWave,
             enemiesRemaining,
-            ActiveBloodMoonModifier);
+            ActiveBloodMoonModifier,
+            this);
+        CampaignEventUtility.Invoke(
+            EnemyCountChanged,
+            currentWave,
+            enemiesRemaining,
+            enemiesExpectedThisWave,
+            this);
 
         Debug.Log(
             $"Wave {currentWave} started with " +
@@ -276,6 +291,10 @@ public class waveManager : MonoBehaviour
         }
 
         enemiesByType[enemyType]++;
+        CampaignEventUtility.Invoke(
+            EncounterEnemySpawned,
+            spawnedEnemy,
+            this);
         RefreshWaveUI();
     }
 
@@ -306,6 +325,12 @@ public class waveManager : MonoBehaviour
             Mathf.Max(0, enemiesRemaining - 1);
 
         RefreshWaveUI();
+        CampaignEventUtility.Invoke(
+            EnemyCountChanged,
+            currentWave,
+            enemiesRemaining,
+            enemiesExpectedThisWave,
+            this);
 
         Debug.Log(
             $"Enemy defeated. " +
@@ -334,7 +359,7 @@ public class waveManager : MonoBehaviour
         ActiveBloodMoonModifier = null;
 
         ScoreboardManager.GetOrCreate().AddWaveSurvived(completedBloodMoon);
-        WaveCompleted?.Invoke(currentWave);
+        CampaignEventUtility.Invoke(WaveCompleted, currentWave, this);
         RefreshWaveUI();
         PlayWaveSound(waveCompleteClip);
 
@@ -344,10 +369,11 @@ public class waveManager : MonoBehaviour
         {
             Debug.Log("All waves completed.");
             FinalWaveCleared = true;
-            AllWavesCompleted?.Invoke();
+            CampaignEventUtility.Invoke(AllWavesCompleted, this);
             ShowAllWavesCleared();
 
             if (!useTruckEscapeEnding &&
+                !completionOwnedExternally &&
                 gameManager.instance != null)
             {
                 gameManager.instance.youWin();
@@ -408,180 +434,6 @@ public class waveManager : MonoBehaviour
 
         curseWarningRoutine = null;
         BeginEncounter();
-    }
-
-    private void SetupWaveUI()
-    {
-        if (!createMissingWaveUI)
-            return;
-
-        if (waveNumberText != null &&
-            enemyTypeText != null &&
-            waveTitleText != null)
-        {
-            SetupWaveTitleReadability();
-            return;
-        }
-
-        Canvas canvas = CreateWaveCanvas();
-
-        if (waveNumberText == null)
-        {
-            waveNumberText =
-                CreateUIText(
-                    "Wave Number Text",
-                    canvas.transform,
-                    new Vector2(0f, 1f),
-                    new Vector2(0f, 1f),
-                    new Vector2(20f, -35f),
-                    new Vector2(560f, 130f),
-                    30f,
-                    TextAlignmentOptions.TopLeft);
-        }
-
-        if (enemyTypeText == null)
-        {
-            enemyTypeText =
-                CreateUIText(
-                    "Enemy Type Count Text",
-                    canvas.transform,
-                    new Vector2(0f, 1f),
-                    new Vector2(0f, 1f),
-                    new Vector2(20f, -185f),
-                    new Vector2(560f, 260f),
-                    22f,
-                    TextAlignmentOptions.TopLeft);
-        }
-
-        if (waveTitleText == null)
-        {
-            waveTitleText =
-                CreateUIText(
-                    "Wave Title Card Text",
-                    canvas.transform,
-                    new Vector2(0.5f, 1f),
-                    new Vector2(0.5f, 1f),
-                    new Vector2(0f, -58f),
-                    new Vector2(760f, 120f),
-                    24f,
-                    TextAlignmentOptions.Center);
-
-            RectTransform titleRect =
-                waveTitleText.GetComponent<RectTransform>();
-
-            titleRect.pivot =
-                new Vector2(0.5f, 1f);
-        }
-
-        SetupWaveTitleReadability();
-    }
-
-    private Canvas CreateWaveCanvas()
-    {
-        GameObject canvasObject =
-            new GameObject("Wave HUD Canvas");
-
-        Canvas canvas =
-            canvasObject.AddComponent<Canvas>();
-
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 20;
-
-        CanvasScaler scaler =
-            canvasObject.AddComponent<CanvasScaler>();
-
-        scaler.uiScaleMode =
-            CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution =
-            new Vector2(1920f, 1080f);
-
-        canvasObject.AddComponent<GraphicRaycaster>();
-
-        return canvas;
-    }
-
-    private TMP_Text CreateUIText(
-        string objectName,
-        Transform parent,
-        Vector2 anchorMin,
-        Vector2 anchorMax,
-        Vector2 anchoredPosition,
-        Vector2 size,
-        float fontSize,
-        TextAlignmentOptions alignment)
-    {
-        GameObject textObject =
-            new GameObject(objectName);
-
-        textObject.transform.SetParent(parent, false);
-
-        TextMeshProUGUI text =
-            textObject.AddComponent<TextMeshProUGUI>();
-
-        RectTransform rect =
-            text.GetComponent<RectTransform>();
-
-        rect.anchorMin = anchorMin;
-        rect.anchorMax = anchorMax;
-        rect.pivot = new Vector2(0f, 1f);
-        rect.anchoredPosition = anchoredPosition;
-        rect.sizeDelta = size;
-
-        text.fontSize = fontSize;
-        text.color = Color.white;
-        text.alignment = alignment;
-        text.enableWordWrapping = true;
-        text.richText = true;
-        text.overflowMode = TextOverflowModes.Truncate;
-        text.raycastTarget = false;
-
-        return text;
-    }
-
-    private void SetupWaveTitleReadability()
-    {
-        if (waveTitleText == null)
-            return;
-
-        RectTransform titleRect =
-            waveTitleText.GetComponent<RectTransform>();
-
-        titleRect.anchorMin =
-            new Vector2(0.5f, 1f);
-        titleRect.anchorMax =
-            new Vector2(0.5f, 1f);
-        titleRect.pivot =
-            new Vector2(0.5f, 1f);
-        titleRect.anchoredPosition =
-            new Vector2(0f, -58f);
-        titleRect.sizeDelta =
-            new Vector2(760f, 120f);
-
-        waveTitleText.fontSize = 24f;
-        waveTitleText.fontSizeMin = 12f;
-        waveTitleText.fontSizeMax = 26f;
-        waveTitleText.enableAutoSizing = true;
-        waveTitleText.fontStyle = FontStyles.Bold;
-        waveTitleText.alignment = TextAlignmentOptions.Center;
-        waveTitleText.overflowMode = TextOverflowModes.Truncate;
-        waveTitleText.enableWordWrapping = true;
-        waveTitleText.outlineWidth = 0.12f;
-        waveTitleText.outlineColor = Color.black;
-
-        Shadow shadow =
-            waveTitleText.GetComponent<Shadow>();
-
-        if (shadow == null)
-        {
-            shadow =
-                waveTitleText.gameObject.AddComponent<Shadow>();
-        }
-
-        shadow.effectColor =
-            new Color(0f, 0f, 0f, 0.85f);
-        shadow.effectDistance =
-            new Vector2(2f, -2f);
-        shadow.useGraphicAlpha = true;
     }
 
     private void ShowWaveTitleCard()
