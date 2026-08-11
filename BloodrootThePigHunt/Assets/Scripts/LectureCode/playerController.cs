@@ -52,6 +52,8 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
 
     //[SerializeField] Transform gunPivot;
     [SerializeField] Transform shootPos;
+
+    int speedOrig;
     int jumpCount;
     int HPOrig;
     int gunInvPos;
@@ -65,6 +67,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     //==========================================================================================
     void Start() {
         HPOrig = HP;
+        speedOrig = speed;
         spawnPlayer();
     }
     //==========================================================================================
@@ -109,6 +112,20 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             speed *= sprintMod;
         } else if(Input.GetButtonUp("Sprint")) {
             speed /= sprintMod;
+        }
+    }
+    //==========================================================================================
+    // Function, Handle Weight
+    //==========================================================================================
+    public void handleWeight() {
+        Inventory inv = this.GetComponent<Inventory>();
+        if (inv == null) { return; }
+        if (inv.inventoryWeight >= inv.weightThreshold) { 
+            speed = (int)(speed * (inv.weightThreshold / inv.inventoryWeight)); 
+            if (speed <= 0) { speed = 1; }
+            if (speed > speedOrig) { speed = speedOrig; }
+        } else {
+            speed = speedOrig;
         }
     }
     //==========================================================================================
@@ -612,7 +629,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             if (!inventory.IsSlotEmpty(i)) {
                 //inventory.RemoveItem(inventory.inventoryItems[i].itemName, 1, false);
                 //inventory.RemoveMultipleItems("M1 Garand Ammo");
-                inventory.TransferToNewInventory(testContainer, "M1 Garand");
+                inventory.TransferToNewInventory(testContainer, "M1 Garand Ammo");
                 break;
             }
         }

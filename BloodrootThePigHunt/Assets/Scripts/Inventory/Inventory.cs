@@ -2,6 +2,7 @@
 // Using Unity Engine
 //==============================================================================================
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 //==============================================================================================
 // Instructions for Using the Inventory
@@ -245,10 +246,10 @@ public class Inventory : MonoBehaviour {
         currItemQuantity = FindItem(item);
         if (currItemQuantity.Key == null) { return false; }
         if (currItemQuantity.Value <= 0) { return false; }
-        // Remove Item from our Inventory
-        KillItem(currItemQuantity.Key.itemName, currItemQuantity.Value, false);
         // Add Item to New Inventory
         newInv.AddItem(item);
+        // Remove Item from our Inventory
+        KillItem(currItemQuantity.Key.itemName, currItemQuantity.Value, false);
         return true;
     }
     //==========================================================================================
@@ -262,10 +263,10 @@ public class Inventory : MonoBehaviour {
         currItemQuantity = FindItem(item);
         if (currItemQuantity.Key == null) { return false; }
         if (currItemQuantity.Value <= 0) { return false; }
-        // Remove Item from our Inventory
-        KillItem(currItemQuantity.Key.itemName, currItemQuantity.Value, false);
         // Add Item to New Inventory
         newInv.AddItem(item);
+        // Remove Item from our Inventory
+        KillItem(currItemQuantity.Key.itemName, currItemQuantity.Value, false);
         return true;
     }
     //==========================================================================================
@@ -280,11 +281,11 @@ public class Inventory : MonoBehaviour {
         currItemQuantity = FindItem(newItem);
         if (currItemQuantity.Key == null) { return false; }
         if (currItemQuantity.Value <= 0) { return false; }
-        // Remove Item from our Inventory
-        KillItem(currItemQuantity.Key.itemName, currItemQuantity.Value, false);
         ItemStats transferData = CopyItem(currItemQuantity.Key, currItemQuantity.Value);
         // Add Item to New Inventory
         newInv.AddItem(transferData);
+        // Remove Item from our Inventory
+        KillItem(currItemQuantity.Key.itemName, currItemQuantity.Value, false);
         return true;
     }
     //==========================================================================================
@@ -300,6 +301,7 @@ public class Inventory : MonoBehaviour {
             inventoryItems[i].quantity -= take;
             remaining -= take;
             if (inventoryItems[i].quantity <= 0) {
+                AdjustWeight(inventoryItems[i], false);
                 inventoryItems[i] = null;
                 currItemAmount--;
             }
@@ -318,6 +320,7 @@ public class Inventory : MonoBehaviour {
             inventoryItems[i].quantity -= take;
             remaining -= take;
             if (inventoryItems[i].quantity <= 0) {
+                AdjustWeight(inventoryItems[i], false);
                 inventoryItems[i] = null;
                 currItemAmount--;
             }
@@ -357,6 +360,7 @@ public class Inventory : MonoBehaviour {
             inventoryItems[i] = CopyItem(itemStats, add);
             remaining -= add;
             currItemAmount++;
+            AdjustWeight(inventoryItems[i], true);
         }
     }
     //==========================================================================================
@@ -382,6 +386,7 @@ public class Inventory : MonoBehaviour {
             inventoryItems[i] = CopyItem(itemStats, add);
             remaining -= add;
             currItemAmount++;
+            AdjustWeight(inventoryItems[i], true);
         }
     }
     //==========================================================================================
@@ -406,6 +411,7 @@ public class Inventory : MonoBehaviour {
             inventoryItems[i] = CopyItem(itemStats, add);
             remaining -= add;
             currItemAmount++;
+            AdjustWeight(inventoryItems[i], true);
         }
     }
     //==========================================================================================
@@ -550,6 +556,21 @@ public class Inventory : MonoBehaviour {
             }
         }
         return false;
+    }
+    //==========================================================================================
+    // Function, Check Item
+    //------------------------------------------------------------------------------------------
+    private void AdjustWeight(ItemStats item, bool isAdd = true) {
+        // Safety Check, If not Item Return
+        if (item == null) { return; }
+        if (item.itemName == null) { return; }
+        float tempWeight = item.weight;
+        if (isAdd) {
+            inventoryWeight += tempWeight;
+        } else {
+            inventoryWeight -= (Mathf.Abs(tempWeight));
+        }
+        gameManager.instance.player.GetComponent<playerController>().handleWeight();
     }
     //==========================================================================================
 }
