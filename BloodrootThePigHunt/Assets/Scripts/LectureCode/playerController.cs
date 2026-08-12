@@ -616,10 +616,10 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         gunModel.GetComponent<MeshFilter>().sharedMesh = gunInv[gunInvPos].gunModel.GetComponent<MeshFilter>().sharedMesh;
         gunModel.GetComponent<MeshRenderer>().sharedMaterial = gunInv[gunInvPos].gunModel.GetComponent<MeshRenderer>().sharedMaterial;
     }
-    //==========================================================================================
-    // Function, Select Gun
-    //==========================================================================================
-    void selectGun()
+//==========================================================================================
+// Function, Select Gun
+//==========================================================================================
+void selectGun()
     {
         if (Input.GetAxis("Mouse ScrollWheel") > 0 && gunInvPos < gunInv.Count - 1)
         {
