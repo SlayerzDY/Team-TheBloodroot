@@ -51,7 +51,7 @@ MonoBehaviour:
   rb: {fileID: 2108990204882630989}
   damageAmount: 5
   damageRate: 0
-  bulletSpeed: 50
+  bulletSpeed: 200
   bulletDestroyTime: 3
   hitEffect: {fileID: 5584602140419805224, guid: 6d2ab2bfa7deb87469243d7b8de20229, type: 3}
   soundEffect: {fileID: 8300000, guid: 5dd9394a011d8584bbe6ccef7f9b484b, type: 3}
@@ -153,7 +153,7 @@ TrailRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Time: 0.35
+  m_Time: 0.01
   m_PreviewTimeScale: 1
   m_Parameters:
     serializedVersion: 3
@@ -210,7 +210,7 @@ TrailRenderer:
     textureScale: {x: 1, y: 1}
     shadowBias: 0.5
     generateLightingData: 0
-  m_MinVertexDistance: 0.1
+  m_MinVertexDistance: 0.001
   m_Autodestruct: 0
   m_Emitting: 1
   m_ApplyActiveColorSpace: 1
