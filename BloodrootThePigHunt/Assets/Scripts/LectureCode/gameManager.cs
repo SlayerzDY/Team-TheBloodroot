@@ -37,11 +37,18 @@ public class gameManager : MonoBehaviour
     public GameObject player;
     public playerController playerController;
     public GameObject playerSpawnPos;
+    public bool isDefenseActive = false;
+    public int totalItemsFed = 0;
+    [Range(2,5)] public int ItemsNeededPerDefense = 5;
+    public bool StartBaseDefenseOnStart = true;
     // Private Variables
     private float timer = 0;
     private float timeScaleOrig;
     private int gameGoalCount;
     private bool waveManagerControlsWin;
+    // Refrences
+    public TreeSpawner RootSpanw;
+    public TreeRootInteraction RootInteraction;
 
     /// <summary>
     /// Lifecycle hooks for campaign-owned encounters. Listeners must not own
@@ -66,6 +73,10 @@ public class gameManager : MonoBehaviour
     {
         timeScaleOrig = GetPlayableTimeScale(Time.timeScale);
         ScoreboardManager.GetOrCreate();
+
+        //start game with the dense with x amount of enemies
+        RootSpanw = FindAnyObjectByType<TreeSpawner>();
+        if(RootSpanw != null && StartBaseDefenseOnStart) { RootSpanw.StartBaseDefense(10); }
 
         if (playerController != null)
         {
@@ -191,7 +202,7 @@ public class gameManager : MonoBehaviour
 
         MobSpawner spawner = FindAnyObjectByType<MobSpawner>();
 
-        if(spawner == null)
+        if (spawner == null)
         {
             Debug.LogError(
                 "GameManager cannot start the next wave because no MobSpawner was found.");
@@ -232,6 +243,77 @@ public class gameManager : MonoBehaviour
     private static float GetPlayableTimeScale(float candidate)
     {
         return candidate > 0f ? candidate : 1f;
+    }
+    //==========================================================================================
+    // Function, Add Tree Item
+    //==========================================================================================
+
+    public void AddTreeItem()
+    {
+
+        totalItemsFed++;
+        CheckTreeMileStone();
+
+    }
+    //==========================================================================================
+    // Function, Check Mile Stone
+    //==========================================================================================
+
+    private void CheckTreeMileStone()
+    {
+
+        //unlock levels here 
+        // ex could be depending on cody's code if(totalItemsFed == X){ Unlock(x) }
+        
+
+        //Base Defense stuff here
+        if(totalItemsFed % ItemsNeededPerDefense == 0)
+        {
+
+            int enemiesToSpawn = 10 + (totalItemsFed * 2);
+            RootInteraction.HideTreeUI();
+            RootSpanw.StartBaseDefense(enemiesToSpawn);
+
+        }
+
+    }
+    //==========================================================================================
+    // Function, Base Cleared
+    //==========================================================================================
+    public void BaseCleared()
+    {
+
+        isDefenseActive = false;
+        Debug.Log("You Completed the Defense the Hub is safe");
+
+    }
+    //==========================================================================================
+    // Function, Check Wave End
+    //==========================================================================================
+
+    public void StartCheckWave()
+    {
+
+        StartCoroutine(CheckForRemainingEnemies());
+
+    }
+    //==========================================================================================
+    // Function, Check Remaining enemies
+    //==========================================================================================
+
+    private IEnumerator CheckForRemainingEnemies()
+    {
+
+        yield return new WaitForSeconds(5f);
+
+        while(GameObject.FindGameObjectsWithTag("Enemy").Length > 0)
+        {
+
+            yield return new WaitForSeconds(2f);
+
+        }
+
+        BaseCleared();
     }
 }
 //==============================================================================================

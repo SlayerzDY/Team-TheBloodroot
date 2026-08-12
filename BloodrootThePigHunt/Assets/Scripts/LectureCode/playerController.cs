@@ -168,11 +168,10 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
 
         if (gunInv[gunInvPos].shootSound.Count() > 0) {
             if (gunInv[gunInvPos].shootSound.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(gunInv[gunInvPos].shootSound[Random.Range(0, gunInv[gunInvPos].shootSound.Length)], gunInv[gunInvPos].shootSoundVolume); }
-            //int randomInt = Random.Range(0, gunInv[gunInvPos].shootSound.Count());
-            //float randomShotVolume = Random.Range(-gunInv[gunInvPos].shootSoundVolume * 0.9f, gunInv[gunInvPos].shootSoundVolume * 0.9f);
-            //AudioSource.PlayClipAtPoint(gunInv[gunInvPos].shootSound[randomInt], gameObject.transform.position, (gunInv[gunInvPos].shootSoundVolume + randomShotVolume)); 
+            int randomInt = Random.Range(0, gunInv[gunInvPos].shootSound.Count());
+            float randomShotVolume = Random.Range(-gunInv[gunInvPos].shootSoundVolume * 0.9f, gunInv[gunInvPos].shootSoundVolume * 0.9f);
+            AudioSource.PlayClipAtPoint(gunInv[gunInvPos].shootSound[randomInt], gameObject.transform.position, (gunInv[gunInvPos].shootSoundVolume + randomShotVolume));
         }
-
         //Cursor aimer for guns should just get the middle of the monitor then instantiate the bullet
         Ray aimRay = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         Vector3 TargetPos;
@@ -180,33 +179,57 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         {
             TargetPos = hit.point;
         }
-        else { 
+        else
+        {
             TargetPos = aimRay.GetPoint(gunInv[gunInvPos].shootDistance);
         }
 
         Vector3 shootDir = (TargetPos - shootPos.position).normalized;
         int mBullets = gunInv[gunInvPos].bulletCount;
         float spread = gunInv[gunInvPos].spread;
-
-        for (int i = 0; i < mBullets; i++)
+        Quaternion spreadRotate = Quaternion.Euler(Random.Range(-spread, spread), Random.Range(-spread, spread), 0);
+        GameObject bullet =
+        Instantiate(gunInv[gunInvPos].bullet, shootPos.position, Quaternion.LookRotation(shootDir));
+        Damage bulletDamage =
+            bullet.GetComponent<Damage>();
+        if (bulletDamage != null)
         {
-
-            Quaternion spreadRotate = Quaternion.Euler(Random.Range(-spread, spread), Random.Range(-spread, spread), 0);
-
-            Vector3 NewShootDir = spreadRotate * shootDir;
-
-            GameObject bullet =
-                Instantiate(gunInv[gunInvPos].bullet, shootPos.position, Quaternion.LookRotation(NewShootDir));
-
-            Damage bulletDamage =
-                bullet.GetComponent<Damage>();
-
-            if (bulletDamage != null)
-            {
-                bulletDamage.SetPlayerBullet(true);
-            }
-
+            bulletDamage.SetPlayerBullet(true);
         }
+        ////Cursor aimer for guns should just get the middle of the monitor then instantiate the bullet
+        //Ray aimRay = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+        //Vector3 TargetPos;
+        //if (Physics.Raycast(aimRay, out RaycastHit hit, gunInv[gunInvPos].shootDistance))
+        //{
+        //    TargetPos = hit.point;
+        //}
+        //else { 
+        //    TargetPos = aimRay.GetPoint(gunInv[gunInvPos].shootDistance);
+        //}
+
+        //Vector3 shootDir = (TargetPos - shootPos.position).normalized;
+        //int mBullets = gunInv[gunInvPos].bulletCount;
+        //float spread = gunInv[gunInvPos].spread;
+
+        //for (int i = 0; i < mBullets; i++w)
+        //{
+
+        //    Quaternion spreadRotate = Quaternion.Euler(Random.Range(-spread, spread), Random.Range(-spread, spread), 0);
+
+        //    Vector3 NewShootDir = spreadRotate * shootDir;
+
+        //GameObject bullet =
+        //Instantiate(gunInv[gunInvPos].bullet, shootPos.position, Quaternion.LookRotation(NewShootDir));
+
+        //    Damage bulletDamage =
+        //        bullet.GetComponent<Damage>();
+
+        //    if (bulletDamage != null)
+        //    {
+        //        bulletDamage.SetPlayerBullet(true);
+        //    }
+
+        //}
     }
     //==========================================================================================
     // Function, Rload
