@@ -4,14 +4,17 @@ using UnityEngine.UI;
 
 public class TreeRootInteraction : MonoBehaviour, IInteract
 {
+    //public variables
     public GameObject interactionUIPanel;
     public Image uiItemIcon;
     public TextMeshProUGUI uiCostText;
     public Sprite itemSprite;
     public string requiredItemName = "CursedItem";
     public int itemsRequiredToFeed = 1;
-
+    //private variables
     private Inventory playerInventory;
+    private bool isFeeding = false;
+
 
     private void Start()
     {
@@ -66,6 +69,8 @@ public class TreeRootInteraction : MonoBehaviour, IInteract
 
     private void TryFeedTree()
     {
+        if (isFeeding) { return; }
+
         if (playerInventory == null || playerInventory.inventoryItems == null)
         {
             Debug.LogError("Cannot feed tree: Inventory component is missing reference");
@@ -75,6 +80,7 @@ public class TreeRootInteraction : MonoBehaviour, IInteract
         int currentCount = GetCurrentItemCount();
         if (currentCount >= itemsRequiredToFeed)
         {
+            isFeeding = true;
             int itemsRemoved = 0;
 
             for (int i = playerInventory.inventoryItems.Length - 1; i >= 0; i--)
@@ -98,6 +104,7 @@ public class TreeRootInteraction : MonoBehaviour, IInteract
             {
                 UpdateAndShowTreeUI();
             }
+            Invoke(nameof(ResetFeeding), 0.5f);
 
             Debug.Log($"Manually fed {itemsRequiredToFeed}x {requiredItemName} to the tree!");
         }
@@ -145,4 +152,12 @@ public class TreeRootInteraction : MonoBehaviour, IInteract
             interactionUIPanel.SetActive(false);
         }
     }
+
+    private void ResetFeeding()
+    {
+
+        isFeeding = false;
+
+    }
+
 }
