@@ -51,11 +51,22 @@ public class enemyAI : MonoBehaviour, IDamage
     float angleToPlayer;
     float roamTimer;
     float stoppingDistanceOrig;
+    private Animator animator;
     private bool isUnalived;
+    //==========================================================================================
+    // Function, Awake
+    //==========================================================================================
+    protected virtual void Awake() {
+        animator = GetComponent<Animator>();
+        if (animator == null)
+        {
+            Debug.LogWarning("Boar missing Animator component! Proceeding without animations.");
+        }
+    }
     //==========================================================================================
     // Function, Start
     //==========================================================================================
-    void Start()
+    protected virtual void Start()
     {
         isUnalived = false;
         boarBrute = GetComponent<BoarBruteAI>();
@@ -131,11 +142,13 @@ public class enemyAI : MonoBehaviour, IDamage
     //==========================================================================================
     // Function, Update
     //==========================================================================================
-    void Update()
+    protected virtual void Update()
     {
         if (isDead)
             return;
-
+        if (animator != null) { animator.SetFloat("Speed", agent.velocity.magnitude); }
+        //if (animator != null) { animator.speed = agent.velocity.magnitude; }
+        Debug.Log(animator.GetFloat("Speed"));
         if (playerInTrigger)
         {
             ScreecherAI screecher = GetComponent<ScreecherAI>();
@@ -311,7 +324,7 @@ public class enemyAI : MonoBehaviour, IDamage
     // Function, Die
     //==========================================================================================
 
-    private void Die()
+    protected virtual void Die()
     {
         // Prevent one enemy from being counted twice.
         isUnalived = true;
