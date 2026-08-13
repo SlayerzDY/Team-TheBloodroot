@@ -19,6 +19,7 @@ public class gameManager : MonoBehaviour
     // Serialize Fields
     [SerializeField] GameObject menuActive;
     [SerializeField] GameObject menuPause;
+    [SerializeField] GameObject menuOptions;
     [SerializeField] GameObject menuWin;
     [SerializeField] GameObject menuLose;
     [SerializeField] GameObject menuMain;
@@ -75,10 +76,7 @@ public class gameManager : MonoBehaviour
                 menuActive = menuPause;
                 menuActive.SetActive(true);
             }
-            else
-            {
-                if (menuActive == menuPause) { stateUnpause(); }
-            }
+            else if (menuActive == menuPause) { stateUnpause(); }
         }
         timer += Time.deltaTime;
     }
@@ -103,6 +101,18 @@ public class gameManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         menuActive.SetActive(false);
         menuActive = null;
+    }
+    //==========================================================================================
+    // Function, OptionsMenu
+    //==========================================================================================
+    public void OptionsMenu()
+    {
+        statePause();
+        if (menuActive == menuPause)
+        {
+            menuActive = menuOptions;
+            menuActive.SetActive(true);
+        }
     }
     //==========================================================================================
     // Function, Update Game Goal
