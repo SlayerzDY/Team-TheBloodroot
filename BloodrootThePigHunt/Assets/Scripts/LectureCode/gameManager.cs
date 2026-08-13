@@ -21,6 +21,7 @@ public class gameManager : MonoBehaviour
     // Serialize Fields
     [SerializeField] GameObject menuActive;
     [SerializeField] GameObject menuPause;
+    [SerializeField] GameObject menuOptions;
     [SerializeField] GameObject menuWin;
     [SerializeField] GameObject menuLose;
     [SerializeField] GameObject menuMain;
@@ -75,6 +76,7 @@ public class gameManager : MonoBehaviour
         ScoreboardManager.GetOrCreate();
 
         //start game with the dense with x amount of enemies
+        RootInteraction = FindAnyObjectByType<TreeRootInteraction>();
         RootSpanw = FindAnyObjectByType<TreeSpawner>();
         if(RootSpanw != null && StartBaseDefenseOnStart) { RootSpanw.StartBaseDefense(10); }
 
@@ -96,10 +98,7 @@ public class gameManager : MonoBehaviour
                 menuActive = menuPause;
                 menuActive.SetActive(true);
             }
-            else
-            {
-                if (menuActive == menuPause) { stateUnpause(); }
-            }
+            else if (menuActive == menuPause) { stateUnpause(); }
         }
         timer += Time.deltaTime;
     }
@@ -130,6 +129,18 @@ public class gameManager : MonoBehaviour
         }
 
         menuActive = null;
+    }
+    //==========================================================================================
+    // Function, OptionsMenu
+    //==========================================================================================
+    public void OptionsMenu()
+    {
+        statePause();
+        if (menuActive == menuPause)
+        {
+            menuActive = menuOptions;
+            menuActive.SetActive(true);
+        }
     }
     //==========================================================================================
     // Function, Update Game Goal
@@ -165,7 +176,7 @@ public class gameManager : MonoBehaviour
     public void youLose()
     {
         CampaignEventUtility.Invoke(PlayerLost, this);
-        ScoreboardManager.GetOrCreate().ShowFinalScore(false);
+        //ScoreboardManager.GetOrCreate().ShowFinalScore(false);
         statePause();
         menuActive = menuLose;
 
@@ -188,7 +199,7 @@ public class gameManager : MonoBehaviour
     //==========================================================================================
     public void youWin()
     {
-        ScoreboardManager.GetOrCreate().ShowFinalScore(true);
+        //ScoreboardManager.GetOrCreate().ShowFinalScore(true);
         statePause();
         menuActive = menuWin;
         menuActive.SetActive(true);

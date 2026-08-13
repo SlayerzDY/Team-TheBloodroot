@@ -2,10 +2,11 @@
 // Using Unity Engine
 //==============================================================================================
 using Bloodroot.Features.BloodMoon;
-using UnityEngine;
 using System.Collections;
-using UnityEngine.AI;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEngine;
+using UnityEngine.AI;
 //==============================================================================================
 // Declare Enemy AI
 //==============================================================================================
@@ -15,6 +16,8 @@ public class enemyAI : MonoBehaviour, IDamage
     // Declare Variables
     //==========================================================================================
     [SerializeField] float HP;
+    [SerializeField] GameObject[] drops;
+    [SerializeField] private GameObject genericPickupShell;
     [SerializeField] Renderer model;
     [SerializeField] NavMeshAgent agent;
     [SerializeField] int FOV;
@@ -348,7 +351,20 @@ public class enemyAI : MonoBehaviour, IDamage
 
         Dissolver dissolver =
             GetComponent<Dissolver>();
+        for (int i = 0; i < drops.Length; i++)
+        {
+            Item item = drops[i].GetComponent<Item>();
+            if (item.item.itemName == null) { Debug.Log(drops[i].name + " is not an item."); continue; }
 
+            Vector2 randomCircle = Random.insideUnitCircle.normalized * 5;
+            Vector3 randomPosition = transform.position + new Vector3(randomCircle.x, 0f, randomCircle.y);
+            Quaternion localRotation = transform.localRotation;
+
+            genericPickupShell.GetComponent<Item>().item = CopyItem(item.item, item.item.quantity);
+            GameObject newPickup = Instantiate(genericPickupShell, randomPosition, localRotation);
+            newPickup.GetComponent<Item>().canInteract = true;
+            newPickup.GetComponent<Item>().ApplyMeshToSelf();
+        }
         if (dissolver != null)
         {
             dissolver.StartCoroutine(
@@ -358,6 +374,24 @@ public class enemyAI : MonoBehaviour, IDamage
         {
             Destroy(gameObject);
         }
+    }
+    //==========================================================================================
+    // Function, Copy Item
+    //------------------------------------------------------------------------------------------
+    private ItemStats CopyItem(ItemStats source, int qty)
+    {
+        return new ItemStats
+        {
+            itemName = source.itemName,
+            itemDescription = source.itemDescription,
+            icon = source.icon,
+            weight = source.weight,
+            quantity = qty,
+            stackSize = source.stackSize,
+            itemMesh = source.itemMesh,
+            pickupSound = source.pickupSound,
+            itemIncreases = source.itemIncreases
+        };
     }
     //==========================================================================================
     // Function, Flash
