@@ -54,7 +54,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::enemyAI
   HP: 5
-  model: {fileID: 8059819927296918534}
+  drops:
+  - {fileID: 8731680815952161017, guid: 8b3610a9ff3a5ba4abacdd05a4c8309b, type: 3}
+  - {fileID: 8731680815952161017, guid: 8b3610a9ff3a5ba4abacdd05a4c8309b, type: 3}
+  - {fileID: 8731680815952161017, guid: 8b3610a9ff3a5ba4abacdd05a4c8309b, type: 3}
+  genericPickupShell: {fileID: 817942340654339044, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
+  model: {fileID: -7511558181221131132, guid: cb4baa1ac8a3ccd4ab295742f319b70d, type: 3}
   agent: {fileID: 6388563050362958215}
   FOV: 45
   roamDist: 30
@@ -113,7 +118,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5464231581442848068}
-  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 6116459562254526, guid: cb4baa1ac8a3ccd4ab295742f319b70d, type: 3}
 --- !u!23 &8059819927296918534
 MeshRenderer:
   m_ObjectHideFlags: 0

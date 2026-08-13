@@ -267,6 +267,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::enemyAI
   HP: 10
+  drops: []
+  genericPickupShell: {fileID: 817942340654339044, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
   model: {fileID: 1789756216634893366}
   agent: {fileID: 5628251410324903177}
   FOV: 45
@@ -299,12 +301,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Dissolver
   dissolveMaterial: {fileID: -876546973899608171, guid: 2145ce6362bbe1941b7b08334c31e87d, type: 3}
   model: {fileID: 1789756216634893366}
-  dissolveDamage: {fileID: 8300000, guid: 230321f4bc38ac54b921bbf981fefbe8, type: 3}
-  dissolveDeath: {fileID: 8300000, guid: 2ee9099450593044794f46fbd065503c, type: 3}
-  damageVolume: 0.25
-  deathVolume: 0.35
-  maxDamageSoundTime: 0.6
-  maxDeathSoundTime: 1.25
   dissolveDuration: 2
   dissolveStrength: 0
   flashDuration: 0.1

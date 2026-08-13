@@ -176,7 +176,7 @@ public class gameManager : MonoBehaviour
     public void youLose()
     {
         CampaignEventUtility.Invoke(PlayerLost, this);
-        ScoreboardManager.GetOrCreate().ShowFinalScore(false);
+        //ScoreboardManager.GetOrCreate().ShowFinalScore(false);
         statePause();
         menuActive = menuLose;
 
@@ -199,7 +199,7 @@ public class gameManager : MonoBehaviour
     //==========================================================================================
     public void youWin()
     {
-        ScoreboardManager.GetOrCreate().ShowFinalScore(true);
+        //ScoreboardManager.GetOrCreate().ShowFinalScore(true);
         statePause();
         menuActive = menuWin;
         menuActive.SetActive(true);
