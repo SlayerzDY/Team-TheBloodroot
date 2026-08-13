@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 783934772159284768}
   - component: {fileID: 1967233212972591110}
   - component: {fileID: 3689569051924429633}
+  - component: {fileID: 5680692050734537892}
+  - component: {fileID: 1869229805707656710}
   m_Layer: 5
   m_Name: Respawn
   m_TagString: Untagged
@@ -90,10 +92,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 4
     m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
+    m_SelectOnUp: {fileID: 770002118694008040}
+    m_SelectOnDown: {fileID: 5634333427206656631}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
@@ -121,6 +123,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
+      - m_Target: {fileID: 1869229805707656710}
+        m_TargetAssemblyTypeName: Bloodroot.Features.AlphaMenu.AlphaMenuButtonActionFeedback,
+          Assembly-CSharp
+        m_MethodName: PlayActionFeedback
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
       - m_Target: {fileID: 6970637296006004547}
         m_TargetAssemblyTypeName: buttonFunctions, Assembly-CSharp
         m_MethodName: respawn
@@ -133,6 +148,33 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &5680692050734537892
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 262773748164106281}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fc7c9c4e5664237abff3a0854fa779e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Features.AlphaMenu.AlphaMenuSelectableFeedback
+  menuAudio: {fileID: 0}
+--- !u!114 &1869229805707656710
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 262773748164106281}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6f8a9e0b1d2433ca4e5f60718293a4b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Features.AlphaMenu.AlphaMenuButtonActionFeedback
+  menuAudio: {fileID: 0}
+  feedbackKind: 0
 --- !u!1 &268650209552996690
 GameObject:
   m_ObjectHideFlags: 0
@@ -889,6 +931,8 @@ GameObject:
   - component: {fileID: 2090011304645086851}
   - component: {fileID: 1551904843417521962}
   - component: {fileID: 123905213327501888}
+  - component: {fileID: 930259405273990295}
+  - component: {fileID: 293700633706971461}
   m_Layer: 5
   m_Name: Quit
   m_TagString: Untagged
@@ -967,10 +1011,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 4
     m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
+    m_SelectOnUp: {fileID: 4194985725687599096}
+    m_SelectOnDown: {fileID: 4194985725687599096}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
@@ -998,6 +1042,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
+      - m_Target: {fileID: 293700633706971461}
+        m_TargetAssemblyTypeName: Bloodroot.Features.AlphaMenu.AlphaMenuButtonActionFeedback,
+          Assembly-CSharp
+        m_MethodName: PlayActionFeedback
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
       - m_Target: {fileID: 6970637296006004547}
         m_TargetAssemblyTypeName: buttonFunctions, Assembly-CSharp
         m_MethodName: quit
@@ -1010,6 +1067,33 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &930259405273990295
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1268591054881356119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fc7c9c4e5664237abff3a0854fa779e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Features.AlphaMenu.AlphaMenuSelectableFeedback
+  menuAudio: {fileID: 0}
+--- !u!114 &293700633706971461
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1268591054881356119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6f8a9e0b1d2433ca4e5f60718293a4b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Features.AlphaMenu.AlphaMenuButtonActionFeedback
+  menuAudio: {fileID: 0}
+  feedbackKind: 0
 --- !u!1 &1401203585844305158
 GameObject:
   m_ObjectHideFlags: 0
@@ -1022,6 +1106,8 @@ GameObject:
   - component: {fileID: 2395199986063844478}
   - component: {fileID: 7027756386479135460}
   - component: {fileID: 2506308928758254146}
+  - component: {fileID: 6968709590366280238}
+  - component: {fileID: 4241506159197642918}
   m_Layer: 5
   m_Name: Resume
   m_TagString: Untagged
@@ -1100,10 +1186,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 4
     m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
+    m_SelectOnUp: {fileID: 8423484431129659601}
+    m_SelectOnDown: {fileID: 3156521922062180962}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
@@ -1131,6 +1217,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
+      - m_Target: {fileID: 4241506159197642918}
+        m_TargetAssemblyTypeName: Bloodroot.Features.AlphaMenu.AlphaMenuButtonActionFeedback,
+          Assembly-CSharp
+        m_MethodName: PlayActionFeedback
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
       - m_Target: {fileID: 6970637296006004547}
         m_TargetAssemblyTypeName: buttonFunctions, Assembly-CSharp
         m_MethodName: resume
@@ -1143,6 +1242,33 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &6968709590366280238
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1401203585844305158}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fc7c9c4e5664237abff3a0854fa779e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Features.AlphaMenu.AlphaMenuSelectableFeedback
+  menuAudio: {fileID: 0}
+--- !u!114 &4241506159197642918
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1401203585844305158}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6f8a9e0b1d2433ca4e5f60718293a4b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Features.AlphaMenu.AlphaMenuButtonActionFeedback
+  menuAudio: {fileID: 0}
+  feedbackKind: 1
 --- !u!1 &1444502448621085331
 GameObject:
   m_ObjectHideFlags: 0
@@ -1305,6 +1431,8 @@ GameObject:
   - component: {fileID: 4940351811175145637}
   - component: {fileID: 2298962323735729077}
   - component: {fileID: 3156521922062180962}
+  - component: {fileID: 6143817996389579718}
+  - component: {fileID: 5451675082914462233}
   m_Layer: 5
   m_Name: Restart
   m_TagString: Untagged
@@ -1383,10 +1511,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 4
     m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
+    m_SelectOnUp: {fileID: 2506308928758254146}
+    m_SelectOnDown: {fileID: 8423484431129659601}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
@@ -1414,6 +1542,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
+      - m_Target: {fileID: 5451675082914462233}
+        m_TargetAssemblyTypeName: Bloodroot.Features.AlphaMenu.AlphaMenuButtonActionFeedback,
+          Assembly-CSharp
+        m_MethodName: PlayActionFeedback
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
       - m_Target: {fileID: 6970637296006004547}
         m_TargetAssemblyTypeName: buttonFunctions, Assembly-CSharp
         m_MethodName: restart
@@ -1426,6 +1567,33 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &6143817996389579718
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1743861472843236195}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fc7c9c4e5664237abff3a0854fa779e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Features.AlphaMenu.AlphaMenuSelectableFeedback
+  menuAudio: {fileID: 0}
+--- !u!114 &5451675082914462233
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1743861472843236195}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6f8a9e0b1d2433ca4e5f60718293a4b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Features.AlphaMenu.AlphaMenuButtonActionFeedback
+  menuAudio: {fileID: 0}
+  feedbackKind: 0
 --- !u!1 &1888664906148770168
 GameObject:
   m_ObjectHideFlags: 0
@@ -1643,6 +1811,8 @@ GameObject:
   - component: {fileID: 5858920756567560502}
   - component: {fileID: 9035260500465481198}
   - component: {fileID: 5634333427206656631}
+  - component: {fileID: 3173216413066391898}
+  - component: {fileID: 8618111564090988789}
   m_Layer: 5
   m_Name: Restart
   m_TagString: Untagged
@@ -1721,10 +1891,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 4
     m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
+    m_SelectOnUp: {fileID: 3689569051924429633}
+    m_SelectOnDown: {fileID: 770002118694008040}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
@@ -1752,6 +1922,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
+      - m_Target: {fileID: 8618111564090988789}
+        m_TargetAssemblyTypeName: Bloodroot.Features.AlphaMenu.AlphaMenuButtonActionFeedback,
+          Assembly-CSharp
+        m_MethodName: PlayActionFeedback
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
       - m_Target: {fileID: 6970637296006004547}
         m_TargetAssemblyTypeName: buttonFunctions, Assembly-CSharp
         m_MethodName: restart
@@ -1764,6 +1947,33 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &3173216413066391898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2273885938821530936}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fc7c9c4e5664237abff3a0854fa779e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Features.AlphaMenu.AlphaMenuSelectableFeedback
+  menuAudio: {fileID: 0}
+--- !u!114 &8618111564090988789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2273885938821530936}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6f8a9e0b1d2433ca4e5f60718293a4b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Features.AlphaMenu.AlphaMenuButtonActionFeedback
+  menuAudio: {fileID: 0}
+  feedbackKind: 0
 --- !u!1 &2295552462501149184
 GameObject:
   m_ObjectHideFlags: 0
@@ -2238,6 +2448,7 @@ GameObject:
   - component: {fileID: 7322002773679961848}
   - component: {fileID: 6770670737706202005}
   - component: {fileID: 6257552146719104786}
+  - component: {fileID: 1040679957551294113}
   m_Layer: 5
   m_Name: Win Menu
   m_TagString: Untagged
@@ -2305,6 +2516,19 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &1040679957551294113
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2948344646326536840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7a9b0f1c2e3544db5f60718293a4b5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Features.AlphaMenu.AlphaMenuFocusOnEnable
+  firstSelectedButton: {fileID: 4194985725687599096}
 --- !u!1 &3226115111504673034
 GameObject:
   m_ObjectHideFlags: 0
@@ -2391,6 +2615,7 @@ GameObject:
   - component: {fileID: 1713753418992983515}
   - component: {fileID: 9047363195926683846}
   - component: {fileID: 1402427923179500980}
+  - component: {fileID: 6667389894055488070}
   m_Layer: 5
   m_Name: Pause Menu
   m_TagString: Untagged
@@ -2459,6 +2684,19 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &6667389894055488070
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3326222989237154975}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7a9b0f1c2e3544db5f60718293a4b5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Features.AlphaMenu.AlphaMenuFocusOnEnable
+  firstSelectedButton: {fileID: 2506308928758254146}
 --- !u!1 &3635046833941555381
 GameObject:
   m_ObjectHideFlags: 0
@@ -2471,6 +2709,8 @@ GameObject:
   - component: {fileID: 260307120750878772}
   - component: {fileID: 9179691035646821905}
   - component: {fileID: 4194985725687599096}
+  - component: {fileID: 8161759396836430147}
+  - component: {fileID: 3545930511603570218}
   m_Layer: 5
   m_Name: Restart
   m_TagString: Untagged
@@ -2549,10 +2789,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 4
     m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
+    m_SelectOnUp: {fileID: 123905213327501888}
+    m_SelectOnDown: {fileID: 123905213327501888}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
@@ -2580,6 +2820,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
+      - m_Target: {fileID: 3545930511603570218}
+        m_TargetAssemblyTypeName: Bloodroot.Features.AlphaMenu.AlphaMenuButtonActionFeedback,
+          Assembly-CSharp
+        m_MethodName: PlayActionFeedback
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
       - m_Target: {fileID: 6970637296006004547}
         m_TargetAssemblyTypeName: buttonFunctions, Assembly-CSharp
         m_MethodName: restart
@@ -2592,6 +2845,33 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &8161759396836430147
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3635046833941555381}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fc7c9c4e5664237abff3a0854fa779e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Features.AlphaMenu.AlphaMenuSelectableFeedback
+  menuAudio: {fileID: 0}
+--- !u!114 &3545930511603570218
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3635046833941555381}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6f8a9e0b1d2433ca4e5f60718293a4b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Features.AlphaMenu.AlphaMenuButtonActionFeedback
+  menuAudio: {fileID: 0}
+  feedbackKind: 0
 --- !u!1 &3648728890282776508
 GameObject:
   m_ObjectHideFlags: 0
@@ -2820,6 +3100,8 @@ GameObject:
   - component: {fileID: 7075077964368934105}
   - component: {fileID: 8911252226179117895}
   - component: {fileID: 770002118694008040}
+  - component: {fileID: 7782751645736507288}
+  - component: {fileID: 2982267985149711047}
   m_Layer: 5
   m_Name: Quit
   m_TagString: Untagged
@@ -2898,10 +3180,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 4
     m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
+    m_SelectOnUp: {fileID: 5634333427206656631}
+    m_SelectOnDown: {fileID: 3689569051924429633}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
@@ -2929,6 +3211,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
+      - m_Target: {fileID: 2982267985149711047}
+        m_TargetAssemblyTypeName: Bloodroot.Features.AlphaMenu.AlphaMenuButtonActionFeedback,
+          Assembly-CSharp
+        m_MethodName: PlayActionFeedback
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
       - m_Target: {fileID: 6970637296006004547}
         m_TargetAssemblyTypeName: buttonFunctions, Assembly-CSharp
         m_MethodName: quit
@@ -2941,6 +3236,33 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &7782751645736507288
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3859030333255887811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fc7c9c4e5664237abff3a0854fa779e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Features.AlphaMenu.AlphaMenuSelectableFeedback
+  menuAudio: {fileID: 0}
+--- !u!114 &2982267985149711047
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3859030333255887811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6f8a9e0b1d2433ca4e5f60718293a4b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Features.AlphaMenu.AlphaMenuButtonActionFeedback
+  menuAudio: {fileID: 0}
+  feedbackKind: 0
 --- !u!1 &4152675601064265431
 GameObject:
   m_ObjectHideFlags: 0
@@ -4318,6 +4640,8 @@ GameObject:
   - component: {fileID: 6470918832380400314}
   - component: {fileID: 6231097369795698322}
   - component: {fileID: 8423484431129659601}
+  - component: {fileID: 5167333996196225055}
+  - component: {fileID: 4998362862423890954}
   m_Layer: 5
   m_Name: Quit
   m_TagString: Untagged
@@ -4396,10 +4720,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 4
     m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
+    m_SelectOnUp: {fileID: 3156521922062180962}
+    m_SelectOnDown: {fileID: 2506308928758254146}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
@@ -4427,6 +4751,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
+      - m_Target: {fileID: 4998362862423890954}
+        m_TargetAssemblyTypeName: Bloodroot.Features.AlphaMenu.AlphaMenuButtonActionFeedback,
+          Assembly-CSharp
+        m_MethodName: PlayActionFeedback
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
       - m_Target: {fileID: 6970637296006004547}
         m_TargetAssemblyTypeName: buttonFunctions, Assembly-CSharp
         m_MethodName: quit
@@ -4439,6 +4776,33 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &5167333996196225055
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7078975632351140565}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fc7c9c4e5664237abff3a0854fa779e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Features.AlphaMenu.AlphaMenuSelectableFeedback
+  menuAudio: {fileID: 0}
+--- !u!114 &4998362862423890954
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7078975632351140565}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6f8a9e0b1d2433ca4e5f60718293a4b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Features.AlphaMenu.AlphaMenuButtonActionFeedback
+  menuAudio: {fileID: 0}
+  feedbackKind: 0
 --- !u!1 &7086992469718103497
 GameObject:
   m_ObjectHideFlags: 0
@@ -4450,6 +4814,7 @@ GameObject:
   - component: {fileID: 4378293624561449180}
   - component: {fileID: 310566759928411055}
   - component: {fileID: 3922062314957126060}
+  - component: {fileID: 6762956911968032874}
   m_Layer: 5
   m_Name: Lose Menu
   m_TagString: Untagged
@@ -4518,6 +4883,19 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &6762956911968032874
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7086992469718103497}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7a9b0f1c2e3544db5f60718293a4b5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Features.AlphaMenu.AlphaMenuFocusOnEnable
+  firstSelectedButton: {fileID: 3689569051924429633}
 --- !u!1 &7319106856529425144
 GameObject:
   m_ObjectHideFlags: 0

@@ -14,7 +14,6 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     //==========================================================================================
     // Test Variables
     [SerializeField] public GameObject testContainer; 
-
     [SerializeField] CharacterController controller;
     [SerializeField] LayerMask ignoreLayer;
     float camRotX, camRotY;
@@ -253,7 +252,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         StartCoroutine(flashDamage());  
         if (HP <= 0)
         {
-            if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolve(true)); }
+            if (this.GetComponent<Dissolver>() != null) { this.GetComponent<Dissolver>().StartCoroutine(this.GetComponent<Dissolver>().dissolve(true)); }
             gameManager.instance.youLose();
         }
         else

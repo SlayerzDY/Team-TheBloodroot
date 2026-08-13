@@ -1,23 +1,39 @@
+//==============================================================================================
+// Using Unity Engine
+//==============================================================================================
 using UnityEngine;
 using UnityEngine.AI;
-
-  public class BoarBruteAI : MonoBehaviour
+//==============================================================================================
+// Declare Boar Brute AI
+//==============================================================================================
+public class BoarBruteAI : enemyAI
     {
         [SerializeField] float chargeSpeed;
         [SerializeField] float chargeTime;
     public bool charging;
         float timer;
-
+    private Animator anim;
     NavMeshAgent agent;
 
-    void Start()
+    protected override void Awake() {
+        base.Awake();
+        anim = GetComponent<Animator>();
+        if (anim == null)
+        {
+            Debug.LogWarning("Boar missing Animator component! Proceeding without animations.");
+        }
+    }
+
+    protected override void Start()
     {
+        base.Start();
         agent = GetComponent<NavMeshAgent>();
     }
 
-    void Update()
+    protected override void Update()
         {
-            if (charging)
+        base.Update();    
+        if (charging)
             {
                 timer += Time.deltaTime;
 
@@ -44,6 +60,6 @@ using UnityEngine.AI;
            agent.enabled = false;
         }
     }
-
-
-
+//==============================================================================================
+// End of Enemy AI .cs
+//==============================================================================================
