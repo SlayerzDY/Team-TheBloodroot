@@ -2,7 +2,9 @@
 // Using Unity Engine
 //==============================================================================================
 using UnityEngine;
+using System;
 using System.Collections;
+using Bloodroot.Campaign;
 using Bloodroot.Features.BloodMoon;
 using TMPro;
 using UnityEngine.UI;
@@ -23,6 +25,7 @@ public class gameManager : MonoBehaviour
     [SerializeField] GameObject menuWin;
     [SerializeField] GameObject menuLose;
     [SerializeField] GameObject menuMain;
+    [SerializeField] GameObject menuRadar;
     [SerializeField] TMP_Text gameGoalCountText;
     public GameObject menuInteractable;
     // Public Variables
@@ -35,11 +38,26 @@ public class gameManager : MonoBehaviour
     public GameObject player;
     public playerController playerController;
     public GameObject playerSpawnPos;
+    public bool isDefenseActive = false;
+    public int totalItemsFed = 0;
+    [Range(2,5)] public int ItemsNeededPerDefense = 5;
+    public bool StartBaseDefenseOnStart = true;
     // Private Variables
     private float timer = 0;
     private float timeScaleOrig;
     private int gameGoalCount;
     private bool waveManagerControlsWin;
+    // Refrences
+    public TreeSpawner RootSpanw;
+    public TreeRootInteraction RootInteraction;
+
+    /// <summary>
+    /// Lifecycle hooks for campaign-owned encounters. Listeners must not own
+    /// the lose menu or player health; they use these notifications to pause
+    /// or resume their own state machines.
+    /// </summary>
+    public event Action PlayerLost;
+    public event Action PlayerRespawned;
     //==========================================================================================
     // Function, Awake, Pre Start 
     //==========================================================================================
@@ -54,9 +72,13 @@ public class gameManager : MonoBehaviour
     //==========================================================================================
     void Start()
     {
-        timeScaleOrig = Time.timeScale;
+        timeScaleOrig = GetPlayableTimeScale(Time.timeScale);
         ScoreboardManager.GetOrCreate();
-        setupPlayerHUD();
+
+        //start game with the dense with x amount of enemies
+        RootInteraction = FindAnyObjectByType<TreeRootInteraction>();
+        RootSpanw = FindAnyObjectByType<TreeSpawner>();
+        if(RootSpanw != null && StartBaseDefenseOnStart) { RootSpanw.StartBaseDefense(10); }
 
         if (playerController != null)
         {
@@ -96,10 +118,16 @@ public class gameManager : MonoBehaviour
     public void stateUnpause()
     {
         isPaused = false;
+        timeScaleOrig = GetPlayableTimeScale(timeScaleOrig);
         Time.timeScale = timeScaleOrig;
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
-        menuActive.SetActive(false);
+
+        if (menuActive != null)
+        {
+            menuActive.SetActive(false);
+        }
+
         menuActive = null;
     }
     //==========================================================================================
@@ -124,7 +152,10 @@ public class gameManager : MonoBehaviour
         if (waveManagerControlsWin)
             return;
 
-       gameGoalCountText.text = gameGoalCount.ToString("F0");
+        if (gameGoalCountText != null)
+        {
+            gameGoalCountText.text = gameGoalCount.ToString("F0");
+        }
 
         if (gameGoalCount >= 10)
         {
@@ -133,14 +164,35 @@ public class gameManager : MonoBehaviour
         }
     }
     //==========================================================================================
+    // Function, Set Wave Manager Controls Win
+    //==========================================================================================
+    public void SetWaveManagerControlsWin(bool controlsWin)
+    {
+        waveManagerControlsWin = controlsWin;
+    }
+    //==========================================================================================
     // Function, Lose
     //==========================================================================================
     public void youLose()
     {
+        CampaignEventUtility.Invoke(PlayerLost, this);
         ScoreboardManager.GetOrCreate().ShowFinalScore(false);
         statePause();
         menuActive = menuLose;
-        menuActive.SetActive(true);
+
+        if (menuActive != null)
+        {
+            menuActive.SetActive(true);
+        }
+    }
+
+    /// <summary>
+    /// Called by the authored respawn button after the existing player
+    /// controller has moved and restored the player.
+    /// </summary>
+    public void NotifyPlayerRespawned()
+    {
+        CampaignEventUtility.Invoke(PlayerRespawned, this);
     }
     //==========================================================================================
     // Function, Win
@@ -161,7 +213,7 @@ public class gameManager : MonoBehaviour
 
         MobSpawner spawner = FindAnyObjectByType<MobSpawner>();
 
-        if(spawner == null)
+        if (spawner == null)
         {
             Debug.LogError(
                 "GameManager cannot start the next wave because no MobSpawner was found.");
@@ -174,83 +226,106 @@ public class gameManager : MonoBehaviour
 
     }
     //==========================================================================================
+    // Function, Radar
+    //==========================================================================================
+    public void ActivateRadar(bool on = true) {
+        menuRadar.SetActive(on);
+    }
+    //==========================================================================================
     // Function, Update Player
     //==========================================================================================
     public void updatePlayer()
     {
-        timeScaleOrig = Time.timeScale;
+        timeScaleOrig = GetPlayableTimeScale(Time.timeScale);
         player = GameObject.FindWithTag("Player");
+
+        if (player == null)
+        {
+            playerController = null;
+            playerSpawnPos = GameObject.FindWithTag("PlayerSpawnPos");
+            Debug.LogError("GameManager could not find an active Player object.");
+            return;
+        }
+
         playerController = player.GetComponent<playerController>();
         playerSpawnPos = GameObject.FindWithTag("PlayerSpawnPos");
     }
-    //==========================================================================================
-    // Function, Setup Player HUD
-    //==========================================================================================
-    void setupPlayerHUD()
+
+    private static float GetPlayableTimeScale(float candidate)
     {
-        if (AmmoCount != null && FlashlightCount != null)
-            return;
-
-        GameObject canvasObject = new GameObject("Player HUD Canvas");
-
-        Canvas canvas = canvasObject.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 15;
-
-        CanvasScaler scaler = canvasObject.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920f, 1080f);
-
-        canvasObject.AddComponent<GraphicRaycaster>();
-
-        if (AmmoCount == null)
-        {
-            AmmoCount = createPlayerHUDText(
-                "Ammo Count",
-                canvas.transform,
-                new Vector2(25f, 90f),
-                "0 / 0");
-        }
-
-        if (FlashlightCount == null)
-        {
-            FlashlightCount = createPlayerHUDText(
-                "Flashlight Count",
-                canvas.transform,
-                new Vector2(25f, 55f),
-                "Flashlight: --");
-        }
+        return candidate > 0f ? candidate : 1f;
     }
     //==========================================================================================
-    // Function, Create Player HUD Text
+    // Function, Add Tree Item
     //==========================================================================================
-    TextMeshProUGUI createPlayerHUDText(
-        string objectName,
-        Transform parent,
-        Vector2 anchoredPosition,
-        string startText)
+
+    public void AddTreeItem()
     {
-        GameObject textObject = new GameObject(objectName);
-        textObject.transform.SetParent(parent, false);
 
-        TextMeshProUGUI text = textObject.AddComponent<TextMeshProUGUI>();
+        totalItemsFed++;
+        CheckTreeMileStone();
 
-        RectTransform rect = text.GetComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0f, 0f);
-        rect.anchorMax = new Vector2(0f, 0f);
-        rect.pivot = new Vector2(0f, 0f);
-        rect.anchoredPosition = anchoredPosition;
-        rect.sizeDelta = new Vector2(360f, 35f);
-
-        text.text = startText;
-        text.fontSize = 24f;
-        text.color = Color.white;
-        text.alignment = TextAlignmentOptions.Left;
-        text.raycastTarget = false;
-
-        return text;
     }
     //==========================================================================================
+    // Function, Check Mile Stone
+    //==========================================================================================
+
+    private void CheckTreeMileStone()
+    {
+
+        //unlock levels here 
+        // ex could be depending on cody's code if(totalItemsFed == X){ Unlock(x) }
+        
+
+        //Base Defense stuff here
+        if(totalItemsFed % ItemsNeededPerDefense == 0)
+        {
+
+            int enemiesToSpawn = 10 + (totalItemsFed * 2);
+            RootInteraction.HideTreeUI();
+            RootSpanw.StartBaseDefense(enemiesToSpawn);
+
+        }
+
+    }
+    //==========================================================================================
+    // Function, Base Cleared
+    //==========================================================================================
+    public void BaseCleared()
+    {
+
+        isDefenseActive = false;
+        Debug.Log("You Completed the Defense the Hub is safe");
+
+    }
+    //==========================================================================================
+    // Function, Check Wave End
+    //==========================================================================================
+
+    public void StartCheckWave()
+    {
+
+        StartCoroutine(CheckForRemainingEnemies());
+
+    }
+    //==========================================================================================
+    // Function, Check Remaining enemies
+    //==========================================================================================
+
+    private IEnumerator CheckForRemainingEnemies()
+    {
+
+        yield return new WaitForSeconds(5f);
+
+        while(GameObject.FindGameObjectsWithTag("Enemy").Length > 0)
+        {
+
+            yield return new WaitForSeconds(2f);
+
+        }
+
+        BaseCleared();
+    }
 }
 //==============================================================================================
 // End of Game Manager

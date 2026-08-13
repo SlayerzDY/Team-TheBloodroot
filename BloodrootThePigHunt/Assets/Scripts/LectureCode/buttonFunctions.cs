@@ -26,15 +26,42 @@ public class buttonFunctions : MonoBehaviour {
     //==========================================================================================
     public void respawn()
     {
-        gameManager.instance.playerController.spawnPlayer();
-        gameManager.instance.stateUnpause();
+        gameManager manager = gameManager.instance;
+
+        if (manager == null)
+        {
+            Debug.LogError("Respawn requires the authored GameManager.");
+            return;
+        }
+
+        if (manager.playerController == null)
+        {
+            manager.updatePlayer();
+        }
+
+        if (manager.playerController == null)
+        {
+            Debug.LogError("Respawn requires the authored player controller.");
+            return;
+        }
+
+        manager.playerController.spawnPlayer();
+        manager.NotifyPlayerRespawned();
+        manager.stateUnpause();
     }
     //==========================================================================================
     // Function, Restart
     //==========================================================================================
     public void restart() {
+        if (gameManager.instance != null)
+        {
+            // Restore real gameplay time before the replacement scene starts.
+            // This prevents a freshly loaded manager from capturing a paused
+            // time scale as its baseline.
+            gameManager.instance.stateUnpause();
+        }
+
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-        gameManager.instance.stateUnpause();
     }
     //==========================================================================================
     // Function, Quit
