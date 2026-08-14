@@ -43,9 +43,8 @@ public class BoarBruteAI : enemyAI
                 }
             }
         }
-        public void StartCharge()
+        public virtual void StartCharge()
         {
-
             charging = true;
 
            agent.enabled = false;
