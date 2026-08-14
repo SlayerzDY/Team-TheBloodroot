@@ -121,10 +121,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8949988314870021976}
-  - component: {fileID: 4878719805137503533}
+  - component: {fileID: 3521915985337104216}
   - component: {fileID: 8163918689632145016}
   m_Layer: 10
-  m_Name: Door
+  m_Name: LockedDoor
   m_TagString: Interact
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -146,7 +146,7 @@ Transform:
   - {fileID: 4576332379082786438}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4878719805137503533
+--- !u!114 &3521915985337104216
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -155,12 +155,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 8790447849310696719}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c941d4fb2c1f9094b9b9b691accd8568, type: 3}
+  m_Script: {fileID: 11500000, guid: 00d722f48b59d574196c70b855442519, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::hingeRotator
+  m_EditorClassIdentifier: Assembly-CSharp::lockedHingeRotator
+  key: {fileID: 3501958250119339175, guid: 8b3610a9ff3a5ba4abacdd05a4c8309b, type: 3}
   startPosition: {x: 0, y: 0, z: 0}
   endPosition: {x: 0, y: 90, z: 0}
-  speed: 5
+  speed: 3
   audOpenSound: []
   audOpenSoundVolume: 0
   audCloseSound: []
