@@ -19,7 +19,8 @@ public class enemyAI : MonoBehaviour, IDamage
     [SerializeField] GameObject[] drops;
     [SerializeField] private GameObject genericPickupShell;
     [SerializeField] Renderer model;
-    [SerializeField] NavMeshAgent agent;
+    [SerializeField] public NavMeshAgent agent;
+    [SerializeField] public Animator animator;
     [SerializeField] int FOV;
     // Roam Stats
     [SerializeField] int roamDist;
@@ -51,23 +52,20 @@ public class enemyAI : MonoBehaviour, IDamage
     float angleToPlayer;
     float roamTimer;
     float stoppingDistanceOrig;
-    private Animator animator;
     private bool isUnalived;
-    //==========================================================================================
-    // Function, Awake
-    //==========================================================================================
-    protected virtual void Awake() {
-        animator = GetComponent<Animator>();
-        if (animator == null)
-        {
-            Debug.LogWarning("Boar missing Animator component! Proceeding without animations.");
-        }
-    }
+  
     //==========================================================================================
     // Function, Start
     //==========================================================================================
     protected virtual void Start()
     {
+        animator = GetComponentInChildren<Animator>();
+
+        if (animator == null)
+        {
+            Debug.LogWarning("Boar missing Animator component! Proceeding without animations.");
+        }
+
         isUnalived = false;
         boarBrute = GetComponent<BoarBruteAI>();
         if (model != null) { colorOrig = model.material.color; }
@@ -146,9 +144,11 @@ public class enemyAI : MonoBehaviour, IDamage
     {
         if (isDead)
             return;
-        if (animator != null) { animator.SetFloat("Speed", agent.velocity.magnitude); }
-        //if (animator != null) { animator.speed = agent.velocity.magnitude; }
+
+        //if (animator != null) { animator.SetFloat("Speed", agent.velocity.magnitude); }
+        animator.SetFloat("Speed", agent.velocity.magnitude / agent.speed, 0.1f, Time.deltaTime);
         Debug.Log(animator.GetFloat("Speed"));
+
         if (playerInTrigger)
         {
             ScreecherAI screecher = GetComponent<ScreecherAI>();

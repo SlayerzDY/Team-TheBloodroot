@@ -8,21 +8,12 @@ using UnityEngine.AI;
 //==============================================================================================
 public class BoarBruteAI : enemyAI
     {
+        // Seralized Variables
         [SerializeField] float chargeSpeed;
         [SerializeField] float chargeTime;
-    public bool charging;
+        // none searlized variables
+        public bool charging;
         float timer;
-    private Animator anim;
-    NavMeshAgent agent;
-
-    protected override void Awake() {
-        base.Awake();
-        anim = GetComponent<Animator>();
-        if (anim == null)
-        {
-            Debug.LogWarning("Boar missing Animator component! Proceeding without animations.");
-        }
-    }
 
     protected override void Start()
     {
