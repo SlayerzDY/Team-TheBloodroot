@@ -98,7 +98,16 @@ public class gameManager : MonoBehaviour
                 menuActive = menuPause;
                 menuActive.SetActive(true);
             }
-            else if (menuActive == menuPause) { stateUnpause(); }
+            else if (menuActive != null && menuActive != menuPause) {
+                menuActive.SetActive(false);
+                menuActive = menuPause;
+                menuActive.SetActive(true);
+            }
+            else if (menuActive == menuPause) {
+                menuActive.SetActive(false);
+                menuActive = null;
+                stateUnpause();
+            }
         }
         timer += Time.deltaTime;
     }
@@ -135,9 +144,9 @@ public class gameManager : MonoBehaviour
     //==========================================================================================
     public void OptionsMenu()
     {
-        statePause();
         if (menuActive == menuPause)
         {
+            menuActive.SetActive(false);
             menuActive = menuOptions;
             menuActive.SetActive(true);
         }
