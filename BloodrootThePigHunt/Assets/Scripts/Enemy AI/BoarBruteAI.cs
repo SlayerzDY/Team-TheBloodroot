@@ -6,58 +6,59 @@ using UnityEngine.AI;
 //==============================================================================================
 // Declare Boar Brute AI
 //==============================================================================================
-public class BoarBruteAI : enemyAI
-    {
-        [SerializeField] float chargeSpeed;
-        [SerializeField] float chargeTime;
+public class BoarBruteAI : enemyAI {
+    //==========================================================================================
+    // Variable Declarations
+    //==========================================================================================
+    [SerializeField] float chargeSpeed;
+    [SerializeField] float chargeTime;
     public bool charging;
-        float timer;
-    private Animator anim;
-    NavMeshAgent agent;
-
+    float timer;
+    [SerializeField] Animator anim;
+    NavMeshAgent agent1;
+    //==========================================================================================
+    // Function Declarations
+    //==========================================================================================
+    // Function, Awake Override
+    //------------------------------------------------------------------------------------------
     protected override void Awake() {
         base.Awake();
         anim = GetComponent<Animator>();
-        if (anim == null)
-        {
+        if (anim == null) {
             Debug.LogWarning("Boar missing Animator component! Proceeding without animations.");
         }
-    }
 
-    protected override void Start()
-    {
+    }
+    //==========================================================================================
+    // Function, Start Override
+    //------------------------------------------------------------------------------------------
+    protected override void Start() {
         base.Start();
-        agent = GetComponent<NavMeshAgent>();
+        agent1 = GetComponent<NavMeshAgent>();
     }
-
-    protected override void Update()
-        {
+    //==========================================================================================
+    // Function, Update Override
+    //------------------------------------------------------------------------------------------
+    protected override void Update() {
         base.Update();    
-        if (charging)
-            {
-                timer += Time.deltaTime;
-
-                // Move forward fast
-                transform.position += transform.forward * chargeSpeed * Time.deltaTime;
-
-                if (timer >= chargeTime)
-                {
-                    charging = false;
-                    timer = 0f;
-                
-                agent.enabled = true;
-
-
-                agent.SetDestination(gameManager.instance.player.transform.position);
-                }
+        if (charging) {
+            timer += Time.deltaTime;
+            // Move forward fast
+            transform.position += transform.forward * chargeSpeed * Time.deltaTime;
+            if (timer >= chargeTime) {
+                charging = false;
+                timer = 0f;
+                agent1.enabled = true;
+                agent1.SetDestination(gameManager.instance.player.transform.position);
             }
         }
-        public void StartCharge()
-        {
-
-            charging = true;
-
-           agent.enabled = false;
+    }
+    //==========================================================================================
+    // Function, Start Charge
+    //------------------------------------------------------------------------------------------
+    public void StartCharge() {
+        charging = true;
+        agent1.enabled = false;
         }
     }
 //==============================================================================================

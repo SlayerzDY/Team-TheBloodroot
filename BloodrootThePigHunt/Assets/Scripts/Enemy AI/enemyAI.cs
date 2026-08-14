@@ -73,11 +73,6 @@ public class enemyAI : MonoBehaviour, IDamage
         if (model != null) { colorOrig = model.material.color; }
         manager = FindAnyObjectByType<waveManager>();
         ApplyBloodMoonModifier();
-        if (gameManager.instance != null) { 
-            gameManager.instance.updateGameGoal(1);
-            startingPos = transform.position;
-            stoppingDistanceOrig = agent.stoppingDistance;
-        }
     }
     //==========================================================================================
     // Function, Roam
