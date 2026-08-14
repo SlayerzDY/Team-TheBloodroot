@@ -19,7 +19,7 @@ public class gameManager : MonoBehaviour
     // Game Manager Instance, Creates Singleton
     public static gameManager instance;
     // Serialize Fields
-    [SerializeField] GameObject[] prevMenus;
+    [SerializeField] GameObject menuUtility;
     [SerializeField] GameObject menuActive;
     [SerializeField] GameObject menuPause;
     [SerializeField] GameObject menuOptions;
@@ -48,10 +48,10 @@ public class gameManager : MonoBehaviour
     private float timeScaleOrig;
     private int gameGoalCount;
     private bool waveManagerControlsWin;
+   
     // Refrences
     public TreeSpawner RootSpanw;
     public TreeRootInteraction RootInteraction;
-
     /// <summary>
     /// Lifecycle hooks for campaign-owned encounters. Listeners must not own
     /// the lose menu or player health; they use these notifications to pause
@@ -101,12 +101,13 @@ public class gameManager : MonoBehaviour
             }
             else if (menuActive != null && menuActive != menuPause) {
                 menuActive.SetActive(false);
-                menuActive = menuPause;
+                menuActive = MenuTracker.Instance.PreviousMenu();
                 menuActive.SetActive(true);
             }
             else if (menuActive == menuPause) {
                 menuActive.SetActive(false);
                 menuActive = null;
+                MenuTracker.Instance.Clear();
                 stateUnpause();
             }
         }
@@ -147,6 +148,7 @@ public class gameManager : MonoBehaviour
     {
         if (menuActive == menuPause)
         {
+            MenuTracker.Instance.AddMenu(menuActive);
             menuActive.SetActive(false);
             menuActive = menuOptions;
             menuActive.SetActive(true);
