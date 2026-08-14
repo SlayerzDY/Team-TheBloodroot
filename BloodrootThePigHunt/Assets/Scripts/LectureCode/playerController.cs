@@ -65,6 +65,14 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     //==========================================================================================
     void Start() {
+        if (controller == null)
+        {
+            controller = GetComponent<CharacterController>();
+            if (controller == null)
+            {
+                Debug.LogError("CharacterController missing from " + gameObject.name + "!");
+            }
+        }
         HPOrig = HP;
         speedOrig = speed;
         spawnPlayer();
