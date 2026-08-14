@@ -352,10 +352,10 @@ public class enemyAI : MonoBehaviour, IDamage
             manager.EnemyDefeated(gameObject);
         }
 
-        if (gameManager.instance != null)
-        {
-            gameManager.instance.updateGameGoal(-1);
-        }
+        //if (gameManager.instance != null)
+        //{
+        //    gameManager.instance.updateGameGoal(-1);
+        //}
 
         Dissolver dissolver =
             GetComponent<Dissolver>();

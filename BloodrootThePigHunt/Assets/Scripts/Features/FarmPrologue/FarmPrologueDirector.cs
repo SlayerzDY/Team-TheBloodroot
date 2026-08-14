@@ -918,10 +918,10 @@ namespace Bloodroot.Features.FarmPrologue
                 waveEncounter.SetCompletionOwnedExternally(true);
             }
 
-            if (gameManager.instance != null)
-            {
-                gameManager.instance.SetWaveManagerControlsWin(true);
-            }
+            //if (gameManager.instance != null)
+            //{
+            //    gameManager.instance.SetWaveManagerControlsWin(true);
+            //}
 
             DisableLegacyTruckGameplay();
         }
