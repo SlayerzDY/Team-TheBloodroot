@@ -26,6 +26,7 @@ public class gameManager : MonoBehaviour
     [SerializeField] GameObject menuLose;
     [SerializeField] GameObject menuMain;
     [SerializeField] GameObject menuRadar;
+    [SerializeField] GameObject menuInventory;
     [SerializeField] TMP_Text gameGoalCountText;
     public GameObject menuInteractable;
     // Public Variables
@@ -100,13 +101,20 @@ public class gameManager : MonoBehaviour
             }
             else if (menuActive == menuPause) { stateUnpause(); }
         }
+        if (Input.GetButtonDown("Inventory"))
+        {
+            if (menuActive == null)
+            {
+                openInventory();
+            }
+            else if (menuActive == menuInventory) { openInventory(false); }
+        }
         timer += Time.deltaTime;
     }
     //==========================================================================================
     // Function, StatePause
     //==========================================================================================
-    public void statePause()
-    {
+    public void statePause() {
         isPaused = true;
         Time.timeScale = 0;
         Cursor.visible = true;
@@ -203,6 +211,22 @@ public class gameManager : MonoBehaviour
         statePause();
         menuActive = menuWin;
         menuActive.SetActive(true);
+    }
+    //==========================================================================================
+    // Function, menuInventory
+    //==========================================================================================
+    public void openInventory(bool isOn = true)
+    {
+        //ScoreboardManager.GetOrCreate().ShowFinalScore(true);
+        if (isOn) {
+            statePause();
+            menuActive = menuInventory;
+            menuActive.SetActive(isOn);
+        } else {
+            stateUnpause();
+            menuActive = null;
+            menuActive.SetActive(isOn);
+        }
     }
     //==========================================================================================
     // Function, StartNextWave
