@@ -19,6 +19,7 @@ public class gameManager : MonoBehaviour
     // Game Manager Instance, Creates Singleton
     public static gameManager instance;
     // Serialize Fields
+    [SerializeField] GameObject[] prevMenus;
     [SerializeField] GameObject menuActive;
     [SerializeField] GameObject menuPause;
     [SerializeField] GameObject menuOptions;
