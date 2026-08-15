@@ -112,7 +112,7 @@ public class Damage : MonoBehaviour
                 !countedPlayerHit)
             {
                 countedPlayerHit = true;
-                ScoreboardManager.GetOrCreate().AddShotHit();
+               // ScoreboardManager.GetOrCreate().AddShotHit();
             }
 
             // Regular Damage

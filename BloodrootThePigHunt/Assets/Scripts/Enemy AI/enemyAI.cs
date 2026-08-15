@@ -328,7 +328,7 @@ public class enemyAI : MonoBehaviour, IDamage
 
         isDead = true;
         playerInTrigger = false;
-        ScoreboardManager.GetOrCreate().AddEnemyPigKilled();
+        //ScoreboardManager.GetOrCreate().AddEnemyPigKilled();
 
         foreach (Collider enemyCollider in GetComponentsInChildren<Collider>())
         {

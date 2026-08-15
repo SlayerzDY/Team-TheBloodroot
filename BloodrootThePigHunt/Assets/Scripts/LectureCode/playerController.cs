@@ -254,7 +254,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     //==========================================================================================
     public void TakeDamage(int amount)
     {
-        ScoreboardManager.GetOrCreate().AddDamageTaken(amount);
+       ScoreboardManager.GetOrCreate().AddDamageTaken(amount);
         HP -= amount;
         updatePlayerUI();
         StartCoroutine(flashDamage());  

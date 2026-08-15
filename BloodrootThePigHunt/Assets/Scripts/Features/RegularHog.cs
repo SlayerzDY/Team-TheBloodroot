@@ -147,7 +147,7 @@ public class RegularHog : MonoBehaviour, IDamage
             return;
 
         isDead = true;
-        ScoreboardManager.GetOrCreate().AddRegularHogKilled();
+        //ScoreboardManager.GetOrCreate().AddRegularHogKilled();
         PlayDeathSound();
 
         if (agent != null && agent.isOnNavMesh)
