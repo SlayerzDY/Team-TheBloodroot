@@ -13,9 +13,9 @@ public class inventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     [SerializeField] public int index;
     [SerializeField] public Inventory inventory;
     [SerializeField] public Sprite defaultImage;
+    [SerializeField] public GameObject dropToRemoveTarget;
 
-    // Set true by a drop target (e.g. ItemTossZone) that already removed this
-    // item from the inventory and is about to Destroy() it - skips the
+    // Set true when this item was removed via dropToRemoveTarget - skips the
     // reparent below since there's no slot to snap back into.
     [HideInInspector] public bool consumed = false;
 
@@ -57,11 +57,30 @@ public class inventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     public void OnEndDrag(PointerEventData eventData)
     {
         if (consumed) { return; }
+
+        if (dropToRemoveTarget != null && eventData.pointerCurrentRaycast.gameObject == dropToRemoveTarget)
+        {
+            RemoveFromInventory();
+            return;
+        }
+
         if (image != null) { image.raycastTarget = true; }
         transform.SetParent(parentAfterDrag);
         // SetParent keeps the old world position, so re-center inside whichever
         // slot we landed in (origin slot if the drop target rejected it, or the
-        // new slot if InventorySlot.OnDrop or ItemTossZone.OnDrop accepted it).
+        // new slot if InventorySlot.OnDrop accepted it).
         if (rectTransform != null) { rectTransform.anchoredPosition = Vector2.zero; }
+    }
+
+    private void RemoveFromInventory()
+    {
+        if (inventory != null && itemStats != null)
+        {
+            gameManager.instance.player.GetComponent<Inventory>().RemoveItem(
+                itemStats.quantity, itemStats.itemName, true, index
+                );
+        }
+        consumed = true;
+        Destroy(gameObject);
     }
 }
