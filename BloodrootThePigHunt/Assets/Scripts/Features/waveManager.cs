@@ -358,7 +358,7 @@ public class waveManager : MonoBehaviour
 
         ActiveBloodMoonModifier = null;
 
-        ScoreboardManager.GetOrCreate().AddWaveSurvived(completedBloodMoon);
+       // ScoreboardManager.GetOrCreate().AddWaveSurvived(completedBloodMoon);
         CampaignEventUtility.Invoke(WaveCompleted, currentWave, this);
         RefreshWaveUI();
         PlayWaveSound(waveCompleteClip);

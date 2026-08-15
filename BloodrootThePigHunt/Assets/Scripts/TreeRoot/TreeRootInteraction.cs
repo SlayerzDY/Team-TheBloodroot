@@ -138,7 +138,7 @@ public class TreeRootInteraction : MonoBehaviour, IInteract
             if (uiCostText != null)
             {
                 int currentCount = GetCurrentItemCount();
-                uiCostText.text = $"Feed Tree {currentCount}/{itemsRequiredToFeed}";
+                uiCostText.text = $"Feed The Tree {currentCount}/{itemsRequiredToFeed}";
             }
 
             interactionUIPanel.SetActive(true);

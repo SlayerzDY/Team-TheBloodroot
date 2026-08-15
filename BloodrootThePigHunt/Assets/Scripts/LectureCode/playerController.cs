@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 //==============================================================================================
 // Declare Player Controller
 //==============================================================================================
@@ -19,10 +20,14 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     float camRotX, camRotY;
     // Player Stats
     [Range(1, 1000)] [SerializeField] int HP;
+    [Range(1, 1000)] [SerializeField] float stam;
+    [Range(0, 1)] [SerializeField] float stamReduction;
+    [Range(1, 10)] [SerializeField] float stamRegen;
     [Range(1, 100)] [SerializeField] int speed;
     [Range(1, 10)] [SerializeField] int sprintMod;
     [Range(1, 10)] [SerializeField] int jumpSpeed;
     [Range(1, 10)] [SerializeField] int jumpMax;
+    [Range(0, 100)] [SerializeField] float jumpCost;
     [SerializeField] int gravity;
     // Weapon Stats
     [SerializeField] List<gunStats> gunInv = new List<gunStats>();
@@ -55,6 +60,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     int speedOrig;
     int jumpCount;
     int HPOrig;
+    float stamOrig;
     int gunInvPos;
     float shootTimer;
     Vector3 moveDir;
@@ -74,6 +80,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             }
         }
         HPOrig = HP;
+        stamOrig = stam;
         speedOrig = speed;
         spawnPlayer();
     }
@@ -87,7 +94,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             if (Input.GetKeyDown(KeyCode.K)) { RemoveItemFromInventory(); }
         }
         sprint();
-    }
+        if (isSprinting) { StaminaReduction(stamReduction); } else { if (stam <= stamOrig) { StaminaRegen(); }}
     //==========================================================================================
     // Function, Movement
     //==========================================================================================
@@ -101,7 +108,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         // kill after the plus to make Side Scroller
         moveDir = Input.GetAxis("Horizontal") * transform.right + Input.GetAxis("Vertical") * transform.forward;
         controller.Move(moveDir.normalized * speed * Time.deltaTime);
-        jump();
+        if (stam > jumpCost) { jump(); }
         controller.Move(playerVel * Time.deltaTime);
         playerVel.y -= gravity * Time.deltaTime;
         shootTimer += Time.deltaTime;
@@ -114,11 +121,21 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     //==========================================================================================
     // Function, Sprint
     //==========================================================================================
-    void sprint() {
-        if(Input.GetButtonDown("Sprint")) {
-            speed *= sprintMod;
-        } else if(Input.GetButtonUp("Sprint")) {
-            speed /= sprintMod;
+    void sprint()
+        {
+            if (Input.GetButtonDown("Sprint"))
+            {
+                if (stam <= 0) { return; }
+                speed *= sprintMod;
+                isSprinting = true;
+            }
+            else if (Input.GetButtonUp("Sprint"))
+            {
+                StaminaRegen();
+                speed /= sprintMod;
+                if (speed < 1) { speed = 1; }
+                isSprinting = false;
+            }
         }
     }
     //==========================================================================================
@@ -161,6 +178,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             if (audJump.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(audJump[Random.Range(0, audJump.Length)], audJumpVolume); }
             playerVel.y = jumpSpeed;
             jumpCount++;
+            StaminaReduction(jumpCost);
         }
     }
 
@@ -254,7 +272,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     //==========================================================================================
     public void TakeDamage(int amount)
     {
-        ScoreboardManager.GetOrCreate().AddDamageTaken(amount);
+       ScoreboardManager.GetOrCreate().AddDamageTaken(amount);
         HP -= amount;
         updatePlayerUI();
         StartCoroutine(flashDamage());  
@@ -319,15 +337,13 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     //==========================================================================================
     public void updatePlayerUI() {
         //fixed
-        if (gameManager.instance == null || gameManager.instance.playerHPBAR == null)
-        {
-            return;
-        }
-
+        if (gameManager.instance == null || gameManager.instance.playerHPBAR == null) { return; }
         gameManager.instance.playerHPBAR.fillAmount = (float)HP / HPOrig;
+        if (gameManager.instance == null || gameManager.instance.playerStamBar == null) { return; }
+        gameManager.instance.playerStamBar.fillAmount = (float)stam / stamOrig;
     }
     //==========================================================================================
-    // Function, get Gun Stats
+    // Function, Update Player Ammo
     //==========================================================================================
     public void updatePlayerAmmo() {
         if (gameManager.instance == null || gameManager.instance.AmmoCount == null)
@@ -340,6 +356,27 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             gameManager.instance.AmmoCount.text = $"{gunInv[gunInvPos].ammoCurr} / {gunInv[gunInvPos].ammoMax}";
         } else {
             gameManager.instance.AmmoCount.text = "0 / 0";
+        }
+    }
+    //==========================================================================================
+    // Function, Update Player Weight
+    //==========================================================================================
+    public void updatePlayerWeight()
+    {
+        Inventory inv = GetComponent<Inventory>();
+        if (inv == null) { return; }
+        if (gameManager.instance == null || gameManager.instance.AmmoCount == null)
+        {
+            return;
+        }
+
+        if (gunInv.Count > 0)
+        {
+            gameManager.instance.weight.text = $"{inv.inventoryWeight} / {inv.weightThreshold}";
+        }
+        else
+        {
+            gameManager.instance.weight.text = $"0 / {inv.weightThreshold}";
         }
     }
     //==========================================================================================
@@ -655,8 +692,10 @@ void selectGun()
     public void RemoveItemFromInventory() {
         Inventory inventory = GetComponent<Inventory>();
         if (inventory == null) { return; }
-        for (int i = 0; i < inventory.inventoryItems.Length; i++) {
-            if (!inventory.IsSlotEmpty(i)) {
+        for (int i = 0; i < inventory.inventoryItems.Length; i++)
+        {
+            if (!inventory.IsSlotEmpty(i))
+            {
                 //inventory.RemoveItem(inventory.inventoryItems[i].itemName, 1, false);
                 //inventory.RemoveMultipleItems("M1 Garand Ammo");
                 inventory.TransferToNewInventory(testContainer, "M1 Garand Ammo");
@@ -664,7 +703,25 @@ void selectGun()
             }
         }
     }
-    //==============================================================================================
+    //==========================================================================================
+    // Function, Stamina Reduction
+    //==========================================================================================
+    private float StaminaReduction(float amount) {
+        float temp = Mathf.Abs(amount);
+        stam -= temp;
+        stam = Mathf.Clamp(stam, 0, stamOrig);
+        updatePlayerUI();
+        return stam;
+    }
+    //==========================================================================================
+    // Function, Stamina Regen
+    //==========================================================================================
+    private void StaminaRegen() {
+        if (stam >= stamOrig) { stam = stamOrig; return; }
+        stam += stamRegen;
+        updatePlayerUI();
+    }
+    //==========================================================================================
 }
 //==============================================================================================
 // End of Player Controller .cs

@@ -142,7 +142,6 @@ public class enemyAI : MonoBehaviour, IDamage
 
         //if (animator != null) { animator.SetFloat("Speed", agent.velocity.magnitude); }
         animator.SetFloat("Speed", agent.velocity.magnitude / agent.speed, 0.1f, Time.deltaTime);
-        Debug.Log(animator.GetFloat("Speed"));
 
         if (playerInTrigger)
         {
@@ -328,7 +327,7 @@ public class enemyAI : MonoBehaviour, IDamage
 
         isDead = true;
         playerInTrigger = false;
-        ScoreboardManager.GetOrCreate().AddEnemyPigKilled();
+        //ScoreboardManager.GetOrCreate().AddEnemyPigKilled();
 
         foreach (Collider enemyCollider in GetComponentsInChildren<Collider>())
         {
@@ -352,10 +351,10 @@ public class enemyAI : MonoBehaviour, IDamage
             manager.EnemyDefeated(gameObject);
         }
 
-        if (gameManager.instance != null)
-        {
-            gameManager.instance.updateGameGoal(-1);
-        }
+        //if (gameManager.instance != null)
+        //{
+        //    gameManager.instance.updateGameGoal(-1);
+        //}
 
         Dissolver dissolver =
             GetComponent<Dissolver>();
@@ -409,7 +408,7 @@ public class enemyAI : MonoBehaviour, IDamage
         //model.material.color = Color.red;
         //yield return new WaitForSeconds(0.1f);
         //model.material.color = colorOrig;
-        if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolveFlash()); }
+        if (this.GetComponent<Dissolver>() != null) { this.GetComponent<Dissolver>().StartCoroutine(this.GetComponent<Dissolver>().dissolveFlash()); }
         yield return null;
     }
 

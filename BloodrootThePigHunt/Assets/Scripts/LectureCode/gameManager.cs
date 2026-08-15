@@ -8,6 +8,7 @@ using Bloodroot.Campaign;
 using Bloodroot.Features.BloodMoon;
 using TMPro;
 using UnityEngine.UI;
+using System.Linq.Expressions;
 //==============================================================================================
 // Declare Game Manager
 //==============================================================================================
@@ -18,6 +19,7 @@ public class gameManager : MonoBehaviour
     //==========================================================================================
     // Game Manager Instance, Creates Singleton
     public static gameManager instance;
+    [Header("Menu's")]
     // Serialize Fields
     [SerializeField] GameObject menuUtility;
     [SerializeField] GameObject menuActive;
@@ -28,31 +30,40 @@ public class gameManager : MonoBehaviour
     [SerializeField] GameObject menuMain;
     [SerializeField] GameObject menuRadar;
     [SerializeField] GameObject menuInventory;
-    [SerializeField] TMP_Text gameGoalCountText;
+    //[SerializeField] TMP_Text gameGoalCountText;
+    [Header("Text")]
+    [SerializeField] TMP_Text timeText;
+    [SerializeField] TMP_Text enemyCountText;
+    [SerializeField] TMP_Text congratulations;
+    [Header("Other Stuf That Needs Sorted")]
     public GameObject menuInteractable;
     // Public Variables
     public GameObject checkpointPopup;
+    public TextMeshProUGUI weight;
     public TextMeshProUGUI AmmoCount;
     public TextMeshProUGUI FlashlightCount;
     public Image playerHPBAR;
+    public Image playerStamBar;
     public GameObject playerDamageScreen;
     public bool isPaused = false;
     public GameObject player;
     public playerController playerController;
     public GameObject playerSpawnPos;
-    public bool isDefenseActive = false;
     public int totalItemsFed = 0;
-    [Range(2,5)] public int ItemsNeededPerDefense = 5;
-    public bool StartBaseDefenseOnStart = true;
     // Private Variables
     private float timer = 0;
     private float timeScaleOrig;
-    private int gameGoalCount;
-    private bool waveManagerControlsWin;
-   
-    // Refrences
+    //private int gameGoalCount;
+    //private bool waveManagerControlsWin;
+
+    [Header("Tree Root Variables")]
     public TreeSpawner RootSpanw;
     public TreeRootInteraction RootInteraction;
+    public bool isDefenseActive = false;
+    [Range(2,5)] public int ItemsNeededPerDefense = 5;
+    public bool StartBaseDefenseOnStart = true;
+    [Range(1f,30f)]public float preperationTime = 15.0f;
+
     /// <summary>
     /// Lifecycle hooks for campaign-owned encounters. Listeners must not own
     /// the lose menu or player health; they use these notifications to pause
@@ -75,16 +86,20 @@ public class gameManager : MonoBehaviour
     void Start()
     {
         timeScaleOrig = GetPlayableTimeScale(Time.timeScale);
-        ScoreboardManager.GetOrCreate();
+        //ScoreboardManager.GetOrCreate();
+
+        timeText.gameObject.SetActive(false);
+        enemyCountText.gameObject.SetActive(false);
+        congratulations.gameObject.SetActive(false);
 
         //start game with the dense with x amount of enemies
         RootInteraction = FindAnyObjectByType<TreeRootInteraction>();
         RootSpanw = FindAnyObjectByType<TreeSpawner>();
-        if(RootSpanw != null && StartBaseDefenseOnStart) { RootSpanw.StartBaseDefense(10); }
 
         if (playerController != null)
         {
             playerController.updatePlayerAmmo();
+            playerController.updatePlayerWeight();
         }
     }
     //==========================================================================================
@@ -122,6 +137,7 @@ public class gameManager : MonoBehaviour
         }
         timer += Time.deltaTime;
     }
+
     //==========================================================================================
     // Function, StatePause
     //==========================================================================================
@@ -165,31 +181,31 @@ public class gameManager : MonoBehaviour
     //==========================================================================================
     // Function, Update Game Goal
     //==========================================================================================
-    public void updateGameGoal(int amount)
-    {
-        gameGoalCount += amount;
+    //public void updateGameGoal(int amount)
+    //{
+    //    gameGoalCount += amount;
 
-        if (waveManagerControlsWin)
-            return;
+    //    if (waveManagerControlsWin)
+    //        return;
 
-        if (gameGoalCountText != null)
-        {
-            gameGoalCountText.text = gameGoalCount.ToString("F0");
-        }
+    //    if (gameGoalCountText != null)
+    //    {
+    //        gameGoalCountText.text = gameGoalCount.ToString("F0");
+    //    }
 
-        if (gameGoalCount >= 10)
-        {
-            // You win the game
-            youWin();
-        }
-    }
+    //    if (gameGoalCount >= 10)
+    //    {
+    //        // You win the game
+    //        youWin();
+    //    }
+    //}
     //==========================================================================================
     // Function, Set Wave Manager Controls Win
     //==========================================================================================
-    public void SetWaveManagerControlsWin(bool controlsWin)
-    {
-        waveManagerControlsWin = controlsWin;
-    }
+    //public void SetWaveManagerControlsWin(bool controlsWin)
+    //{
+    //    waveManagerControlsWin = controlsWin;
+    //}
     //==========================================================================================
     // Function, Lose
     //==========================================================================================
@@ -302,6 +318,7 @@ public class gameManager : MonoBehaviour
         CheckTreeMileStone();
 
     }
+
     //==========================================================================================
     // Function, Check Mile Stone
     //==========================================================================================
@@ -311,29 +328,79 @@ public class gameManager : MonoBehaviour
 
         //unlock levels here 
         // ex could be depending on cody's code if(totalItemsFed == X){ Unlock(x) }
-        
+
 
         //Base Defense stuff here
-        if(totalItemsFed % ItemsNeededPerDefense == 0)
+
+        bool isFirstWave = (totalItemsFed == 1);
+
+        bool isFuture = (!isFirstWave && totalItemsFed % ItemsNeededPerDefense == 0);
+
+        if(isFirstWave || isFuture)
         {
 
-            int enemiesToSpawn = 10 + (totalItemsFed * 2);
+            int enemiesToSpawn = 1 + (totalItemsFed * 2);
             RootInteraction.HideTreeUI();
-            RootSpanw.StartBaseDefense(enemiesToSpawn);
+            StartCoroutine(StartDefenseWithCountDown(enemiesToSpawn));
 
         }
 
     }
+
+    //==========================================================================================
+    // Function, Defense Wave with a countdown
+    //==========================================================================================
+    private IEnumerator StartDefenseWithCountDown(int enemyCount)
+    {
+      
+
+        if(timeText != null)
+        {
+
+            timeText.gameObject.SetActive(true);
+
+        }
+        while (preperationTime > 0)
+        { 
+        
+            if(timeText != null)
+            {
+
+                timeText.text = $"Wave Starts in: {preperationTime:F0}s";
+                yield return new WaitForSeconds(1.0f);
+                preperationTime -= 1.0f;
+
+            }
+        }
+        if (timeText != null)
+        {
+
+            timeText.gameObject.SetActive(false);
+
+        }
+
+        if(RootSpanw != null) { RootSpanw.StartBaseDefense(enemyCount); }
+        StartCheckWave();
+
+    }
+
     //==========================================================================================
     // Function, Base Cleared
     //==========================================================================================
-    public void BaseCleared()
+
+    public IEnumerator BaseCleared()
     {
 
         isDefenseActive = false;
+        if(enemyCountText != null) { enemyCountText.gameObject.SetActive(false); }
+        if (congratulations != null) { congratulations.gameObject.SetActive(true); }
+        if (congratulations != null) { congratulations.text = $"Wave Defense has been cleared"; }
+        yield return new WaitForSeconds(5.0f);
+        if (congratulations != null) { congratulations.gameObject.SetActive(false); }
         Debug.Log("You Completed the Defense the Hub is safe");
 
     }
+
     //==========================================================================================
     // Function, Check Wave End
     //==========================================================================================
@@ -344,6 +411,7 @@ public class gameManager : MonoBehaviour
         StartCoroutine(CheckForRemainingEnemies());
 
     }
+
     //==========================================================================================
     // Function, Check Remaining enemies
     //==========================================================================================
@@ -351,16 +419,20 @@ public class gameManager : MonoBehaviour
     private IEnumerator CheckForRemainingEnemies()
     {
 
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(0.2f);
+        if(enemyCountText != null) { enemyCountText.gameObject.SetActive(true); }
 
-        while(GameObject.FindGameObjectsWithTag("Enemy").Length > 0)
+        int enemyCount = GameObject.FindGameObjectsWithTag("Enemy").Length;
+        while (enemyCount > 0)
         {
 
+            if (enemyCountText != null) { enemyCountText.text = $"Enemies That Remain: {enemyCount}"; }
             yield return new WaitForSeconds(2f);
+            enemyCount = GameObject.FindGameObjectsWithTag("Enemy").Length;
 
         }
 
-        BaseCleared();
+        StartCoroutine(BaseCleared());
     }
 }
 //==============================================================================================

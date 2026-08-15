@@ -12,16 +12,14 @@ public class ShotgunBullet : MonoBehaviour
         spawnBulletsSpread();
     }
     private void spawnBulletsSpread() {
-        // Spawn the additional pellets around the bullet's forward vector
+        // Spawn
         for (int i = 0; i < pelletCount; i++)
         {
             // Generate uniform random spread within a circular cone
             Vector2 randomCircle = Random.insideUnitCircle * spread;
             Quaternion spreadRotate = Quaternion.Euler(randomCircle.x, randomCircle.y, 0);
-
             // Apply rotation relative to this bullet's initial forward direction
             Vector3 newDir = transform.rotation * spreadRotate * Vector3.forward;
-
             GameObject pellet = Instantiate(
                 pelletPrefab,
                 transform.position,
