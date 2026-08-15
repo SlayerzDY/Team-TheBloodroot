@@ -74,6 +74,20 @@ public class buttonFunctions : MonoBehaviour {
     #endif
     }
     //==========================================================================================
+    // Function, Open Level
+    //==========================================================================================
+    public void OpenLevel(string levelName) {
+        playerController controller = gameManager.instance.player.GetComponent<playerController>();
+        if (controller == null) { return; }
+        controller.LoadLevel(levelName);
+    }
+    //==========================================================================================
+    // Function, Extraction Close
+    //==========================================================================================
+    public void ExtractionClose(string levelName) {
+        gameManager.instance.ExtractionMenu(false);
+    }
+    //==========================================================================================
 }
 //==============================================================================================
 // End of Declare UI Button Functions

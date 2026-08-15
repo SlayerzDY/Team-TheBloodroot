@@ -30,6 +30,7 @@ public class gameManager : MonoBehaviour
     [SerializeField] GameObject menuMain;
     [SerializeField] GameObject menuRadar;
     [SerializeField] GameObject menuInventory;
+    [SerializeField] GameObject menuExtraction;
     //[SerializeField] TMP_Text gameGoalCountText;
     [Header("Text")]
     [SerializeField] TMP_Text timeText;
@@ -436,13 +437,25 @@ public class gameManager : MonoBehaviour
         StartCoroutine(BaseCleared());
     }
     //==========================================================================================
-    // Function, Check Remaining enemies
+    // Function, Stamina Bar Display
     //==========================================================================================
     public void Stamina(bool isOn) {
         if (isOn) {
             playerStam.SetActive(isOn);
         } else {
             playerStam.SetActive(isOn);
+        }
+    }
+    //==========================================================================================
+    // Function, Extraction Menu
+    //==========================================================================================
+    public void ExtractionMenu(bool isOn) {
+        if (isOn) {
+            menuActive = menuExtraction;
+            menuExtraction.SetActive(isOn);
+        } else {
+            menuActive = null;
+            menuExtraction.SetActive(isOn);
         }
     }
     //==========================================================================================

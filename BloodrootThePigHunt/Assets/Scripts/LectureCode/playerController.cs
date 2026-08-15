@@ -742,11 +742,20 @@ void selectGun()
     //==========================================================================================
     // Function, Load Test Scene
     //==========================================================================================
-    public void LoadTestScene()
+    private void LoadTestScene()
     {
         if (!string.IsNullOrEmpty(testLevel))
         {
             SceneManager.LoadScene(testLevel);
+        }
+    }
+    //==========================================================================================
+    // Function, Load Test Scene
+    //==========================================================================================
+    public void LoadLevel(string levelName) {
+        if (!string.IsNullOrEmpty(levelName))
+        {
+            SceneManager.LoadScene(levelName);
         }
     }
     //==========================================================================================
