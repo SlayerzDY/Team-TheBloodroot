@@ -685,6 +685,7 @@ void selectGun()
     // Function, Stamina Reduction
     //==========================================================================================
     private float StaminaReduction(float amount) {
+        if (stam >= stamOrig) { gameManager.instance.showStamina(true); }
         float temp = Mathf.Abs(amount);
         stam -= temp;
         updatePlayerUI();
@@ -697,6 +698,7 @@ void selectGun()
         if (stam >= stamOrig) { stam = stamOrig; return; }
         stam += stamRegen;
         updatePlayerUI();
+        if (stam >= stamOrig) { gameManager.instance.showStamina(false); }
     }
     //==========================================================================================
 }
