@@ -48,7 +48,7 @@ public class MenuTracker : MonoBehaviour
     public void AddMenu(GameObject menu)
     {
         previousMenus.Add(menu);
-        Debug.Log(menu.ToString() + " has been added to queue");
+        Debug.Log(menu.ToString() + " has been added to menu queue");
     }
     //==========================================================================================
     // Function, Remove Last Menu 
@@ -77,7 +77,7 @@ public class MenuTracker : MonoBehaviour
             Instance.RemoveLast();
             removed++;
         }
-        Debug.Log(removed + "/" +  size + " removed from queue");
+        Debug.Log(removed + "/" +  size + " removed from  menu queue");
     }
     //==========================================================================================
     // Function, Previous Menu
