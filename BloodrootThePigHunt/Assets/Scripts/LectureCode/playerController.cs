@@ -142,6 +142,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     // Function, Handle Weight
     //==========================================================================================
     public void handleWeight() {
+        updatePlayerWeight();
         Inventory inv = this.GetComponent<Inventory>();
         if (inv == null) { return; }
         if (inv.inventoryWeight >= inv.weightThreshold) { 
@@ -707,6 +708,7 @@ void selectGun()
     // Function, Stamina Reduction
     //==========================================================================================
     private float StaminaReduction(float amount) {
+        gameManager.instance.Stamina(true);
         float temp = Mathf.Abs(amount);
         stam -= temp;
         stam = Mathf.Clamp(stam, 0, stamOrig);
@@ -717,7 +719,7 @@ void selectGun()
     // Function, Stamina Regen
     //==========================================================================================
     private void StaminaRegen() {
-        if (stam >= stamOrig) { stam = stamOrig; return; }
+        if (stam >= stamOrig) { gameManager.instance.Stamina(false); stam = stamOrig; return; }
         stam += stamRegen;
         updatePlayerUI();
     }
