@@ -39,6 +39,7 @@ public class gameManager : MonoBehaviour
     public GameObject menuInteractable;
     // Public Variables
     public GameObject checkpointPopup;
+    public TextMeshProUGUI weight;
     public TextMeshProUGUI AmmoCount;
     public TextMeshProUGUI FlashlightCount;
     public Image playerHPBAR;
@@ -98,6 +99,7 @@ public class gameManager : MonoBehaviour
         if (playerController != null)
         {
             playerController.updatePlayerAmmo();
+            playerController.updatePlayerWeight();
         }
     }
     //==========================================================================================

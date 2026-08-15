@@ -133,6 +133,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             {
                 StaminaRegen();
                 speed /= sprintMod;
+                if (speed < 1) { speed = 1; }
                 isSprinting = false;
             }
         }
@@ -342,7 +343,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         gameManager.instance.playerStamBar.fillAmount = (float)stam / stamOrig;
     }
     //==========================================================================================
-    // Function, get Gun Stats
+    // Function, Update Player Ammo
     //==========================================================================================
     public void updatePlayerAmmo() {
         if (gameManager.instance == null || gameManager.instance.AmmoCount == null)
@@ -355,6 +356,27 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             gameManager.instance.AmmoCount.text = $"{gunInv[gunInvPos].ammoCurr} / {gunInv[gunInvPos].ammoMax}";
         } else {
             gameManager.instance.AmmoCount.text = "0 / 0";
+        }
+    }
+    //==========================================================================================
+    // Function, Update Player Weight
+    //==========================================================================================
+    public void updatePlayerWeight()
+    {
+        Inventory inv = GetComponent<Inventory>();
+        if (inv == null) { return; }
+        if (gameManager.instance == null || gameManager.instance.AmmoCount == null)
+        {
+            return;
+        }
+
+        if (gunInv.Count > 0)
+        {
+            gameManager.instance.weight.text = $"{inv.inventoryWeight} / {inv.weightThreshold}";
+        }
+        else
+        {
+            gameManager.instance.weight.text = $"0 / {inv.weightThreshold}";
         }
     }
     //==========================================================================================
@@ -687,6 +709,7 @@ void selectGun()
     private float StaminaReduction(float amount) {
         float temp = Mathf.Abs(amount);
         stam -= temp;
+        stam = Mathf.Clamp(stam, 0, stamOrig);
         updatePlayerUI();
         return stam;
     }

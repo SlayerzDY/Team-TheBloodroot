@@ -304,6 +304,7 @@ public class Inventory : MonoBehaviour {
                 AdjustWeight(inventoryItems[i], false);
                 inventoryItems[i] = null;
                 currItemAmount--;
+                if (gameManager.instance != null) { gameManager.instance.playerController.updatePlayerWeight(); }
             }
         }
     }
@@ -323,6 +324,7 @@ public class Inventory : MonoBehaviour {
                 AdjustWeight(inventoryItems[i], false);
                 inventoryItems[i] = null;
                 currItemAmount--;
+                if (gameManager.instance != null) { gameManager.instance.playerController.updatePlayerWeight(); }
             }
         }
     }
@@ -361,6 +363,7 @@ public class Inventory : MonoBehaviour {
             remaining -= add;
             currItemAmount++;
             AdjustWeight(inventoryItems[i], true);
+            if (gameManager.instance != null) { gameManager.instance.playerController.updatePlayerWeight(); }
         }
     }
     //==========================================================================================
@@ -387,6 +390,7 @@ public class Inventory : MonoBehaviour {
             remaining -= add;
             currItemAmount++;
             AdjustWeight(inventoryItems[i], true);
+            if (gameManager.instance != null) { gameManager.instance.playerController.updatePlayerWeight(); }
         }
     }
     //==========================================================================================
@@ -412,6 +416,7 @@ public class Inventory : MonoBehaviour {
             remaining -= add;
             currItemAmount++;
             AdjustWeight(inventoryItems[i], true);
+            if (gameManager.instance != null) { gameManager.instance.playerController.updatePlayerWeight(); }
         }
     }
     //==========================================================================================
