@@ -7,28 +7,33 @@ using UnityEngine;
 // Declare Inventory UI Spawner
 //==============================================================================================
 public class InventoryUISpawner : MonoBehaviour {
-
+    //==========================================================================================
+    // Declare Variables
+    //==========================================================================================
     [Header("References")]
-    [Tooltip("Prefab with an InventorySlot component (and your slot background/frame)")]
     public GameObject slotPrefab;
-
-    [Tooltip("Prefab with an Image + inventoryItem component on it")]
     public GameObject itemUIPrefab;
-
     [HideInInspector] public InventorySlot[] slots;
-
     private Inventory playerInventory;
     private Coroutine bindRoutine;
-
+    //==========================================================================================
+    // Declare Public Functions
+    //==========================================================================================
+    // Function, On Enable
+    //------------------------------------------------------------------------------------------
     private void OnEnable() {
         if (bindRoutine != null) { StopCoroutine(bindRoutine); }
         bindRoutine = StartCoroutine(BindAndBuild());
     }
-
+    //==========================================================================================
+    // Function, On Disable
+    //------------------------------------------------------------------------------------------
     private void OnDisable() {
         if (bindRoutine != null) { StopCoroutine(bindRoutine); bindRoutine = null; }
     }
-
+    //==========================================================================================
+    // Function, Bind and Build
+    //------------------------------------------------------------------------------------------
     private IEnumerator BindAndBuild() {
         while (gameManager.instance == null || gameManager.instance.player == null) {
             yield return null;
@@ -40,17 +45,15 @@ public class InventoryUISpawner : MonoBehaviour {
         Refresh();
         bindRoutine = null;
     }
-
-    // Call this any time the inventory changes (pickup, drop, use, swap from a
-    // non-drag source) to rebuild the UI from Inventory.inventoryItems. Drag/drop
-    // between slots updates itself and doesn't need a call here.
+    //==========================================================================================
+    // Function, Refresh
+    //------------------------------------------------------------------------------------------
     public void Refresh() {
         if (playerInventory == null || playerInventory.inventoryItems == null) { return; }
         BuildSlots();
         for (int i = 0; i < slots.Length; i++) {
             InventorySlot slot = slots[i];
             if (slot == null) { continue; }
-            // Clear whatever item's currently in the slot before rebuilding it
             for (int c = slot.transform.childCount - 1; c >= 0; c--) {
                 Destroy(slot.transform.GetChild(c).gameObject);
             }
@@ -59,10 +62,9 @@ public class InventoryUISpawner : MonoBehaviour {
             SpawnItemUI(stats, i, slot.transform);
         }
     }
-
-    // Spawns one InventorySlot per Inventory array index. If the inventory's size
-    // has changed since we last built (or this is the first run), tear down and
-    // rebuild from scratch so slot count always matches inventoryItems.Length.
+    //==========================================================================================
+    // Function, Build Slots
+    //------------------------------------------------------------------------------------------
     private void BuildSlots() {
         int size = playerInventory.inventoryItems.Length;
         if (slots != null && slots.Length == size) { return; }
@@ -86,7 +88,9 @@ public class InventoryUISpawner : MonoBehaviour {
             slots[i] = slot;
         }
     }
-
+    //==========================================================================================
+    // Function, Spawn Item UI
+    //------------------------------------------------------------------------------------------
     private void SpawnItemUI(ItemStats stats, int index, Transform parentSlot) {
         if (itemUIPrefab == null) { return; }
         GameObject itemGO = Instantiate(itemUIPrefab, parentSlot);
@@ -99,6 +103,7 @@ public class InventoryUISpawner : MonoBehaviour {
         uiItem.inventory = playerInventory;
         uiItem.RefreshIcon();
     }
+    //==========================================================================================
 }
 //==============================================================================================
 // End of Inventory UI Spawner CS
