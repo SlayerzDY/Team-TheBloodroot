@@ -8,7 +8,7 @@ using Bloodroot.Campaign;
 using Bloodroot.Features.BloodMoon;
 using TMPro;
 using UnityEngine.UI;
-using System.Linq.Expressions;
+
 //==============================================================================================
 // Declare Game Manager
 //==============================================================================================
@@ -17,10 +17,9 @@ public class gameManager : MonoBehaviour
     //==========================================================================================
     // Define Variables
     //==========================================================================================
-    // Game Manager Instance, Creates Singleton
     public static gameManager instance;
+
     [Header("Menu's")]
-    // Serialize Fields
     [SerializeField] GameObject menuUtility;
     [SerializeField] GameObject menuActive;
     [SerializeField] GameObject menuPause;
@@ -30,14 +29,14 @@ public class gameManager : MonoBehaviour
     [SerializeField] GameObject menuMain;
     [SerializeField] GameObject menuRadar;
     [SerializeField] GameObject menuInventory;
-    //[SerializeField] TMP_Text gameGoalCountText;
+
     [Header("Text")]
     [SerializeField] TMP_Text timeText;
     [SerializeField] TMP_Text enemyCountText;
     [SerializeField] TMP_Text congratulations;
-    [Header("Other Stuf That Needs Sorted")]
+
+    [Header("Other Stuff That Needs Sorted")]
     public GameObject menuInteractable;
-    // Public Variables
     public GameObject checkpointPopup;
     public TextMeshProUGUI weight;
     public TextMeshProUGUI AmmoCount;
@@ -51,49 +50,45 @@ public class gameManager : MonoBehaviour
     public playerController playerController;
     public GameObject playerSpawnPos;
     public int totalItemsFed = 0;
+
     // Private Variables
     private float timer = 0;
     private float timeScaleOrig;
-    //private int gameGoalCount;
-    //private bool waveManagerControlsWin;
 
     [Header("Tree Root Variables")]
     public TreeSpawner RootSpanw;
     public TreeRootInteraction RootInteraction;
     public bool isDefenseActive = false;
-    [Range(2,5)] public int ItemsNeededPerDefense = 5;
+    [Range(2, 5)] public int ItemsNeededPerDefense = 5;
     public bool StartBaseDefenseOnStart = true;
-    [Range(1f,30f)]public float preperationTime = 15.0f;
+    [Range(1f, 30f)] public float preperationTime = 15.0f;
 
     /// <summary>
-    /// Lifecycle hooks for campaign-owned encounters. Listeners must not own
-    /// the lose menu or player health; they use these notifications to pause
-    /// or resume their own state machines.
+    /// Lifecycle hooks for campaign-owned encounters.
     /// </summary>
     public event Action PlayerLost;
     public event Action PlayerRespawned;
+
     //==========================================================================================
     // Function, Awake, Pre Start 
     //==========================================================================================
     void Awake()
     {
-        // Create world static singleton instance of the game manager
         instance = this;
         updatePlayer();
     }
+
     //==========================================================================================
     // Function, Start
     //==========================================================================================
     void Start()
     {
         timeScaleOrig = GetPlayableTimeScale(Time.timeScale);
-        //ScoreboardManager.GetOrCreate();
 
-        timeText.gameObject.SetActive(false);
-        enemyCountText.gameObject.SetActive(false);
-        congratulations.gameObject.SetActive(false);
+        if (timeText != null) timeText.gameObject.SetActive(false);
+        if (enemyCountText != null) enemyCountText.gameObject.SetActive(false);
+        if (congratulations != null) congratulations.gameObject.SetActive(false);
 
-        //start game with the dense with x amount of enemies
         RootInteraction = FindAnyObjectByType<TreeRootInteraction>();
         RootSpanw = FindAnyObjectByType<TreeSpawner>();
 
@@ -103,6 +98,7 @@ public class gameManager : MonoBehaviour
             playerController.updatePlayerWeight();
         }
     }
+
     //==========================================================================================
     // Function, Update
     //==========================================================================================
@@ -116,41 +112,47 @@ public class gameManager : MonoBehaviour
                 menuActive = menuPause;
                 menuActive.SetActive(true);
             }
-            else if (menuActive != null && menuActive != menuPause) {
+            else if (menuActive != null && menuActive != menuPause)
+            {
                 menuActive.SetActive(false);
                 menuActive = MenuTracker.Instance.PreviousMenu();
-                menuActive.SetActive(true);
+                if (menuActive != null) menuActive.SetActive(true);
             }
-            else if (menuActive == menuPause) {
+            else if (menuActive == menuPause)
+            {
                 menuActive.SetActive(false);
                 menuActive = null;
                 MenuTracker.Instance.Clear();
                 stateUnpause();
             }
         }
+
         if (Input.GetButtonDown("Inventory"))
         {
             if (menuActive == null)
             {
-                openInventory();
+                openInventory(true);
             }
-            else if (menuActive == menuInventory) { openInventory(false); }
+            else if (menuActive == menuInventory)
+            {
+                openInventory(false);
+            }
         }
+
         timer += Time.deltaTime;
     }
 
     //==========================================================================================
-    // Function, StatePause
+    // Function, StatePause & StateUnpause
     //==========================================================================================
-    public void statePause() {
+    public void statePause()
+    {
         isPaused = true;
         Time.timeScale = 0;
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
     }
-    //==========================================================================================
-    // Function, StateUnpause
-    //==========================================================================================
+
     public void stateUnpause()
     {
         isPaused = false;
@@ -166,6 +168,7 @@ public class gameManager : MonoBehaviour
 
         menuActive = null;
     }
+
     //==========================================================================================
     // Function, OptionsMenu
     //==========================================================================================
@@ -179,41 +182,13 @@ public class gameManager : MonoBehaviour
             menuActive.SetActive(true);
         }
     }
-    //==========================================================================================
-    // Function, Update Game Goal
-    //==========================================================================================
-    //public void updateGameGoal(int amount)
-    //{
-    //    gameGoalCount += amount;
 
-    //    if (waveManagerControlsWin)
-    //        return;
-
-    //    if (gameGoalCountText != null)
-    //    {
-    //        gameGoalCountText.text = gameGoalCount.ToString("F0");
-    //    }
-
-    //    if (gameGoalCount >= 10)
-    //    {
-    //        // You win the game
-    //        youWin();
-    //    }
-    //}
     //==========================================================================================
-    // Function, Set Wave Manager Controls Win
-    //==========================================================================================
-    //public void SetWaveManagerControlsWin(bool controlsWin)
-    //{
-    //    waveManagerControlsWin = controlsWin;
-    //}
-    //==========================================================================================
-    // Function, Lose
+    // Function, Win & Lose
     //==========================================================================================
     public void youLose()
     {
         CampaignEventUtility.Invoke(PlayerLost, this);
-        //ScoreboardManager.GetOrCreate().ShowFinalScore(false);
         statePause();
         menuActive = menuLose;
 
@@ -223,70 +198,69 @@ public class gameManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Called by the authored respawn button after the existing player
-    /// controller has moved and restored the player.
-    /// </summary>
     public void NotifyPlayerRespawned()
     {
         CampaignEventUtility.Invoke(PlayerRespawned, this);
     }
-    //==========================================================================================
-    // Function, Win
-    //==========================================================================================
+
     public void youWin()
     {
-        //ScoreboardManager.GetOrCreate().ShowFinalScore(true);
         statePause();
         menuActive = menuWin;
-        menuActive.SetActive(true);
+        if (menuActive != null) menuActive.SetActive(true);
     }
+
     //==========================================================================================
-    // Function, menuInventory
+    // Function, UI Controls (Inventory, Radar, Stamina)
     //==========================================================================================
     public void openInventory(bool isOn = true)
     {
-        //ScoreboardManager.GetOrCreate().ShowFinalScore(true);
-        if (isOn) {
+        if (isOn)
+        {
             statePause();
             menuActive = menuInventory;
-            menuActive.SetActive(isOn);
-        } else {
+            if (menuActive != null) menuActive.SetActive(true);
+        }
+        else
+        {
+            if (menuInventory != null) menuInventory.SetActive(false);
             stateUnpause();
-            menuActive = null;
-            menuActive.SetActive(isOn);
         }
     }
-    //==========================================================================================
-    // Function, StartNextWave
-    //==========================================================================================
 
+    public void showInventory(Inventory inventory)
+    {
+        if (inventory == null) return;
+        openInventory(true);
+    }
+
+    public void ActivateRadar(bool on = true)
+    {
+        if (menuRadar != null) menuRadar.SetActive(on);
+    }
+
+    public void showStamina(bool isOn)
+    {
+        if (playerStam != null) playerStam.SetActive(isOn);
+    }
+
+    //==========================================================================================
+    // Function, Spawner & Player Setup
+    //==========================================================================================
     public bool StartNextWave(int enemyNum)
     {
-
         MobSpawner spawner = FindAnyObjectByType<MobSpawner>();
 
         if (spawner == null)
         {
-            Debug.LogError(
-                "GameManager cannot start the next wave because no MobSpawner was found.");
-
+            Debug.LogError("GameManager cannot start the next wave because no MobSpawner was found.");
             return false;
         }
 
         spawner.StartWave(enemyNum);
         return true;
+    }
 
-    }
-    //==========================================================================================
-    // Function, Radar
-    //==========================================================================================
-    public void ActivateRadar(bool on = true) {
-        menuRadar.SetActive(on);
-    }
-    //==========================================================================================
-    // Function, Update Player
-    //==========================================================================================
     public void updatePlayer()
     {
         timeScaleOrig = GetPlayableTimeScale(Time.timeScale);
@@ -308,152 +282,83 @@ public class gameManager : MonoBehaviour
     {
         return candidate > 0f ? candidate : 1f;
     }
-    //==========================================================================================
-    // Function, Add Tree Item
-    //==========================================================================================
 
+    //==========================================================================================
+    // Function, Tree MileStone & Defense
+    //==========================================================================================
     public void AddTreeItem()
     {
-
         totalItemsFed++;
         CheckTreeMileStone();
-
     }
-
-    //==========================================================================================
-    // Function, Check Mile Stone
-    //==========================================================================================
 
     private void CheckTreeMileStone()
     {
-
-        //unlock levels here 
-        // ex could be depending on cody's code if(totalItemsFed == X){ Unlock(x) }
-
-
-        //Base Defense stuff here
-
         bool isFirstWave = (totalItemsFed == 1);
-
         bool isFuture = (!isFirstWave && totalItemsFed % ItemsNeededPerDefense == 0);
 
-        if(isFirstWave || isFuture)
+        if (isFirstWave || isFuture)
         {
-
             int enemiesToSpawn = 1 + (totalItemsFed * 2);
-            RootInteraction.HideTreeUI();
+            if (RootInteraction != null) RootInteraction.HideTreeUI();
             StartCoroutine(StartDefenseWithCountDown(enemiesToSpawn));
-
         }
-
     }
 
-    //==========================================================================================
-    // Function, Defense Wave with a countdown
-    //==========================================================================================
     private IEnumerator StartDefenseWithCountDown(int enemyCount)
     {
-      
+        if (timeText != null) timeText.gameObject.SetActive(true);
 
-        if(timeText != null)
-        {
-
-            timeText.gameObject.SetActive(true);
-
-        }
         while (preperationTime > 0)
-        { 
-        
-            if(timeText != null)
-            {
-
-                timeText.text = $"Wave Starts in: {preperationTime:F0}s";
-                yield return new WaitForSeconds(1.0f);
-                preperationTime -= 1.0f;
-
-            }
-        }
-        if (timeText != null)
         {
-
-            timeText.gameObject.SetActive(false);
-
+            if (timeText != null)
+            {
+                timeText.text = $"Wave Starts in: {preperationTime:F0}s";
+            }
+            yield return new WaitForSeconds(1.0f);
+            preperationTime -= 1.0f;
         }
 
-        if(RootSpanw != null) { RootSpanw.StartBaseDefense(enemyCount); }
+        if (timeText != null) timeText.gameObject.SetActive(false);
+        if (RootSpanw != null) RootSpanw.StartBaseDefense(enemyCount);
+
         StartCheckWave();
-
     }
-
-    //==========================================================================================
-    // Function, Base Cleared
-    //==========================================================================================
 
     public IEnumerator BaseCleared()
     {
-
         isDefenseActive = false;
-        if(enemyCountText != null) { enemyCountText.gameObject.SetActive(false); }
-        if (congratulations != null) { congratulations.gameObject.SetActive(true); }
-        if (congratulations != null) { congratulations.text = $"Wave Defense has been cleared"; }
+        if (enemyCountText != null) enemyCountText.gameObject.SetActive(false);
+        if (congratulations != null)
+        {
+            congratulations.gameObject.SetActive(true);
+            congratulations.text = "Wave Defense has been cleared";
+        }
+
         yield return new WaitForSeconds(5.0f);
-        if (congratulations != null) { congratulations.gameObject.SetActive(false); }
+
+        if (congratulations != null) congratulations.gameObject.SetActive(false);
         Debug.Log("You Completed the Defense the Hub is safe");
-
     }
-
-    //==========================================================================================
-    // Function, Check Wave End
-    //==========================================================================================
 
     public void StartCheckWave()
     {
-
         StartCoroutine(CheckForRemainingEnemies());
-
     }
-
-    //==========================================================================================
-    // Function, Check Remaining enemies
-    //==========================================================================================
 
     private IEnumerator CheckForRemainingEnemies()
     {
-
         yield return new WaitForSeconds(0.2f);
-        if(enemyCountText != null) { enemyCountText.gameObject.SetActive(true); }
+        if (enemyCountText != null) enemyCountText.gameObject.SetActive(true);
 
         int enemyCount = GameObject.FindGameObjectsWithTag("Enemy").Length;
         while (enemyCount > 0)
         {
-
-            if (enemyCountText != null) { enemyCountText.text = $"Enemies That Remain: {enemyCount}"; }
+            if (enemyCountText != null) enemyCountText.text = $"Enemies That Remain: {enemyCount}";
             yield return new WaitForSeconds(2f);
             enemyCount = GameObject.FindGameObjectsWithTag("Enemy").Length;
-
         }
 
         StartCoroutine(BaseCleared());
     }
-    //==========================================================================================
-    // Function, Check Remaining enemies
-    //==========================================================================================
-    public void showStamina(bool isOn) {
-        if (isOn) {
-            playerStam.SetActive(isOn);
-        } else {
-            playerStam.SetActive(isOn);
-        }
-    }
-    //==========================================================================================
-    // Function, Check Remaining enemies
-    //==========================================================================================
-    public void showInventory(Inventory inventory) {
-        if (inventory == null) return;
-
-    }
-    //==========================================================================================
 }
-//==============================================================================================
-// End of Game Manager
-//==============================================================================================
