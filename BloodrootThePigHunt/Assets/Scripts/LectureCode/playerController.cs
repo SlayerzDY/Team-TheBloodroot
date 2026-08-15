@@ -1,11 +1,12 @@
 ﻿//==============================================================================================
 // Using Unity Engine
 //==============================================================================================
-using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 //==============================================================================================
 // Declare Player Controller
 //==============================================================================================
@@ -45,6 +46,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     [SerializeField] flashlightStats flashlight;
     [SerializeField] string flashlightButton = "Fire2";
     [SerializeField] KeyCode flashlightKey = KeyCode.F;
+    [SerializeField] private string testLevel = "Level_02";
     Vector3 flashlightHoldPosition = new Vector3(0.75f, -0.85f, -0.9f);
     Vector3 flashlightLightPosition = new Vector3(0, -0.05f, 0.15f);
     GameObject flashlightModel;
@@ -97,7 +99,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             isJumping = false;
             movement();
             useFlashlight();
-            if (Input.GetKeyDown(KeyCode.K)) { RemoveItemFromInventory(); }
+            if (Input.GetKeyDown(KeyCode.K)) { LoadTestScene(); }
         }
         sprint();
         if (isSprinting) { StaminaReduction(stamReduction); } else { if (stam <= stamOrig) { StaminaRegen(); }}
@@ -736,6 +738,16 @@ void selectGun()
         if (stam >= stamOrig) { gameManager.instance.Stamina(false); stam = stamOrig; return; }
         stam += stamRegen;
         updatePlayerUI();
+    }
+    //==========================================================================================
+    // Function, Load Test Scene
+    //==========================================================================================
+    public void LoadTestScene()
+    {
+        if (!string.IsNullOrEmpty(testLevel))
+        {
+            SceneManager.LoadScene(testLevel);
+        }
     }
     //==========================================================================================
 }
