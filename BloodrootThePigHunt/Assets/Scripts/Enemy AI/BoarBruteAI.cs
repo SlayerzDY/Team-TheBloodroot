@@ -9,10 +9,16 @@ using UnityEngine.AI;
 public class BoarBruteAI : enemyAI
     {
         // Seralized Variables
-        [SerializeField] float chargeSpeed;
-        [SerializeField] float chargeTime;
-        // none searlized variables
-        public bool charging;
+    [SerializeField] float chargeSpeed;
+    [SerializeField] float chargeTime;
+    [SerializeField] AudioClip[] chargeSound;
+    [Range(0f, 1f)][SerializeField] float chargeSoundVolume;
+    [SerializeField] AudioClip[] damageSounds;
+    [Range(0f, 1f)][SerializeField] float damageSoundVolume;
+    [SerializeField] AudioClip[] trotSounds;
+    [Range(0f, 1f)][SerializeField] float trotSoundVolume;
+    // none searlized variables
+    public bool charging;
         float timer;
 
     protected override void Start()
@@ -43,13 +49,25 @@ public class BoarBruteAI : enemyAI
                 }
             }
         }
-        public virtual void StartCharge()
+    public virtual void StartCharge() {
+        playSound(chargeSound);
+        charging = true;
+        agent.enabled = false;
+        }
+    private void playSound(AudioClip[] clipToPlay)
+    {
+        if (clipToPlay != null && clipToPlay.Length > 0 && audioManager.instance != null && audioManager.instance.audPlayer != null)
         {
-            charging = true;
+            int randomIndex = Random.Range(0, clipToPlay.Length);
+            AudioClip selectedClip = clipToPlay[randomIndex];
 
-           agent.enabled = false;
+            if (selectedClip != null)
+            {
+                audioManager.instance.audPlayer.PlayOneShot(selectedClip, chargeSoundVolume);
+            }
         }
     }
+}
 //==============================================================================================
 // End of Enemy AI .cs
 //==============================================================================================

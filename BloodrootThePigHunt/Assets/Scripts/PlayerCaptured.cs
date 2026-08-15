@@ -48,7 +48,7 @@ public class PlayerCaptured : MonoBehaviour, IInteract {
     // Function, Hold Object
     //==========================================================================================
     IEnumerator holdObject(GameObject entity) {
-        if (damageSound != null) { AudioSource.PlayClipAtPoint(damageSound, gameObject.transform.position, 0.35f); }
+        if (damageSound != null) { audioManager.instance.audPlayer.PlayOneShot(damageSound, 0.35f); }
         disableMovement(entity);
         float timer = 0f;
         while (timer < holdTime) {

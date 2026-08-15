@@ -5,6 +5,9 @@ public class RootAttack : MonoBehaviour
 {
     [Header("Root Settings")]
     [SerializeField] GameObject rootPrefab;
+    [SerializeField] AudioClip[] backgroundAudio;
+    [SerializeField] AudioClip mainAudio;
+    [SerializeField] float audioVolume;
     [SerializeField] float transformDuration;
     [SerializeField] int rootCount = 8;
     [SerializeField] float rootSpread = 5f;
@@ -51,8 +54,8 @@ public class RootAttack : MonoBehaviour
 
     private IEnumerator spawnChangeForm()
     {
+        playSound();
         Vector3 targetScale = transform.localScale;
-        Debug.Log($"[{gameObject.name}] targetScale={targetScale}, duration={transformDuration}");
         transform.localScale = new Vector3(targetScale.x, targetScale.y, 0f);
         float elapsed = 0f;
         while (elapsed < transformDuration)
@@ -61,11 +64,9 @@ public class RootAttack : MonoBehaviour
             float t = Mathf.Clamp01(elapsed / transformDuration);
             float z = Mathf.Lerp(0f, targetScale.z, t);
             transform.localScale = new Vector3(targetScale.x, targetScale.y, z);
-            Debug.Log($"[{gameObject.name}] IsScaling z={z}, elapsed={elapsed}");
             yield return null;
         }
         transform.localScale = targetScale;
-        Debug.Log($"[{gameObject.name}] DONE final={transform.localScale}");
     }
     private IEnumerator despawn() {
         if (despawnTime <= 0f) { yield return null; }
@@ -75,5 +76,10 @@ public class RootAttack : MonoBehaviour
         } else { 
             Destroy(gameObject); 
         }
+    }
+    private void playSound() {
+        int randAudio = Random.Range(0, backgroundAudio.Length);
+        audioManager.instance.audPlayer.PlayOneShot(backgroundAudio[Random.Range(0, backgroundAudio.Length)], audioVolume);
+        audioManager.instance.audPlayer.PlayOneShot(mainAudio, audioVolume);
     }
 }
