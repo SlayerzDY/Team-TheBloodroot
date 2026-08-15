@@ -84,7 +84,7 @@ public class buttonFunctions : MonoBehaviour {
     //==========================================================================================
     // Function, Extraction Close
     //==========================================================================================
-    public void ExtractionClose(string levelName) {
+    public void ExtractionClose() {
         gameManager.instance.ExtractionMenu(false);
     }
     //==========================================================================================
