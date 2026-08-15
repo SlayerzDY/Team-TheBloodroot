@@ -206,6 +206,16 @@ public class Inventory : MonoBehaviour {
         KillItem(name, amount, spawnItem, index);
     }
     //==========================================================================================
+    // Overload Function, Remove Item By Index
+    //------------------------------------------------------------------------------------------
+    public void RemoveItem(int amount, string itemName, bool spawnItem, int index) {
+        // Safety Check, If not Item Return
+        if (name == null) { return; }
+        if (amount <= 0) { return; }
+        // Execute Remove Item Function
+        KillItem(itemName, amount, spawnItem, index);
+    }
+    //==========================================================================================
     // Function, Remove Multiple Items
     //------------------------------------------------------------------------------------------
     public bool RemoveMultipleItems(GameObject item, bool spawnItem = true) {
@@ -329,6 +339,22 @@ public class Inventory : MonoBehaviour {
         }
     }
     //==========================================================================================
+    // Function, Kill Item At Index (touches only this exact slot - no name search)
+    //------------------------------------------------------------------------------------------
+    public void KillItemAtIndex(int index, int amount, bool spawnItem = true) {
+        if (IsNotValidIndex(index)) { return; }
+        if (IsSlotEmpty(index)) { return; }
+        if (spawnItem) { SpawnItem(inventoryItems[index]); }
+        int take = Mathf.Min(amount, inventoryItems[index].quantity);
+        inventoryItems[index].quantity -= take;
+        if (inventoryItems[index].quantity <= 0) {
+            AdjustWeight(inventoryItems[index], false);
+            inventoryItems[index] = null;
+            currItemAmount--;
+            if (gameManager.instance != null) { gameManager.instance.playerController.updatePlayerWeight(); }
+        }
+    }
+    //==========================================================================================
     // Function, Spawn Item
     //------------------------------------------------------------------------------------------
     private void SpawnItem(ItemStats objectSpawn) {
@@ -418,6 +444,17 @@ public class Inventory : MonoBehaviour {
             AdjustWeight(inventoryItems[i], true);
             if (gameManager.instance != null) { gameManager.instance.playerController.updatePlayerWeight(); }
         }
+    }
+    //==========================================================================================
+    // Function, Swap Slots
+    //------------------------------------------------------------------------------------------
+    public void SwapSlots(ItemStats item1, int item1Index, ItemStats item2, int item2Index) {
+        if (item1.itemName == null) return;
+        if (item2.itemName == null) return;
+        if (item1Index < 0) return;
+        if (item2Index < 0) return;
+        inventoryItems[item1Index] = CopyItem(item2, item2.quantity);
+        inventoryItems[item2Index] = CopyItem(item1, item1.quantity);
     }
     //==========================================================================================
     // Function, Is Slot Empty
