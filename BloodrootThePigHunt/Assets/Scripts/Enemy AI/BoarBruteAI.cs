@@ -3,71 +3,85 @@
 //==============================================================================================
 using UnityEngine;
 using UnityEngine.AI;
+
 //==============================================================================================
 // Declare Boar Brute AI
 //==============================================================================================
 public class BoarBruteAI : enemyAI
-    {
-        // Seralized Variables
+{
+    // Serialized Variables
     [SerializeField] float chargeSpeed;
     [SerializeField] float chargeTime;
-    [SerializeField] AudioClip[] chargeSound;
-    [Range(0f, 1f)][SerializeField] float chargeSoundVolume;
-    [SerializeField] AudioClip[] damageSounds;
-    [Range(0f, 1f)][SerializeField] float damageSoundVolume;
-    [SerializeField] AudioClip[] trotSounds;
-    [Range(0f, 1f)][SerializeField] float trotSoundVolume;
-    // none searlized variables
-    public bool charging;
-        float timer;
 
+    [SerializeField] AudioClip[] chargeSound;
+    [SerializeField, Range(0f, 1f)] float chargeSoundVolume;
+
+    [SerializeField] AudioClip[] damageSounds;
+    [SerializeField, Range(0f, 1f)] float damageSoundVolume;
+
+    [SerializeField] AudioClip[] trotSounds;
+    [SerializeField, Range(0f, 1f)] float trotSoundVolume;
+
+    // Non-serialized Variables
+    public bool charging;
+    float timer;
+
+    //==========================================================================================
+    // Start
+    //==========================================================================================
     protected override void Start()
     {
         base.Start();
-        agent = GetComponent<NavMeshAgent>();
+        if (agent == null)
+        {
+            agent = GetComponent<NavMeshAgent>();
+        }
     }
 
+    //==========================================================================================
+    // Update
+    //==========================================================================================
     protected override void Update()
-        {
-        base.Update();    
+    {
+        base.Update();
+
         if (charging)
+        {
+            timer += Time.deltaTime;
+
+            // Move forward fast
+            transform.position += transform.forward * chargeSpeed * Time.deltaTime;
+
+            if (timer >= chargeTime)
             {
-                timer += Time.deltaTime;
+                charging = false;
+                timer = 0f;
 
-                // Move forward fast
-                transform.position += transform.forward * chargeSpeed * Time.deltaTime;
-
-                if (timer >= chargeTime)
+                if (agent != null)
                 {
-                    charging = false;
-                    timer = 0f;
-                
-                agent.enabled = true;
-
-
-                agent.SetDestination(gameManager.instance.player.transform.position);
+                    agent.enabled = true;
+                    if (gameManager.instance != null && gameManager.instance.player != null)
+                    {
+                        agent.SetDestination(gameManager.instance.player.transform.position);
+                    }
                 }
             }
         }
-    public virtual void StartCharge() {
-        playSound(chargeSound);
-        charging = true;
-        agent.enabled = false;
-        }
-    private void playSound(AudioClip[] clipToPlay)
-    {
-        if (clipToPlay != null && clipToPlay.Length > 0 && audioManager.instance != null && audioManager.instance.audPlayer != null)
-        {
-            int randomIndex = Random.Range(0, clipToPlay.Length);
-            AudioClip selectedClip = clipToPlay[randomIndex];
+    }
 
-            if (selectedClip != null)
-            {
-                audioManager.instance.audPlayer.PlayOneShot(selectedClip, chargeSoundVolume);
-            }
+    //==========================================================================================
+    // Start Charge
+    //==========================================================================================
+    public virtual void StartCharge()
+    {
+        charging = true;
+
+        if (agent != null)
+        {
+            agent.enabled = false;
         }
     }
 }
 //==============================================================================================
-// End of Enemy AI .cs
+// End of BoarBruteAI.cs
 //==============================================================================================

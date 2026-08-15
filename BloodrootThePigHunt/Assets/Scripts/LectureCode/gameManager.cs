@@ -42,6 +42,7 @@ public class gameManager : MonoBehaviour
     public TextMeshProUGUI AmmoCount;
     public TextMeshProUGUI FlashlightCount;
     public Image playerHPBAR;
+    public Image playerStamBar;
     public GameObject playerDamageScreen;
     public bool isPaused = false;
     public GameObject player;
