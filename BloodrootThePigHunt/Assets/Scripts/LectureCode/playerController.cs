@@ -28,6 +28,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     [Range(1, 10)] [SerializeField] int jumpSpeed;
     [Range(1, 10)] [SerializeField] int jumpMax;
     [Range(0, 100)] [SerializeField] float jumpCost;
+    [SerializeField] public Animator animator;
     [SerializeField] int gravity;
     // Weapon Stats
     [SerializeField] List<gunStats> gunInv = new List<gunStats>();
@@ -67,18 +68,19 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     Vector3 playerVel;
     bool isSprinting;
     bool isPlayingSteps;
+    private bool isJumping;
     //==========================================================================================
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     //==========================================================================================
     void Start() {
-        if (controller == null)
-        {
+        if (controller == null) {
             controller = GetComponent<CharacterController>();
-            if (controller == null)
-            {
+            if (controller == null) {
                 Debug.LogError("CharacterController missing from " + gameObject.name + "!");
             }
         }
+        animator = GetComponentInChildren<Animator>();
+        if (animator == null) { Debug.LogWarning("Boar missing Animator component! Proceeding without animations."); }
         HPOrig = HP;
         stamOrig = stam;
         speedOrig = speed;
@@ -89,6 +91,10 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     //==========================================================================================
     void Update() {
         if (!gameManager.instance.isPaused) {
+            //animator.SetFloat("Speed", agent.velocity.magnitude / agent.speed, 0.1f, Time.deltaTime);
+            //animator.SetFloat("Speed", this.playerVel.magnitude / this.speed, 0.1f, Time.deltaTime);
+            animator.SetFloat("Speed", this.speed, 0.1f, Time.deltaTime);
+            isJumping = false;
             movement();
             useFlashlight();
             if (Input.GetKeyDown(KeyCode.K)) { RemoveItemFromInventory(); }
@@ -103,11 +109,13 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         if (controller.isGrounded) {
             playerVel.y = 0;
             jumpCount = 0;
-            if (moveDir.magnitude > 0.3f && isPlayingSteps == false) { StartCoroutine(playSteps()); }
-        }
+            animator.SetBool("IsJumping", false);
+            if (moveDir.magnitude > 0.3f && isPlayingSteps == false) { StartCoroutine(playSteps()); } 
+            }
         // kill after the plus to make Side Scroller
         moveDir = Input.GetAxis("Horizontal") * transform.right + Input.GetAxis("Vertical") * transform.forward;
         controller.Move(moveDir.normalized * speed * Time.deltaTime);
+        if (moveDir.magnitude > 0.3f) { animator.SetBool("IsMoving", true); } else { animator.SetBool("IsMoving", false); }
         if (stam > jumpCost) { jump(); }
         controller.Move(playerVel * Time.deltaTime);
         playerVel.y -= gravity * Time.deltaTime;
@@ -115,6 +123,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         if (Input.GetButton("Fire1") && gunInv.Count > 0 && gunInv[gunInvPos].ammoCurr > 0 && shootTimer > gunInv[gunInvPos].shootRate) { shoot(); }
         if (gunInv.Count > 0) {
             Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * gunInv[gunInvPos].shootDistance, Color.red);
+                animator.SetBool("IsAiming", true);
         }
         reload();
     }
@@ -178,6 +187,8 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             //StartCoroutine(playRandomSound(jumpEffects, jumpSoundVolume));
             if (audJump.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(audJump[Random.Range(0, audJump.Length)], audJumpVolume); }
             playerVel.y = jumpSpeed;
+            animator.SetBool("IsJumping", true);
+            isJumping = true;
             jumpCount++;
             StaminaReduction(jumpCost);
         }
@@ -216,6 +227,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         Quaternion spreadRotate = Quaternion.Euler(Random.Range(-spread, spread), Random.Range(-spread, spread), 0);
         GameObject bullet =
         Instantiate(gunInv[gunInvPos].bullet, shootPos.position, Quaternion.LookRotation(shootDir));
+        animator.SetTrigger("Fire");
         Damage bulletDamage =
             bullet.GetComponent<Damage>();
         if (bulletDamage != null)
@@ -264,6 +276,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     void reload() {
         if (Input.GetButtonDown("Reload") && gunInv.Count > 0) {
             if (gunInv[gunInvPos].reloadSound.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(gunInv[gunInvPos].reloadSound[Random.Range(0, gunInv[gunInvPos].reloadSound.Length)], gunInv[gunInvPos].reloadSoundVolume); }
+            animator.SetTrigger("IsReload");
             gunInv[gunInvPos].ammoCurr = gunInv[gunInvPos].ammoMax;
             updatePlayerAmmo();
         }
@@ -660,6 +673,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         updatePlayerAmmo();
         gunModel.GetComponent<MeshFilter>().sharedMesh = gunInv[gunInvPos].gunModel.GetComponent<MeshFilter>().sharedMesh;
         gunModel.GetComponent<MeshRenderer>().sharedMaterial = gunInv[gunInvPos].gunModel.GetComponent<MeshRenderer>().sharedMaterial;
+        animator.SetInteger("WeaponType", gunInv[gunInvPos].gunType);
     }
 //==========================================================================================
 // Function, Select Gun

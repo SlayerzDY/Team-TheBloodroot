@@ -57,15 +57,9 @@ public class enemyAI : MonoBehaviour, IDamage
     //==========================================================================================
     // Function, Start
     //==========================================================================================
-    protected virtual void Start()
-    {
+    protected virtual void Start() {
         animator = GetComponentInChildren<Animator>();
-
-        if (animator == null)
-        {
-            Debug.LogWarning("Boar missing Animator component! Proceeding without animations.");
-        }
-
+        if (animator == null) { Debug.LogWarning("Boar missing Animator component! Proceeding without animations."); }
         isUnalived = false;
         boarBrute = GetComponent<BoarBruteAI>();
         if (model != null) { colorOrig = model.material.color; }
