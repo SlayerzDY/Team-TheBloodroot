@@ -43,6 +43,7 @@ public class gameManager : MonoBehaviour
     public TextMeshProUGUI AmmoCount;
     public TextMeshProUGUI FlashlightCount;
     public Image playerHPBAR;
+    public GameObject playerStam;
     public Image playerStamBar;
     public GameObject playerDamageScreen;
     public bool isPaused = false;
@@ -434,6 +435,17 @@ public class gameManager : MonoBehaviour
 
         StartCoroutine(BaseCleared());
     }
+    //==========================================================================================
+    // Function, Check Remaining enemies
+    //==========================================================================================
+    public void Stamina(bool isOn) {
+        if (isOn) {
+            playerStam.SetActive(isOn);
+        } else {
+            playerStam.SetActive(isOn);
+        }
+    }
+    //==========================================================================================
 }
 //==============================================================================================
 // End of Game Manager

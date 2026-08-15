@@ -42,6 +42,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 847259515196219006}
+  - {fileID: 8473833014963671760}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: -45.361, z: 0}
 --- !u!114 &7458372834616254395
@@ -64,7 +65,7 @@ MonoBehaviour:
   HP: 30
   stam: 100
   stamReduction: 0.1
-  stamRegen: 0.01
+  stamRegen: 1
   speed: 5
   sprintMod: 2
   jumpSpeed: 10
@@ -117,7 +118,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory
   inventoryWeight: 0
   weightThreshold: 150
-  inventorySize: 10
+  inventorySize: 20
   inventoryItems: []
   distance: 2
   genericPickupShell: {fileID: 817942340654339044, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
@@ -546,7 +547,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8897371573927782991}
-  - {fileID: 7335621562086086423}
   m_Father: {fileID: 553067051677788182}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8096271848171541856
@@ -757,13 +757,13 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!1001 &4689802727025063788
+--- !u!1001 &5855172584182248107
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 847259515196219006}
+    m_TransformParent: {fileID: 553067051677788182}
     m_Modifications:
     - target: {fileID: 2655111993512091771, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
       propertyPath: m_LocalPosition.x
@@ -771,7 +771,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2655111993512091771, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -1.957
+      value: -0.957
       objectReference: {fileID: 0}
     - target: {fileID: 2655111993512091771, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
       propertyPath: m_LocalPosition.z
@@ -809,17 +809,35 @@ PrefabInstance:
       propertyPath: m_Name
       value: Apocalyptic character (helmet +hood)
       objectReference: {fileID: 0}
+    - target: {fileID: 5500368471699037692, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
+      propertyPath: model
+      value: 
+      objectReference: {fileID: 931801443997154438}
     - target: {fileID: 8230599481399654913, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
       propertyPath: m_Controller
       value: 
       objectReference: {fileID: 9100000, guid: 046374c9522499e439ab690069293f89, type: 2}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: -1802141933194807189, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
+    - {fileID: 6628232517335859365, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
+    - {fileID: -4091322787999087480, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
+    - {fileID: 8331663259886382185, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
+    - {fileID: -762359778345306864, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
+    - {fileID: -1410763798583082958, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
+    - {fileID: -8472922548478642025, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
+    - {fileID: 5074120417355765180, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
+    - {fileID: 2264416404359897767, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
---- !u!4 &7335621562086086423 stripped
+--- !u!137 &931801443997154438 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 6750803519167303213, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
+  m_PrefabInstance: {fileID: 5855172584182248107}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &8473833014963671760 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2655111993512091771, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
-  m_PrefabInstance: {fileID: 4689802727025063788}
+  m_PrefabInstance: {fileID: 5855172584182248107}
   m_PrefabAsset: {fileID: 0}
