@@ -373,7 +373,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4159644953564479450}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0.6795506, z: -0, w: 0.73362863}
+  m_LocalRotation: {x: 0, y: -0.6795501, z: 0, w: 0.7336291}
   m_LocalPosition: {x: 71.22, y: 2, z: -65.02}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -409,6 +409,11 @@ MonoBehaviour:
   jumpMax: 1
   jumpCost: 20
   animator: {fileID: 0}
+  pistolDamageMultiplier: 1
+  rifleDamageMultiplier: 1
+  shotgunDamageMultiplier: 1
+  healthMultiplier: 1
+  staminaMultiplier: 1
   gravity: 35
   gunInv: []
   gunModel: {fileID: 2090553889130754505}
@@ -442,7 +447,10 @@ MonoBehaviour:
   flashlightButton: Fire2
   flashlightKey: 102
   testLevel: L_DevScene
+  hasFlashlight: 0
   shootPos: {fileID: 9215448509803119699}
+  newGame: 0
+  gunInvPos: 0
 --- !u!114 &5816373040676030608
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -792,6 +800,18 @@ PrefabInstance:
       propertyPath: model
       value: 
       objectReference: {fileID: 2624943611051514747}
+    - target: {fileID: 5703809270293624016, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 25.52
+      objectReference: {fileID: 0}
+    - target: {fileID: 5703809270293624016, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5703809270293624016, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -66.78
+      objectReference: {fileID: 0}
     - target: {fileID: 8230599481399654913, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
       propertyPath: m_Controller
       value: 
