@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Bloodroot.Campaign
 {
@@ -9,6 +10,41 @@ namespace Bloodroot.Campaign
     /// </summary>
     internal static class CampaignEventUtility
     {
+        public static void Invoke(
+            UnityEvent callback,
+            UnityEngine.Object context)
+        {
+            if (callback == null)
+                return;
+
+            try
+            {
+                callback.Invoke();
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, context);
+            }
+        }
+
+        public static void Invoke<T>(
+            UnityEvent<T> callback,
+            T argument,
+            UnityEngine.Object context)
+        {
+            if (callback == null)
+                return;
+
+            try
+            {
+                callback.Invoke(argument);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, context);
+            }
+        }
+
         public static void Invoke(Action callback, UnityEngine.Object context)
         {
             if (callback == null)

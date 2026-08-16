@@ -19,6 +19,7 @@ public class ItemStats {
     [SerializeField] public GameObject itemMesh;
     [SerializeField] public AudioClip[] pickupSound;
     [SerializeField] public ItemHeroStats itemIncreases;
+    [SerializeField] public string itemID;
     //==========================================================================================
 }
 //==============================================================================================

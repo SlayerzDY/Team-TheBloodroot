@@ -11,7 +11,8 @@ public class buttonFunctions : MonoBehaviour {
     //==========================================================================================
     // Function, Resume
     //==========================================================================================
-    public void resume() { 
+    public void resume() {
+        gameManager.instance.Save();
         gameManager.instance.stateUnpause();
     }
     //==========================================================================================
@@ -44,7 +45,7 @@ public class buttonFunctions : MonoBehaviour {
             Debug.LogError("Respawn requires the authored player controller.");
             return;
         }
-
+        gameManager.instance.Save();
         manager.playerController.spawnPlayer();
         manager.NotifyPlayerRespawned();
         manager.stateUnpause();
@@ -60,18 +61,84 @@ public class buttonFunctions : MonoBehaviour {
             // time scale as its baseline.
             gameManager.instance.stateUnpause();
         }
-
+        gameManager.instance.Save();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
     //==========================================================================================
     // Function, Quit
     //==========================================================================================
     public void quit() {
-    #if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
+#if UNITY_EDITOR
+        gameManager.instance.Save();    
+        UnityEditor.EditorApplication.isPlaying = false;
     #else
             Application.Quit();     
     #endif
+    }
+    //==========================================================================================
+    // Function, Open Level
+    //==========================================================================================
+    public void OpenLevel(string levelName) {
+        gameManager.instance.Save();
+        playerController controller = gameManager.instance.player.GetComponent<playerController>();
+        if (controller == null) { return; }
+        controller.LoadLevel(levelName);
+    }
+    //==========================================================================================
+    // Function, Open Level
+    //==========================================================================================
+    public void OpenLevelBlackPines(string levelName) {
+            gameManager.instance.Save();
+            playerController controller = gameManager.instance.player.GetComponent<playerController>();
+            if (controller == null) { return; }
+            controller.LoadLevel(levelName);
+            gameManager.instance.checkpoint("PlayerSpawnPosBlackPines");
+    }
+    //==========================================================================================
+    // Function, Open Level
+    //==========================================================================================
+    public void OpenLevelStillwater(string levelName) {
+            gameManager.instance.Save();
+            playerController controller = gameManager.instance.player.GetComponent<playerController>();
+            if (controller == null) { return; }
+            controller.LoadLevel(levelName);
+        gameManager.instance.checkpoint("PlayerSpawnPosStillwater");
+    }
+    //==========================================================================================
+    // Function, Open Level
+    //==========================================================================================
+    public void OpenLevelHarrow(string levelName) {
+            gameManager.instance.Save();
+            playerController controller = gameManager.instance.player.GetComponent<playerController>();
+            if (controller == null) { return; }
+            controller.LoadLevel(levelName);
+        gameManager.instance.checkpoint("PlayerSpawnPosHarrowEstate");
+    }
+    //==========================================================================================
+    // Function, Open Level
+    //==========================================================================================
+    public void OpenLevelBloodRoot(string levelName) {
+            gameManager.instance.Save();
+            playerController controller = gameManager.instance.player.GetComponent<playerController>();
+            if (controller == null) { return; }
+            controller.LoadLevel(levelName);
+        gameManager.instance.checkpoint("PlayerSpawnPosBloodRootHollow");
+    }
+    //==========================================================================================
+    // Function, Open Level
+    //==========================================================================================
+    public void OpenLevelHub(string levelName) {
+        gameManager.instance.Save();
+        playerController controller = gameManager.instance.player.GetComponent<playerController>();
+        if (controller == null) { return; }
+        controller.LoadLevel(levelName);
+        gameManager.instance.checkpoint("PlayerSpawnPosHub");
+    }
+    //==========================================================================================
+    // Function, Extraction Close
+    //==========================================================================================
+    public void ExtractionClose() {
+        gameManager.instance.ExtractionMenu(false);
     }
     //==========================================================================================
 }

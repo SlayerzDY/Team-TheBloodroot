@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 817942340654339044, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: m_Name
-      value: NewItem1
+      value: Item_Box
       objectReference: {fileID: 0}
     - target: {fileID: 4559782537062358527, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: m_LocalPosition.x
@@ -57,9 +57,17 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 10915, guid: 0000000000000000f000000000000000, type: 0}
     - target: {fileID: 4822712193961387962, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
+      propertyPath: item.itemID
+      value: Box084378289
+      objectReference: {fileID: 0}
+    - target: {fileID: 4822712193961387962, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: item.itemMesh
       value: 
       objectReference: {fileID: 279592539831864504, guid: ea9fd657b8791467da086847950c7aaa, type: 3}
+    - target: {fileID: 4822712193961387962, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
+      propertyPath: item.itemName
+      value: Box
+      objectReference: {fileID: 0}
     - target: {fileID: 4822712193961387962, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: item.quantity
       value: 75

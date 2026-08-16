@@ -221,11 +221,13 @@ namespace Bloodroot.Features.AlphaMenu
                 return;
             }
 
-            if (!state.StartNewGame())
+            if (!CampaignSafetySaveIntegration.TryResetForNewGame(
+                    state.StartNewGame,
+                    out string resetError))
             {
                 FailAction(
-                    "New Game could not replace the campaign save. " +
-                    "See the preceding save error for details.");
+                    "New Game could not atomically reset the campaign and " +
+                    $"Safety saves: {resetError}");
                 return;
             }
 
@@ -571,20 +573,63 @@ namespace Bloodroot.Features.AlphaMenu
         private string GetContinueTarget(CampaignProgressSnapshot snapshot)
         {
             if (!string.IsNullOrWhiteSpace(snapshot.PendingSceneName) &&
+                CampaignSafetySaveIntegration
+                    .TryValidatePendingArrivalContext(
+                        snapshot.PendingSceneName) &&
                 Application.CanStreamedLevelBeLoaded(
                     snapshot.PendingSceneName))
             {
                 return snapshot.PendingSceneName;
             }
 
-            return continueFallbackSceneName;
+            if (CampaignSafetySaveIntegration.TryGetContinueScene(
+                    out string savedSceneName) &&
+                Application.CanStreamedLevelBeLoaded(savedSceneName))
+            {
+                return savedSceneName;
+            }
+
+            return GetCampaignOnlyContinueTarget(
+                snapshot,
+                continueFallbackSceneName);
+        }
+
+        private static string GetCampaignOnlyContinueTarget(
+            CampaignProgressSnapshot snapshot,
+            string configuredFallback)
+        {
+            // A campaign-first finale transition can survive a process exit
+            // before the paired Safety context is written. Preserve the
+            // truck as the only return authority: every crossed/unburned
+            // Hollow state resumes OpenWorld, including recovered cargo.
+            if (snapshot.HeartrootBurned || snapshot.CampaignCompleted)
+                return CampaignSceneNames.FarmPrologueHub;
+
+            if (snapshot.HollowVeilCrossed)
+                return CampaignSceneNames.OpenWorld;
+
+            return configuredFallback;
         }
 
         private static bool HasContinueProgress(
             CampaignProgressSnapshot snapshot)
         {
+            if (!string.IsNullOrWhiteSpace(snapshot.PendingSceneName))
+            {
+                return CampaignSafetySaveIntegration
+                    .TryValidatePendingArrivalContext(
+                        snapshot.PendingSceneName);
+            }
+
             return snapshot.PrologueCompleted ||
-                   !string.IsNullOrWhiteSpace(snapshot.PendingSceneName);
+                   snapshot.PrologueCursedObjectRevealed ||
+                   snapshot.PrologueCursedObjectOffered ||
+                   !string.IsNullOrWhiteSpace(snapshot.PendingRootOfferingId) ||
+                   snapshot.HasUnresolvedFarmEmergence ||
+                   snapshot.HollowVeilCrossed ||
+                   snapshot.HeartrootBurned ||
+                   snapshot.CampaignCompleted ||
+                   CampaignSafetySaveIntegration.TryGetContinueScene(out _);
         }
 
         private static bool IsSceneLoadable(string sceneName)

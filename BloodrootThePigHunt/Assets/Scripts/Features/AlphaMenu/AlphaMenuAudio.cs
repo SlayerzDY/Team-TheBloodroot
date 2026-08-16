@@ -22,6 +22,7 @@ namespace Bloodroot.Features.AlphaMenu
         [SerializeField] private AudioClip selectionChangedClip;
         [SerializeField] private AudioClip confirmClip;
         [SerializeField] private AudioClip cancelClip;
+        public AudioClip backgroundMusicClip;
 
         public static AlphaMenuAudio Instance => instance;
 
@@ -69,6 +70,19 @@ namespace Bloodroot.Features.AlphaMenu
             menuAudioSource.spatialBlend = 0f;
             menuAudioSource.ignoreListenerPause = true;
             menuAudioSource.volume = 1f;
+
+            if (menuAudioSource != null && backgroundMusicClip != null)
+            {
+                menuAudioSource.clip = backgroundMusicClip;
+                menuAudioSource.loop = true;
+                menuAudioSource.Play();
+            }
+
+        }
+
+        public void ChangeVolume(float volumeValue)
+        {
+            if (menuAudioSource != null) { menuAudioSource.volume = volumeValue; }
         }
 
         private void OnDestroy()

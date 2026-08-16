@@ -57,15 +57,9 @@ public class enemyAI : MonoBehaviour, IDamage
     //==========================================================================================
     // Function, Start
     //==========================================================================================
-    protected virtual void Start()
-    {
+    protected virtual void Start() {
         animator = GetComponentInChildren<Animator>();
-
-        if (animator == null)
-        {
-            Debug.LogWarning("Boar missing Animator component! Proceeding without animations.");
-        }
-
+        if (animator == null) { Debug.LogWarning("Boar missing Animator component! Proceeding without animations."); }
         isUnalived = false;
         boarBrute = GetComponent<BoarBruteAI>();
         if (model != null) { colorOrig = model.material.color; }
@@ -140,7 +134,7 @@ public class enemyAI : MonoBehaviour, IDamage
         if (isDead)
             return;
 
-        //if (animator != null) { animator.SetFloat("Speed", agent.velocity.magnitude); }
+        if (animator != null) { animator.SetFloat("Speed", agent.velocity.magnitude); }
         animator.SetFloat("Speed", agent.velocity.magnitude / agent.speed, 0.1f, Time.deltaTime);
 
         if (playerInTrigger)

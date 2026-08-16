@@ -24,6 +24,7 @@ public class gunStats : ScriptableObject {
 
     [Range(1, 8)]public int bulletCount = 1;
     [Range(0, 10f)] public float spread = 0;
+    [Range(0, 1)] public int gunType = 0;
 
     //==========================================================================================
 }

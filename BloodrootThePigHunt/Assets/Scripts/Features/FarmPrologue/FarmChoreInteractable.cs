@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -35,6 +36,8 @@ namespace Bloodroot.Features.FarmPrologue
         public bool IsComplete => completedInteractions >= RequiredInteractions;
         public bool IsAvailable => isAvailable && !IsComplete;
         public bool RequiresInventoryItem => requiresInventoryItem;
+
+        public event Action<string, int, int> ProgressChanged;
 
         private void OnValidate()
         {
@@ -99,12 +102,20 @@ namespace Bloodroot.Features.FarmPrologue
         {
             completedInteractions = 0;
             isAvailable = false;
-            FarmPrologueEventUtility.Invoke(
-                progressChanged,
-                objectiveText,
-                completedInteractions,
-                RequiredInteractions,
-                this);
+            RaiseProgressChanged();
+        }
+
+        /// <summary>
+        /// Restores the only durable post-chore state currently represented by
+        /// campaign progress. A revealed prologue cursed object proves that
+        /// every chore completed before the save, so a Farm reload must not
+        /// visually roll those chores back to their pending state.
+        /// </summary>
+        internal void RestoreCompletedProgress()
+        {
+            completedInteractions = RequiredInteractions;
+            isAvailable = false;
+            RaiseProgressChanged();
         }
 
         internal void SetAvailable(bool available)
@@ -132,12 +143,7 @@ namespace Bloodroot.Features.FarmPrologue
             completedInteractions =
                 Mathf.Min(completedInteractions + 1, RequiredInteractions);
 
-            FarmPrologueEventUtility.Invoke(
-                progressChanged,
-                objectiveText,
-                completedInteractions,
-                RequiredInteractions,
-                this);
+            RaiseProgressChanged();
 
             if (IsComplete)
             {
@@ -146,6 +152,22 @@ namespace Bloodroot.Features.FarmPrologue
             }
 
             return true;
+        }
+
+        private void RaiseProgressChanged()
+        {
+            FarmPrologueEventUtility.Invoke(
+                progressChanged,
+                objectiveText,
+                completedInteractions,
+                RequiredInteractions,
+                this);
+            FarmPrologueEventUtility.Invoke(
+                ProgressChanged,
+                objectiveText,
+                completedInteractions,
+                RequiredInteractions,
+                this);
         }
 
         internal void RejectInteraction(string reason)
