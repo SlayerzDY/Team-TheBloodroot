@@ -1,49 +1,87 @@
+//==============================================================================================
+// Using Unity Engine
+//==============================================================================================
 using UnityEngine;
 using UnityEngine.AI;
 
-  public class BoarBruteAI : MonoBehaviour
-    {
-        [SerializeField] float chargeSpeed;
-        [SerializeField] float chargeTime;
+//==============================================================================================
+// Declare Boar Brute AI
+//==============================================================================================
+public class BoarBruteAI : enemyAI
+{
+    // Serialized Variables
+    [SerializeField] float chargeSpeed;
+    [SerializeField] float chargeTime;
+
+    [SerializeField] AudioClip[] chargeSound;
+    [SerializeField, Range(0f, 1f)] float chargeSoundVolume;
+
+    [SerializeField] AudioClip[] damageSounds;
+    [SerializeField, Range(0f, 1f)] float damageSoundVolume;
+
+    [SerializeField] AudioClip[] trotSounds;
+    [SerializeField, Range(0f, 1f)] float trotSoundVolume;
+
+    // Non-serialized Variables
     public bool charging;
-        float timer;
+    float timer;
 
-    NavMeshAgent agent;
-
-    void Start()
+    //==========================================================================================
+    // Start
+    //==========================================================================================
+    protected override void Start()
     {
-        agent = GetComponent<NavMeshAgent>();
+        base.Start();
+        if (agent == null)
+        {
+            agent = GetComponent<NavMeshAgent>();
+        }
     }
 
-    void Update()
+    //==========================================================================================
+    // Update
+    //==========================================================================================
+    protected override void Update()
+    {
+        base.Update();
+
+        if (charging)
         {
-            if (charging)
+            timer += Time.deltaTime;
+
+            // Move forward fast
+            transform.position += transform.forward * chargeSpeed * Time.deltaTime;
+
+            if (timer >= chargeTime)
             {
-                timer += Time.deltaTime;
+                charging = false;
+                timer = 0f;
 
-                // Move forward fast
-                transform.position += transform.forward * chargeSpeed * Time.deltaTime;
-
-                if (timer >= chargeTime)
+                if (agent != null)
                 {
-                    charging = false;
-                    timer = 0f;
-                
-                agent.enabled = true;
-
-
-                agent.SetDestination(gameManager.instance.player.transform.position);
+                    agent.enabled = true;
+                    if (gameManager.instance != null && gameManager.instance.player != null)
+                    {
+                        agent.SetDestination(gameManager.instance.player.transform.position);
+                    }
                 }
             }
         }
-        public void StartCharge()
-        {
-
-            charging = true;
-
-           agent.enabled = false;
-        }
     }
 
+    //==========================================================================================
+    // Start Charge
+    //==========================================================================================
+    public virtual void StartCharge()
+    {
+        charging = true;
 
-
+        if (agent != null)
+        {
+            agent.enabled = false;
+        }
+    }
+}
+//==============================================================================================
+// End of BoarBruteAI.cs
+//==============================================================================================

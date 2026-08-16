@@ -1,10 +1,12 @@
 ﻿//==============================================================================================
 // Using Unity Engine
 //==============================================================================================
-using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 //==============================================================================================
 // Declare Player Controller
 //==============================================================================================
@@ -14,19 +16,28 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     //==========================================================================================
     // Test Variables
     [SerializeField] public GameObject testContainer; 
-
     [SerializeField] CharacterController controller;
     [SerializeField] LayerMask ignoreLayer;
     float camRotX, camRotY;
     // Player Stats
-    [Range(1, 1000)] [SerializeField] int HP;
+    [Range(1, 1000)] [SerializeField] public int HP;
+    [Range(1, 1000)] [SerializeField] public float stam;
+    [Range(0, 1)] [SerializeField] float stamReduction;
+    [Range(1, 10)] [SerializeField] float stamRegen;
     [Range(1, 100)] [SerializeField] int speed;
     [Range(1, 10)] [SerializeField] int sprintMod;
     [Range(1, 10)] [SerializeField] int jumpSpeed;
     [Range(1, 10)] [SerializeField] int jumpMax;
+    [Range(0, 100)] [SerializeField] float jumpCost;
+    [SerializeField] public Animator animator;
+    [SerializeField] public float pistolDamageMultiplier = 1f;
+    [SerializeField] public float rifleDamageMultiplier = 1f;
+    [SerializeField] public float shotgunDamageMultiplier = 1f;
+    [SerializeField] public float healthMultiplier = 1.0f;
+    [SerializeField] public float staminaMultiplier = 1.0f;
     [SerializeField] int gravity;
     // Weapon Stats
-    [SerializeField] List<gunStats> gunInv = new List<gunStats>();
+    [SerializeField] public List<gunStats> gunInv = new List<gunStats>();
     [SerializeField] GameObject gunModel;
     [SerializeField] AudioClip[] audHurt;
     [Range(0f, 1f)] [SerializeField] float audHurtVolume;
@@ -40,34 +51,48 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     [SerializeField] flashlightStats flashlight;
     [SerializeField] string flashlightButton = "Fire2";
     [SerializeField] KeyCode flashlightKey = KeyCode.F;
+    [SerializeField] private string testLevel = "Level_02";
     Vector3 flashlightHoldPosition = new Vector3(0.75f, -0.85f, -0.9f);
     Vector3 flashlightLightPosition = new Vector3(0, -0.05f, 0.15f);
     GameObject flashlightModel;
     GameObject flashlightLightObject;
     Light flashlightLight;
-    bool hasFlashlight;
+    public bool hasFlashlight;
     bool flashlightOn;
     float flashlightFlickerTimer;
     float lowBatterySoundTimer;
 
     //[SerializeField] Transform gunPivot;
     [SerializeField] Transform shootPos;
-
+    public bool newGame;
     int speedOrig;
     int jumpCount;
     int HPOrig;
-    int gunInvPos;
+    float stamOrig;
+    public int gunInvPos;
     float shootTimer;
     Vector3 moveDir;
     Vector3 playerVel;
     bool isSprinting;
     bool isPlayingSteps;
+    private bool isJumping;
     //==========================================================================================
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     //==========================================================================================
     void Start() {
+        if (controller == null) {
+            controller = GetComponent<CharacterController>();
+            if (controller == null) {
+                Debug.LogError("CharacterController missing from " + gameObject.name + "!");
+            }
+        }
+        animator = GetComponentInChildren<Animator>();
+        if (animator == null) { Debug.LogWarning("Boar missing Animator component! Proceeding without animations."); }
         HPOrig = HP;
+        stamOrig = stam;
         speedOrig = speed;
+        if (!newGame) { gameManager.instance.Load(); }
+        gameManager.instance.updatePlayer();
         spawnPlayer();
     }
     //==========================================================================================
@@ -75,12 +100,16 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     //==========================================================================================
     void Update() {
         if (!gameManager.instance.isPaused) {
+            //animator.SetFloat("Speed", agent.velocity.magnitude / agent.speed, 0.1f, Time.deltaTime);
+            //animator.SetFloat("Speed", this.playerVel.magnitude / this.speed, 0.1f, Time.deltaTime);
+            animator.SetFloat("Speed", this.speed, 0.1f, Time.deltaTime);
+            isJumping = false;
             movement();
             useFlashlight();
-            if (Input.GetKeyDown(KeyCode.K)) { RemoveItemFromInventory(); }
+            if (Input.GetKeyDown(KeyCode.K)) { LoadTestScene(); }
         }
         sprint();
-    }
+        if (isSprinting) { StaminaReduction(stamReduction); } else { if (stam <= stamOrig) { StaminaRegen(); }}
     //==========================================================================================
     // Function, Movement
     //==========================================================================================
@@ -89,35 +118,49 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         if (controller.isGrounded) {
             playerVel.y = 0;
             jumpCount = 0;
-            if (moveDir.magnitude > 0.3f && isPlayingSteps == false) { StartCoroutine(playSteps()); }
-        }
+            animator.SetBool("IsJumping", false);
+            if (moveDir.magnitude > 0.3f && isPlayingSteps == false) { StartCoroutine(playSteps()); } 
+            }
         // kill after the plus to make Side Scroller
         moveDir = Input.GetAxis("Horizontal") * transform.right + Input.GetAxis("Vertical") * transform.forward;
         controller.Move(moveDir.normalized * speed * Time.deltaTime);
-        jump();
+        if (moveDir.magnitude > 0.3f) { animator.SetBool("IsMoving", true); } else { animator.SetBool("IsMoving", false); }
+        if (stam > jumpCost) { jump(); }
         controller.Move(playerVel * Time.deltaTime);
         playerVel.y -= gravity * Time.deltaTime;
         shootTimer += Time.deltaTime;
         if (Input.GetButton("Fire1") && gunInv.Count > 0 && gunInv[gunInvPos].ammoCurr > 0 && shootTimer > gunInv[gunInvPos].shootRate) { shoot(); }
         if (gunInv.Count > 0) {
             Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * gunInv[gunInvPos].shootDistance, Color.red);
+                animator.SetBool("IsAiming", true);
         }
         reload();
     }
     //==========================================================================================
     // Function, Sprint
     //==========================================================================================
-    void sprint() {
-        if(Input.GetButtonDown("Sprint")) {
-            speed *= sprintMod;
-        } else if(Input.GetButtonUp("Sprint")) {
-            speed /= sprintMod;
+    void sprint()
+        {
+            if (Input.GetButtonDown("Sprint"))
+            {
+                if (stam <= 0) { return; }
+                speed *= sprintMod;
+                isSprinting = true;
+            }
+            else if (Input.GetButtonUp("Sprint"))
+            {
+                StaminaRegen();
+                speed /= sprintMod;
+                if (speed < 1) { speed = 1; }
+                isSprinting = false;
+            }
         }
     }
     //==========================================================================================
     // Function, Handle Weight
     //==========================================================================================
     public void handleWeight() {
+        updatePlayerWeight();
         Inventory inv = this.GetComponent<Inventory>();
         if (inv == null) { return; }
         if (inv.inventoryWeight >= inv.weightThreshold) { 
@@ -153,7 +196,10 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             //StartCoroutine(playRandomSound(jumpEffects, jumpSoundVolume));
             if (audJump.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(audJump[Random.Range(0, audJump.Length)], audJumpVolume); }
             playerVel.y = jumpSpeed;
+            animator.SetBool("IsJumping", true);
+            isJumping = true;
             jumpCount++;
+            StaminaReduction(jumpCost);
         }
     }
 
@@ -190,11 +236,30 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         Quaternion spreadRotate = Quaternion.Euler(Random.Range(-spread, spread), Random.Range(-spread, spread), 0);
         GameObject bullet =
         Instantiate(gunInv[gunInvPos].bullet, shootPos.position, Quaternion.LookRotation(shootDir));
+        animator.SetTrigger("Fire");
         Damage bulletDamage =
             bullet.GetComponent<Damage>();
         if (bulletDamage != null)
         {
             bulletDamage.SetPlayerBullet(true);
+            string activeWeaponName = gunInv[gunInvPos].name;
+
+            if (activeWeaponName.Contains("pistol"))
+            {
+                bulletDamage.SetDamageMultiplier(pistolDamageMultiplier);
+            }
+            else if (activeWeaponName.Contains("rifle"))
+            {
+                bulletDamage.SetDamageMultiplier(rifleDamageMultiplier);
+            }
+            else if (activeWeaponName.Contains("shotgun"))
+            {
+                bulletDamage.SetDamageMultiplier(shotgunDamageMultiplier);
+            }
+            else
+            {
+                bulletDamage.SetDamageMultiplier(1f);
+            }
         }
         ////Cursor aimer for guns should just get the middle of the monitor then instantiate the bullet
         //Ray aimRay = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
@@ -238,6 +303,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     void reload() {
         if (Input.GetButtonDown("Reload") && gunInv.Count > 0) {
             if (gunInv[gunInvPos].reloadSound.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(gunInv[gunInvPos].reloadSound[Random.Range(0, gunInv[gunInvPos].reloadSound.Length)], gunInv[gunInvPos].reloadSoundVolume); }
+            animator.SetTrigger("IsReload");
             gunInv[gunInvPos].ammoCurr = gunInv[gunInvPos].ammoMax;
             updatePlayerAmmo();
         }
@@ -247,13 +313,14 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     //==========================================================================================
     public void TakeDamage(int amount)
     {
-        ScoreboardManager.GetOrCreate().AddDamageTaken(amount);
+       ScoreboardManager.GetOrCreate().AddDamageTaken(amount);
         HP -= amount;
         updatePlayerUI();
         StartCoroutine(flashDamage());  
         if (HP <= 0)
         {
-            if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolve(true)); }
+            if (this.GetComponent<Dissolver>() != null) { this.GetComponent<Dissolver>().StartCoroutine(this.GetComponent<Dissolver>().dissolve(true)); }
+            stam = 0;
             gameManager.instance.youLose();
         }
         else
@@ -312,15 +379,13 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     //==========================================================================================
     public void updatePlayerUI() {
         //fixed
-        if (gameManager.instance == null || gameManager.instance.playerHPBAR == null)
-        {
-            return;
-        }
-
+        if (gameManager.instance == null || gameManager.instance.playerHPBAR == null) { return; }
         gameManager.instance.playerHPBAR.fillAmount = (float)HP / HPOrig;
+        if (gameManager.instance == null || gameManager.instance.playerStamBar == null) { return; }
+        gameManager.instance.playerStamBar.fillAmount = (float)stam / stamOrig;
     }
     //==========================================================================================
-    // Function, get Gun Stats
+    // Function, Update Player Ammo
     //==========================================================================================
     public void updatePlayerAmmo() {
         if (gameManager.instance == null || gameManager.instance.AmmoCount == null)
@@ -333,6 +398,27 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             gameManager.instance.AmmoCount.text = $"{gunInv[gunInvPos].ammoCurr} / {gunInv[gunInvPos].ammoMax}";
         } else {
             gameManager.instance.AmmoCount.text = "0 / 0";
+        }
+    }
+    //==========================================================================================
+    // Function, Update Player Weight
+    //==========================================================================================
+    public void updatePlayerWeight()
+    {
+        Inventory inv = GetComponent<Inventory>();
+        if (inv == null) { return; }
+        if (gameManager.instance == null || gameManager.instance.AmmoCount == null)
+        {
+            return;
+        }
+
+        if (gunInv.Count > 0)
+        {
+            gameManager.instance.weight.text = $"{inv.inventoryWeight} / {inv.weightThreshold}";
+        }
+        else
+        {
+            gameManager.instance.weight.text = $"0 / {inv.weightThreshold}";
         }
     }
     //==========================================================================================
@@ -615,11 +701,12 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         updatePlayerAmmo();
         gunModel.GetComponent<MeshFilter>().sharedMesh = gunInv[gunInvPos].gunModel.GetComponent<MeshFilter>().sharedMesh;
         gunModel.GetComponent<MeshRenderer>().sharedMaterial = gunInv[gunInvPos].gunModel.GetComponent<MeshRenderer>().sharedMaterial;
+        animator.SetInteger("WeaponType", gunInv[gunInvPos].gunType);
     }
-    //==========================================================================================
-    // Function, Select Gun
-    //==========================================================================================
-    void selectGun()
+//==========================================================================================
+// Function, Select Gun
+//==========================================================================================
+void selectGun()
     {
         if (Input.GetAxis("Mouse ScrollWheel") > 0 && gunInvPos < gunInv.Count - 1)
         {
@@ -648,8 +735,10 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     public void RemoveItemFromInventory() {
         Inventory inventory = GetComponent<Inventory>();
         if (inventory == null) { return; }
-        for (int i = 0; i < inventory.inventoryItems.Length; i++) {
-            if (!inventory.IsSlotEmpty(i)) {
+        for (int i = 0; i < inventory.inventoryItems.Length; i++)
+        {
+            if (!inventory.IsSlotEmpty(i))
+            {
                 //inventory.RemoveItem(inventory.inventoryItems[i].itemName, 1, false);
                 //inventory.RemoveMultipleItems("M1 Garand Ammo");
                 inventory.TransferToNewInventory(testContainer, "M1 Garand Ammo");
@@ -657,7 +746,55 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             }
         }
     }
-    //==============================================================================================
+    //==========================================================================================
+    // Function, Stamina Reduction
+    //==========================================================================================
+    private float StaminaReduction(float amount) {
+        gameManager.instance.Stamina(true);
+        float temp = Mathf.Abs(amount);
+        stam -= temp;
+        stam = Mathf.Clamp(stam, 0, stamOrig);
+        updatePlayerUI();
+        return stam;
+    }
+    //==========================================================================================
+    // Function, Stamina Regen
+    //==========================================================================================
+    private void StaminaRegen() {
+        if (stam >= stamOrig) { gameManager.instance.Stamina(false); stam = stamOrig; return; }
+        stam += stamRegen;
+        updatePlayerUI();
+    }
+    //==========================================================================================
+    // Function, Load Test Scene
+    //==========================================================================================
+    private void LoadTestScene()
+    {
+        if (!string.IsNullOrEmpty(testLevel))
+        {
+            SceneManager.LoadScene(testLevel);
+        }
+    }
+    //==========================================================================================
+    // Function, Load Test Scene
+    //==========================================================================================
+    public void LoadLevel(string levelName) {
+        if (!string.IsNullOrEmpty(levelName))
+        {
+            SceneManager.LoadScene(levelName);
+        }
+    }
+    //==========================================================================================
+    //==========================================================================================
+    // Function, Called in Upgradee tabl to update stats once upgraded
+    //==========================================================================================
+    public void UpdateUpgradedStats(string statType = "all")
+    {
+        if (statType == "all" || statType == "health" || statType == "hp") { HP = Mathf.RoundToInt(HPOrig * healthMultiplier); }
+
+        if (statType == "all" || statType == "stamina") { stam = stamOrig * staminaMultiplier;}
+    }
+
 }
 //==============================================================================================
 // End of Player Controller .cs

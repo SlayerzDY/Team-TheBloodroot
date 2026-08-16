@@ -2,10 +2,11 @@
 // Using Unity Engine
 //==============================================================================================
 using Bloodroot.Features.BloodMoon;
-using UnityEngine;
 using System.Collections;
-using UnityEngine.AI;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEngine;
+using UnityEngine.AI;
 //==============================================================================================
 // Declare Enemy AI
 //==============================================================================================
@@ -15,8 +16,11 @@ public class enemyAI : MonoBehaviour, IDamage
     // Declare Variables
     //==========================================================================================
     [SerializeField] float HP;
+    [SerializeField] GameObject[] drops;
+    [SerializeField] private GameObject genericPickupShell;
     [SerializeField] Renderer model;
-    [SerializeField] NavMeshAgent agent;
+    [SerializeField] public NavMeshAgent agent;
+    [SerializeField] public Animator animator;
     [SerializeField] int FOV;
     // Roam Stats
     [SerializeField] int roamDist;
@@ -49,21 +53,18 @@ public class enemyAI : MonoBehaviour, IDamage
     float roamTimer;
     float stoppingDistanceOrig;
     private bool isUnalived;
+  
     //==========================================================================================
     // Function, Start
     //==========================================================================================
-    void Start()
-    {
+    protected virtual void Start() {
+        animator = GetComponentInChildren<Animator>();
+        if (animator == null) { Debug.LogWarning("Boar missing Animator component! Proceeding without animations."); }
         isUnalived = false;
         boarBrute = GetComponent<BoarBruteAI>();
         if (model != null) { colorOrig = model.material.color; }
         manager = FindAnyObjectByType<waveManager>();
         ApplyBloodMoonModifier();
-        if (gameManager.instance != null) { 
-            gameManager.instance.updateGameGoal(1);
-            startingPos = transform.position;
-            stoppingDistanceOrig = agent.stoppingDistance;
-        }
     }
     //==========================================================================================
     // Function, Roam
@@ -128,10 +129,13 @@ public class enemyAI : MonoBehaviour, IDamage
     //==========================================================================================
     // Function, Update
     //==========================================================================================
-    void Update()
+    protected virtual void Update()
     {
         if (isDead)
             return;
+
+        if (animator != null) { animator.SetFloat("Speed", agent.velocity.magnitude); }
+        animator.SetFloat("Speed", agent.velocity.magnitude / agent.speed, 0.1f, Time.deltaTime);
 
         if (playerInTrigger)
         {
@@ -308,7 +312,7 @@ public class enemyAI : MonoBehaviour, IDamage
     // Function, Die
     //==========================================================================================
 
-    private void Die()
+    protected virtual void Die()
     {
         // Prevent one enemy from being counted twice.
         isUnalived = true;
@@ -317,7 +321,7 @@ public class enemyAI : MonoBehaviour, IDamage
 
         isDead = true;
         playerInTrigger = false;
-        ScoreboardManager.GetOrCreate().AddEnemyPigKilled();
+        //ScoreboardManager.GetOrCreate().AddEnemyPigKilled();
 
         foreach (Collider enemyCollider in GetComponentsInChildren<Collider>())
         {
@@ -341,14 +345,27 @@ public class enemyAI : MonoBehaviour, IDamage
             manager.EnemyDefeated(gameObject);
         }
 
-        if (gameManager.instance != null)
-        {
-            gameManager.instance.updateGameGoal(-1);
-        }
+        //if (gameManager.instance != null)
+        //{
+        //    gameManager.instance.updateGameGoal(-1);
+        //}
 
         Dissolver dissolver =
             GetComponent<Dissolver>();
+        for (int i = 0; i < drops.Length; i++)
+        {
+            Item item = drops[i].GetComponent<Item>();
+            if (item.item.itemName == null) { Debug.Log(drops[i].name + " is not an item."); continue; }
 
+            Vector2 randomCircle = Random.insideUnitCircle.normalized * 5;
+            Vector3 randomPosition = transform.position + new Vector3(randomCircle.x, 0f, randomCircle.y);
+            Quaternion localRotation = transform.localRotation;
+
+            genericPickupShell.GetComponent<Item>().item = CopyItem(item.item, item.item.quantity);
+            GameObject newPickup = Instantiate(genericPickupShell, randomPosition, localRotation);
+            newPickup.GetComponent<Item>().canInteract = true;
+            newPickup.GetComponent<Item>().ApplyMeshToSelf();
+        }
         if (dissolver != null)
         {
             dissolver.StartCoroutine(
@@ -360,6 +377,24 @@ public class enemyAI : MonoBehaviour, IDamage
         }
     }
     //==========================================================================================
+    // Function, Copy Item
+    //------------------------------------------------------------------------------------------
+    private ItemStats CopyItem(ItemStats source, int qty)
+    {
+        return new ItemStats
+        {
+            itemName = source.itemName,
+            itemDescription = source.itemDescription,
+            icon = source.icon,
+            weight = source.weight,
+            quantity = qty,
+            stackSize = source.stackSize,
+            itemMesh = source.itemMesh,
+            pickupSound = source.pickupSound,
+            itemIncreases = source.itemIncreases
+        };
+    }
+    //==========================================================================================
     // Function, Flash
     //==========================================================================================
     IEnumerator flashRed()
@@ -367,7 +402,7 @@ public class enemyAI : MonoBehaviour, IDamage
         //model.material.color = Color.red;
         //yield return new WaitForSeconds(0.1f);
         //model.material.color = colorOrig;
-        if (GetComponent<Dissolver>() != null) { GetComponent<Dissolver>().StartCoroutine(GetComponent<Dissolver>().dissolveFlash()); }
+        if (this.GetComponent<Dissolver>() != null) { this.GetComponent<Dissolver>().StartCoroutine(this.GetComponent<Dissolver>().dissolveFlash()); }
         yield return null;
     }
 

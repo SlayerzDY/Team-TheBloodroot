@@ -49,15 +49,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Item
   item:
-    itemName: M1 Garand Ammo
-    itemDescription: Im an M1 Garand Ammo Pickup!
+    itemName: ItemPickupMaster
+    itemDescription: Wonderful bits of dead pig!
     icon: {fileID: 21300000, guid: 13002bd83cec13a4b93704504e4f1cc6, type: 3}
     weight: 0.1
-    quantity: 2
-    stackSize: 10
-    itemMesh: {fileID: 7940527310238685648, guid: 0fd4b118c879443969647aff0e75ae10, type: 3}
+    quantity: 1
+    stackSize: 99
+    itemMesh: {fileID: 919132149155446097, guid: 089573e79cecb77498bf6f6423ae4424, type: 3}
     pickupSound: []
     itemIncreases: {fileID: 11400000, guid: 1fd5b603596412145bd58b5bbe757e2b, type: 2}
+    itemID: ItemPickupMaster54518541561
   canInteract: 1
 --- !u!114 &1807892849295950277
 MonoBehaviour:
@@ -85,7 +86,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 817942340654339044}
-  m_Mesh: {fileID: 2524561061639738139, guid: 9b8d082861c4c4eae87b2c854fcd32a2, type: 3}
+  m_Mesh: {fileID: 2616682858060250926, guid: 089573e79cecb77498bf6f6423ae4424, type: 3}
 --- !u!23 &4942448490666211775
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -111,7 +112,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: ad5e6d6fbc9c8498290e52331ce3bc5e, type: 2}
+  - {fileID: 2100000, guid: 3d44c90a3d61ff345a1126dd327983a3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

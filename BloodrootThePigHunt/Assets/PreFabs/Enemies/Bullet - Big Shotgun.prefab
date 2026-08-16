@@ -8,6 +8,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 842533775542283392, guid: 600056e04222aaa4fa06a983ce4ed432, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5433222104674597542, guid: 600056e04222aaa4fa06a983ce4ed432, type: 3}
       propertyPath: m_Name
       value: Bullet - Big Shotgun
@@ -82,6 +86,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShotgunBullet
   pelletPrefab: {fileID: 5433222104674597542, guid: 600056e04222aaa4fa06a983ce4ed432, type: 3}
-  pelletCount: 8
-  spread: 5
+  pelletCount: 24
+  spread: 10
   isPlayerBullet: 1

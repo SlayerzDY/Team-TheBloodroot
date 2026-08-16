@@ -13,7 +13,9 @@ namespace Bloodroot.Features.FarmPrologue
         Combat,
         FadeToHub,
         Hub,
-        CompletionPending
+        CompletionPending,
+        // Appended to preserve every serialized numeric phase value above.
+        AwaitingOffering
     }
 
     public enum FarmInventoryConsumptionMode

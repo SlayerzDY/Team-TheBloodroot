@@ -97,6 +97,17 @@ namespace Bloodroot.Features.FarmPrologue
 
         private void HandleInteractionRejected(string reason)
         {
+            ShowRejectedStatus(reason);
+        }
+
+        /// <summary>
+        /// Shows non-prologue interaction feedback through the Farm's
+        /// already-authored objective labels. This is a public UnityEvent
+        /// target so campaign-owned Hub interactions do not depend on Farm
+        /// presentation internals.
+        /// </summary>
+        public void ShowRejectedStatus(string reason)
+        {
             StopTemporaryStatus();
             temporaryStatus = string.IsNullOrWhiteSpace(reason)
                 ? "That cannot be done right now."

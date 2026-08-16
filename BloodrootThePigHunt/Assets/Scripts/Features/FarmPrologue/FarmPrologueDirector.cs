@@ -9,7 +9,11 @@ using UnityEngine.SceneManagement;
 
 namespace Bloodroot.Features.FarmPrologue
 {
-    [DefaultExecutionOrder(100)]
+    // Campaign services restore durable state at -1000 through -800. Run
+    // after those services, but before Safety's default-order player Start,
+    // so its tagged-spawn compatibility teleport converges on this phase's
+    // exact authored pose instead of a stale scene default.
+    [DefaultExecutionOrder(-700)]
     [DisallowMultipleComponent]
     public sealed class FarmPrologueDirector : MonoBehaviour
     {
@@ -30,10 +34,6 @@ namespace Bloodroot.Features.FarmPrologue
         [SerializeField] private GameObject waveManagerRoot;
         [Tooltip("The root containing MobSpawner and its spawn points.")]
         [SerializeField] private GameObject mobSpawnerRoot;
-        [Tooltip("Assign the old TruckEscapeEnding component so its truck remains visible while its legacy win flow is disabled.")]
-        [SerializeField] private TruckEscapeEnding legacyTruckEscapeEnding;
-        [Tooltip("Assign the old escape key object so it cannot trigger the legacy ending during the prologue or hub phase.")]
-        [SerializeField] private GameObject legacyTruckKeyObject;
 
         [Header("Existing-System Hooks")]
         [SerializeField] private waveManager waveEncounter;
@@ -42,6 +42,8 @@ namespace Bloodroot.Features.FarmPrologue
         [Header("Campaign State and Farm Spawns")]
         [SerializeField] private CampaignStateService campaignState;
         [SerializeField] private Transform playerTransform;
+        [Tooltip("The one scene-local object tagged PlayerSpawnPos. Its pose is mirrored to the active Farm phase before Safety player startup or respawn.")]
+        [SerializeField] private Transform playerSpawnFallback;
         [SerializeField] private Transform prologueSpawn;
         [SerializeField] private Transform hubSpawn;
 
@@ -70,6 +72,8 @@ namespace Bloodroot.Features.FarmPrologue
         [Header("Completion Save Recovery")]
         [SerializeField, Min(1)] private int completionSaveAttempts = 3;
         [SerializeField, Min(0f)] private float completionSaveRetrySeconds = 1f;
+        [SerializeField, Min(0.1f)]
+        private float completionSaveMaxRetrySeconds = 15f;
 
         [Header("Objective Copy")]
         [SerializeField] private string wakeUpObjective =
@@ -98,6 +102,7 @@ namespace Bloodroot.Features.FarmPrologue
         [SerializeField] private UnityEvent hubUnlocked = new();
 
         private Coroutine phaseRoutine;
+        private Coroutine groundRumbleRoutine;
         private waveManager boundWaveEncounter;
         private CampaignStateService boundCampaignState;
         private gameManager boundGameManager;
@@ -110,21 +115,28 @@ namespace Bloodroot.Features.FarmPrologue
         private bool combatCompletedRaised;
         private bool hubTransitionStartedRaised;
         private bool hubUnlockedRaised;
+        private int completionRetryCycle;
         private bool playerControlsLocked;
         private Behaviour[] gatedBehaviourSnapshot = Array.Empty<Behaviour>();
         private bool[] gatedBehaviourEnabledStates = Array.Empty<bool>();
         private string currentObjectiveText = string.Empty;
         private int currentObjectiveAmount = -1;
         private int currentObjectiveRequired = -1;
+        private bool groundRumbleActive;
 
         public FarmProloguePhase CurrentPhase { get; private set; } =
             FarmProloguePhase.Inactive;
         public bool IsHubUnlocked => CurrentPhase == FarmProloguePhase.Hub;
+        public bool IsGroundRumbleActive => groundRumbleActive;
+        public bool ChoresMustBeCompletedInOrder =>
+            choresMustBeCompletedInOrder;
         public string CurrentObjectiveText => currentObjectiveText;
         public int CurrentObjectiveAmount => Mathf.Max(0, currentObjectiveAmount);
         public int CurrentObjectiveRequired => Mathf.Max(0, currentObjectiveRequired);
+        public Transform PlayerSpawnFallback => playerSpawnFallback;
 
         public event Action<FarmProloguePhase> PhaseChanged;
+        public event Action<bool> GroundRumbleStateChanged;
         public event Action<string> ObjectiveTextChanged;
         public event Action<string, int, int> ObjectiveProgressChanged;
         public event Action<string> InteractionRejected;
@@ -166,7 +178,7 @@ namespace Bloodroot.Features.FarmPrologue
                 return;
             }
 
-            MovePlayerTo(prologueSpawn);
+            MovePlayerToAuthoritativeSpawn(prologueSpawn);
 
             if (beginOnStart)
             {
@@ -177,6 +189,7 @@ namespace Bloodroot.Features.FarmPrologue
         private void OnDisable()
         {
             StopPhaseRoutine();
+            StopGroundRumble();
             UnbindWaveEvents();
             UnbindCampaignEvents();
             UnbindGameManagerEvents();
@@ -185,6 +198,7 @@ namespace Bloodroot.Features.FarmPrologue
 
         private void OnDestroy()
         {
+            StopGroundRumble();
             SetPlayerControlsLocked(false);
             UnbindWaveEvents();
             UnbindCampaignEvents();
@@ -201,6 +215,8 @@ namespace Bloodroot.Features.FarmPrologue
             completionSaveAttempts = Mathf.Max(1, completionSaveAttempts);
             completionSaveRetrySeconds =
                 Mathf.Max(0f, completionSaveRetrySeconds);
+            completionSaveMaxRetrySeconds =
+                Mathf.Max(0.1f, completionSaveMaxRetrySeconds);
 
             if (waveManagerRoot != null &&
                 waveManagerRoot == mobSpawnerRoot)
@@ -235,20 +251,37 @@ namespace Bloodroot.Features.FarmPrologue
             }
 
             StopPhaseRoutine();
+            StopGroundRumble();
             ResolveCampaignReferences();
             ClaimExistingCompletionSystems();
-            ResetChores();
             combatCompletionReceived = false;
             combatCompletedRaised = false;
             hubTransitionStartedRaised = false;
+            completionRetryCycle = 0;
 
-            MovePlayerTo(prologueSpawn);
+            MovePlayerToAuthoritativeSpawn(prologueSpawn);
             SetActive(prologueStateRoot, true);
             SetActive(hubStateRoot, false);
             SetActive(waveManagerRoot, false);
             SetActive(mobSpawnerRoot, false);
-            DisableLegacyTruckGameplay();
             SetFaderInstantly(0f);
+
+            if (campaignState != null &&
+                campaignState.PrologueCursedObjectRevealed)
+            {
+                RestoreCompletedChores();
+                SetPhase(FarmProloguePhase.AwaitingOffering);
+                RaisePrologueStartedOnce();
+                PublishObjective(
+                    campaignState.PrologueCursedObjectOffered
+                        ? "The Root Tree accepted the curse. The emergence is pending."
+                        : "Carry the cursed object to the Root Tree.",
+                    0,
+                    1);
+                return;
+            }
+
+            ResetChores();
 
             SetPhase(FarmProloguePhase.WakeUp);
             RaisePrologueStartedOnce();
@@ -265,12 +298,14 @@ namespace Bloodroot.Features.FarmPrologue
         public void ConfigureCampaign(
             CampaignStateService stateService,
             Transform player,
+            Transform fallbackSpawnPoint,
             Transform prologueSpawnPoint,
             Transform hubSpawnPoint)
         {
             UnbindCampaignEvents();
             campaignState = stateService;
             playerTransform = player;
+            playerSpawnFallback = fallbackSpawnPoint;
             prologueSpawn = prologueSpawnPoint;
             hubSpawn = hubSpawnPoint;
 
@@ -279,6 +314,20 @@ namespace Bloodroot.Features.FarmPrologue
                 ResolveCampaignReferences();
                 BindCampaignEvents();
             }
+        }
+
+        public void ConfigureCampaign(
+            CampaignStateService stateService,
+            Transform player,
+            Transform prologueSpawnPoint,
+            Transform hubSpawnPoint)
+        {
+            ConfigureCampaign(
+                stateService,
+                player,
+                playerSpawnFallback,
+                prologueSpawnPoint,
+                hubSpawnPoint);
         }
 
         public void ConfigureStateRoots(
@@ -299,16 +348,12 @@ namespace Bloodroot.Features.FarmPrologue
         public void ConfigureEncounter(
             waveManager manager,
             GameObject managerRoot,
-            GameObject spawnerRoot,
-            TruckEscapeEnding legacyTruckEnding,
-            GameObject legacyTruckKey)
+            GameObject spawnerRoot)
         {
             UnbindWaveEvents();
             waveEncounter = manager;
             waveManagerRoot = managerRoot;
             mobSpawnerRoot = spawnerRoot;
-            legacyTruckEscapeEnding = legacyTruckEnding;
-            legacyTruckKeyObject = legacyTruckKey;
 
             if (isActiveAndEnabled)
             {
@@ -336,6 +381,18 @@ namespace Bloodroot.Features.FarmPrologue
             playerInventory = inventory;
             chores = choreReferences ?? Array.Empty<FarmChoreInteractable>();
             BindChoreDirectors();
+        }
+
+        public void ConfigureChoreOrder(bool mustBeCompletedInOrder)
+        {
+            choresMustBeCompletedInOrder = mustBeCompletedInOrder;
+
+            if (isActiveAndEnabled &&
+                hasStarted &&
+                CurrentPhase == FarmProloguePhase.Chores)
+            {
+                RefreshChoreAvailabilityAndObjective();
+            }
         }
 
         public void ConfigureScreenFader(CanvasGroup authoredScreenFader)
@@ -417,7 +474,7 @@ namespace Bloodroot.Features.FarmPrologue
 
             if (AreAllChoresComplete())
             {
-                BeginRumble();
+                BeginAwaitingOffering();
             }
 
             return true;
@@ -430,7 +487,7 @@ namespace Bloodroot.Features.FarmPrologue
             RejectChoreInteraction(chore, reason);
         }
 
-        public void BeginRumble()
+        public void BeginAwaitingOffering()
         {
             if (CurrentPhase != FarmProloguePhase.Chores)
                 return;
@@ -444,24 +501,81 @@ namespace Bloodroot.Features.FarmPrologue
             }
 
             StopPhaseRoutine();
-            SetPhase(FarmProloguePhase.Rumble);
-            FarmPrologueEventUtility.Invoke(rumbleStarted, this);
-            PublishObjective(rumbleObjective, 0, 1);
+            StopGroundRumble();
+            SetPhase(FarmProloguePhase.AwaitingOffering);
+            PublishObjective(
+                "The cursed object surfaced. Recover it and carry it to the Root Tree.",
+                0,
+                1);
+        }
 
-            if (autoCompleteRumble)
-            {
-                phaseRoutine =
-                    StartCoroutine(CompleteRumbleAfterDelay());
-            }
+        /// <summary>
+        /// Compatibility entry point retained for authored UnityEvents. Chore
+        /// completion now waits for the durable Root Tree offering instead of
+        /// starting the presentation or combat early.
+        /// </summary>
+        public void BeginRumble()
+        {
+            BeginAwaitingOffering();
         }
 
         public void CompleteRumble()
         {
-            if (CurrentPhase != FarmProloguePhase.Rumble)
-                return;
+            BeginTreeFedEmergence();
+        }
+
+        /// <summary>
+        /// Starts the authored ground rumble and the existing three-wave
+        /// encounter together, but only after the prologue offering is both
+        /// durably committed and durably active.
+        /// </summary>
+        public bool BeginTreeFedEmergence()
+        {
+            if (CurrentPhase != FarmProloguePhase.AwaitingOffering &&
+                CurrentPhase != FarmProloguePhase.Rumble)
+            {
+                return false;
+            }
+
+            ResolveCampaignReferences();
+            if (campaignState == null ||
+                !campaignState.PrologueCursedObjectOffered ||
+                !string.Equals(
+                    campaignState.ActiveFarmEmergenceOfferingId,
+                    CampaignRootOfferingIds.PrologueCursedObject,
+                    StringComparison.Ordinal))
+            {
+                RejectChoreInteraction(
+                    null,
+                    "Offer the cursed object to the Root Tree before the emergence can begin.");
+                return false;
+            }
+
+            if (!CanStartCombat(out string failureReason))
+            {
+                PublishObjective(failureReason, 0, 1);
+                RejectChoreInteraction(null, failureReason);
+                return false;
+            }
 
             StopPhaseRoutine();
+            SetPhase(FarmProloguePhase.Rumble);
+            PublishObjective(rumbleObjective, 0, 1);
+            StartGroundRumble();
             phaseRoutine = StartCoroutine(BeginCombatSequence());
+            return true;
+        }
+
+        /// <summary>
+        /// Lets campaign-owned Farm mechanics reuse the authored objective
+        /// presenter without creating another runtime UI authority.
+        /// </summary>
+        public void PublishCampaignObjective(
+            string objective,
+            int amount,
+            int required)
+        {
+            PublishObjective(objective, amount, required);
         }
 
         public void NotifyCombatCompleted()
@@ -518,17 +632,11 @@ namespace Bloodroot.Features.FarmPrologue
             CompleteWakeUp();
         }
 
-        private IEnumerator CompleteRumbleAfterDelay()
-        {
-            yield return WaitRealtime(rumbleSeconds);
-            phaseRoutine = null;
-            CompleteRumble();
-        }
-
         private IEnumerator BeginCombatSequence()
         {
             if (!CanStartCombat(out string failureReason))
             {
+                StopGroundRumble();
                 PublishObjective(failureReason, 0, 1);
                 RejectChoreInteraction(null, failureReason);
                 phaseRoutine = null;
@@ -558,7 +666,7 @@ namespace Bloodroot.Features.FarmPrologue
             {
                 const string missingManager =
                     "The cursed-hog encounter lost its WaveManager during startup.";
-                SetPhase(FarmProloguePhase.Rumble);
+                SetPhase(FarmProloguePhase.AwaitingOffering);
                 PublishObjective(missingManager, 0, 1);
                 RejectChoreInteraction(null, missingManager);
                 phaseRoutine = null;
@@ -680,7 +788,10 @@ namespace Bloodroot.Features.FarmPrologue
             if (CurrentPhase != FarmProloguePhase.Combat)
                 return;
 
-            PublishObjective($"Wave {waveNumber} cleared.", 1, 1);
+            PublishObjective(
+                $"Wave {waveNumber} cleared. More cursed hogs are coming.",
+                1,
+                1);
         }
 
         private void HandleAllWavesCompleted()
@@ -761,16 +872,21 @@ namespace Bloodroot.Features.FarmPrologue
                     this);
                 yield return FadeTo(0f, fadeInSeconds);
                 phaseRoutine = null;
+                ScheduleHubTransitionRetry();
                 yield break;
             }
 
+            completionRetryCycle = 0;
             yield return WaitRealtime(blackScreenHoldSeconds);
             FarmPrologueEventUtility.Invoke(combatCleanupRequested, this);
             SetActive(mobSpawnerRoot, false);
             SetActive(waveManagerRoot, false);
-            SetActive(prologueStateRoot, false);
+            // Prologue Objectives contains the persistent physical Farm
+            // environment. Its wake, rumble, interaction, and combat systems
+            // are gated independently, so keep the parent active in Hub.
+            SetActive(prologueStateRoot, true);
             SetActive(hubStateRoot, true);
-            MovePlayerTo(hubSpawn);
+            MovePlayerToAuthoritativeSpawn(hubSpawn);
             yield return FadeTo(0f, fadeInSeconds);
 
             // Keep gameplay input gated until the authored fade is fully
@@ -780,6 +896,54 @@ namespace Bloodroot.Features.FarmPrologue
             PublishObjective(hubObjective, 1, 1);
             RaiseHubUnlockedOnce();
             phaseRoutine = null;
+        }
+
+        private void ScheduleHubTransitionRetry()
+        {
+            if (!isActiveAndEnabled ||
+                phaseRoutine != null ||
+                playerDeathPending ||
+                !combatCompletionReceived ||
+                CurrentPhase != FarmProloguePhase.CompletionPending)
+            {
+                return;
+            }
+
+            phaseRoutine = StartCoroutine(RetryHubTransitionAfterDelay());
+        }
+
+        private IEnumerator RetryHubTransitionAfterDelay()
+        {
+            float retryDelay = CalculateCompletionRetryDelay(
+                completionRetryCycle,
+                completionSaveRetrySeconds,
+                completionSaveMaxRetrySeconds);
+            completionRetryCycle = Mathf.Min(completionRetryCycle + 1, 10);
+            yield return WaitRealtime(retryDelay);
+            phaseRoutine = null;
+
+            if (!isActiveAndEnabled ||
+                playerDeathPending ||
+                !combatCompletionReceived ||
+                CurrentPhase != FarmProloguePhase.CompletionPending)
+            {
+                yield break;
+            }
+
+            StartHubTransition();
+        }
+
+        private static float CalculateCompletionRetryDelay(
+            int retryCycle,
+            float initialDelay,
+            float maximumDelay)
+        {
+            float safeInitial = Mathf.Max(0.1f, initialDelay);
+            float safeMaximum = Mathf.Max(0.1f, maximumDelay);
+            int exponent = Mathf.Clamp(retryCycle, 0, 10);
+            return Mathf.Min(
+                safeMaximum,
+                safeInitial * Mathf.Pow(2f, exponent));
         }
 
         private bool TryPersistPrologueCompletion(
@@ -827,7 +991,6 @@ namespace Bloodroot.Features.FarmPrologue
             SetActive(hubStateRoot, false);
             SetActive(waveManagerRoot, false);
             SetActive(mobSpawnerRoot, false);
-            DisableLegacyTruckGameplay();
             SetFaderInstantly(0f);
         }
 
@@ -835,17 +998,19 @@ namespace Bloodroot.Features.FarmPrologue
         {
             StopPhaseRoutine();
             ClaimExistingCompletionSystems();
-            ResetChores();
+            RestoreCompletedChores();
             playerDeathPending = false;
             combatCompletionReceived = true;
+            completionRetryCycle = 0;
 
             SetActive(waveManagerRoot, false);
             SetActive(mobSpawnerRoot, false);
-            DisableLegacyTruckGameplay();
-            SetActive(prologueStateRoot, false);
+            // A saved Hub arrival must reconstruct the same completed Farm
+            // environment as a continuous prologue playthrough.
+            SetActive(prologueStateRoot, true);
             SetActive(hubStateRoot, true);
             SetFaderInstantly(0f);
-            MovePlayerTo(hubSpawn);
+            MovePlayerToAuthoritativeSpawn(hubSpawn);
 
             SetPhase(FarmProloguePhase.Hub);
             PublishObjective(hubObjective, 1, 1);
@@ -875,6 +1040,21 @@ namespace Bloodroot.Features.FarmPrologue
             BindGameManagerEvents();
         }
 
+        private void MovePlayerToAuthoritativeSpawn(Transform destination)
+        {
+            if (destination == null)
+                return;
+
+            if (playerSpawnFallback != null)
+            {
+                playerSpawnFallback.SetPositionAndRotation(
+                    destination.position,
+                    destination.rotation);
+            }
+
+            MovePlayerTo(destination);
+        }
+
         private void MovePlayerTo(Transform destination)
         {
             if (playerTransform == null || destination == null)
@@ -897,6 +1077,7 @@ namespace Bloodroot.Features.FarmPrologue
                 playerTransform.SetPositionAndRotation(
                     destination.position,
                     destination.rotation);
+                Physics.SyncTransforms();
             }
             catch (Exception exception)
             {
@@ -918,22 +1099,11 @@ namespace Bloodroot.Features.FarmPrologue
                 waveEncounter.SetCompletionOwnedExternally(true);
             }
 
-            if (gameManager.instance != null)
-            {
-                gameManager.instance.SetWaveManagerControlsWin(true);
-            }
+            //if (gameManager.instance != null)
+            //{
+            //    gameManager.instance.SetWaveManagerControlsWin(true);
+            //}
 
-            DisableLegacyTruckGameplay();
-        }
-
-        private void DisableLegacyTruckGameplay()
-        {
-            if (legacyTruckEscapeEnding != null)
-            {
-                legacyTruckEscapeEnding.enabled = false;
-            }
-
-            SetActive(legacyTruckKeyObject, false);
         }
 
         private void BindWaveEvents()
@@ -1056,12 +1226,18 @@ namespace Bloodroot.Features.FarmPrologue
 
         private void HandlePlayerRespawned()
         {
+            ResolveCampaignReferences();
+            bool shouldUseHubSpawn =
+                CurrentPhase == FarmProloguePhase.Hub ||
+                (campaignState != null &&
+                 campaignState.HasCompletedPrologue);
+            MovePlayerToAuthoritativeSpawn(
+                shouldUseHubSpawn ? hubSpawn : prologueSpawn);
+
             if (!playerDeathPending)
                 return;
 
             playerDeathPending = false;
-
-            ResolveCampaignReferences();
 
             if (campaignState != null && campaignState.HasCompletedPrologue)
             {
@@ -1080,6 +1256,7 @@ namespace Bloodroot.Features.FarmPrologue
 
             SetPhase(FarmProloguePhase.Combat);
             PublishObjective(combatObjective, 0, 1);
+            ResumeCombatStartupIfNeeded();
         }
 
         private void HandleNewGameStarted()
@@ -1127,6 +1304,7 @@ namespace Bloodroot.Features.FarmPrologue
             combatCompletedRaised = false;
             hubTransitionStartedRaised = false;
             hubUnlockedRaised = false;
+            completionRetryCycle = 0;
             playerDeathPending = false;
             currentObjectiveText = string.Empty;
             currentObjectiveAmount = -1;
@@ -1219,9 +1397,8 @@ namespace Bloodroot.Features.FarmPrologue
                         StartCoroutine(CompleteWakeUpAfterDelay());
                     break;
 
-                case FarmProloguePhase.Rumble when autoCompleteRumble:
-                    phaseRoutine =
-                        StartCoroutine(CompleteRumbleAfterDelay());
+                case FarmProloguePhase.Rumble:
+                    BeginTreeFedEmergence();
                     break;
 
                 case FarmProloguePhase.Combat:
@@ -1230,16 +1407,19 @@ namespace Bloodroot.Features.FarmPrologue
                     {
                         NotifyCombatCompleted();
                     }
-                    else if (waveEncounter != null &&
-                             !waveEncounter.EncounterStarted)
+                    else
                     {
-                        phaseRoutine =
-                            StartCoroutine(BeginCombatSequence());
+                        ResumeCombatStartupIfNeeded();
                     }
                     break;
 
                 case FarmProloguePhase.FadeToHub:
                     phaseRoutine = StartCoroutine(TransitionToHub());
+                    break;
+
+                case FarmProloguePhase.CompletionPending when
+                    combatCompletionReceived:
+                    ScheduleHubTransitionRetry();
                     break;
             }
         }
@@ -1269,6 +1449,17 @@ namespace Bloodroot.Features.FarmPrologue
                 {
                     chore.ResetChoreProgress();
                 }
+            }
+        }
+
+        private void RestoreCompletedChores()
+        {
+            if (chores == null)
+                return;
+
+            foreach (FarmChoreInteractable chore in chores)
+            {
+                chore?.RestoreCompletedProgress();
             }
         }
 
@@ -1449,6 +1640,12 @@ namespace Bloodroot.Features.FarmPrologue
 
         private void SetPhase(FarmProloguePhase phase)
         {
+            if (phase != FarmProloguePhase.Rumble &&
+                phase != FarmProloguePhase.Combat)
+            {
+                StopGroundRumble();
+            }
+
             bool changed = CurrentPhase != phase;
             CurrentPhase = phase;
             ApplyPhaseSceneState(phase);
@@ -1473,19 +1670,32 @@ namespace Bloodroot.Features.FarmPrologue
                 phase == FarmProloguePhase.WakeUp);
             SetActive(
                 choreSequenceRoot,
-                phase == FarmProloguePhase.Chores);
+                ShouldShowChoreEnvironment(phase));
             SetActive(
                 rumbleSequenceRoot,
-                phase == FarmProloguePhase.Rumble);
+                groundRumbleActive);
+        }
+
+        /// <summary>
+        /// Chore interaction is phase-gated separately. The authored chore
+        /// environment contains physical Farm props plus pending/completed
+        /// state presentation, so it remains visible after each interaction,
+        /// throughout the emergence, and in the saved Hub state.
+        /// </summary>
+        public static bool ShouldShowChoreEnvironment(
+            FarmProloguePhase phase)
+        {
+            return phase != FarmProloguePhase.Inactive;
         }
 
         private void ApplyPlayerControlForPhase(FarmProloguePhase phase)
         {
             bool shouldLock =
                 phase == FarmProloguePhase.WakeUp ||
-                phase == FarmProloguePhase.Rumble ||
                 phase == FarmProloguePhase.FadeToHub ||
                 playerDeathPending;
+            // Rumble is authored gameplay, not a cutscene: keep movement,
+            // interaction, and camera input live while its presenter shakes.
             SetPlayerControlsLocked(shouldLock);
         }
 
@@ -1709,6 +1919,77 @@ namespace Bloodroot.Features.FarmPrologue
                 yield break;
 
             yield return new WaitForSecondsRealtime(seconds);
+        }
+
+        private void ResumeCombatStartupIfNeeded()
+        {
+            if (CurrentPhase != FarmProloguePhase.Combat ||
+                phaseRoutine != null ||
+                waveEncounter == null ||
+                waveEncounter.EncounterStarted)
+            {
+                return;
+            }
+
+            phaseRoutine = StartCoroutine(BeginCombatSequence());
+        }
+
+        private void StartGroundRumble()
+        {
+            StopGroundRumbleRoutine();
+            SetGroundRumbleActive(true);
+            groundRumbleRoutine =
+                StartCoroutine(StopGroundRumbleAfterDelay());
+        }
+
+        private IEnumerator StopGroundRumbleAfterDelay()
+        {
+            yield return WaitRealtime(rumbleSeconds);
+            groundRumbleRoutine = null;
+            SetGroundRumbleActive(false);
+        }
+
+        private void StopGroundRumble()
+        {
+            StopGroundRumbleRoutine();
+            SetGroundRumbleActive(false);
+        }
+
+        private void StopGroundRumbleRoutine()
+        {
+            if (groundRumbleRoutine == null)
+                return;
+
+            StopCoroutine(groundRumbleRoutine);
+            groundRumbleRoutine = null;
+        }
+
+        private void SetGroundRumbleActive(bool active)
+        {
+            if (groundRumbleActive == active)
+            {
+                ApplyPhaseSceneState(CurrentPhase);
+                return;
+            }
+
+            groundRumbleActive = active;
+
+            if (active)
+            {
+                ApplyPhaseSceneState(CurrentPhase);
+                FarmPrologueEventUtility.Invoke(
+                    GroundRumbleStateChanged,
+                    true,
+                    this);
+                FarmPrologueEventUtility.Invoke(rumbleStarted, this);
+                return;
+            }
+
+            FarmPrologueEventUtility.Invoke(
+                GroundRumbleStateChanged,
+                false,
+                this);
+            ApplyPhaseSceneState(CurrentPhase);
         }
 
         private void StopPhaseRoutine()

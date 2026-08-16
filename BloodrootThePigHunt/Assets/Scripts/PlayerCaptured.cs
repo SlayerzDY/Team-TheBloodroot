@@ -48,7 +48,7 @@ public class PlayerCaptured : MonoBehaviour, IInteract {
     // Function, Hold Object
     //==========================================================================================
     IEnumerator holdObject(GameObject entity) {
-        if (damageSound != null) { AudioSource.PlayClipAtPoint(damageSound, gameObject.transform.position, 0.35f); }
+        if (damageSound != null) { audioManager.instance.audPlayer.PlayOneShot(damageSound, 0.35f); }
         disableMovement(entity);
         float timer = 0f;
         while (timer < holdTime) {
@@ -61,7 +61,7 @@ public class PlayerCaptured : MonoBehaviour, IInteract {
     // Function, Release Object
     //==========================================================================================
     private void disable() {
-        if (gameObject.GetComponent<Dissolver>() != null) { gameObject.GetComponent<Dissolver>().StartCoroutine(gameObject.GetComponent<Dissolver>().dissolve()); return; } else { Destroy(gameObject); }
+        if (this.gameObject.GetComponent<Dissolver>() != null) { this.gameObject.GetComponent<Dissolver>().StartCoroutine(this.gameObject.GetComponent<Dissolver>().dissolve()); return; } else { Destroy(gameObject); }
     }
     //==========================================================================================
     // Function, Release Object

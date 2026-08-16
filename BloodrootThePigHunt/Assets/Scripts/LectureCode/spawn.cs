@@ -25,7 +25,7 @@ public class spawn : MonoBehaviour
     //------------------------------------------------------------------------------------------
     void Start()
     {
-        gameManager.instance.updateGameGoal(amountToSpawn);
+        //gameManager.instance.updateGameGoal(amountToSpawn);
     }
     //==========================================================================================
     // Function, Update
