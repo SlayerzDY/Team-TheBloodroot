@@ -59,7 +59,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
 
     //[SerializeField] Transform gunPivot;
     [SerializeField] Transform shootPos;
-
+    public bool newGame;
     int speedOrig;
     int jumpCount;
     int HPOrig;
@@ -86,6 +86,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         HPOrig = HP;
         stamOrig = stam;
         speedOrig = speed;
+        if (!newGame) { gameManager.instance.Load(); }
         spawnPlayer();
     }
     //==========================================================================================

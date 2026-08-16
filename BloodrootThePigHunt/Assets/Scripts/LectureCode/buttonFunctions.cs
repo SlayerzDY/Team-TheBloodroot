@@ -77,6 +77,7 @@ public class buttonFunctions : MonoBehaviour {
     // Function, Open Level
     //==========================================================================================
     public void OpenLevel(string levelName) {
+        gameManager.instance.Save();
         playerController controller = gameManager.instance.player.GetComponent<playerController>();
         if (controller == null) { return; }
         controller.LoadLevel(levelName);

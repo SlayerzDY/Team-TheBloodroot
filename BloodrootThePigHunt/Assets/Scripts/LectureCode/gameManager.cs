@@ -261,8 +261,8 @@ public class gameManager : MonoBehaviour
             menuActive.SetActive(isOn);
         } else {
             stateUnpause();
+            menuInventory.SetActive(isOn);
             menuActive = null;
-            menuActive.SetActive(isOn);
         }
     }
     //==========================================================================================
