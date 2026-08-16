@@ -64,9 +64,10 @@ public class gameManager : MonoBehaviour
     public TreeSpawner RootSpanw;
     public TreeRootInteraction RootInteraction;
     public bool isDefenseActive = false;
-    [Range(2,5)] public int ItemsNeededPerDefense = 5;
+    [Range(2,5)] public int ItemsNeededPerDefense = 2;
     public bool StartBaseDefenseOnStart = true;
-    [Range(1f,30f)]public float preperationTime = 15.0f;
+    [Range(1f,30f)]public float preperationTime = 10.0f;
+    public int DefensesBeat = 0;
     [Header("Dependencies")]
     public Transform playerTransform;
     [Header("Live Tracked Variables")]
@@ -439,6 +440,7 @@ public class gameManager : MonoBehaviour
         yield return new WaitForSeconds(5.0f);
         if (congratulations != null) { congratulations.gameObject.SetActive(false); }
         Debug.Log("You Completed the Defense the Hub is safe");
+        DefensesBeat++;
 
     }
 
@@ -485,14 +487,20 @@ public class gameManager : MonoBehaviour
     // Function, Extraction Menu
     //==========================================================================================
     public void ExtractionMenu(bool isOn) {
-        if (isOn) {
-            menuActive = menuExtraction;
-            menuExtraction.SetActive(isOn);
-            statePause();
-        } else {
-            menuActive = null;
-            menuExtraction.SetActive(isOn);
-            stateUnpause();
+        if (DefensesBeat >= 1)
+        {
+            if (isOn)
+            {
+                menuActive = menuExtraction;
+                menuExtraction.SetActive(isOn);
+                statePause();
+            }
+            else
+            {
+                menuActive = null;
+                menuExtraction.SetActive(isOn);
+                stateUnpause();
+            }
         }
     }
     //==========================================================================================

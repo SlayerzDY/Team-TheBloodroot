@@ -86,41 +86,54 @@ public class buttonFunctions : MonoBehaviour {
     // Function, Open Level
     //==========================================================================================
     public void OpenLevelBlackPines(string levelName) {
-        gameManager.instance.Save();
-        playerController controller = gameManager.instance.player.GetComponent<playerController>();
-        if (controller == null) { return; }
-        controller.LoadLevel(levelName);
-        gameManager.instance.checkpoint("PlayerSpawnPosBlackPines");
+        if (gameManager.instance.DefensesBeat >= 1)
+        {
+            gameManager.instance.Save();
+            playerController controller = gameManager.instance.player.GetComponent<playerController>();
+            if (controller == null) { return; }
+            controller.LoadLevel(levelName);
+            gameManager.instance.checkpoint("PlayerSpawnPosBlackPines");
+        }
     }
     //==========================================================================================
     // Function, Open Level
     //==========================================================================================
     public void OpenLevelStillwater(string levelName) {
-        gameManager.instance.Save();
-        playerController controller = gameManager.instance.player.GetComponent<playerController>();
-        if (controller == null) { return; }
-        gameManager.instance.checkpoint("PlayerSpawnPosStillwater");
-        controller.LoadLevel(levelName);
+        if (gameManager.instance.DefensesBeat >= 2)
+        {
+            gameManager.instance.Save();
+            playerController controller = gameManager.instance.player.GetComponent<playerController>();
+            if (controller == null) { return; }
+            gameManager.instance.checkpoint("PlayerSpawnPosStillwater");
+            controller.LoadLevel(levelName);
+        }
     }
     //==========================================================================================
     // Function, Open Level
     //==========================================================================================
     public void OpenLevelHarrow(string levelName) {
-        gameManager.instance.Save();
-        playerController controller = gameManager.instance.player.GetComponent<playerController>();
-        if (controller == null) { return; }
-        gameManager.instance.checkpoint("PlayerSpawnPosHarrowEstate");
-        controller.LoadLevel(levelName);
+        if (gameManager.instance.DefensesBeat >= 3)
+        {
+            gameManager.instance.Save();
+            playerController controller = gameManager.instance.player.GetComponent<playerController>();
+            if (controller == null) { return; }
+            gameManager.instance.checkpoint("PlayerSpawnPosHarrowEstate");
+            controller.LoadLevel(levelName);
+        }
     }
     //==========================================================================================
     // Function, Open Level
     //==========================================================================================
     public void OpenLevelBloodRoot(string levelName) {
-        gameManager.instance.Save();
-        playerController controller = gameManager.instance.player.GetComponent<playerController>();
-        if (controller == null) { return; }
-        gameManager.instance.checkpoint("PlayerSpawnPosBloodRootHollow");
-        controller.LoadLevel(levelName);
+        if (gameManager.instance.DefensesBeat >= 4)
+        {
+            gameManager.instance.Save();
+            playerController controller = gameManager.instance.player.GetComponent<playerController>();
+            if (controller == null) { return; }
+            gameManager.instance.checkpoint("PlayerSpawnPosBloodRootHollow");
+            controller.LoadLevel(levelName);
+
+        }
     }
     //==========================================================================================
     // Function, Open Level
