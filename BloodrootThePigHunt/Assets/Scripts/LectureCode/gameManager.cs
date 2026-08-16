@@ -288,60 +288,6 @@ public class gameManager : MonoBehaviour
     //==========================================================================================
     // Function, Lose Fade
     //==========================================================================================
-    //private IEnumerator LoseFadeRoutine()
-    //{
-    //    if (menuLose != null) menuLose.SetActive(false);
-    //    if (fadeImagee != null)
-    //    {
-    //        fadeImagee.color = new Color32(0, 0, 0, 0);
-    //        fadeImagee.gameObject.SetActive(true);
-    //    }
-    //    while (fadeImagee.color.a < 255)
-    //    {
-    //        Color32 c = fadeImagee.color;
-    //        int nextAlpha = c.a + 17;
-    //        if (nextAlpha > 255) nextAlpha = 255;
-    //        fadeImagee.color = new Color32(0, 0, 0, (byte)nextAlpha);
-    //        yield return new WaitForSecondsRealtime(0.01f);
-    //    }
-    //    fadeImagee.color = new Color32(0, 0, 0, 255);
-    //    if (losePromptText != null){ losePromptText.SetActive(true); }
-    //    bool inputReceived = false;
-    //    while (!inputReceived)
-    //    {
-    //        if (Input.anyKeyDown || Input.GetMouseButtonDown(0)) {inputReceived = true;}
-    //        yield return null;
-    //    }
-    //    amDying = false; 
-    //    if (losePromptText != null) losePromptText.SetActive(false);
-    //    if (buttonfunc != null) { buttonfunc.respawn();}
-    //    else {Debug.LogError("Don't forget to drag your button script into the GameManager Inspector slot!");}
-    //    StartCoroutine(RespawnFadeOutRoutine());
-
-    //}
-
-    ////==========================================================================================
-    //// Function, Respawn Fade for testing since no hub
-    ////==========================================================================================
-
-    //private IEnumerator RespawnFadeOutRoutine()
-    //{
-    //    fadeImagee.color = new Color32(0, 0, 0, 255);
-    //    while (fadeImagee.color.a > 0)
-    //    {
-    //        Color32 c = fadeImagee.color;
-    //        int nextAlpha = c.a - 5;
-    //        if (nextAlpha < 0) nextAlpha = 0;
-    //        fadeImagee.color = new Color32(0, 0, 0, (byte)nextAlpha);
-    //        yield return new WaitForSecondsRealtime(0.01f);
-    //    }
-    //    fadeImagee.gameObject.SetActive(false);
-    //}
-
-    /// <summary>
-    /// Called by the authored respawn button after the existing player
-    /// controller has moved and restored the player.
-    /// </summary>
     public void NotifyPlayerRespawned()
     {
         CampaignEventUtility.Invoke(PlayerRespawned, this);

@@ -11,7 +11,8 @@ public class buttonFunctions : MonoBehaviour {
     //==========================================================================================
     // Function, Resume
     //==========================================================================================
-    public void resume() { 
+    public void resume() {
+        gameManager.instance.Save();
         gameManager.instance.stateUnpause();
     }
     //==========================================================================================
@@ -44,7 +45,7 @@ public class buttonFunctions : MonoBehaviour {
             Debug.LogError("Respawn requires the authored player controller.");
             return;
         }
-
+        gameManager.instance.Save();
         manager.playerController.spawnPlayer();
         manager.NotifyPlayerRespawned();
         manager.stateUnpause();
@@ -60,15 +61,16 @@ public class buttonFunctions : MonoBehaviour {
             // time scale as its baseline.
             gameManager.instance.stateUnpause();
         }
-
+        gameManager.instance.Save();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
     //==========================================================================================
     // Function, Quit
     //==========================================================================================
     public void quit() {
-    #if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
+#if UNITY_EDITOR
+        gameManager.instance.Save();    
+        UnityEditor.EditorApplication.isPlaying = false;
     #else
             Application.Quit();     
     #endif
