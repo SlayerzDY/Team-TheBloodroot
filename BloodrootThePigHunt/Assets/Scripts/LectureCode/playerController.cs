@@ -319,6 +319,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         if (HP <= 0)
         {
             if (this.GetComponent<Dissolver>() != null) { this.GetComponent<Dissolver>().StartCoroutine(this.GetComponent<Dissolver>().dissolve(true)); }
+            stam = 0;
             gameManager.instance.youLose();
         }
         else

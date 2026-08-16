@@ -278,7 +278,8 @@ public class gameManager : MonoBehaviour
         menuActive = menuLose;
 
         //StartCoroutine(LoseFadeRoutine());
-        
+
+        OpenLevelForGameManager("Farm_PrologueHub");
 
         if (menuActive != null)
         {
@@ -653,6 +654,13 @@ public class gameManager : MonoBehaviour
             player.gunInv = new List<gunStats>(loadedData._savgunInv);
         }
         Debug.Log("Game loaded successfully!");
+    }
+    public void OpenLevelForGameManager(string levelName)
+    {
+        Save();
+        playerController controller = gameManager.instance.player.GetComponent<playerController>();
+        if (controller == null) { return; }
+        controller.LoadLevel(levelName);
     }
     //==========================================================================================
 }
