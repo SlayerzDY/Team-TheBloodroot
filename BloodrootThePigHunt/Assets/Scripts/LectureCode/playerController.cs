@@ -91,8 +91,9 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         HPOrig = HP;
         stamOrig = stam;
         speedOrig = speed;
-        spawnPlayer();
         if (!newGame) { gameManager.instance.Load(); }
+        gameManager.instance.updatePlayer();
+        spawnPlayer();
     }
     //==========================================================================================
     // Update is called once per frame
@@ -358,7 +359,6 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             if (audDeath.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(audDeath[Random.Range(0, audDeath.Length)], audDeathVolume); }
             dissolver.StartCoroutine(dissolver.dissolve());
         }
-        gameManager.instance.Save();
         gameManager.instance.youLose();
     }
 
