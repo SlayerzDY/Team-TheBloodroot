@@ -351,13 +351,13 @@ namespace Bloodroot.Features.AlphaEnemies
                 return;
             }
 
-            if (shieldActive)
-            {
-                TriggerAnimator(shieldHitTrigger);
-                PlayClip(shieldHitClip);
-                AlphaEnemyEventUtility.Invoke(onShieldHit, this, nameof(onShieldHit));
-                return;
-            }
+            //if (shieldActive)
+            //{
+            //    TriggerAnimator(shieldHitTrigger);
+            //    PlayClip(shieldHitClip);
+            //    AlphaEnemyEventUtility.Invoke(onShieldHit, this, nameof(onShieldHit));
+            //    return;
+            //}
 
             currentHealth = Mathf.Max(0, currentHealth - amount);
             TriggerAnimator(hitTrigger);
