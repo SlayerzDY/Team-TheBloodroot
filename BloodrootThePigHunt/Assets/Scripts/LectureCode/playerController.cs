@@ -30,6 +30,11 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     [Range(1, 10)] [SerializeField] int jumpMax;
     [Range(0, 100)] [SerializeField] float jumpCost;
     [SerializeField] public Animator animator;
+    [SerializeField] public float pistolDamageMultiplier = 1f;
+    [SerializeField] public float rifleDamageMultiplier = 1f;
+    [SerializeField] public float shotgunDamageMultiplier = 1f;
+    [SerializeField] public float healthMultiplier = 1.0f;
+    [SerializeField] public float staminaMultiplier = 1.0f;
     [SerializeField] int gravity;
     // Weapon Stats
     [SerializeField] public List<gunStats> gunInv = new List<gunStats>();
@@ -236,6 +241,24 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         if (bulletDamage != null)
         {
             bulletDamage.SetPlayerBullet(true);
+            string activeWeaponName = gunInv[gunInvPos].name;
+
+            if (activeWeaponName.Contains("pistol"))
+            {
+                bulletDamage.SetDamageMultiplier(pistolDamageMultiplier);
+            }
+            else if (activeWeaponName.Contains("rifle"))
+            {
+                bulletDamage.SetDamageMultiplier(rifleDamageMultiplier);
+            }
+            else if (activeWeaponName.Contains("shotgun"))
+            {
+                bulletDamage.SetDamageMultiplier(shotgunDamageMultiplier);
+            }
+            else
+            {
+                bulletDamage.SetDamageMultiplier(1f);
+            }
         }
         ////Cursor aimer for guns should just get the middle of the monitor then instantiate the bullet
         //Ray aimRay = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
@@ -760,6 +783,16 @@ void selectGun()
         }
     }
     //==========================================================================================
+    //==========================================================================================
+    // Function, Called in Upgradee tabl to update stats once upgraded
+    //==========================================================================================
+    public void UpdateUpgradedStats(string statType = "all")
+    {
+        if (statType == "all" || statType == "health" || statType == "hp") { HP = Mathf.RoundToInt(HPOrig * healthMultiplier); }
+
+        if (statType == "all" || statType == "stamina") { stam = stamOrig * staminaMultiplier;}
+    }
+
 }
 //==============================================================================================
 // End of Player Controller .cs
