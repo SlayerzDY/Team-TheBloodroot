@@ -20,8 +20,8 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     [SerializeField] LayerMask ignoreLayer;
     float camRotX, camRotY;
     // Player Stats
-    [Range(1, 1000)] [SerializeField] int HP;
-    [Range(1, 1000)] [SerializeField] float stam;
+    [Range(1, 1000)] [SerializeField] public int HP;
+    [Range(1, 1000)] [SerializeField] public float stam;
     [Range(0, 1)] [SerializeField] float stamReduction;
     [Range(1, 10)] [SerializeField] float stamRegen;
     [Range(1, 100)] [SerializeField] int speed;
@@ -32,7 +32,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     [SerializeField] public Animator animator;
     [SerializeField] int gravity;
     // Weapon Stats
-    [SerializeField] List<gunStats> gunInv = new List<gunStats>();
+    [SerializeField] public List<gunStats> gunInv = new List<gunStats>();
     [SerializeField] GameObject gunModel;
     [SerializeField] AudioClip[] audHurt;
     [Range(0f, 1f)] [SerializeField] float audHurtVolume;
@@ -52,7 +52,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     GameObject flashlightModel;
     GameObject flashlightLightObject;
     Light flashlightLight;
-    bool hasFlashlight;
+    public bool hasFlashlight;
     bool flashlightOn;
     float flashlightFlickerTimer;
     float lowBatterySoundTimer;
@@ -64,7 +64,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     int jumpCount;
     int HPOrig;
     float stamOrig;
-    int gunInvPos;
+    public int gunInvPos;
     float shootTimer;
     Vector3 moveDir;
     Vector3 playerVel;

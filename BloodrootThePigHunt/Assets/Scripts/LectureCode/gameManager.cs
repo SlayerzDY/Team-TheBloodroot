@@ -1,14 +1,15 @@
 //==============================================================================================
 // Using Unity Engine
 //==============================================================================================
-using UnityEngine;
-using System;
-using System.Collections;
 using Bloodroot.Campaign;
 using Bloodroot.Features.BloodMoon;
-using TMPro;
-using UnityEngine.UI;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq.Expressions;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 //==============================================================================================
 // Declare Game Manager
 //==============================================================================================
@@ -57,7 +58,6 @@ public class gameManager : MonoBehaviour
     private float timeScaleOrig;
     //private int gameGoalCount;
     //private bool waveManagerControlsWin;
-
     [Header("Tree Root Variables")]
     public TreeSpawner RootSpanw;
     public TreeRootInteraction RootInteraction;
@@ -65,6 +65,11 @@ public class gameManager : MonoBehaviour
     [Range(2,5)] public int ItemsNeededPerDefense = 5;
     public bool StartBaseDefenseOnStart = true;
     [Range(1f,30f)]public float preperationTime = 15.0f;
+    [Header("Dependencies")]
+    public Transform playerTransform;
+    [Header("Live Tracked Variables")]
+    public int currentScore;
+    public float currentHealth;
 
     /// <summary>
     /// Lifecycle hooks for campaign-owned encounters. Listeners must not own
@@ -137,6 +142,8 @@ public class gameManager : MonoBehaviour
             }
             else if (menuActive == menuInventory) { openInventory(false); }
         }
+        if (Input.GetKeyDown(KeyCode.F5)) Save();
+        if (Input.GetKeyDown(KeyCode.F9)) Load();
         timer += Time.deltaTime;
     }
 
@@ -406,12 +413,8 @@ public class gameManager : MonoBehaviour
     //==========================================================================================
     // Function, Check Wave End
     //==========================================================================================
-
-    public void StartCheckWave()
-    {
-
+    public void StartCheckWave() {
         StartCoroutine(CheckForRemainingEnemies());
-
     }
 
     //==========================================================================================
@@ -459,6 +462,54 @@ public class gameManager : MonoBehaviour
             menuExtraction.SetActive(isOn);
             stateUnpause();
         }
+    }
+    //==========================================================================================
+    // Function, Save
+    //==========================================================================================
+    public void Save() {
+        // Get References Needed
+        playerController player = gameManager.instance.player.GetComponent<playerController>();
+        if (player == null) { Debug.Log("Please Assign Player Controller!"); return; }
+        Inventory playerInv = gameManager.instance.player.GetComponent<Inventory>();
+        if (playerInv == null) { Debug.Log("Please Assign Player Inventory!"); return; }
+        // Pass live references into the constructor
+        GameData dataToSave = new GameData(player, playerInv);
+        // Push data to data path using [SaveSystem](https://unity3d.com)
+        SaveSystem.SaveGame(dataToSave);
+    }
+    //==========================================================================================
+    // Function, Load
+    //------------------------------------------------------------------------------------------
+    public void Load() {
+        // Pull the saved data from Save System
+        GameData loadedData = SaveSystem.LoadGame();
+        if (loadedData == null) { Debug.Log("No save data to load!"); return; }
+        // Get live references
+        playerController player = gameManager.instance.player.GetComponent<playerController>();
+        Inventory playerInv = gameManager.instance.player.GetComponent<Inventory>();
+        if (player == null || playerInv == null) { Debug.Log("Missing Player or Inventory!"); return; }
+        // Apply saved stats back to the player
+        player.HP = loadedData._savHP;
+        player.stam = loadedData._savstam;
+        player.hasFlashlight = loadedData._savhasFlashlight;
+        player.gunInvPos = loadedData._savgunInvPos;
+        // Apply position
+        if (loadedData._savplayerPosition != null && loadedData._savplayerPosition.Length >= 3) {
+            Vector3 loadedPos = new Vector3(
+                loadedData._savplayerPosition[0],
+                loadedData._savplayerPosition[1],
+                loadedData._savplayerPosition[2]
+            );
+            player.transform.position = loadedPos;
+        }
+        // Apply inventory & guns
+        if (loadedData._savInventory != null) {
+            playerInv.inventoryItems = (ItemStats[])loadedData._savInventory.Clone();
+        }
+        if (loadedData._savgunInv != null) {
+            player.gunInv = new List<gunStats>(loadedData._savgunInv);
+        }
+        Debug.Log("Game loaded successfully!");
     }
     //==========================================================================================
 }
