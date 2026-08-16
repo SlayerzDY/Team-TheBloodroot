@@ -208,28 +208,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ed6b382c36eac7438b2c834a13764b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  testContainer: {fileID: 0}
   controller: {fileID: 8333364145718669195}
   ignoreLayer:
     serializedVersion: 2
     m_Bits: 8
   HP: 30
+  stam: 1
+  stamReduction: 0
+  stamRegen: 1
   speed: 5
   sprintMod: 2
   jumpSpeed: 10
   jumpMax: 1
+  jumpCost: 0
+  animator: {fileID: 0}
   gravity: 35
   gunInv: []
   gunModel: {fileID: 0}
-  hurtEffects: []
-  hurtSoundVolume: 0
-  deathEffects: []
-  deathSoundVolume: 0
-  jumpEffects: []
-  jumpSoundVolume: 0
+  audHurt: []
+  audHurtVolume: 0
+  audDeath: []
+  audDeathVolume: 0
+  audJump: []
+  audJumpVolume: 0
+  audSteps: []
+  audStepsVolume: 0
   flashlight: {fileID: 0}
   flashlightButton: Fire2
   flashlightKey: 102
+  testLevel: Level_02
+  hasFlashlight: 0
   shootPos: {fileID: 0}
+  newGame: 0
+  gunInvPos: 0
 --- !u!114 &2698694537028029020
 MonoBehaviour:
   m_ObjectHideFlags: 0

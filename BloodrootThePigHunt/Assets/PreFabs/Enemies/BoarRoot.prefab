@@ -64,7 +64,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: BoarRoot
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: -2624448967457116415, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -119,9 +120,15 @@ MonoBehaviour:
   damageGrowth: 1.08
   chargeSpeed: 0
   chargeTime: 0
+  chargeSound: []
+  chargeSoundVolume: 0
+  damageSounds: []
+  damageSoundVolume: 0
+  trotSounds: []
+  trotSoundVolume: 0
   charging: 0
   RootTrap: {fileID: 8805823926485247629, guid: 15b53257dbe6bac4ba83a86845b7e7ff, type: 3}
-  SpawnChance: 100
+  SpawnChance: 50
 --- !u!4 &4046647553792901338 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7100000000000000004, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
