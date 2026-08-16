@@ -521,7 +521,8 @@ public class Inventory : MonoBehaviour {
             stackSize = source.stackSize,
             itemMesh = source.itemMesh,
             pickupSound = source.pickupSound,
-            itemIncreases = source.itemIncreases
+            itemIncreases = source.itemIncreases,
+            itemID = source.itemID
         };
     }
     //==========================================================================================

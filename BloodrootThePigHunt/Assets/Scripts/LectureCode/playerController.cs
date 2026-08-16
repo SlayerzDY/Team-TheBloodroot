@@ -91,8 +91,8 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         HPOrig = HP;
         stamOrig = stam;
         speedOrig = speed;
-        if (!newGame) { gameManager.instance.Load(); }
         spawnPlayer();
+        if (!newGame) { gameManager.instance.Load(); }
     }
     //==========================================================================================
     // Update is called once per frame

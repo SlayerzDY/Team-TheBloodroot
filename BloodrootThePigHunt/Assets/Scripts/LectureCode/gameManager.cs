@@ -39,6 +39,7 @@ public class gameManager : MonoBehaviour
     [SerializeField] TMP_Text enemyCountText;
     [SerializeField] TMP_Text congratulations;
     [Header("Other Stuf That Needs Sorted")]
+    [SerializeField] public ItemDatabase itemDatabase;
     public GameObject menuInteractable;
     // Public Variables
     public GameObject checkpointPopup;
@@ -505,20 +506,22 @@ public class gameManager : MonoBehaviour
         if (playerInv == null) { Debug.Log("Please Assign Player Inventory!"); return; }
         // Pass live references into the constructor
         GameData dataToSave = new GameData(player, playerInv);
-        // Push data to data path using [SaveSystem](https://unity3d.com)
         SaveSystem.SaveGame(dataToSave);
     }
     //==========================================================================================
     // Function, Load
     //------------------------------------------------------------------------------------------
-    public void Load() {
+    public void Load()
+    {
         // Pull the saved data from Save System
         GameData loadedData = SaveSystem.LoadGame();
         if (loadedData == null) { Debug.Log("No save data to load!"); return; }
         // Get live references
         playerController player = gameManager.instance.player.GetComponent<playerController>();
         Inventory playerInv = gameManager.instance.player.GetComponent<Inventory>();
-        if (player == null || playerInv == null) { Debug.Log("Missing Player or Inventory!"); return; }
+        ItemDatabase itemDatabase = gameManager.instance.itemDatabase;
+        Debug.Log($"player: {player}, playerInv: {playerInv}, itemDatabase: {itemDatabase}");
+        if (player == null || playerInv == null || itemDatabase == null) { Debug.Log("Missing Player, Inventory, or ItemDatabase!"); return; }
         // Apply saved stats back to the player
         player.HP = loadedData._savHP;
         player.stam = loadedData._savstam;
@@ -526,7 +529,8 @@ public class gameManager : MonoBehaviour
         player.gunInvPos = loadedData._savgunInvPos;
         playerInv.inventoryWeight = loadedData._savinventoryWeight;
         // Apply position
-        if (loadedData._savplayerPosition != null && loadedData._savplayerPosition.Length >= 3) {
+        if (loadedData._savplayerPosition != null && loadedData._savplayerPosition.Length >= 3)
+        {
             Vector3 loadedPos = new Vector3(
                 loadedData._savplayerPosition[0],
                 loadedData._savplayerPosition[1],
@@ -535,10 +539,32 @@ public class gameManager : MonoBehaviour
             player.transform.position = loadedPos;
         }
         // Apply inventory & guns
-        if (loadedData._savInventory != null) {
-            playerInv.inventoryItems = (ItemStats[])loadedData._savInventory.Clone();
+        if (loadedData._savInventory != null)
+        {
+            playerInv.inventoryItems = new ItemStats[loadedData._savInventory.Length];
+            for (int i = 0; i < loadedData._savInventory.Length; i++)
+            {
+                ItemSaveData saved = loadedData._savInventory[i];
+                if (saved == null || string.IsNullOrEmpty(saved.itemID)) { continue; }
+                ItemStats template = itemDatabase.GetByID(saved.itemID);
+                if (template == null) { Debug.LogWarning("No item found for ID: " + saved.itemID); continue; }
+                playerInv.inventoryItems[i] = new ItemStats
+                {
+                    itemID = template.itemID,
+                    itemName = template.itemName,
+                    itemDescription = template.itemDescription,
+                    icon = template.icon,
+                    weight = template.weight,
+                    quantity = saved.quantity,
+                    stackSize = template.stackSize,
+                    itemMesh = template.itemMesh,
+                    pickupSound = template.pickupSound,
+                    itemIncreases = template.itemIncreases
+                };
+            }
         }
-        if (loadedData._savgunInv != null) {
+        if (loadedData._savgunInv != null)
+        {
             player.gunInv = new List<gunStats>(loadedData._savgunInv);
         }
         Debug.Log("Game loaded successfully!");

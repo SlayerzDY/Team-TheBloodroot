@@ -5,6 +5,19 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 //==============================================================================================
+// Declare Item Save Data
+//==============================================================================================
+[Serializable]
+public class ItemSaveData
+{
+    //==========================================================================================
+    // Define Variables
+    //==========================================================================================
+    public string itemID;
+    public int quantity;
+    //==========================================================================================
+}
+//==============================================================================================
 // Declare Game Data
 //==============================================================================================
 [Serializable]
@@ -15,7 +28,7 @@ public class GameData
     //==========================================================================================
     public int _savHP;
     public float _savstam;
-    public ItemStats[] _savInventory;
+    public ItemSaveData[] _savInventory;
     public List<gunStats> _savgunInv;
     public int _savgunInvPos;
     public bool _savhasFlashlight;
@@ -26,20 +39,23 @@ public class GameData
     //==========================================================================================
     // Function, Default Constructor
     //------------------------------------------------------------------------------------------
-    public GameData() {
+    public GameData()
+    {
         _savHP = 100;
         _savstam = 100f;
         _savplayerPosition = new float[] { 0f, 0f, 0f };
         _savgunInv = new List<gunStats>();
         _savhasFlashlight = false;
-        _savInventory = new ItemStats[] { };
+        _savInventory = new ItemSaveData[30];
         _savinventoryWeight = 0;
     }
     //==========================================================================================
     // Function, Save Game Overloaded Constructor
     //------------------------------------------------------------------------------------------
-    public GameData(playerController player, Inventory playerInv) : this() {
-        if (player == null || playerInv == null) {
+    public GameData(playerController player, Inventory playerInv) : this()
+    {
+        if (player == null || playerInv == null)
+        {
             Debug.Log("Please Assign Player Controller and Inventory!");
             return;
         }
@@ -50,10 +66,21 @@ public class GameData
         };
         _savHP = player.HP;
         _savstam = player.stam;
-        if (playerInv.inventoryItems != null) {
-            _savInventory = (ItemStats[])playerInv.inventoryItems.Clone();
+        if (playerInv.inventoryItems != null)
+        {
+            _savInventory = new ItemSaveData[playerInv.inventoryItems.Length];
+            for (int i = 0; i < playerInv.inventoryItems.Length; i++)
+            {
+                ItemStats item = playerInv.inventoryItems[i];
+                _savInventory[i] = item == null ? null : new ItemSaveData
+                {
+                    itemID = item.itemID,
+                    quantity = item.quantity
+                };
+            }
         }
-        if (player.gunInv != null) {
+        if (player.gunInv != null)
+        {
             _savgunInv = new List<gunStats>(player.gunInv);
         }
         _savgunInvPos = player.gunInvPos;
