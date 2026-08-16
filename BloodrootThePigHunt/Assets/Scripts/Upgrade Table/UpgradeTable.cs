@@ -11,9 +11,9 @@ public class UpgradeTable : MonoBehaviour, IInteract
 
     void Start()
     {
-        
-        upgradeWindow = FindAnyObjectByType<UpgradeUI>();
-        if(upgradeWindow == null) { Debug.LogWarning("Table cannont find the ui"); }
+
+        upgradeWindow = FindAnyObjectByType<UpgradeUI>(FindObjectsInactive.Include);
+        if (upgradeWindow == null) { Debug.LogWarning("Table cannont find the ui"); }
 
     }
 

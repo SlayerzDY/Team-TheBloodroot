@@ -7,8 +7,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 //==============================================================================================
 // Declare Game Manager
@@ -20,6 +22,7 @@ public class gameManager : MonoBehaviour
     //==========================================================================================
     // Game Manager Instance, Creates Singleton
     public static gameManager instance;
+
     [Header("Menu's")]
     // Serialize Fields
     [SerializeField] GameObject menuUtility;
@@ -34,10 +37,12 @@ public class gameManager : MonoBehaviour
     [SerializeField] GameObject menuExtraction;
     [SerializeField] GameObject menuUpgrade;
     //[SerializeField] TMP_Text gameGoalCountText;
+
     [Header("Text")]
     [SerializeField] TMP_Text timeText;
     [SerializeField] TMP_Text enemyCountText;
     [SerializeField] TMP_Text congratulations;
+
     [Header("Other Stuf That Needs Sorted")]
     [SerializeField] public ItemDatabase itemDatabase;
     public GameObject menuInteractable;
@@ -60,6 +65,7 @@ public class gameManager : MonoBehaviour
     private float timeScaleOrig;
     //private int gameGoalCount;
     //private bool waveManagerControlsWin;
+
     [Header("Tree Root Variables")]
     public TreeSpawner RootSpanw;
     public TreeRootInteraction RootInteraction;
@@ -68,8 +74,19 @@ public class gameManager : MonoBehaviour
     public bool StartBaseDefenseOnStart = true;
     [Range(1f,30f)]public float preperationTime = 10.0f;
     public int DefensesBeat = 0;
+
+    [Header("Lose Screen Fade Settings")]
+    public Image fadeImagee;
+    public float fadeSped = 25f;
+    //public string hubSceneName = "Farm_PrologueHub";
+    private bool ProceedToHub = false;
+    private bool amDying = false;
+    public GameObject losePromptText;
+    public buttonFunctions buttonfunc;
+
     [Header("Dependencies")]
     public Transform playerTransform;
+
     [Header("Live Tracked Variables")]
     public int currentScore;
     public float currentHealth;
@@ -105,6 +122,8 @@ public class gameManager : MonoBehaviour
         //start game with the dense with x amount of enemies
         RootInteraction = FindAnyObjectByType<TreeRootInteraction>();
         RootSpanw = FindAnyObjectByType<TreeSpawner>();
+
+        if (fadeImagee != null) { fadeImagee.gameObject.SetActive(false);}
 
         if (playerController != null)
         {
@@ -250,16 +269,74 @@ public class gameManager : MonoBehaviour
     //==========================================================================================
     public void youLose()
     {
+        if (amDying == true) { return; }
+        amDying = true;
+
         CampaignEventUtility.Invoke(PlayerLost, this);
         //ScoreboardManager.GetOrCreate().ShowFinalScore(false);
         statePause();
         menuActive = menuLose;
+
+        //StartCoroutine(LoseFadeRoutine());
+        
 
         if (menuActive != null)
         {
             menuActive.SetActive(true);
         }
     }
+    //==========================================================================================
+    // Function, Lose Fade
+    //==========================================================================================
+    //private IEnumerator LoseFadeRoutine()
+    //{
+    //    if (menuLose != null) menuLose.SetActive(false);
+    //    if (fadeImagee != null)
+    //    {
+    //        fadeImagee.color = new Color32(0, 0, 0, 0);
+    //        fadeImagee.gameObject.SetActive(true);
+    //    }
+    //    while (fadeImagee.color.a < 255)
+    //    {
+    //        Color32 c = fadeImagee.color;
+    //        int nextAlpha = c.a + 17;
+    //        if (nextAlpha > 255) nextAlpha = 255;
+    //        fadeImagee.color = new Color32(0, 0, 0, (byte)nextAlpha);
+    //        yield return new WaitForSecondsRealtime(0.01f);
+    //    }
+    //    fadeImagee.color = new Color32(0, 0, 0, 255);
+    //    if (losePromptText != null){ losePromptText.SetActive(true); }
+    //    bool inputReceived = false;
+    //    while (!inputReceived)
+    //    {
+    //        if (Input.anyKeyDown || Input.GetMouseButtonDown(0)) {inputReceived = true;}
+    //        yield return null;
+    //    }
+    //    amDying = false; 
+    //    if (losePromptText != null) losePromptText.SetActive(false);
+    //    if (buttonfunc != null) { buttonfunc.respawn();}
+    //    else {Debug.LogError("Don't forget to drag your button script into the GameManager Inspector slot!");}
+    //    StartCoroutine(RespawnFadeOutRoutine());
+
+    //}
+
+    ////==========================================================================================
+    //// Function, Respawn Fade for testing since no hub
+    ////==========================================================================================
+
+    //private IEnumerator RespawnFadeOutRoutine()
+    //{
+    //    fadeImagee.color = new Color32(0, 0, 0, 255);
+    //    while (fadeImagee.color.a > 0)
+    //    {
+    //        Color32 c = fadeImagee.color;
+    //        int nextAlpha = c.a - 5;
+    //        if (nextAlpha < 0) nextAlpha = 0;
+    //        fadeImagee.color = new Color32(0, 0, 0, (byte)nextAlpha);
+    //        yield return new WaitForSecondsRealtime(0.01f);
+    //    }
+    //    fadeImagee.gameObject.SetActive(false);
+    //}
 
     /// <summary>
     /// Called by the authored respawn button after the existing player
