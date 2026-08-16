@@ -10,10 +10,15 @@ public class ItemHeroStats : ScriptableObject {
     //==========================================================================================
     // Define Variables
     //==========================================================================================
-    [Range(1, 10)] public int attackIncrease;
-    [Range(1, 10)] public int damageReduction;
-    [Range(1, 10)] public int healthIncrease;
-    [Range(1, 10)] public int staminaIncrease;
+    [Range(0, 10)] public int damageReduction = 1;
+    [Range(0, 10)] public int healthIncrease = 1;
+    [Range(0, 10)] public int staminaIncrease = 1;
+    [Range(0, 10)] public int pistolDamageBonus = 1;
+    [Range(0, 10)] public int rifleDamageBonus = 1; 
+    [Range(0, 10)] public int shotgunDamageBonus = 1; 
+
+    public float weightModifier;
+    public int ammoMaxIncrease;
     //==========================================================================================
 }
 //==============================================================================================
