@@ -59,7 +59,8 @@ public class UpgradeTable : MonoBehaviour, IInteract
         else
         {
             if (upgradeWindow != null) upgradeWindow.ShowNotification("Failed: Not enough materials!", false);
-            Debug.LogWarning("Insufficient crafting materials!");
+            gameManager.instance.ToastMenu(true, "Insufficient crafting materials!");
+            //Debug.LogWarning("Insufficient crafting materials!");
         }
 
 
@@ -79,17 +80,20 @@ public class UpgradeTable : MonoBehaviour, IInteract
                 if (gunType.Contains("pistol"))
                 {
                     ctrler.pistolDamageMultiplier += upgradeAmount;
-                    Debug.Log($"Pistol upgraded to {ctrler.pistolDamageMultiplier}x");
+                    gameManager.instance.ToastMenu(true, $"Pistol upgraded to x{ctrler.pistolDamageMultiplier}");
+                    //Debug.Log($"Pistol upgraded to {ctrler.pistolDamageMultiplier}x");
                 }
                 else if (gunType.Contains("rifle"))
                 {
                     ctrler.rifleDamageMultiplier += upgradeAmount;
-                    Debug.Log($"Rifle upgraded to {ctrler.rifleDamageMultiplier}x");
+                    gameManager.instance.ToastMenu(true, $"Rifle upgraded to {ctrler.rifleDamageMultiplier}x");
+                    //Debug.Log($"Rifle upgraded to {ctrler.rifleDamageMultiplier}x");
                 }
                 else if (gunType.Contains("shotgun"))
                 {
                     ctrler.shotgunDamageMultiplier += upgradeAmount;
-                    Debug.Log($"Shotgun upgraded to {ctrler.shotgunDamageMultiplier}x");
+                    gameManager.instance.ToastMenu(true, $"Shotgun upgraded to {ctrler.shotgunDamageMultiplier}x");
+                    //Debug.Log($"Shotgun upgraded to {ctrler.shotgunDamageMultiplier}x");
                 }
             }
             return;

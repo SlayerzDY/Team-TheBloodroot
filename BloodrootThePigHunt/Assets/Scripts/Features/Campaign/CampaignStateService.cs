@@ -125,6 +125,7 @@ namespace Bloodroot.Campaign
         public event Action<string> FarmEmergenceStarted;
         public event Action<string> FarmEmergenceCompleted;
         public event Action HollowEntryAvailable;
+        public event Action HollowTowerActivated;
         public event Action HollowVeilCrossed;
         public event Action<int> HollowWitchDefeated;
         public event Action HeartrootExposed;
@@ -834,6 +835,47 @@ namespace Bloodroot.Campaign
         }
 
         /// <summary>
+        /// Commits the campaign victory immediately after the third witch.
+        /// The legacy carried/burned terminal flags are retained only so old
+        /// saves and inventory normalization stay compatible; no recovery or
+        /// burn gameplay event is emitted by this path.
+        /// </summary>
+        public bool TryCompleteCampaignFromFinalWitch()
+        {
+            if (state.campaignCompleted)
+            {
+                return state.hollowVeilCrossed &&
+                       state.defeatedWitchCount == 3 &&
+                       state.heartrootExposed;
+            }
+
+            if (!state.hollowVeilCrossed ||
+                state.defeatedWitchCount != 3 ||
+                !state.heartrootExposed)
+            {
+                return false;
+            }
+
+            CampaignSaveData previousState = state.Clone();
+            state.hollowCompleted = true;
+            state.heartrootCarried = true;
+            state.heartrootBurned = true;
+            state.campaignCompleted = true;
+            if (!SaveNow())
+            {
+                state = previousState;
+                return false;
+            }
+
+            // Do not publish ProgressChanged here. The Hollow mission root
+            // remains visible behind the Win menu so the final witch's
+            // Heartroot drop can be seen. Reload normalization still sees the
+            // durable terminal facts.
+            CampaignEventUtility.Invoke(CampaignCompleted, this);
+            return true;
+        }
+
+        /// <summary>
         /// Atomically makes the exposed Heartroot current cargo and stores the
         /// exact seven-entry inventory snapshot in the same campaign save.
         /// Safety's paired save/checkpoint is coordinated by the owned finale
@@ -1255,6 +1297,7 @@ namespace Bloodroot.Campaign
             }
 
             state.SetAreaCompleted(area);
+            state.ApplyTowerCompletionCredits(area);
             CampaignAreaId? nextArea = GetNextArea(area);
             bool unlockedNextArea =
                 nextArea.HasValue && state.SetAreaUnlocked(nextArea.Value);
@@ -1275,6 +1318,48 @@ namespace Bloodroot.Campaign
                     this);
             }
 
+            CampaignEventUtility.Invoke(
+                ProgressChanged,
+                state.Snapshot,
+                this);
+            return true;
+        }
+
+        /// <summary>
+        /// Durably activates the final progression cylinder. The Nell stone
+        /// facts are hidden compatibility state for Safety's established
+        /// thorn-veil contract; no retired offering or emergence events are
+        /// emitted by this simplified campaign action.
+        /// </summary>
+        public bool TryActivateHollowTower()
+        {
+            bool alreadyActivated =
+                state.IsNameStoneOffered(CampaignNameStoneIds.Nell) &&
+                state.IsFarmEmergenceCompleted(CampaignNameStoneIds.Nell);
+            if (alreadyActivated)
+                return true;
+
+            if (!state.harrowCompleted || !state.hollowUnlocked ||
+                state.hollowCompleted || state.heartrootCarried ||
+                state.heartrootBurned || state.campaignCompleted ||
+                !state.IsNameStoneOffered(CampaignNameStoneIds.Esther) ||
+                !state.IsNameStoneOffered(CampaignNameStoneIds.Ruth) ||
+                !state.IsNameStoneOffered(CampaignNameStoneIds.Naomi))
+            {
+                return false;
+            }
+
+            CampaignSaveData previousState = state.Clone();
+            if (!state.ApplyHollowTowerCredit())
+                return false;
+
+            if (!SaveNow())
+            {
+                state = previousState;
+                return false;
+            }
+
+            CampaignEventUtility.Invoke(HollowTowerActivated, this);
             CampaignEventUtility.Invoke(
                 ProgressChanged,
                 state.Snapshot,
@@ -1437,6 +1522,7 @@ namespace Bloodroot.Campaign
         {
             string id = offeringId?.Trim() ?? string.Empty;
             if (!CampaignRootOfferingIds.IsCanonical(id) ||
+                CampaignNameStoneIds.IsCanonical(id) ||
                 !string.IsNullOrEmpty(state.pendingRootOfferingId) ||
                 state.HasUnresolvedFarmEmergence() ||
                 state.IsRootOfferingCommitted(id))

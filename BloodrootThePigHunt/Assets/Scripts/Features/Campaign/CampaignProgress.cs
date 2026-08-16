@@ -582,7 +582,7 @@ namespace Bloodroot.Campaign
     [Serializable]
     internal sealed class CampaignSaveData
     {
-        public const int CurrentVersion = 6;
+        public const int CurrentVersion = 7;
 
         public int saveVersion = CurrentVersion;
         public bool prologueCompleted;
@@ -825,10 +825,60 @@ namespace Bloodroot.Campaign
             }
 
             SeedLegacyQuestProgress(loadedVersion);
+            NormalizeTowerCampaignProgress(loadedVersion);
             NormalizeQuestProgress();
             MigrateVersionFiveRootProgress(loadedVersion);
             NormalizeRootOfferingProgress();
             NormalizeHeartrootFinaleProgress(loadedVersion);
+        }
+
+        /// <summary>
+        /// The simplified tower campaign replaces the old Name Stone chores.
+        /// Completed regions therefore imply their hidden compatibility stone
+        /// and a resolved Farm emergence. Existing offered stones are also
+        /// treated as resolved so Continue never creates surprise hub combat.
+        /// The prologue cursed-object transaction is intentionally untouched.
+        /// </summary>
+        private void NormalizeTowerCampaignProgress(int loadedVersion)
+        {
+            if (blackPinesCompleted)
+            {
+                ApplyTowerStoneCredit(CampaignNameStoneIds.Esther);
+            }
+
+            if (stillwaterCompleted)
+            {
+                ApplyTowerStoneCredit(CampaignNameStoneIds.Ruth);
+            }
+
+            if (harrowCompleted)
+            {
+                ApplyTowerStoneCredit(CampaignNameStoneIds.Naomi);
+            }
+
+            foreach (string nameStoneId in CampaignNameStoneIds.All)
+            {
+                if (IsNameStoneOffered(nameStoneId) &&
+                    !IsFarmEmergenceCompleted(nameStoneId))
+                {
+                    TryAddCompletedFarmEmergence(nameStoneId);
+                }
+            }
+
+            if (loadedVersion < 7 &&
+                CampaignNameStoneIds.IsCanonical(pendingRootOfferingId))
+            {
+                pendingRootOfferingId = string.Empty;
+            }
+
+            if (loadedVersion < 7 && CampaignNameStoneIds.IsCanonical(
+                    activeFarmEmergenceOfferingId))
+            {
+                activeFarmEmergenceOfferingId = string.Empty;
+            }
+
+            if (loadedVersion < 7)
+                pendingNameStoneOfferId = string.Empty;
         }
 
         private void NormalizeHeartrootFinaleProgress(int loadedVersion)
@@ -1110,6 +1160,79 @@ namespace Bloodroot.Campaign
             offeredNameStoneIds = CampaignNameStoneIds.Normalize(
                 offeredNameStoneIds);
             return true;
+        }
+
+        /// <summary>
+        /// Applies the hidden legacy bookkeeping represented by a completed
+        /// regional progression cylinder. Hollow is intentionally excluded:
+        /// its final Nell credit belongs to the Hollow cylinder itself.
+        /// </summary>
+        public bool ApplyTowerCompletionCredits(CampaignAreaId area)
+        {
+            return area switch
+            {
+                CampaignAreaId.BlackPines =>
+                    ApplyTowerStoneCredit(CampaignNameStoneIds.Esther),
+                CampaignAreaId.StillwaterFeedMill =>
+                    ApplyTowerStoneCredit(CampaignNameStoneIds.Ruth),
+                CampaignAreaId.HarrowEstate =>
+                    ApplyTowerStoneCredit(CampaignNameStoneIds.Naomi),
+                _ => false
+            };
+        }
+
+        /// <summary>
+        /// Durably opening the Hollow cylinder supplies the last hidden
+        /// compatibility stone. This keeps the existing thorn-veil and witch
+        /// finale authority intact without exposing the retired stone chores.
+        /// </summary>
+        public bool ApplyHollowTowerCredit()
+        {
+            return ApplyTowerStoneCredit(CampaignNameStoneIds.Nell);
+        }
+
+        private bool ApplyTowerStoneCredit(string nameStoneId)
+        {
+            string id = nameStoneId?.Trim() ?? string.Empty;
+            if (!CampaignNameStoneIds.IsCanonical(id))
+                return false;
+
+            bool changed = false;
+            if (!IsNameStoneExtracted(id))
+            {
+                changed |= TryAddExtractedNameStone(id);
+            }
+
+            if (!IsNameStoneOffered(id))
+            {
+                changed |= TryAddOfferedNameStone(id);
+            }
+
+            if (!IsFarmEmergenceCompleted(id))
+            {
+                changed |= TryAddCompletedFarmEmergence(id);
+            }
+
+            if (string.Equals(
+                    pendingRootOfferingId,
+                    id,
+                    StringComparison.Ordinal))
+            {
+                pendingRootOfferingId = string.Empty;
+                changed = true;
+            }
+
+            if (string.Equals(
+                    activeFarmEmergenceOfferingId,
+                    id,
+                    StringComparison.Ordinal))
+            {
+                activeFarmEmergenceOfferingId = string.Empty;
+                changed = true;
+            }
+
+            pendingNameStoneOfferId = string.Empty;
+            return changed;
         }
 
         private void NormalizeQuestProgress()

@@ -73,7 +73,7 @@ public class pickupGun : MonoBehaviour, IInteract {
 
         if (dissolve != null)
         {
-            dissolve.StartCoroutine(dissolve.dissolve());
+            this.GetComponent<Dissolver>().StartCoroutine(dissolve.dissolve());
         }
         else
         {
