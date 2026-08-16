@@ -360,6 +360,7 @@ public class gameManager : MonoBehaviour
         {
             playerController = null;
             playerSpawnPos = GameObject.FindWithTag("PlayerSpawnPos");
+            
             Debug.LogError("GameManager could not find an active Player object.");
             return;
         }
@@ -583,15 +584,15 @@ public class gameManager : MonoBehaviour
         player.gunInvPos = loadedData._savgunInvPos;
         playerInv.inventoryWeight = loadedData._savinventoryWeight;
         // Apply position
-        if (loadedData._savplayerPosition != null && loadedData._savplayerPosition.Length >= 3)
-        {
-            Vector3 loadedPos = new Vector3(
-                loadedData._savplayerPosition[0],
-                loadedData._savplayerPosition[1],
-                loadedData._savplayerPosition[2]
-            );
-            player.transform.position = loadedPos;
-        }
+        //if (loadedData._savplayerPosition != null && loadedData._savplayerPosition.Length >= 3)
+        //{
+        //    Vector3 loadedPos = new Vector3(
+        //        loadedData._savplayerPosition[0],
+        //        loadedData._savplayerPosition[1],
+        //        loadedData._savplayerPosition[2]
+        //    );
+        //    //player.transform.position = loadedPos;
+        //}
         // Apply inventory & guns
         if (loadedData._savInventory != null)
         {
