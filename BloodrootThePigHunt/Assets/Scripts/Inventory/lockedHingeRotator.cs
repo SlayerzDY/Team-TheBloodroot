@@ -55,8 +55,11 @@ public class lockedHingeRotator: MonoBehaviour, IInteract {
     // Function, Send Interact
     //==========================================================================================
     public void SendInteract(Collider target) {
+        if (key == null || key.item == null || string.IsNullOrEmpty(key.item.itemName)) { return; }
+        if (gameManager.instance == null || gameManager.instance.player == null) { return; }
         if (!playerHasItem()) { return; }
         if (activeRotationRoutine != null){
+            gameManager.instance.ToastMenu(true, $"You need a {key.item.itemName} to open");
             StopCoroutine(activeRotationRoutine);
         }
         isOpen = !isOpen;
@@ -70,6 +73,8 @@ public class lockedHingeRotator: MonoBehaviour, IInteract {
         ItemStats[] items = playerInv.inventoryItems;
         if (playerInv == null || items.Length == 0) { return false; }
         for (int i = 0; i < items.Length; i++) {
+            if (items[i] == null) { continue; }
+            if (items[i].itemName == null) { continue; }
             if (items[i].itemName == key.item.itemName) { return true; }
         }
         return false;

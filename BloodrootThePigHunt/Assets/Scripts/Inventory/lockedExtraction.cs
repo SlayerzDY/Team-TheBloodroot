@@ -15,25 +15,16 @@ public class lockedExtraction: MonoBehaviour, IInteract {
     //==========================================================================================
     // Declare Public Functions
     //==========================================================================================
-    // Function, Open Menu
-    //------------------------------------------------------------------------------------------
-    private void OpenMenu() {
-        gameManager.instance.ExtractionMenu(true);
-    }
-    //==========================================================================================
     // Function, Send Interact
     //==========================================================================================
     public void SendInteract(Collider target) {
-        if (key == null || key.item == null || string.IsNullOrEmpty(key.item.itemName))
-        {
-            return;
-        }
-        if (gameManager.instance == null || gameManager.instance.player == null)
-        {
-            return;
-        }
-        if (!playerHasItem()) { return; }
-        OpenMenu();
+        if (key == null || key.item == null || string.IsNullOrEmpty(key.item.itemName)) { return; }
+        if (gameManager.instance == null || gameManager.instance.player == null) { return; }
+        if (!playerHasItem()) {
+            gameManager.instance.ToastMenu(true, $"You need a {key.item.itemName} to open");
+            return; 
+        } 
+        gameManager.instance.ExtractionMenu(true);
     }
     //==========================================================================================
     // Function, Send Interact
