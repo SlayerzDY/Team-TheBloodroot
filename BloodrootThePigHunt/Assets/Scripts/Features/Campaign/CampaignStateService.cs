@@ -835,6 +835,47 @@ namespace Bloodroot.Campaign
         }
 
         /// <summary>
+        /// Commits the campaign victory immediately after the third witch.
+        /// The legacy carried/burned terminal flags are retained only so old
+        /// saves and inventory normalization stay compatible; no recovery or
+        /// burn gameplay event is emitted by this path.
+        /// </summary>
+        public bool TryCompleteCampaignFromFinalWitch()
+        {
+            if (state.campaignCompleted)
+            {
+                return state.hollowVeilCrossed &&
+                       state.defeatedWitchCount == 3 &&
+                       state.heartrootExposed;
+            }
+
+            if (!state.hollowVeilCrossed ||
+                state.defeatedWitchCount != 3 ||
+                !state.heartrootExposed)
+            {
+                return false;
+            }
+
+            CampaignSaveData previousState = state.Clone();
+            state.hollowCompleted = true;
+            state.heartrootCarried = true;
+            state.heartrootBurned = true;
+            state.campaignCompleted = true;
+            if (!SaveNow())
+            {
+                state = previousState;
+                return false;
+            }
+
+            // Do not publish ProgressChanged here. The Hollow mission root
+            // remains visible behind the Win menu so the final witch's
+            // Heartroot drop can be seen. Reload normalization still sees the
+            // durable terminal facts.
+            CampaignEventUtility.Invoke(CampaignCompleted, this);
+            return true;
+        }
+
+        /// <summary>
         /// Atomically makes the exposed Heartroot current cargo and stores the
         /// exact seven-entry inventory snapshot in the same campaign save.
         /// Safety's paired save/checkpoint is coordinated by the owned finale

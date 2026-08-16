@@ -13,7 +13,7 @@ namespace Bloodroot.Campaign
     [RequireComponent(typeof(Collider))]
     public sealed class CampaignProgressionTower : MonoBehaviour, IInteract
     {
-        private const int DurableResumeFrames = 120;
+        private const int DurableReconciliationFrames = 120;
 
         [Header("Campaign")]
         [SerializeField] private CampaignStateService stateService;
@@ -277,7 +277,7 @@ namespace Bloodroot.Campaign
         {
             yield return null;
 
-            for (int frame = 0; frame < DurableResumeFrames; frame++)
+            for (int frame = 0; frame < DurableReconciliationFrames; frame++)
             {
                 BindStateService();
                 CampaignStateService state = ResolveStateService();
@@ -304,27 +304,10 @@ namespace Bloodroot.Campaign
                 }
 
                 if (objective.IsComplete)
-                    CommitActivatedPresentation();
-
-                if (area == CampaignAreaId.BloodrootHollow &&
-                    objective.IsComplete && state.Current.HollowVeilCrossed &&
-                    hollowWitchSpawner != null &&
-                    !hollowWitchSpawner.HasStarted &&
-                    !state.Current.HeartrootBurned &&
-                    !state.Current.CampaignCompleted)
                 {
-                    hollowWitchSpawner.TryResumeDurableEncounter();
-                }
-
-                bool resumeSettled = area != CampaignAreaId.BloodrootHollow ||
-                    !state.Current.HollowVeilCrossed ||
-                    hollowWitchSpawner == null ||
-                    hollowWitchSpawner.HasStarted ||
-                    state.Current.HeartrootCarried ||
-                    state.Current.HeartrootBurned ||
-                    state.Current.CampaignCompleted;
-                if (objective.IsComplete && resumeSettled)
+                    CommitActivatedPresentation();
                     break;
+                }
 
                 yield return null;
             }

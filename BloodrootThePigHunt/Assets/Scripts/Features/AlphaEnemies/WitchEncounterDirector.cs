@@ -96,7 +96,7 @@ namespace Bloodroot.Features.AlphaEnemies
 
         private void Awake()
         {
-            SubscribeAltar();
+            DisableAltarMechanic();
             SetExtractionActive(false);
             if (deactivateWitchesUntilStarted)
             {
@@ -159,14 +159,15 @@ namespace Bloodroot.Features.AlphaEnemies
             }
 
             ResolvePlayerTargetIfNeeded();
-            SubscribeAltar();
-            if (witchesTargetAltar && defenseAltar == null)
+            DisableAltarMechanic();
+            if (playerTarget == null)
             {
-                Debug.LogError($"{name}: altar-defense mode requires a WitchDefenseAltar reference.", this);
+                Debug.LogError(
+                    $"{name}: the authoritative Player is required before the witch encounter can begin.",
+                    this);
                 return false;
             }
 
-            defenseAltar?.ResetAltar();
             SetConfiguredWitchesActive(false);
             SetAllWaveSupportObjectsActive(false);
             SetExtractionActive(false);
@@ -178,6 +179,7 @@ namespace Bloodroot.Features.AlphaEnemies
 
             AlphaEnemyEventUtility.Invoke(onEncounterStarted, this, this, nameof(onEncounterStarted));
             AlphaEnemyEventUtility.Invoke(EncounterStarted, this, this, nameof(EncounterStarted));
+            SetState(WitchEncounterState.Defending);
             if (durableDefeatedCount == 3)
             {
                 if (!progress.HeartrootExposed)
@@ -188,14 +190,10 @@ namespace Bloodroot.Features.AlphaEnemies
                     return false;
                 }
 
-                SetState(WitchEncounterState.AwaitingExtraction);
-                SetExtractionActive(true);
-                AlphaEnemyEventUtility.Invoke(onDefenseSucceeded, this, this, nameof(onDefenseSucceeded));
-                AlphaEnemyEventUtility.Invoke(DefenseSucceeded, this, this, nameof(DefenseSucceeded));
-                return true;
+                CompleteDefense();
+                return state == WitchEncounterState.Completed;
             }
 
-            SetState(WitchEncounterState.Defending);
             ScheduleNextWave();
             return true;
         }
@@ -281,7 +279,6 @@ namespace Bloodroot.Features.AlphaEnemies
             SetState(WitchEncounterState.Failed);
             AlphaEnemyEventUtility.Invoke(onDefenseFailed, this, this, nameof(onDefenseFailed));
             AlphaEnemyEventUtility.Invoke(DefenseFailed, this, this, nameof(DefenseFailed));
-            PresentDefenseFailure();
         }
 
         /// <summary>
@@ -397,6 +394,21 @@ namespace Bloodroot.Features.AlphaEnemies
 
             activeWitches.Remove(witch);
 
+            if (currentWaveIndex == 2)
+            {
+                PositionHeartrootDrop(witch.transform.position);
+            }
+
+            bool finalWitchDefeated = currentWaveIndex == 2 &&
+                                      activeWitches.Count == 0;
+            if (finalWitchDefeated)
+            {
+                SetWaveSupportObjectsActive(
+                    waves[currentWaveIndex],
+                    false);
+                CompleteDefense();
+            }
+
             AlphaEnemyEventUtility.Invoke(onWitchDefeated, witch, this, nameof(onWitchDefeated));
             AlphaEnemyEventUtility.Invoke(WitchDefeated, witch, this, nameof(WitchDefeated));
             if (state == WitchEncounterState.Defending && activeWitches.Count == 0)
@@ -426,63 +438,95 @@ namespace Bloodroot.Features.AlphaEnemies
                 : default;
             if (campaignState == null ||
                 progress.DefeatedWitchCount != 3 ||
-                !progress.HeartrootExposed)
+                !progress.HeartrootExposed ||
+                !campaignState.TryCompleteCampaignFromFinalWitch())
             {
                 Debug.LogError(
-                    $"{name}: Heartroot exposure was blocked because all three witch deaths are not durable.",
+                    $"{name}: final-witch victory was blocked because its durable campaign save failed.",
                     this);
                 FailEncounter();
                 return;
             }
 
-            SetState(WitchEncounterState.AwaitingExtraction);
+            SetState(WitchEncounterState.Completed);
             SetAllWaveSupportObjectsActive(false);
             SetExtractionActive(true);
+            DisableHeartrootInteraction();
             AlphaEnemyEventUtility.Invoke(onDefenseSucceeded, this, this, nameof(onDefenseSucceeded));
             AlphaEnemyEventUtility.Invoke(DefenseSucceeded, this, this, nameof(DefenseSucceeded));
+
+            global::gameManager manager = global::gameManager.instance;
+            if (manager == null)
+            {
+                Debug.LogError(
+                    $"{name}: final-witch victory was saved, but the GameManager is unavailable to show the Win menu.",
+                    this);
+                return;
+            }
+
+            manager.youWin();
         }
 
         private Transform ResolveEncounterTarget()
         {
             ResolvePlayerTargetIfNeeded();
-            if (witchesTargetAltar && defenseAltar != null)
-            {
-                // The altar is the encounter's spatial anchor. Witches still
-                // alternate viable attacks against the player through their
-                // secondary target, but cannot be kited away from the defense
-                // objective.
-                return defenseAltar.transform;
-            }
-
-            if (playerTarget != null)
-            {
-                return playerTarget;
-            }
-
-            if (defenseAltar != null)
-            {
-                return defenseAltar.transform;
-            }
-
-            return null;
+            return playerTarget;
         }
 
         private Transform ResolveSecondaryEncounterTarget(
             Transform primaryTarget)
         {
-            ResolvePlayerTargetIfNeeded();
-            if (defenseAltar != null &&
-                defenseAltar.transform == primaryTarget)
-            {
-                return playerTarget;
-            }
-
-            if (witchesTargetAltar && defenseAltar != null)
-            {
-                return defenseAltar.transform;
-            }
-
             return null;
+        }
+
+        private void DisableAltarMechanic()
+        {
+            witchesTargetAltar = false;
+            UnsubscribeAltar();
+            if (defenseAltar != null)
+            {
+                defenseAltar.gameObject.SetActive(false);
+            }
+        }
+
+        private void DisableHeartrootInteraction()
+        {
+            if (heartrootExtractionRoot == null)
+            {
+                return;
+            }
+
+            WitchHeartrootExtractionInteractable interactable =
+                heartrootExtractionRoot.GetComponentInChildren<
+                    WitchHeartrootExtractionInteractable>(true);
+            if (interactable != null)
+            {
+                interactable.enabled = false;
+            }
+
+            Collider[] colliders =
+                heartrootExtractionRoot.GetComponentsInChildren<Collider>(
+                    true);
+            foreach (Collider collider in colliders)
+            {
+                if (collider != null)
+                {
+                    collider.enabled = false;
+                }
+            }
+        }
+
+        private void PositionHeartrootDrop(Vector3 witchDeathPosition)
+        {
+            if (heartrootExtractionRoot == null)
+            {
+                return;
+            }
+
+            Vector3 dropPosition = heartrootExtractionRoot.transform.position;
+            dropPosition.x = witchDeathPosition.x;
+            dropPosition.z = witchDeathPosition.z;
+            heartrootExtractionRoot.transform.position = dropPosition;
         }
 
         private void ResolvePlayerTargetIfNeeded()
@@ -620,12 +664,6 @@ namespace Bloodroot.Features.AlphaEnemies
                 error = string.IsNullOrWhiteSpace(error)
                     ? "The Heartroot finale bridge is missing or invalid."
                     : error;
-                return false;
-            }
-
-            if (witchesTargetAltar && defenseAltar == null)
-            {
-                error = "Altar-defense mode requires an authored altar.";
                 return false;
             }
 

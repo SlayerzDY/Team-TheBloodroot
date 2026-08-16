@@ -71,16 +71,6 @@ namespace Bloodroot.Features.WorldMissions
             TryStartEncounter(other);
         }
 
-        private IEnumerator Start()
-        {
-            // Campaign/Safety automatic load and mission activation finish
-            // before reconstruction. A durable crossing proves the Player
-            // originally passed the threshold, so no second trigger contact
-            // is required when Continue/F9 restores inside the Hollow.
-            yield return null;
-            TryResumeDurableEncounter();
-        }
-
         public bool TryStartEncounter(Collider enteringCollider)
         {
             return TryStartOrResumeEncounter(

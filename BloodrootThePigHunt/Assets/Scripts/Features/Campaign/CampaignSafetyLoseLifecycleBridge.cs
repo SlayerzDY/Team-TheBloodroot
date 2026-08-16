@@ -6,10 +6,10 @@ namespace Bloodroot.Campaign
 {
     /// <summary>
     /// Completes the online-safety lose/respawn lifecycle without replacing
-    /// its authored Respawn button or respawn implementation. The protected
-    /// gameManager latches its private lose guard on the first death; this
-    /// scene-added bridge clears only that guard after the protected respawn
-    /// callback has raised PlayerRespawned.
+    /// its authored death travel, Respawn button, or respawn implementation.
+    /// Lethal player stats are normalized before Safety saves during its
+    /// PlayerLost callback, and the protected gameManager lose guard is reset
+    /// after its Respawn callback raises PlayerRespawned.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class CampaignSafetyLoseLifecycleBridge : MonoBehaviour
@@ -127,6 +127,7 @@ namespace Bloodroot.Campaign
 
             Unbind();
             boundManager = configuredManager;
+            boundManager.PlayerLost += HandlePlayerLost;
             boundManager.PlayerRespawned += HandlePlayerRespawned;
         }
 
@@ -137,8 +138,58 @@ namespace Bloodroot.Campaign
                 return;
             }
 
+            boundManager.PlayerLost -= HandlePlayerLost;
             boundManager.PlayerRespawned -= HandlePlayerRespawned;
             boundManager = null;
+        }
+
+        private void HandlePlayerLost()
+        {
+            if (boundManager == null ||
+                boundManager != configuredManager ||
+                boundManager.gameObject != gameObject)
+            {
+                Debug.LogError(
+                    "CampaignSafetyLoseLifecycleBridge received PlayerLost " +
+                    "from an unrecognized gameManager.",
+                    this);
+                return;
+            }
+
+            global::playerController controller =
+                boundManager.playerController;
+            if (controller == null && boundManager.player != null)
+            {
+                controller =
+                    boundManager.player.GetComponent<global::playerController>();
+            }
+
+            if (controller == null)
+            {
+                Debug.LogError(
+                    "CampaignSafetyLoseLifecycleBridge could not normalize " +
+                    "lethal player stats because the Safety playerController " +
+                    "is unavailable.",
+                    this);
+                return;
+            }
+
+            if (controller.HP > 0)
+            {
+                return;
+            }
+
+            // Safety saves immediately after PlayerLost while traveling to the
+            // Farm. Restore its existing upgraded maxima before that save so a
+            // lethal HP value cannot survive into the next gameplay scene.
+            controller.UpdateUpgradedStats("all");
+            if (controller.HP <= 0)
+            {
+                Debug.LogError(
+                    "CampaignSafetyLoseLifecycleBridge could not restore a " +
+                    "positive player health value before Safety saved.",
+                    this);
+            }
         }
 
         private void HandlePlayerRespawned()

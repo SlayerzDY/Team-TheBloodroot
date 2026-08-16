@@ -3205,6 +3205,13 @@ namespace Bloodroot.Campaign
         {
             controller.HP = loadedData._savHP;
             controller.stam = loadedData._savstam;
+            if (controller.HP <= 0)
+            {
+                // Repair legacy death saves after Start has captured the
+                // authored upgraded maxima. The next paired Safety refresh
+                // persists the corrected current health and stamina.
+                controller.UpdateUpgradedStats("all");
+            }
             controller.hasFlashlight = loadedData._savhasFlashlight;
             if (applyGuns)
             {
