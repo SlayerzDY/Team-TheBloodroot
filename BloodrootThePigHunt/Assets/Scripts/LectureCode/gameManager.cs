@@ -36,6 +36,7 @@ public class gameManager : MonoBehaviour
     [SerializeField] GameObject menuInventory;
     [SerializeField] GameObject menuExtraction;
     [SerializeField] GameObject menuUpgrade;
+    [SerializeField] GameObject menuToast;
     //[SerializeField] TMP_Text gameGoalCountText;
 
     [Header("Text")]
@@ -48,6 +49,7 @@ public class gameManager : MonoBehaviour
     public GameObject menuInteractable;
     // Public Variables
     public GameObject checkpointPopup;
+    public TextMeshProUGUI toastMessage;
     public TextMeshProUGUI weight;
     public TextMeshProUGUI AmmoCount;
     public TextMeshProUGUI FlashlightCount;
@@ -520,11 +522,31 @@ public class gameManager : MonoBehaviour
             }
             else
             {
-                menuActive = null;
                 menuExtraction.SetActive(isOn);
+                menuActive = null;
                 stateUnpause();
             }
         }
+    }
+    //==========================================================================================
+    // Function, Toast Menu
+    //==========================================================================================
+    public void ToastMenu(bool isOn, string message) { 
+        if (isOn) {
+            toastMessage.text = message;
+            menuToast.SetActive(isOn);
+            StartCoroutine(AutoHideToast());
+        } else {
+            menuToast.SetActive(isOn);
+        }
+    }
+    //==========================================================================================
+    // Function, Auto Hide Toast
+    //==========================================================================================
+    private IEnumerator AutoHideToast() {
+        yield return new WaitForSeconds(3f);
+        menuToast.SetActive(false);
+        ToastMenu(false, "Hidden");
     }
     //==========================================================================================
     // Function, Save
