@@ -125,6 +125,7 @@ namespace Bloodroot.Campaign
         public event Action<string> FarmEmergenceStarted;
         public event Action<string> FarmEmergenceCompleted;
         public event Action HollowEntryAvailable;
+        public event Action HollowTowerActivated;
         public event Action HollowVeilCrossed;
         public event Action<int> HollowWitchDefeated;
         public event Action HeartrootExposed;
@@ -1255,6 +1256,7 @@ namespace Bloodroot.Campaign
             }
 
             state.SetAreaCompleted(area);
+            state.ApplyTowerCompletionCredits(area);
             CampaignAreaId? nextArea = GetNextArea(area);
             bool unlockedNextArea =
                 nextArea.HasValue && state.SetAreaUnlocked(nextArea.Value);
@@ -1275,6 +1277,48 @@ namespace Bloodroot.Campaign
                     this);
             }
 
+            CampaignEventUtility.Invoke(
+                ProgressChanged,
+                state.Snapshot,
+                this);
+            return true;
+        }
+
+        /// <summary>
+        /// Durably activates the final progression cylinder. The Nell stone
+        /// facts are hidden compatibility state for Safety's established
+        /// thorn-veil contract; no retired offering or emergence events are
+        /// emitted by this simplified campaign action.
+        /// </summary>
+        public bool TryActivateHollowTower()
+        {
+            bool alreadyActivated =
+                state.IsNameStoneOffered(CampaignNameStoneIds.Nell) &&
+                state.IsFarmEmergenceCompleted(CampaignNameStoneIds.Nell);
+            if (alreadyActivated)
+                return true;
+
+            if (!state.harrowCompleted || !state.hollowUnlocked ||
+                state.hollowCompleted || state.heartrootCarried ||
+                state.heartrootBurned || state.campaignCompleted ||
+                !state.IsNameStoneOffered(CampaignNameStoneIds.Esther) ||
+                !state.IsNameStoneOffered(CampaignNameStoneIds.Ruth) ||
+                !state.IsNameStoneOffered(CampaignNameStoneIds.Naomi))
+            {
+                return false;
+            }
+
+            CampaignSaveData previousState = state.Clone();
+            if (!state.ApplyHollowTowerCredit())
+                return false;
+
+            if (!SaveNow())
+            {
+                state = previousState;
+                return false;
+            }
+
+            CampaignEventUtility.Invoke(HollowTowerActivated, this);
             CampaignEventUtility.Invoke(
                 ProgressChanged,
                 state.Snapshot,
@@ -1437,6 +1481,7 @@ namespace Bloodroot.Campaign
         {
             string id = offeringId?.Trim() ?? string.Empty;
             if (!CampaignRootOfferingIds.IsCanonical(id) ||
+                CampaignNameStoneIds.IsCanonical(id) ||
                 !string.IsNullOrEmpty(state.pendingRootOfferingId) ||
                 state.HasUnresolvedFarmEmergence() ||
                 state.IsRootOfferingCommitted(id))
