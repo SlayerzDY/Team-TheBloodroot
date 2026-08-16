@@ -134,7 +134,7 @@ public class enemyAI : MonoBehaviour, IDamage
         if (isDead)
             return;
 
-        //if (animator != null) { animator.SetFloat("Speed", agent.velocity.magnitude); }
+        if (animator != null) { animator.SetFloat("Speed", agent.velocity.magnitude); }
         animator.SetFloat("Speed", agent.velocity.magnitude / agent.speed, 0.1f, Time.deltaTime);
 
         if (playerInTrigger)
