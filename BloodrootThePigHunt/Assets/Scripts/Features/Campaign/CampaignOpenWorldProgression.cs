@@ -45,6 +45,9 @@ namespace Bloodroot.Campaign
         private bool hasValidBarrierSet;
         private bool hasValidMissionRootSet;
         private bool configurationErrorLogged;
+        private Transform guardedPlayer;
+        private CharacterController guardedCharacterController;
+        private float nextBoundaryCorrectionWarningTime;
 
         public bool HasValidBarrierSet => hasValidBarrierSet;
         public bool HasValidMissionRootSet => hasValidMissionRootSet;
@@ -69,6 +72,19 @@ namespace Bloodroot.Campaign
         private void OnDisable()
         {
             Unsubscribe();
+            guardedPlayer = null;
+            guardedCharacterController = null;
+        }
+
+        private void LateUpdate()
+        {
+            bool ready = EnsureReady();
+            CampaignProgressSnapshot progress = ready
+                ? subscribedState.Current
+                : default;
+
+            EnforceBarrierIntegrity(progress, !ready);
+            ConstrainPlayerToLockedAreas(progress, !ready);
         }
 
         public void CompleteArea(CampaignAreaId area)
@@ -126,7 +142,7 @@ namespace Bloodroot.Campaign
         {
             TrySubscribe();
 
-            if (!hasValidBarrierSet)
+            if (!hasValidBarrierSet || !hasValidMissionRootSet)
             {
                 RebuildBarrierMap();
             }
@@ -251,6 +267,160 @@ namespace Bloodroot.Campaign
                     barrier.SetUnlocked(false);
                 }
             }
+        }
+
+        private void EnforceBarrierIntegrity(
+            CampaignProgressSnapshot progress,
+            bool lockAll)
+        {
+            OpenWorldAreaBarrier[] authoredBarriers =
+                areaBarriers ?? Array.Empty<OpenWorldAreaBarrier>();
+
+            foreach (OpenWorldAreaBarrier barrier in authoredBarriers)
+            {
+                if (barrier == null)
+                {
+                    continue;
+                }
+
+                bool shouldBeUnlocked = !lockAll &&
+                    progress.IsAreaUnlocked(ToCampaignArea(barrier.Area));
+
+                if (!barrier.MatchesUnlockedState(shouldBeUnlocked))
+                {
+                    barrier.SetUnlocked(shouldBeUnlocked);
+                }
+            }
+        }
+
+        private void ConstrainPlayerToLockedAreas(
+            CampaignProgressSnapshot progress,
+            bool lockAll)
+        {
+            if (!TryResolveGuardedPlayer())
+            {
+                return;
+            }
+
+            Vector3 currentPosition = guardedPlayer.position;
+            Vector3 constrainedPosition = currentPosition;
+            OpenWorldAreaId constrainedArea = default;
+            bool wasConstrained = false;
+            float clearance = ResolvePlayerBoundaryClearance();
+
+            foreach (OpenWorldAreaId barrierId in RequiredBarrierIds)
+            {
+                if (!barrierById.TryGetValue(
+                        barrierId,
+                        out OpenWorldAreaBarrier barrier))
+                {
+                    continue;
+                }
+
+                bool shouldBeUnlocked = !lockAll &&
+                    progress.IsAreaUnlocked(ToCampaignArea(barrierId));
+
+                if (shouldBeUnlocked ||
+                    !barrier.TryConstrainToUnlockedSide(
+                        constrainedPosition,
+                        clearance,
+                        out Vector3 correctedPosition))
+                {
+                    continue;
+                }
+
+                constrainedPosition = correctedPosition;
+                constrainedArea = barrierId;
+                wasConstrained = true;
+            }
+
+            if (!wasConstrained ||
+                (constrainedPosition - currentPosition).sqrMagnitude <=
+                0.000001f)
+            {
+                return;
+            }
+
+            bool restoreController =
+                guardedCharacterController != null &&
+                guardedCharacterController.enabled;
+
+            if (restoreController)
+            {
+                guardedCharacterController.enabled = false;
+            }
+
+            guardedPlayer.position = constrainedPosition;
+            Physics.SyncTransforms();
+
+            if (restoreController && guardedCharacterController != null)
+            {
+                guardedCharacterController.enabled = true;
+            }
+
+            if (Time.unscaledTime >= nextBoundaryCorrectionWarningTime)
+            {
+                nextBoundaryCorrectionWarningTime = Time.unscaledTime + 2f;
+                Debug.LogWarning(
+                    $"Open-world boundary guard stopped travel into locked " +
+                    $"area {constrainedArea}. The authored Border collider " +
+                    $"was also restored to its fail-closed state.",
+                    this);
+            }
+        }
+
+        private bool TryResolveGuardedPlayer()
+        {
+            GameObject candidate = gameManager.instance != null
+                ? gameManager.instance.player
+                : null;
+
+            if (candidate == null)
+            {
+                try
+                {
+                    candidate = GameObject.FindGameObjectWithTag("Player");
+                }
+                catch (UnityException)
+                {
+                    return false;
+                }
+            }
+
+            if (candidate == null || !candidate.activeInHierarchy)
+            {
+                guardedPlayer = null;
+                guardedCharacterController = null;
+                return false;
+            }
+
+            if (guardedPlayer != candidate.transform)
+            {
+                guardedPlayer = candidate.transform;
+                guardedCharacterController =
+                    candidate.GetComponent<CharacterController>();
+            }
+
+            return true;
+        }
+
+        private float ResolvePlayerBoundaryClearance()
+        {
+            const float minimumClearance = 0.05f;
+
+            if (guardedCharacterController == null)
+            {
+                return 0.6f;
+            }
+
+            Vector3 scale = guardedCharacterController.transform.lossyScale;
+            float horizontalScale = Mathf.Max(
+                Mathf.Abs(scale.x),
+                Mathf.Abs(scale.z));
+
+            return guardedCharacterController.radius * horizontalScale +
+                   guardedCharacterController.skinWidth +
+                   minimumClearance;
         }
 
         private void HandleProgressChanged(

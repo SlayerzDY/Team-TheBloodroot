@@ -73,11 +73,40 @@ namespace Bloodroot.Campaign
                 return true;
             }
 
-            if (!progression.TryCompleteArea(area))
+            CampaignInventoryCarryover carryover = state != null
+                ? state.GetComponent<CampaignInventoryCarryover>()
+                : null;
+            string[] capturedItemIds = Array.Empty<string>();
+            int[] capturedQuantities = Array.Empty<int>();
+            if (state == null || carryover == null ||
+                !carryover.TryCaptureForAreaCompletion(
+                    out capturedItemIds,
+                    out capturedQuantities) ||
+                !state.TryStageAreaCompletionInventory(
+                    capturedItemIds,
+                    capturedQuantities))
             {
                 Reject();
                 return false;
             }
+
+            bool completed;
+            try
+            {
+                completed = progression.TryCompleteArea(area);
+            }
+            finally
+            {
+                state.ClearStagedAreaCompletionInventory();
+            }
+
+            if (!completed)
+            {
+                Reject();
+                return false;
+            }
+
+            carryover.AcceptAreaCompletionSnapshot(capturedQuantities);
 
             InvokeAuthoredCallback(areaCompleted);
             CampaignEventUtility.Invoke(AreaCompleted, area, this);

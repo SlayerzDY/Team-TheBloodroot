@@ -4,10 +4,10 @@ using UnityEngine.Events;
 namespace Bloodroot.Features.FarmPrologue
 {
     /// <summary>
-    /// Authored presentation adapter for the ground-rumble phase. It applies a
-    /// deterministic positional camera shake, optionally plays an assigned
-    /// AudioSource, and restores the exact local camera position it captured.
-    /// No camera, audio, or UI object is created at runtime.
+    /// Authored presentation adapter for the independently timed ground rumble.
+    /// It applies a deterministic positional camera shake, optionally plays an
+    /// assigned AudioSource, and restores the exact local camera position it
+    /// captured. No camera, audio, or UI object is created at runtime.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class FarmRumblePresenter : MonoBehaviour
@@ -44,7 +44,7 @@ namespace Bloodroot.Features.FarmPrologue
             Bind();
 
             if (director != null &&
-                director.CurrentPhase == FarmProloguePhase.Rumble)
+                director.IsGroundRumbleActive)
             {
                 StartPresentation();
             }
@@ -110,7 +110,7 @@ namespace Bloodroot.Features.FarmPrologue
                 Bind();
 
                 if (director != null &&
-                    director.CurrentPhase == FarmProloguePhase.Rumble)
+                    director.IsGroundRumbleActive)
                 {
                     StartPresentation();
                 }
@@ -175,9 +175,9 @@ namespace Bloodroot.Features.FarmPrologue
             FarmPrologueEventUtility.Invoke(presentationStopped, this);
         }
 
-        private void HandlePhaseChanged(FarmProloguePhase phase)
+        private void HandleGroundRumbleStateChanged(bool active)
         {
-            if (phase == FarmProloguePhase.Rumble)
+            if (active)
             {
                 StartPresentation();
             }
@@ -192,7 +192,8 @@ namespace Bloodroot.Features.FarmPrologue
             if (isBound || director == null)
                 return;
 
-            director.PhaseChanged += HandlePhaseChanged;
+            director.GroundRumbleStateChanged +=
+                HandleGroundRumbleStateChanged;
             isBound = true;
         }
 
@@ -200,7 +201,8 @@ namespace Bloodroot.Features.FarmPrologue
         {
             if (isBound && director != null)
             {
-                director.PhaseChanged -= HandlePhaseChanged;
+                director.GroundRumbleStateChanged -=
+                    HandleGroundRumbleStateChanged;
             }
 
             isBound = false;
