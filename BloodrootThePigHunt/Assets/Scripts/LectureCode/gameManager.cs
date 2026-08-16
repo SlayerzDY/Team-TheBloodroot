@@ -30,6 +30,7 @@ public class gameManager : MonoBehaviour
     [SerializeField] GameObject menuMain;
     [SerializeField] GameObject menuRadar;
     [SerializeField] GameObject menuInventory;
+    [SerializeField] GameObject menuUpgrade;
     //[SerializeField] TMP_Text gameGoalCountText;
     [Header("Text")]
     [SerializeField] TMP_Text timeText;
@@ -116,9 +117,17 @@ public class gameManager : MonoBehaviour
                 menuActive.SetActive(true);
             }
             else if (menuActive != null && menuActive != menuPause) {
-                menuActive.SetActive(false);
-                menuActive = MenuTracker.Instance.PreviousMenu();
-                menuActive.SetActive(true);
+                if (menuActive == menuUpgrade)
+                {
+                    if (MenuTracker.Instance != null) MenuTracker.Instance.Clear();
+                    stateUnpause();
+                }
+                else
+                {
+                    menuActive.SetActive(false);
+                    menuActive = MenuTracker.Instance.PreviousMenu();
+                    menuActive.SetActive(true);
+                }
             }
             else if (menuActive == menuPause) {
                 menuActive.SetActive(false);
@@ -164,6 +173,25 @@ public class gameManager : MonoBehaviour
         }
 
         menuActive = null;
+    }
+    //==========================================================================================
+    // Function, Open Upgrade Menu
+    //==========================================================================================
+    public void OpenUpgradeMenu()
+    {
+
+        if (isDefenseActive == false)
+        {
+            statePause();
+            menuActive = menuUpgrade;
+
+            if (menuActive != null) { menuActive.SetActive(true); }
+
+            if (MenuTracker.Instance != null)
+            {
+                MenuTracker.Instance.AddMenu(menuUpgrade);
+            }
+        }
     }
     //==========================================================================================
     // Function, OptionsMenu
