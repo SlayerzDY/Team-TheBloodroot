@@ -317,15 +317,18 @@ public class gameManager : MonoBehaviour
         return candidate > 0f ? candidate : 1f;
     }
     //==========================================================================================
+    // Function, Update Player
+    //==========================================================================================
+    public void checkpoint(string name) {
+        playerSpawnPos = GameObject.FindWithTag(name);
+    }
+    //==========================================================================================
     // Function, Add Tree Item
     //==========================================================================================
 
-    public void AddTreeItem()
-    {
-
+    public void AddTreeItem() {
         totalItemsFed++;
         CheckTreeMileStone();
-
     }
 
     //==========================================================================================
@@ -493,6 +496,7 @@ public class gameManager : MonoBehaviour
         player.stam = loadedData._savstam;
         player.hasFlashlight = loadedData._savhasFlashlight;
         player.gunInvPos = loadedData._savgunInvPos;
+        playerInv.inventoryWeight = loadedData._savinventoryWeight;
         // Apply position
         if (loadedData._savplayerPosition != null && loadedData._savplayerPosition.Length >= 3) {
             Vector3 loadedPos = new Vector3(

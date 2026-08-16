@@ -83,6 +83,56 @@ public class buttonFunctions : MonoBehaviour {
         controller.LoadLevel(levelName);
     }
     //==========================================================================================
+    // Function, Open Level
+    //==========================================================================================
+    public void OpenLevelBlackPines(string levelName) {
+        gameManager.instance.Save();
+        playerController controller = gameManager.instance.player.GetComponent<playerController>();
+        if (controller == null) { return; }
+        controller.LoadLevel(levelName);
+        gameManager.instance.checkpoint("PlayerSpawnPosBlackPines");
+    }
+    //==========================================================================================
+    // Function, Open Level
+    //==========================================================================================
+    public void OpenLevelStillwater(string levelName) {
+        gameManager.instance.Save();
+        playerController controller = gameManager.instance.player.GetComponent<playerController>();
+        if (controller == null) { return; }
+        gameManager.instance.checkpoint("PlayerSpawnPosStillwater");
+        controller.LoadLevel(levelName);
+    }
+    //==========================================================================================
+    // Function, Open Level
+    //==========================================================================================
+    public void OpenLevelHarrow(string levelName) {
+        gameManager.instance.Save();
+        playerController controller = gameManager.instance.player.GetComponent<playerController>();
+        if (controller == null) { return; }
+        gameManager.instance.checkpoint("PlayerSpawnPosHarrowEstate");
+        controller.LoadLevel(levelName);
+    }
+    //==========================================================================================
+    // Function, Open Level
+    //==========================================================================================
+    public void OpenLevelBloodRoot(string levelName) {
+        gameManager.instance.Save();
+        playerController controller = gameManager.instance.player.GetComponent<playerController>();
+        if (controller == null) { return; }
+        gameManager.instance.checkpoint("PlayerSpawnPosBloodRootHollow");
+        controller.LoadLevel(levelName);
+    }
+    //==========================================================================================
+    // Function, Open Level
+    //==========================================================================================
+    public void OpenLevelHub(string levelName) {
+        gameManager.instance.Save();
+        playerController controller = gameManager.instance.player.GetComponent<playerController>();
+        if (controller == null) { return; }
+        gameManager.instance.checkpoint("PlayerSpawnPosHub");
+        controller.LoadLevel(levelName);
+    }
+    //==========================================================================================
     // Function, Extraction Close
     //==========================================================================================
     public void ExtractionClose() {

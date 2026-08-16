@@ -20,6 +20,7 @@ public class GameData
     public int _savgunInvPos;
     public bool _savhasFlashlight;
     public float[] _savplayerPosition;
+    public float _savinventoryWeight;
     //==========================================================================================
     // Declare Functions 
     //==========================================================================================
@@ -32,6 +33,7 @@ public class GameData
         _savgunInv = new List<gunStats>();
         _savhasFlashlight = false;
         _savInventory = new ItemStats[] { };
+        _savinventoryWeight = 0;
     }
     //==========================================================================================
     // Function, Save Game Overloaded Constructor
@@ -56,6 +58,7 @@ public class GameData
         }
         _savgunInvPos = player.gunInvPos;
         _savhasFlashlight = player.hasFlashlight;
+        _savinventoryWeight = playerInv.inventoryWeight;
     }
     //==========================================================================================
 }
