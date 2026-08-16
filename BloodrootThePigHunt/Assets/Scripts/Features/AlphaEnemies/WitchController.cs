@@ -7,6 +7,7 @@ using UnityEngine.Events;
 namespace Bloodroot.Features.AlphaEnemies
 {
     [DisallowMultipleComponent]
+    [RequireComponent(typeof(CapsuleCollider))]
     public class WitchController : MonoBehaviour, global::IDamage
     {
         [Header("Identity")]
@@ -20,7 +21,7 @@ namespace Bloodroot.Features.AlphaEnemies
         [SerializeField] private Rigidbody flightBody;
 
         [Header("Vitals")]
-        [SerializeField, Min(1)] private int baseMaxHealth = 280;
+        [SerializeField, Min(1)] private int baseMaxHealth = 1;
         [SerializeField, Min(0)] private int baseMagicDamage = 28;
         [SerializeField, Min(0f)] private float deathDestroyDelay = 4f;
         [SerializeField] private bool destroyOnDeath = true;
@@ -351,13 +352,13 @@ namespace Bloodroot.Features.AlphaEnemies
                 return;
             }
 
-            if (shieldActive)
-            {
-                TriggerAnimator(shieldHitTrigger);
-                PlayClip(shieldHitClip);
-                AlphaEnemyEventUtility.Invoke(onShieldHit, this, nameof(onShieldHit));
-                return;
-            }
+            //if (shieldActive)
+            //{
+            //    TriggerAnimator(shieldHitTrigger);
+            //    PlayClip(shieldHitClip);
+            //    AlphaEnemyEventUtility.Invoke(onShieldHit, this, nameof(onShieldHit));
+            //    return;
+            //}
 
             currentHealth = Mathf.Max(0, currentHealth - amount);
             TriggerAnimator(hitTrigger);
@@ -987,8 +988,14 @@ namespace Bloodroot.Features.AlphaEnemies
                 _ => shieldBearerHealthMultiplier
             };
             float variantDamage = variant == WitchVariant.Matriarch ? matriarchDamageMultiplier : 1f;
-            scaledMaxHealth = Mathf.Max(1, Mathf.RoundToInt(
-                baseMaxHealth * variantHealth * healthScalar * (1f + healthPerLevel * levelOffset)));
+            // A serialized base value of one is the explicit one-hit testing
+            // contract. Do not let difficulty or variant multipliers inflate
+            // it; restoring a production value above one restores scaling.
+            scaledMaxHealth = baseMaxHealth == 1
+                ? 1
+                : Mathf.Max(1, Mathf.RoundToInt(
+                    baseMaxHealth * variantHealth * healthScalar *
+                    (1f + healthPerLevel * levelOffset)));
             scaledMagicDamage = Mathf.Max(0, Mathf.RoundToInt(
                 baseMagicDamage * variantDamage * damageScalar * (1f + damagePerLevel * levelOffset)));
             scaledFlightSpeed = Mathf.Max(0.01f,
