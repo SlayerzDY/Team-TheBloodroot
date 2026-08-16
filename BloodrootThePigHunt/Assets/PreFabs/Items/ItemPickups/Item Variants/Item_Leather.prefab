@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &8139426169646313620
+--- !u!1001 &8247431536654154525
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -10,19 +10,19 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 817942340654339044, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: m_Name
-      value: Item_IronOre
+      value: Item_Leather
       objectReference: {fileID: 0}
     - target: {fileID: 4559782537062358527, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 74.41232
       objectReference: {fileID: 0}
     - target: {fileID: 4559782537062358527, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 1.4557487
       objectReference: {fileID: 0}
     - target: {fileID: 4559782537062358527, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -64.19013
       objectReference: {fileID: 0}
     - target: {fileID: 4559782537062358527, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: m_LocalRotation.w
@@ -55,10 +55,10 @@ PrefabInstance:
     - target: {fileID: 4822712193961387962, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: item.itemMesh
       value: 
-      objectReference: {fileID: 919132149155446097, guid: bc70a5563fa3e46469ececd49cd36c22, type: 3}
+      objectReference: {fileID: 919132149155446097, guid: 089573e79cecb77498bf6f6423ae4424, type: 3}
     - target: {fileID: 4822712193961387962, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: item.itemName
-      value: Iron Ore
+      value: Leather
       objectReference: {fileID: 0}
     - target: {fileID: 4822712193961387962, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: item.quantity
@@ -70,12 +70,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4822712193961387962, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: item.itemDescription
-      value: A small piece of Iron. What could it be used for?
+      value: Wonderful bits of dead pig!
       objectReference: {fileID: 0}
+    - target: {fileID: 4942448490666211775, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 3d44c90a3d61ff345a1126dd327983a3, type: 2}
     - target: {fileID: 6681448343115540539, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: m_Mesh
       value: 
-      objectReference: {fileID: 2016904646998833136, guid: bc70a5563fa3e46469ececd49cd36c22, type: 3}
+      objectReference: {fileID: 2616682858060250926, guid: 089573e79cecb77498bf6f6423ae4424, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

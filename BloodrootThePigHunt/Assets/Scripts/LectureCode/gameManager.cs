@@ -453,9 +453,11 @@ public class gameManager : MonoBehaviour
         if (isOn) {
             menuActive = menuExtraction;
             menuExtraction.SetActive(isOn);
+            statePause();
         } else {
             menuActive = null;
             menuExtraction.SetActive(isOn);
+            stateUnpause();
         }
     }
     //==========================================================================================

@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &8247431536654154525
+--- !u!1001 &2771271149442572258
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -10,19 +10,19 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 817942340654339044, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: m_Name
-      value: Item_Leather
+      value: Item_Key
       objectReference: {fileID: 0}
     - target: {fileID: 4559782537062358527, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 74.41232
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4559782537062358527, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.4557487
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4559782537062358527, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -64.19013
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4559782537062358527, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: m_LocalRotation.w
@@ -55,23 +55,31 @@ PrefabInstance:
     - target: {fileID: 4822712193961387962, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: item.itemMesh
       value: 
-      objectReference: {fileID: 919132149155446097, guid: 089573e79cecb77498bf6f6423ae4424, type: 3}
+      objectReference: {fileID: 919132149155446097, guid: 005e4356bb7a04e4c930e8c8b166005c, type: 3}
     - target: {fileID: 4822712193961387962, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: item.itemName
-      value: Leather
+      value: Car Key
+      objectReference: {fileID: 0}
+    - target: {fileID: 4822712193961387962, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
+      propertyPath: item.quantity
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4822712193961387962, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
+      propertyPath: item.stackSize
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4822712193961387962, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: item.itemDescription
-      value: Wonderful bits of dead pig!
+      value: You found a shiny key! Yes!
       objectReference: {fileID: 0}
     - target: {fileID: 4942448490666211775, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 3d44c90a3d61ff345a1126dd327983a3, type: 2}
+      objectReference: {fileID: 2100000, guid: 9f5b73ca4c663b647b677c6ab92d3926, type: 2}
     - target: {fileID: 6681448343115540539, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: m_Mesh
       value: 
-      objectReference: {fileID: 2616682858060250926, guid: 089573e79cecb77498bf6f6423ae4424, type: 3}
+      objectReference: {fileID: -2934398420645475527, guid: 005e4356bb7a04e4c930e8c8b166005c, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
