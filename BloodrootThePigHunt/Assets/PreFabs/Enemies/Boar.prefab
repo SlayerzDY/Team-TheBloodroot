@@ -51,8 +51,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3bc66fc50808454c8f340ae0b5200a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoarBruteAI
-  HP: 0
-  drops: []
+  HP: 10
+  drops:
+  - {fileID: 8731680815952161017, guid: 8b3610a9ff3a5ba4abacdd05a4c8309b, type: 3}
+  - {fileID: 8731680815952161017, guid: 8b3610a9ff3a5ba4abacdd05a4c8309b, type: 3}
+  - {fileID: 8731680815952161017, guid: 8b3610a9ff3a5ba4abacdd05a4c8309b, type: 3}
+  - {fileID: 8731680815952161017, guid: 8b3610a9ff3a5ba4abacdd05a4c8309b, type: 3}
+  - {fileID: 8731680815952161017, guid: 8b3610a9ff3a5ba4abacdd05a4c8309b, type: 3}
   genericPickupShell: {fileID: 817942340654339044, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
   model: {fileID: 3584619749363051082}
   agent: {fileID: 6388563050362958215}
@@ -101,7 +106,7 @@ MonoBehaviour:
   dissolveStrength: 0
   flashDuration: 0.1
   flashStartStrength: 0
-  flashEndStrength: 0.2
+  flashEndStrength: 0.1
 --- !u!136 &2827485554859572553
 CapsuleCollider:
   m_ObjectHideFlags: 0
