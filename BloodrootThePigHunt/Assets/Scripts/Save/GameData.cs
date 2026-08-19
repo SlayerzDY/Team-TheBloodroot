@@ -56,7 +56,7 @@ public class GameData
     {
         if (player == null || playerInv == null)
         {
-            Debug.Log("Please Assign Player Controller and Inventory!");
+            //Debug.Log("Please Assign Player Controller and Inventory!");
             return;
         }
         _savplayerPosition = new float[3] {

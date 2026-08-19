@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 //==============================================================================================
@@ -693,7 +694,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     //==========================================================================================
     // Function, Change Gun
     //==========================================================================================
-    void changeGun()
+    public void changeGun()
     {
         // Assign Visuals
         updatePlayerAmmo();

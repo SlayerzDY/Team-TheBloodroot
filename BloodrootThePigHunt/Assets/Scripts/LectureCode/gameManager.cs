@@ -466,7 +466,7 @@ public class gameManager : MonoBehaviour
         if (congratulations != null) { congratulations.text = $"Wave Defense has been cleared"; }
         yield return new WaitForSeconds(5.0f);
         if (congratulations != null) { congratulations.gameObject.SetActive(false); }
-        Debug.Log("You Completed the Defense the Hub is safe");
+        //Debug.Log("You Completed the Defense the Hub is safe");
         DefensesBeat++;
 
     }
@@ -556,9 +556,9 @@ public class gameManager : MonoBehaviour
     public void Save() {
         // Get References Needed
         playerController player = gameManager.instance.player.GetComponent<playerController>();
-        if (player == null) { Debug.Log("Please Assign Player Controller!"); return; }
+        if (player == null) { Debug.LogError("Please Assign Player Controller!"); return; }
         Inventory playerInv = gameManager.instance.player.GetComponent<Inventory>();
-        if (playerInv == null) { Debug.Log("Please Assign Player Inventory!"); return; }
+        if (playerInv == null) { Debug.LogError("Please Assign Player Inventory!"); return; }
         // Pass live references into the constructor
         GameData dataToSave = new GameData(player, playerInv);
         SaveSystem.SaveGame(dataToSave);
@@ -570,12 +570,12 @@ public class gameManager : MonoBehaviour
     {
         // Pull the saved data from Save System
         GameData loadedData = SaveSystem.LoadGame();
-        if (loadedData == null) { Debug.Log("No save data to load!"); return; }
+        //if (loadedData == null) { Debug.Log("No save data to load!"); return; }
         // Get live references
         playerController player = gameManager.instance.player.GetComponent<playerController>();
         Inventory playerInv = gameManager.instance.player.GetComponent<Inventory>();
         ItemDatabase itemDatabase = gameManager.instance.itemDatabase;
-        Debug.Log($"player: {player}, playerInv: {playerInv}, itemDatabase: {itemDatabase}");
+        //Debug.Log($"player: {player}, playerInv: {playerInv}, itemDatabase: {itemDatabase}");
         if (player == null || playerInv == null || itemDatabase == null) { Debug.Log("Missing Player, Inventory, or ItemDatabase!"); return; }
         // Apply saved stats back to the player
         player.HP = loadedData._savHP;
