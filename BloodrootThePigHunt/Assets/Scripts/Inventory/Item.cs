@@ -32,6 +32,7 @@ public class Item : MonoBehaviour, IInteract {
     // Function, Start
     //------------------------------------------------------------------------------------------
     public void Start() {
+        if (this.GetComponent<Dissolver>() == null) return;
         if (this.GetComponent<Dissolver>() != null) { this.GetComponent<Dissolver>().StartCoroutine(this.GetComponent<Dissolver>().dissolveReturn()); }
     }
     //==========================================================================================
