@@ -20,17 +20,21 @@ PrefabInstance:
       propertyPath: 'drops.Array.data[0]'
       value: 
       objectReference: {fileID: 8731680815952161017, guid: 8b3610a9ff3a5ba4abacdd05a4c8309b, type: 3}
+    - target: {fileID: 3584619749363051082, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 145d6f5c312e63847ae2491227417050, type: 2}
     - target: {fileID: 4190179351161707122, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 72.93334
+      value: 55.104862
       objectReference: {fileID: 0}
     - target: {fileID: 4190179351161707122, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.0699999
+      value: 2.113
       objectReference: {fileID: 0}
     - target: {fileID: 4190179351161707122, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -47.338417
+      value: -28.57976
       objectReference: {fileID: 0}
     - target: {fileID: 4190179351161707122, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
       propertyPath: m_LocalRotation.w
@@ -63,6 +67,10 @@ PrefabInstance:
     - target: {fileID: 5464231581442848068, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
       propertyPath: m_Name
       value: BoarRoot
+      objectReference: {fileID: 0}
+    - target: {fileID: 5873702240648637653, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -2.113
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: -2624448967457116415, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
@@ -105,6 +113,7 @@ MonoBehaviour:
   FOV: 45
   roamDist: 30
   roamPauseTime: 3
+  stoppingDistance: 0
   bullet: {fileID: 5433222104674597542, guid: 600056e04222aaa4fa06a983ce4ed432, type: 3}
   gunPivot: {fileID: 4046647553792901340}
   shootPos: {fileID: 4046647553792901338}
