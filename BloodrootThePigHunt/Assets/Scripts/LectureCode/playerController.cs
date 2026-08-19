@@ -15,7 +15,6 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     // Define Variables
     //==========================================================================================
     // Test Variables
-    [SerializeField] public GameObject testContainer; 
     [SerializeField] CharacterController controller;
     [SerializeField] LayerMask ignoreLayer;
     float camRotX, camRotY;
@@ -739,9 +738,6 @@ void selectGun()
         {
             if (!inventory.IsSlotEmpty(i))
             {
-                //inventory.RemoveItem(inventory.inventoryItems[i].itemName, 1, false);
-                //inventory.RemoveMultipleItems("M1 Garand Ammo");
-                inventory.TransferToNewInventory(testContainer, "M1 Garand Ammo");
                 break;
             }
         }

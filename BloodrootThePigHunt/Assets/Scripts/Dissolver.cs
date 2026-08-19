@@ -64,10 +64,7 @@ public class Dissolver : MonoBehaviour
     // Function, dissolve
     //==========================================================================================
     public IEnumerator dissolve(bool playerDeath = false) {
-        if (playerDeath) {
-            StartCoroutine(dissolveFlash(true));
-            yield break;
-        }
+        flashToken++;
         Renderer[] allRenderers = GetComponentsInChildren<Renderer>();
         for (int i = 0; i < allRenderers.Length; i++) {
             allRenderers[i].sharedMaterial = localDissolveMat;
