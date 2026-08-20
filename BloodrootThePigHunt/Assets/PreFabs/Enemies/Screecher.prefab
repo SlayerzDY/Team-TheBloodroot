@@ -132,7 +132,7 @@ MonoBehaviour:
   dissolveStrength: 0
   flashDuration: 0.5
   flashStartStrength: 0
-  flashEndStrength: 0.3
+  flashEndStrength: 0.1
 --- !u!114 &550858995165659091
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -147,8 +147,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScreecherAI
   alertRadius: 110
   screamCooldown: 5
-  scream: []
-  agent: {fileID: 0}
+  scream:
+  - {fileID: 8300000, guid: 29b156ec7b593314e906e9d46414aedb, type: 3}
+  agent: {fileID: 6217770656463479941}
   screamVolume: 0
   screamVFX: {fileID: 5778066100475942005, guid: 5a47a7eb3149ccb42968d36906e325bf, type: 3}
 --- !u!114 &4171444376872794718
@@ -163,7 +164,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69630da5816b6ce4f965b84a53cb65f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::enemyAI
-  HP: 2
+  HP: 10
   drops: []
   genericPickupShell: {fileID: 817942340654339044, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
   model: {fileID: 7463033574214290584}

@@ -2002,18 +2002,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 550858995165659091, guid: d6ba5ca32b5322249bd5e3aae8960a82, type: 3}
-      propertyPath: agent
-      value: 
-      objectReference: {fileID: 1894769513}
-    - target: {fileID: 550858995165659091, guid: d6ba5ca32b5322249bd5e3aae8960a82, type: 3}
-      propertyPath: scream.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 550858995165659091, guid: d6ba5ca32b5322249bd5e3aae8960a82, type: 3}
-      propertyPath: 'scream.Array.data[0]'
-      value: 
-      objectReference: {fileID: 8300000, guid: 29b156ec7b593314e906e9d46414aedb, type: 3}
     - target: {fileID: 3381432199624528782, guid: d6ba5ca32b5322249bd5e3aae8960a82, type: 3}
       propertyPath: m_LocalPosition.x
       value: 68.09272
@@ -2054,14 +2042,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4171444376872794718, guid: d6ba5ca32b5322249bd5e3aae8960a82, type: 3}
-      propertyPath: HP
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 6942348309230968918, guid: d6ba5ca32b5322249bd5e3aae8960a82, type: 3}
-      propertyPath: flashEndStrength
-      value: 0.1
-      objectReference: {fileID: 0}
     - target: {fileID: 8769039292492642325, guid: d6ba5ca32b5322249bd5e3aae8960a82, type: 3}
       propertyPath: m_Name
       value: Screecher
@@ -2071,11 +2051,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d6ba5ca32b5322249bd5e3aae8960a82, type: 3}
---- !u!195 &1894769513 stripped
-NavMeshAgent:
-  m_CorrespondingSourceObject: {fileID: 6217770656463479941, guid: d6ba5ca32b5322249bd5e3aae8960a82, type: 3}
-  m_PrefabInstance: {fileID: 1894769509}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1904232014
 PrefabInstance:
   m_ObjectHideFlags: 0
