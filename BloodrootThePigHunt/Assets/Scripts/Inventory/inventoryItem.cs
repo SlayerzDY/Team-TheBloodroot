@@ -1,6 +1,7 @@
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class inventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
@@ -13,6 +14,7 @@ public class inventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     [SerializeField] public int index;
     [SerializeField] public Inventory inventory;
     [SerializeField] public Sprite defaultImage;
+    [SerializeField] public TextMeshProUGUI text;
 
     // Set true by a drop target (e.g. ItemTossZone) that already removed this
     // item from the inventory and is about to Destroy() it - skips the
@@ -30,12 +32,29 @@ public class inventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         RefreshIcon();
     }
 
+    private void Start() {
+        if (itemStats.quantity > 1)
+        {
+            text.text = itemStats.quantity.ToString();
+        } else {
+            text.text = string.Empty;
+        }
+    }
+
     // Call this after itemStats/index change (initial spawn, or after a slot
     // move/swap) so the displayed sprite always matches the inventory data.
     public void RefreshIcon()
     {
         if (itemStats == null || string.IsNullOrEmpty(itemStats.itemName)) { return; }
         image.sprite = itemStats.icon != null ? itemStats.icon : defaultImage;
+        if (itemStats.quantity > 1)
+        {
+            text.text = itemStats.quantity.ToString();
+        }
+        else
+        {
+            text.text = string.Empty;
+        }
     }
 
     public void OnBeginDrag(PointerEventData eventData)
