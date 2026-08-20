@@ -140,7 +140,10 @@ public class enemyAI : MonoBehaviour, IDamage
         {
             ScreecherAI screecher = GetComponent<ScreecherAI>();
             if (screecher != null)
-                if (!isUnalived) { screecher.Scream(); }
+                if (!isUnalived) { 
+                    screecher.Scream();
+                    if (animator != null) { animator.SetTrigger("Roar"); }
+                }
             bool isCharging =
                 boarBrute != null && boarBrute.charging;
                 
