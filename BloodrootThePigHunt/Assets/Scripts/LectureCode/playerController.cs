@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 //==============================================================================================
@@ -131,7 +132,6 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         if (Input.GetButton("Fire1") && gunInv.Count > 0 && gunInv[gunInvPos].ammoCurr > 0 && shootTimer > gunInv[gunInvPos].shootRate) { shoot(); }
         if (gunInv.Count > 0) {
             Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * gunInv[gunInvPos].shootDistance, Color.red);
-                animator.SetBool("IsAiming", true);
         }
         reload();
     }
@@ -694,13 +694,14 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     //==========================================================================================
     // Function, Change Gun
     //==========================================================================================
-    void changeGun()
+    public void changeGun()
     {
         // Assign Visuals
         updatePlayerAmmo();
         gunModel.GetComponent<MeshFilter>().sharedMesh = gunInv[gunInvPos].gunModel.GetComponent<MeshFilter>().sharedMesh;
         gunModel.GetComponent<MeshRenderer>().sharedMaterial = gunInv[gunInvPos].gunModel.GetComponent<MeshRenderer>().sharedMaterial;
         animator.SetInteger("WeaponType", gunInv[gunInvPos].gunType);
+        animator.SetBool("IsAiming", true);
     }
 //==========================================================================================
 // Function, Select Gun
