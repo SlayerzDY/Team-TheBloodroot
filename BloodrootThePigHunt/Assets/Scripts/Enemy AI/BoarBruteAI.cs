@@ -87,7 +87,28 @@ public class BoarBruteAI : enemyAI
     // Start Charge
     //==========================================================================================
     protected override bool canSeePlayer() {
-        
+        shootTimer += Time.deltaTime;
+        playerDir = gameManager.instance.player.transform.position - transform.position;
+        angleToPlayer = Vector3.Angle(playerDir, transform.forward);
+        Debug.DrawRay(transform.position, playerDir, Color.red);
+        // Hey I see you!!
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position, playerDir, out hit))
+        {
+            if (hit.collider.CompareTag("Player") && angleToPlayer <= FOV)
+            {
+                agent.SetDestination(gameManager.instance.player.transform.position);
+                rotateGun();
+                faceTarget();
+                if (shootTimer >= shootRate)
+                {
+                    shoot();
+                }
+                agent.stoppingDistance = stoppingDistanceOrig;
+                return true;
+            }
+        }
+        agent.stoppingDistance = 0;
         return false;
     }
     //==========================================================================================

@@ -70,7 +70,7 @@ public class enemyAI : MonoBehaviour, IDamage
     //==========================================================================================
     // Function, Roam
     //==========================================================================================
-    void checkRoam()
+    protected virtual void checkRoam()
     {
         if (agent.remainingDistance < 0.01f)
         {
@@ -81,7 +81,7 @@ public class enemyAI : MonoBehaviour, IDamage
     //==========================================================================================
     // Function, Roam
     //==========================================================================================
-    void roam() {
+    protected virtual void roam() {
         roamTimer = 0;
         agent.stoppingDistance = 0;
         Vector3 ranPos = Random.insideUnitSphere * roamDist;
@@ -94,7 +94,7 @@ public class enemyAI : MonoBehaviour, IDamage
     // Function, ApplyBloodMoonModifier
     //==========================================================================================
 
-    private void ApplyBloodMoonModifier()
+    protected virtual void ApplyBloodMoonModifier()
     {
         damageMultiplier = 1f;
 
@@ -138,15 +138,8 @@ public class enemyAI : MonoBehaviour, IDamage
         animator.SetFloat("Speed", agent.velocity.magnitude / agent.speed, 0.1f, Time.deltaTime);
         if (playerInTrigger)
         {
-            bool isCharging =
-                boarBrute != null && boarBrute.charging;
-                
-
-            if (!isCharging &&
-                agent != null &&
-                agent.isActiveAndEnabled &&
-                agent.isOnNavMesh)
-            {
+            bool isCharging = boarBrute != null && boarBrute.charging;
+            if (!isCharging && agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh) {
                 agent.SetDestination(
                     gameManager.instance.player.transform.position);
             }
@@ -154,10 +147,8 @@ public class enemyAI : MonoBehaviour, IDamage
             playerDir = gameManager.instance.player.transform.position - transform.position;
 
             ScreecherAI screecher = GetComponent<ScreecherAI>();
-            if (screecher != null)
-            {
+            if (screecher != null) {
                 float distance = playerDir.magnitude;
-            
                 if (distance <= 10f && screecher.CanScream() && !isUnalived)
                 {
                     if (animator != null) { animator.SetTrigger("Roar"); }
@@ -213,7 +204,7 @@ public class enemyAI : MonoBehaviour, IDamage
     //==========================================================================================
     // Function, On Trigger Enter
     //==========================================================================================
-    void OnTriggerEnter(Collider other)
+    protected virtual void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
@@ -223,7 +214,7 @@ public class enemyAI : MonoBehaviour, IDamage
     //==========================================================================================
     // Function, On Trigger Exit
     //==========================================================================================
-    void OnTriggerExit(Collider other)
+    protected virtual void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Player"))
         {
@@ -234,7 +225,7 @@ public class enemyAI : MonoBehaviour, IDamage
     //==========================================================================================
     // Function, Shoot
     //==========================================================================================
-    void shoot()
+    protected virtual void shoot()
     {
         shootTimer = 0;
 
@@ -261,126 +252,88 @@ public class enemyAI : MonoBehaviour, IDamage
     //==========================================================================================
     // Function, Face Target
     //==========================================================================================
-    void faceTarget()
-    {
+    protected virtual void faceTarget() {
         Quaternion rot = Quaternion.LookRotation(new Vector3(playerDir.x, 0, playerDir.z));
         transform.rotation = Quaternion.Lerp(transform.rotation, rot, faceTargetSpeed * Time.deltaTime);
     }
     //==========================================================================================
     // Function, Rotate Gun
     //==========================================================================================
-    void rotateGun()
-    {
+    protected virtual void rotateGun() {
         Quaternion rot = Quaternion.LookRotation(playerDir);
         gunPivot.rotation = Quaternion.Lerp(gunPivot.rotation, rot, gunRotateSpeed * Time.deltaTime);
     }
     //==========================================================================================
     // Function, TakeDamage
     //==========================================================================================
-    public void TakeDamage(int amount)
-    {
+    public virtual void TakeDamage(int amount) {
         if (isDead)
             return;
-
         HP -= amount;
-
-        if (HP <= 0)
-        {
+        if (HP <= 0) {
             // Die reports the death to WaveManager,
             // then starts the dissolve effect.
             GetComponent<EnemyAudioControl>().PlayDeathSound();
             Die();
-        }
-        else
-        {
+        } else {
             StartCoroutine(flashRed());
         }
     }
     //==========================================================================================
     // Function, Alert
     //==========================================================================================
-    public void Alert(Vector3 pos)
-    {
-        if (isDead)
-            return;
-
+    public virtual void Alert(Vector3 pos) {
+        if (isDead) { return; }
         playerInTrigger = true;
     }
     //==========================================================================================
     // Function, Die
     //==========================================================================================
 
-    protected virtual void Die()
-    {
+    protected virtual void Die() {
         // Prevent one enemy from being counted twice.
         isUnalived = true;
-        if (isDead)
-            return;
-
+        if (isDead) { return; }
         isDead = true;
         playerInTrigger = false;
         //ScoreboardManager.GetOrCreate().AddEnemyPigKilled();
-
-        foreach (Collider enemyCollider in GetComponentsInChildren<Collider>())
-        {
+        foreach (Collider enemyCollider in GetComponentsInChildren<Collider>()) {
             enemyCollider.enabled = false;
         }
-
-        if (agent != null && agent.isOnNavMesh)
-        {
+        if (agent != null && agent.isOnNavMesh) {
             agent.isStopped = true;
         }
-
         // This reduces enemiesRemaining and allows the
         // WaveManager to start the following wave.
-        if (manager == null)
-        {
+        if (manager == null) {
             manager = FindAnyObjectByType<waveManager>();
         }
-
-        if (manager != null && manager.waveActive)
-        {
+        if (manager != null && manager.waveActive) {
             manager.EnemyDefeated(gameObject);
         }
-
-        //if (gameManager.instance != null)
-        //{
-        //    gameManager.instance.updateGameGoal(-1);
-        //}
-
-        Dissolver dissolver =
-            GetComponent<Dissolver>();
-        for (int i = 0; i < drops.Length; i++)
-        {
+        Dissolver dissolver = GetComponent<Dissolver>();
+        for (int i = 0; i < drops.Length; i++) {
             Item item = drops[i].GetComponent<Item>();
             if (item.item.itemName == null) { Debug.Log(drops[i].name + " is not an item."); continue; }
-
             Vector2 randomCircle = Random.insideUnitCircle.normalized * 5;
             Vector3 randomPosition = transform.position + new Vector3(randomCircle.x, 0f, randomCircle.y);
             Quaternion localRotation = transform.localRotation;
-
             genericPickupShell.GetComponent<Item>().item = CopyItem(item.item, item.item.quantity);
             GameObject newPickup = Instantiate(genericPickupShell, randomPosition, localRotation);
             newPickup.GetComponent<Item>().canInteract = true;
             newPickup.GetComponent<Item>().ApplyMeshToSelf();
         }
-        if (dissolver != null)
-        {
-            dissolver.StartCoroutine(
-                dissolver.dissolve(true));
-        }
-        else
-        {
+        if (dissolver != null) {
+            dissolver.StartCoroutine(dissolver.dissolve(true));
+        } else {
             Destroy(gameObject);
         }
     }
     //==========================================================================================
     // Function, Copy Item
     //------------------------------------------------------------------------------------------
-    private ItemStats CopyItem(ItemStats source, int qty)
-    {
-        return new ItemStats
-        {
+    private ItemStats CopyItem(ItemStats source, int qty) {
+        return new ItemStats {
             itemName = source.itemName,
             itemDescription = source.itemDescription,
             icon = source.icon,
@@ -395,31 +348,25 @@ public class enemyAI : MonoBehaviour, IDamage
     //==========================================================================================
     // Function, Flash
     //==========================================================================================
-    IEnumerator flashRed()
-    {
+    IEnumerator flashRed() {
         //model.material.color = Color.red;
         //yield return new WaitForSeconds(0.1f);
         //model.material.color = colorOrig;
         if (this.GetComponent<Dissolver>() != null) { this.GetComponent<Dissolver>().StartCoroutine(this.GetComponent<Dissolver>().dissolveFlash()); }
         yield return null;
     }
-
-    public void onDeath(bool dead)
-    {
-        if (dead)
-        {
-            Die();
-        }
+    //==========================================================================================
+    // Function, On Death
+    //==========================================================================================
+    public virtual void onDeath(bool dead) {
+        if (dead) { Die(); }
     }
     //==========================================================================================
     // Function, InitializeEnemy
     //==========================================================================================
-    public void InitializeEnemy(int wave)
-    {
+    public virtual void InitializeEnemy(int wave) {
         HP = 10 * Mathf.Pow(healthGrowth, wave - 1);
-
         meleeDamage = 3 *Mathf.Pow(damageGrowth, wave - 1);
-
     }
     //==========================================================================================
     // Function, Can See Player
