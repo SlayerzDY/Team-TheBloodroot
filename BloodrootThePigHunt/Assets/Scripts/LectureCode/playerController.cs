@@ -174,6 +174,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     IEnumerator playSteps()
     {
         isPlayingSteps = true;
+        if (audioManager.instance == null) { yield return null; }
         if (audSteps.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(audSteps[Random.Range(0, audSteps.Length)], audStepsVolume); }
         if (isSprinting)
         {
