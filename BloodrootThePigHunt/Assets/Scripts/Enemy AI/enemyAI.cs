@@ -138,12 +138,6 @@ public class enemyAI : MonoBehaviour, IDamage
         animator.SetFloat("Speed", agent.velocity.magnitude / agent.speed, 0.1f, Time.deltaTime);
         if (playerInTrigger)
         {
-            ScreecherAI screecher = GetComponent<ScreecherAI>();
-            if (screecher != null)
-                if (!isUnalived) { 
-                    screecher.Scream();
-                    if (animator != null) { animator.SetTrigger("Roar"); }
-                }
             bool isCharging =
                 boarBrute != null && boarBrute.charging;
                 
@@ -159,13 +153,14 @@ public class enemyAI : MonoBehaviour, IDamage
 
             playerDir = gameManager.instance.player.transform.position - transform.position;
 
+            ScreecherAI screecher = GetComponent<ScreecherAI>();
             if (screecher != null)
             {
                 float distance = playerDir.magnitude;
-
             
-                if (distance <= 10f && screecher.CanScream())
+                if (distance <= 10f && screecher.CanScream() && !isUnalived)
                 {
+                    if (animator != null) { animator.SetTrigger("Roar"); }
                     screecher.Scream();
                 }
                 faceTarget();
@@ -293,6 +288,7 @@ public class enemyAI : MonoBehaviour, IDamage
         {
             // Die reports the death to WaveManager,
             // then starts the dissolve effect.
+            GetComponent<EnemyAudioControl>().PlayDeathSound();
             Die();
         }
         else

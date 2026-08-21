@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4190179351161707122}
+  - component: {fileID: 3621925963335856108}
   - component: {fileID: -2624448967457116415}
   - component: {fileID: 8250807944334237410}
   - component: {fileID: 2827485554859572553}
@@ -39,6 +40,22 @@ Transform:
   - {fileID: 7683567848071856125}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3621925963335856108
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5464231581442848068}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a9f19e20c1b89a488f132a893bd9559, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAudioControl
+  movementSound: []
+  idleSound: []
+  actionSound: []
+  deathSound: []
 --- !u!114 &-2624448967457116415
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -65,6 +82,7 @@ MonoBehaviour:
   FOV: 45
   roamDist: 30
   roamPauseTime: 3
+  stoppingDistance: 0
   bullet: {fileID: 5433222104674597542, guid: 600056e04222aaa4fa06a983ce4ed432, type: 3}
   gunPivot: {fileID: 7100000000000000002}
   shootPos: {fileID: 7100000000000000004}
