@@ -82,6 +82,9 @@ public class GameData
         if (player.gunInv != null)
         {
             _savgunInv = new List<gunStats>(player.gunInv);
+        } else
+        {
+            _savgunInv = new List<gunStats>();
         }
         _savgunInvPos = player.gunInvPos;
         _savhasFlashlight = player.hasFlashlight;
