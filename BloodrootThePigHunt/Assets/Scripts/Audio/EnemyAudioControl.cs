@@ -17,13 +17,13 @@ public class EnemyAudioControl : MonoBehaviour
     public void PlayMovementSound()  { PlaySound(movementSound, 0.7f, 1.0f, 0.85f, 1.15f); }
 
     //==========================================================================================
-    // Function, Play Idle Sounds
+    // Function, Play Action Sounds
     //------------------------------------------------------------------------------------------
 
     public void PlayActionSound() { PlaySound(actionSound, 0.8f, 1.0f, 0.95f, 1.05f); }
 
     //==========================================================================================
-    // Function, Play Action Sounds
+    // Function, Play Idle Sounds
     //------------------------------------------------------------------------------------------
 
     public void PlayIdleSound() { PlaySound(idleSound, 0.5f, 0.8f, 0.9f, 1.1f); }
@@ -45,7 +45,7 @@ public class EnemyAudioControl : MonoBehaviour
         AudioClip currendSound = sound[Random.Range(0, sound.Length)];
         float randomVol = Random.Range(minVol, maxVol);
         float randomPit = Random.Range(minPitch, maxPitch);
-        audioManager.instance.PlaySpatialSounds(currendSound, transform.position, randomVol, randomPit);
+        audioManager.instance.PlaySpatialSounds(currendSound, transform.root.position, randomVol, randomPit);
 
     }
     

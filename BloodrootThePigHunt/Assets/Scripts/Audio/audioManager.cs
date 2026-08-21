@@ -63,7 +63,7 @@ public class audioManager : MonoBehaviour
             // logaruthmic for realistic and linear for straight distance
             source.rolloffMode = AudioRolloffMode.Logarithmic;
             source.minDistance = 1f;
-            source.maxDistance = 20f;
+            source.maxDistance = 50f;
 
             temp3D.SetActive(false);
             poolList.Add(source);
@@ -79,9 +79,18 @@ public class audioManager : MonoBehaviour
 
         if (clip == null) { return; }
 
+        if(Camera.main != null)
+        {
+
+            float disToPlay = Vector3.Distance(Camera.main.transform.position, pos);
+            if (disToPlay > 50f) { return; }
+
+        }
+
         AudioSource availableSource = GetPooledAudioSource();
         if (availableSource != null)
         {
+            availableSource.gameObject.transform.SetParent(null);
             availableSource.gameObject.transform.position = pos;
             availableSource.gameObject.SetActive(true);
             availableSource.clip = clip;
@@ -168,6 +177,7 @@ public class audioManager : MonoBehaviour
     {
         yield return new WaitForSeconds(delay);
         source.gameObject.SetActive(false);
+        source.gameObject.transform.SetParent(this.transform);
     }
 
 }
