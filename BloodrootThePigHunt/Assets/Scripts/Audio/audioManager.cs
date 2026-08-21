@@ -1,6 +1,7 @@
 //==============================================================================================
 // Using Unity Engine
 //==============================================================================================
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 //==============================================================================================
@@ -17,6 +18,8 @@ public class audioManager : MonoBehaviour
     public AudioMixerGroup musicGroup;
     public AudioSource audPlayer;
     public AudioSource musicSpace;
+    public int poolSize;
+    private List<AudioSource> poolList = new List<AudioSource>();
     //==========================================================================================
     // Declare Functions
     //==========================================================================================
@@ -28,6 +31,7 @@ public class audioManager : MonoBehaviour
         {
             instance = this;
             DontDestroyOnLoad(gameObject);
+            InitializePool();
             UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
         }
         else { Destroy(gameObject);}
@@ -39,35 +43,56 @@ public class audioManager : MonoBehaviour
 
     void Start(){ ApplySettings(); }
 
+
+    //==========================================================================================
+    // Function, Get the pool we need
+    //------------------------------------------------------------------------------------------
+
+    void InitializePool()
+    {
+        for (int i = 0; i < poolSize; i++)
+        {
+            //temp
+            GameObject temp3D = new GameObject("Pooled3DSound_" + i);
+            temp3D.transform.SetParent(this.transform);
+
+            //source
+            AudioSource source = temp3D.AddComponent<AudioSource>();
+            source.outputAudioMixerGroup = sfxGroup;
+            source.spatialBlend = 1.0f;
+            // logaruthmic for realistic and linear for straight distance
+            source.rolloffMode = AudioRolloffMode.Logarithmic;
+            source.minDistance = 1f;
+            source.maxDistance = 20f;
+
+            temp3D.SetActive(false);
+            poolList.Add(source);
+        }
+    }
+
     //==========================================================================================
     // Function, Play Spatial sound / 3d sound effects
     //------------------------------------------------------------------------------------------
 
-    public void PlaySpatialSounds(AudioClip clip, Vector3 pos)
+    public void PlaySpatialSounds(AudioClip clip, Vector3 pos, float vol = 1f, float pitch = 1f)
     {
 
-        if(clip == null) {return;}
+        if (clip == null) { return; }
 
-        // tmep 
-        GameObject temp3D = new GameObject("Temp3DSounds");
-        temp3D.transform.position = pos;
+        AudioSource availableSource = GetPooledAudioSource();
+        if (availableSource != null)
+        {
+            availableSource.gameObject.transform.position = pos;
+            availableSource.gameObject.SetActive(true);
+            availableSource.clip = clip;
+            availableSource.volume = vol;
+            availableSource.pitch = pitch;
+            availableSource.Play();
+            StartCoroutine(DisableSourceAfterPlaying(availableSource, clip.length / pitch));
 
-        //source
-        AudioSource source = temp3D.AddComponent<AudioSource>();
-        source.clip = clip;
-        source.outputAudioMixerGroup = sfxGroup;
-        source.spatialBlend = 1.0f;
-        // logaruthmic for realistic and linear for straight distance
-        source.rolloffMode = AudioRolloffMode.Logarithmic;
-        source.minDistance = 1f;
-        source.maxDistance = 20f;
-        source.Play();
-
-        // I am become death desstroyer of worlds
-        Destroy(temp3D, clip.length);
+        }
 
     }
-
     //==========================================================================================
     // Function, Switch Music track
     //------------------------------------------------------------------------------------------
@@ -118,6 +143,32 @@ public class audioManager : MonoBehaviour
     //------------------------------------------------------------------------------------------
 
     void OnDestroy() { UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded; }
+
+    //==========================================================================================
+    // Function, Get the pools audo source
+    //------------------------------------------------------------------------------------------
+
+    private AudioSource GetPooledAudioSource()
+    {
+        for (int i = 0; i < poolList.Count; i++)
+        {
+            if (!poolList[i].gameObject.activeInHierarchy)
+            {
+                return poolList[i];
+            }
+        }
+        return null;
+    }
+
+    //==========================================================================================
+    // Function, Disable source after play
+    //------------------------------------------------------------------------------------------
+
+    private System.Collections.IEnumerator DisableSourceAfterPlaying(AudioSource source, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        source.gameObject.SetActive(false);
+    }
 
 }
 //==============================================================================================

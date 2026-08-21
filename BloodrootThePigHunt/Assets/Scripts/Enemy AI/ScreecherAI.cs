@@ -6,9 +6,9 @@ public class ScreecherAI  : MonoBehaviour
 {
     [SerializeField] float alertRadius;
     [SerializeField] float screamCooldown = 5f;
-    [SerializeField] private AudioClip[] scream;
+   // [SerializeField] private AudioClip[] scream;
     [SerializeField] public NavMeshAgent agent;
-    [Range(0f, 1f)] [SerializeField] float screamVolume;
+   // [Range(0f, 1f)] [SerializeField] float screamVolume;
     //private Animator animator;
     float screamTimer;
     public GameObject screamVFX;
@@ -56,7 +56,8 @@ public class ScreecherAI  : MonoBehaviour
             return;
         }
         screamTimer = screamCooldown;
-        if (scream.Length > 0) { audioManager.instance.audPlayer.PlayOneShot(scream[UnityEngine.Random.Range(0, scream.Length)], screamVolume); }
+        GetComponent<EnemyAudioControl>().PlayActionSound();
+        //if (scream.Length > 0) { audioManager.instance.audPlayer.PlayOneShot(scream[UnityEngine.Random.Range(0, scream.Length)], screamVolume); }
         AlertNearby();
         SpawnVFX();
     }

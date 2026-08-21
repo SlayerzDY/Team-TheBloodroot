@@ -74,6 +74,7 @@ GameObject:
   - component: {fileID: 3381432199624528782}
   - component: {fileID: 8422143398808330133}
   - component: {fileID: 6942348309230968918}
+  - component: {fileID: -2055257843764263500}
   - component: {fileID: 550858995165659091}
   - component: {fileID: 4171444376872794718}
   - component: {fileID: 7463033574214290584}
@@ -133,6 +134,23 @@ MonoBehaviour:
   flashDuration: 0.5
   flashStartStrength: 0
   flashEndStrength: 0.1
+--- !u!114 &-2055257843764263500
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8769039292492642325}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a9f19e20c1b89a488f132a893bd9559, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAudioControl
+  movementSound: []
+  idleSound: []
+  actionSound:
+  - {fileID: 8300000, guid: 29b156ec7b593314e906e9d46414aedb, type: 3}
+  deathSound: []
 --- !u!114 &550858995165659091
 MonoBehaviour:
   m_ObjectHideFlags: 0
