@@ -15,45 +15,46 @@ public class enemyAI : MonoBehaviour, IDamage
     //==========================================================================================
     // Declare Variables
     //==========================================================================================
-    [SerializeField] float HP;
-    [SerializeField] GameObject[] drops;
-    [SerializeField] private GameObject genericPickupShell;
-    [SerializeField] Renderer model;
+    [SerializeField] protected float HP;
+    [SerializeField] protected GameObject[] drops;
+    [SerializeField] protected GameObject genericPickupShell;
+    [SerializeField] protected Renderer model;
     [SerializeField] public NavMeshAgent agent;
     [SerializeField] public Animator animator;
-    [SerializeField] int FOV;
+    [SerializeField] protected int FOV;
     // Roam Stats
-    [SerializeField] int roamDist;
-    [SerializeField] int roamPauseTime;
-    [SerializeField] int stoppingDistance;
+    [SerializeField] protected int roamDist;
+    [SerializeField] protected int roamPauseTime;
+    [SerializeField] protected int stoppingDistance;
     // Weapon Stats
-    [SerializeField] GameObject bullet;
-    [SerializeField] Transform gunPivot;
-    [SerializeField] Transform shootPos;
-    [SerializeField] float shootRate;
-    [SerializeField] int gunRotateSpeed;
-    [SerializeField] int faceTargetSpeed;
-    [SerializeField] MobSpawner spawner;
-    [SerializeField] float damageMultiplier;  
-    [SerializeField] bool isMelee;
-    [SerializeField] float meleeDamage;
-    [SerializeField] float meleeRange;
-    [SerializeField] float healthGrowth = 1.15f;
-    [SerializeField] float damageGrowth = 1.08f;
-    Color colorOrig;
-    Vector3 playerDir;
-    Vector3 startingPos;
-    float shootTimer;
-    bool playerInTrigger;
-    waveManager manager;
-    BoarBruteAI boarBrute;
-    float chargeCooldown = 5f;
-    float chargeCooldownTimer;
-    bool isDead;
-    float angleToPlayer;
-    float roamTimer;
-    float stoppingDistanceOrig;
-    private bool isUnalived;
+    [SerializeField] protected GameObject bullet;
+    [SerializeField] protected Transform gunPivot;
+    [SerializeField] protected Transform shootPos;
+    [SerializeField] protected float shootRate;
+    [SerializeField] protected int gunRotateSpeed;
+    [SerializeField] protected int faceTargetSpeed;
+    [SerializeField] protected MobSpawner spawner;
+    [SerializeField] protected float damageMultiplier;  
+    [SerializeField] protected bool isMelee;
+    [SerializeField] protected float meleeDamage;
+    [SerializeField] protected float meleeRange;
+    [SerializeField] protected float healthGrowth = 1.15f;
+    [SerializeField] protected float damageGrowth = 1.08f;
+    protected Color colorOrig;
+    protected Vector3 playerDir;
+    protected Vector3 startingPos;
+    protected float shootTimer;
+    protected bool playerInTrigger;
+    protected waveManager manager;
+    protected BoarBruteAI boarBrute;
+    protected float chargeCooldown = 5f;
+    protected float chargeCooldownTimer;
+    protected bool isDead;
+    protected float angleToPlayer;
+    protected float roamTimer;
+    protected float stoppingDistanceOrig;
+    protected bool isCharging;
+    protected bool isUnalived;
   
     //==========================================================================================
     // Function, Start
@@ -130,22 +131,12 @@ public class enemyAI : MonoBehaviour, IDamage
     //==========================================================================================
     // Function, Update
     //==========================================================================================
-    protected virtual void Update()
-    {
-        if (isDead)
-            return;
+    protected virtual void Update() {
+        if (isDead) { return; }
         if (animator != null) { animator.SetFloat("Speed", agent.velocity.magnitude); }
         animator.SetFloat("Speed", agent.velocity.magnitude / agent.speed, 0.1f, Time.deltaTime);
-        if (playerInTrigger)
-        {
-            bool isCharging = boarBrute != null && boarBrute.charging;
-            if (!isCharging && agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh) {
-                agent.SetDestination(
-                    gameManager.instance.player.transform.position);
-            }
-
+        if (playerInTrigger) {
             playerDir = gameManager.instance.player.transform.position - transform.position;
-
             ScreecherAI screecher = GetComponent<ScreecherAI>();
             if (screecher != null) {
                 float distance = playerDir.magnitude;
@@ -156,45 +147,16 @@ public class enemyAI : MonoBehaviour, IDamage
                 }
                 faceTarget();
             }
-            if (boarBrute != null && !isCharging)
-            {
-                chargeCooldownTimer += Time.deltaTime;
-                if (chargeCooldownTimer >= chargeCooldown && playerDir.magnitude > meleeRange * 2f)
-                {
-                    if (!isUnalived) { boarBrute.StartCharge(); }
-                    chargeCooldownTimer = 0f;
-                }
-            }
-
-            if (isMelee)
-            {
-                if (!isCharging)
-                {
-                    shootTimer += Time.deltaTime;
-                    if (shootTimer >= shootRate && playerDir.magnitude <= meleeRange)
-                    {
-                        if (!isUnalived) { MeleeAttack(); }
-                    }
-                }
-            }
-            else
-            {
-                if (gunPivot == null || shootPos == null || bullet == null) { return; }
-                shootTimer += Time.deltaTime;
-                rotateGun();
-                if (shootTimer >= shootRate)
-                {
-                    if (!isUnalived) { shoot(); }
-                }
-            }
         } else {
             checkRoam(); 
         }
     }
 
-    void MeleeAttack()
+    protected virtual void MeleeAttack()
     {
         shootTimer = 0;
+        if (gameManager.instance == null || gameManager.instance.player == null) { return; }
+
         IDamage dmg = gameManager.instance.player.GetComponent<IDamage>();
         if (dmg != null)
         {
