@@ -13,14 +13,19 @@ public class UpgradeTable : MonoBehaviour, IInteract
     {
 
         upgradeWindow = FindAnyObjectByType<UpgradeUI>(FindObjectsInactive.Include);
-        if (upgradeWindow == null) { Debug.LogWarning("Table cannont find the ui"); }
+        if (upgradeWindow == null) {
+           //Debug.LogWarning("Table cannont find the ui"); 
+            return; 
+        }
 
     }
 
     public void SendInteract(Collider target)
     {
         if(upgradeWindow != null && tableInventory.Count > 0){ upgradeWindow.OpenPanelMulti(tableInventory, this); }
-        else { Debug.LogWarning("Table empty or missing its ui window"); }
+        else {
+           //Debug.LogWarning("Table empty or missing its ui window"); 
+        }
 
     }
 
@@ -42,7 +47,7 @@ public class UpgradeTable : MonoBehaviour, IInteract
 
         if (itemComponent == null || itemComponent.item == null)
         {
-            Debug.LogError("The object dropped in Required Item is missing an Item script or its scriptable data slot");
+            //Debug.LogError("The object dropped in Required Item is missing an Item script or its scriptable data slot");
             return;
         }
 
@@ -80,19 +85,19 @@ public class UpgradeTable : MonoBehaviour, IInteract
                 if (gunType.Contains("pistol"))
                 {
                     ctrler.pistolDamageMultiplier += upgradeAmount;
-                    gameManager.instance.ToastMenu(true, $"Pistol upgraded to x{ctrler.pistolDamageMultiplier}");
+                    //gameManager.instance.ToastMenu(true, $"Pistol upgraded to x{ctrler.pistolDamageMultiplier}");
                     //Debug.Log($"Pistol upgraded to {ctrler.pistolDamageMultiplier}x");
                 }
                 else if (gunType.Contains("rifle"))
                 {
                     ctrler.rifleDamageMultiplier += upgradeAmount;
-                    gameManager.instance.ToastMenu(true, $"Rifle upgraded to {ctrler.rifleDamageMultiplier}x");
+                    //gameManager.instance.ToastMenu(true, $"Rifle upgraded to {ctrler.rifleDamageMultiplier}x");
                     //Debug.Log($"Rifle upgraded to {ctrler.rifleDamageMultiplier}x");
                 }
                 else if (gunType.Contains("shotgun"))
                 {
                     ctrler.shotgunDamageMultiplier += upgradeAmount;
-                    gameManager.instance.ToastMenu(true, $"Shotgun upgraded to {ctrler.shotgunDamageMultiplier}x");
+                    //gameManager.instance.ToastMenu(true, $"Shotgun upgraded to {ctrler.shotgunDamageMultiplier}x");
                     //Debug.Log($"Shotgun upgraded to {ctrler.shotgunDamageMultiplier}x");
                 }
             }
