@@ -424,7 +424,7 @@ public class enemyAI : MonoBehaviour, IDamage
     //==========================================================================================
     // Function, Can See Player
     //==========================================================================================
-    bool canSeePlayer() {
+    protected virtual bool canSeePlayer() {
         shootTimer += Time.deltaTime;
         playerDir = gameManager.instance.player.transform.position - transform.position;
         angleToPlayer = Vector3.Angle(playerDir, transform.forward);
