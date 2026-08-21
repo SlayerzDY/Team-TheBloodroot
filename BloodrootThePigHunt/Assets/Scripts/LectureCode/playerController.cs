@@ -205,11 +205,12 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     // Function, Shoot
     //==========================================================================================
     void shoot() {
+        if (gunInv == null) { return; }
+        if (gunInv[gunInvPos] == null) { return; }
         shootTimer = 0;
         gunInv[gunInvPos].ammoCurr--;
         ScoreboardManager.GetOrCreate().AddShotFired();
         updatePlayerAmmo();
-
         if (gunInv[gunInvPos].shootSound.Count() > 0) {
             if (gunInv[gunInvPos].shootSound.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(gunInv[gunInvPos].shootSound[Random.Range(0, gunInv[gunInvPos].shootSound.Length)], gunInv[gunInvPos].shootSoundVolume); }
             int randomInt = Random.Range(0, gunInv[gunInvPos].shootSound.Count());
