@@ -128,9 +128,9 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         playerVel.y -= gravity * Time.deltaTime;
         shootTimer += Time.deltaTime;
         if (Input.GetButton("Fire1") && gunInv.Count > 0 && gunInv[gunInvPos].ammoCurr > 0 && shootTimer > gunInv[gunInvPos].shootRate) { shoot(); }
-        if (gunInv.Count > 0) {
-            Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * gunInv[gunInvPos].shootDistance, Color.red);
-        }
+        //if (gunInv.Count > 0) {
+        //    Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * gunInv[gunInvPos].shootDistance, Color.red);
+        //}
         reload();
     }
     //==========================================================================================

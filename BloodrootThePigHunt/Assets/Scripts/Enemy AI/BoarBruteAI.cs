@@ -83,8 +83,10 @@ public class BoarBruteAI : enemyAI
                 waypoint = transform.position;
             }
             agent.SetDestination(waypoint);
-            while (agent.pathPending || agent.remainingDistance > waypointTolerance) {
-                yield return null;
+            if (agent != null) {
+                while (agent.pathPending || agent.remainingDistance > waypointTolerance) {
+                    yield return null;
+                }
             }
         }
         shouldUpdate = true;

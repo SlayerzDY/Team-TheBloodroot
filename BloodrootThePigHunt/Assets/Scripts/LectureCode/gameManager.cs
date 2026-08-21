@@ -117,9 +117,9 @@ public class gameManager : MonoBehaviour
         timeScaleOrig = GetPlayableTimeScale(Time.timeScale);
         //ScoreboardManager.GetOrCreate();
 
-        timeText.gameObject.SetActive(false);
+       // timeText.gameObject.SetActive(false);
         enemyCountText.gameObject.SetActive(false);
-        congratulations.gameObject.SetActive(false);
+        //congratulations.gameObject.SetActive(false);
 
         //start game with the dense with x amount of enemies
         RootInteraction = FindAnyObjectByType<TreeRootInteraction>();
