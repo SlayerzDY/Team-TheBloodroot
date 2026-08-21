@@ -15,18 +15,18 @@ RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 10
   m_Fog: 1
-  m_FogColor: {r: 0.015686275, g: 0.015686275, b: 0.015686275, a: 1}
+  m_FogColor: {r: 0.34, g: 0.39, b: 0.43, a: 1}
   m_FogMode: 3
-  m_FogDensity: 0.1
+  m_FogDensity: 0.012
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
-  m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
-  m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
-  m_AmbientIntensity: 0.7
-  m_AmbientMode: 0
+  m_AmbientSkyColor: {r: 0.42, g: 0.52, b: 0.65, a: 1}
+  m_AmbientEquatorColor: {r: 0.31, g: 0.3, b: 0.29, a: 1}
+  m_AmbientGroundColor: {r: 0.12, g: 0.1, b: 0.09, a: 1}
+  m_AmbientIntensity: 0.78
+  m_AmbientMode: 1
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 2100000, guid: d3886cd0f3973e043a3d057403a0a1e9, type: 2}
+  m_SkyboxMaterial: {fileID: 2100000, guid: ec47e5325cf52014e84f9f0bbb066b9b, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -35,7 +35,7 @@ RenderSettings:
   m_DefaultReflectionMode: 0
   m_DefaultReflectionResolution: 128
   m_ReflectionBounces: 1
-  m_ReflectionIntensity: 1
+  m_ReflectionIntensity: 0.72
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 1952074883}
   m_UseRadianceAmbientProbe: 0
@@ -1036,6 +1036,55 @@ Transform:
   - {fileID: 71467171}
   m_Father: {fileID: 245223461}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &100291461
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 100291462}
+  - component: {fileID: 100291463}
+  m_Layer: 0
+  m_Name: Farm_Prologue_Dawn Volume
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &100291462
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100291461}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 343835642}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &100291463
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100291461}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.Volume
+  m_IsGlobal: 1
+  priority: 10
+  blendDistance: 0
+  weight: 1
+  sharedProfile: {fileID: 11400000, guid: a85028fcfd9685747a500cd3453a7bd4, type: 2}
 --- !u!1 &101967243
 GameObject:
   m_ObjectHideFlags: 0
@@ -2970,6 +3019,89 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &343835641
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 343835642}
+  - component: {fileID: 343835643}
+  m_Layer: 0
+  m_Name: Campaign Environment Transitions
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &343835642
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343835641}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 100291462}
+  - {fileID: 1092802178}
+  m_Father: {fileID: 1405029322}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &343835643
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343835641}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8ec1ab4e11441c5b55eea8d96f98916, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Campaign.CampaignEnvironmentTransitionController
+  mode: 0
+  campaignState: {fileID: 1856517580}
+  farmPrologueDirector: {fileID: 2021236491}
+  regionalRespawn: {fileID: 0}
+  directionalLight: {fileID: 1952074883}
+  farmProloguePreset:
+    id: farm_prologue_dawn
+    skybox: {fileID: 2100000, guid: ec47e5325cf52014e84f9f0bbb066b9b, type: 2}
+    postProcessVolume: {fileID: 100291463}
+    fogColor: {r: 0.34, g: 0.39, b: 0.43, a: 1}
+    fogDensity: 0.012
+    ambientSkyColor: {r: 0.42, g: 0.52, b: 0.65, a: 1}
+    ambientEquatorColor: {r: 0.31, g: 0.3, b: 0.29, a: 1}
+    ambientGroundColor: {r: 0.12, g: 0.1, b: 0.09, a: 1}
+    ambientIntensity: 0.78
+    reflectionIntensity: 0.72
+    sunColor: {r: 1, g: 0.72, b: 0.48, a: 1}
+    sunIntensity: 0.82
+    sunEulerAngles: {x: 18, y: -42, z: 0}
+  farmHubPreset:
+    id: farm_hub_clear_day
+    skybox: {fileID: 2100000, guid: e90e3128f8aead747bd03c59b043025f, type: 2}
+    postProcessVolume: {fileID: 1092802179}
+    fogColor: {r: 0.55, g: 0.65, b: 0.68, a: 1}
+    fogDensity: 0.0045
+    ambientSkyColor: {r: 0.53, g: 0.68, b: 0.85, a: 1}
+    ambientEquatorColor: {r: 0.38, g: 0.4, b: 0.36, a: 1}
+    ambientGroundColor: {r: 0.17, g: 0.15, b: 0.1, a: 1}
+    ambientIntensity: 1.05
+    reflectionIntensity: 0.9
+    sunColor: {r: 1, g: 0.93, b: 0.74, a: 1}
+    sunIntensity: 1.15
+    sunEulerAngles: {x: 42, y: -28, z: 0}
+  areaBindings: []
+  transitionSeconds: 8
+  areaPollSeconds: 0.25
+  areaSwitchHysteresis: 25
 --- !u!1 &348828946
 GameObject:
   m_ObjectHideFlags: 0
@@ -7535,6 +7667,55 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1083859519}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1092802177
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1092802178}
+  - component: {fileID: 1092802179}
+  m_Layer: 0
+  m_Name: Farm_Hub_Clear_Day Volume
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1092802178
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1092802177}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 343835642}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1092802179
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1092802177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.Volume
+  m_IsGlobal: 1
+  priority: 10
+  blendDistance: 0
+  weight: 0
+  sharedProfile: {fileID: 11400000, guid: f1b1a3ba6f3448d45a371e91a2d3306f, type: 2}
 --- !u!1001 &1096378776
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9663,6 +9844,7 @@ Transform:
   - {fileID: 2021236490}
   - {fileID: 144002438}
   - {fileID: 661002919}
+  - {fileID: 343835642}
   m_Father: {fileID: 1511424113}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1408319779
@@ -10645,8 +10827,8 @@ MonoBehaviour:
   emergencePresenter: {fileID: 1990117647}
   enemyPrefabs:
   - {fileID: 5464231581442848068, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
-  - {fileID: 5464231581442848068, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
   - {fileID: 1257640432060249498, guid: e81ccd077fe525944bd95804a17261ee, type: 3}
+  - {fileID: 923992382883873659, guid: 309e4ba5d962b7a4a9d2a8630fd81b80, type: 3}
   spawnPoints:
   - {fileID: 723085777}
   - {fileID: 734993158}
@@ -16016,13 +16198,17 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7548158578991970889, guid: ab42b32f9dceab542844f62f9e2157a6, type: 3}
+      propertyPath: regularPig
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 7548158578991970889, guid: ab42b32f9dceab542844f62f9e2157a6, type: 3}
       propertyPath: 'enemies.Array.data[1]'
       value: 
-      objectReference: {fileID: 5464231581442848068, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
+      objectReference: {fileID: 1257640432060249498, guid: e81ccd077fe525944bd95804a17261ee, type: 3}
     - target: {fileID: 7548158578991970889, guid: ab42b32f9dceab542844f62f9e2157a6, type: 3}
       propertyPath: 'enemies.Array.data[2]'
       value: 
-      objectReference: {fileID: 1257640432060249498, guid: e81ccd077fe525944bd95804a17261ee, type: 3}
+      objectReference: {fileID: 923992382883873659, guid: 309e4ba5d962b7a4a9d2a8630fd81b80, type: 3}
     - target: {fileID: 7548158578991970889, guid: ab42b32f9dceab542844f62f9e2157a6, type: 3}
       propertyPath: 'spawnPoint.Array.data[0]'
       value: 
@@ -17032,6 +17218,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4176485451477973714, guid: dbf9f57a10d9273488cd78009bf5c1e2, type: 3}
+      propertyPath: m_Color.b
+      value: 0.48
+      objectReference: {fileID: 0}
+    - target: {fileID: 4176485451477973714, guid: dbf9f57a10d9273488cd78009bf5c1e2, type: 3}
+      propertyPath: m_Color.g
+      value: 0.72
+      objectReference: {fileID: 0}
+    - target: {fileID: 4176485451477973714, guid: dbf9f57a10d9273488cd78009bf5c1e2, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4176485451477973714, guid: dbf9f57a10d9273488cd78009bf5c1e2, type: 3}
+      propertyPath: m_Intensity
+      value: 0.82
+      objectReference: {fileID: 0}
     - target: {fileID: 4649726420558359675, guid: dbf9f57a10d9273488cd78009bf5c1e2, type: 3}
       propertyPath: m_Name
       value: Moon
@@ -17050,19 +17252,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8543742572003526017, guid: dbf9f57a10d9273488cd78009bf5c1e2, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.7102641
+      value: 0.9220865
       objectReference: {fileID: 0}
     - target: {fileID: 8543742572003526017, guid: dbf9f57a10d9273488cd78009bf5c1e2, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.59598225
+      value: 0.14604418
       objectReference: {fileID: 0}
     - target: {fileID: 8543742572003526017, guid: dbf9f57a10d9273488cd78009bf5c1e2, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.24079241
+      value: -0.35395586
       objectReference: {fileID: 0}
     - target: {fileID: 8543742572003526017, guid: dbf9f57a10d9273488cd78009bf5c1e2, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.28696525
+      value: 0.056061108
       objectReference: {fileID: 0}
     - target: {fileID: 8543742572003526017, guid: dbf9f57a10d9273488cd78009bf5c1e2, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

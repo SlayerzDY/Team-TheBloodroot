@@ -15,18 +15,18 @@ RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 10
   m_Fog: 1
-  m_FogColor: {r: 0.095, g: 0.12, b: 0.13, a: 1}
+  m_FogColor: {r: 0.105, g: 0.16, b: 0.145, a: 1}
   m_FogMode: 3
-  m_FogDensity: 0.0025
+  m_FogDensity: 0.017
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 0.24, g: 0.29, b: 0.31, a: 1}
-  m_AmbientEquatorColor: {r: 0.12, g: 0.14, b: 0.13, a: 1}
-  m_AmbientGroundColor: {r: 0.045, g: 0.05, b: 0.04, a: 1}
-  m_AmbientIntensity: 1
+  m_AmbientSkyColor: {r: 0.16, g: 0.27, b: 0.27, a: 1}
+  m_AmbientEquatorColor: {r: 0.09, g: 0.13, b: 0.11, a: 1}
+  m_AmbientGroundColor: {r: 0.025, g: 0.04, b: 0.03, a: 1}
+  m_AmbientIntensity: 0.62
   m_AmbientMode: 1
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 2100000, guid: cba07b5fdaa69204dbc8d30b9fdad684, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -35,9 +35,9 @@ RenderSettings:
   m_DefaultReflectionMode: 0
   m_DefaultReflectionResolution: 128
   m_ReflectionBounces: 1
-  m_ReflectionIntensity: 1
+  m_ReflectionIntensity: 0.55
   m_CustomReflection: {fileID: 0}
-  m_Sun: {fileID: 0}
+  m_Sun: {fileID: 1198836929}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -2693,6 +2693,155 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4498163726568028487, guid: e34ba2f050775d14383bc3e6e892e2a2, type: 3}
   m_PrefabInstance: {fileID: 81091643}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &81562734
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 81562735}
+  - component: {fileID: 81562736}
+  m_Layer: 0
+  m_Name: Campaign Environment Transitions
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &81562735
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 81562734}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1402850883}
+  - {fileID: 343835642}
+  - {fileID: 100291462}
+  - {fileID: 1092802178}
+  m_Father: {fileID: 267515338}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &81562736
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 81562734}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8ec1ab4e11441c5b55eea8d96f98916, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Campaign.CampaignEnvironmentTransitionController
+  mode: 1
+  campaignState: {fileID: 1371637646}
+  farmPrologueDirector: {fileID: 0}
+  regionalRespawn: {fileID: 1955614270}
+  directionalLight: {fileID: 1198836929}
+  farmProloguePreset:
+    id: 
+    skybox: {fileID: 0}
+    postProcessVolume: {fileID: 0}
+    fogColor: {r: 0, g: 0, b: 0, a: 0}
+    fogDensity: 0
+    ambientSkyColor: {r: 0, g: 0, b: 0, a: 0}
+    ambientEquatorColor: {r: 0, g: 0, b: 0, a: 0}
+    ambientGroundColor: {r: 0, g: 0, b: 0, a: 0}
+    ambientIntensity: 0
+    reflectionIntensity: 0
+    sunColor: {r: 0, g: 0, b: 0, a: 0}
+    sunIntensity: 0
+    sunEulerAngles: {x: 0, y: 0, z: 0}
+  farmHubPreset:
+    id: 
+    skybox: {fileID: 0}
+    postProcessVolume: {fileID: 0}
+    fogColor: {r: 0, g: 0, b: 0, a: 0}
+    fogDensity: 0
+    ambientSkyColor: {r: 0, g: 0, b: 0, a: 0}
+    ambientEquatorColor: {r: 0, g: 0, b: 0, a: 0}
+    ambientGroundColor: {r: 0, g: 0, b: 0, a: 0}
+    ambientIntensity: 0
+    reflectionIntensity: 0
+    sunColor: {r: 0, g: 0, b: 0, a: 0}
+    sunIntensity: 0
+    sunEulerAngles: {x: 0, y: 0, z: 0}
+  areaBindings:
+  - area: 0
+    anchor: {fileID: 1333036096}
+    preset:
+      id: black_pines_forest
+      skybox: {fileID: 2100000, guid: cba07b5fdaa69204dbc8d30b9fdad684, type: 2}
+      postProcessVolume: {fileID: 1402850884}
+      fogColor: {r: 0.105, g: 0.16, b: 0.145, a: 1}
+      fogDensity: 0.017
+      ambientSkyColor: {r: 0.16, g: 0.27, b: 0.27, a: 1}
+      ambientEquatorColor: {r: 0.09, g: 0.13, b: 0.11, a: 1}
+      ambientGroundColor: {r: 0.025, g: 0.04, b: 0.03, a: 1}
+      ambientIntensity: 0.62
+      reflectionIntensity: 0.55
+      sunColor: {r: 0.7, g: 0.8, b: 0.72, a: 1}
+      sunIntensity: 0.58
+      sunEulerAngles: {x: 28, y: 22, z: 0}
+  - area: 1
+    anchor: {fileID: 2125608277}
+    preset:
+      id: stillwater_industrial_haze
+      skybox: {fileID: 2100000, guid: c38e36800e8aecf499e09f5856c3a123, type: 2}
+      postProcessVolume: {fileID: 343835643}
+      fogColor: {r: 0.3, g: 0.25, b: 0.15, a: 1}
+      fogDensity: 0.013
+      ambientSkyColor: {r: 0.48, g: 0.38, b: 0.22, a: 1}
+      ambientEquatorColor: {r: 0.28, g: 0.23, b: 0.15, a: 1}
+      ambientGroundColor: {r: 0.09, g: 0.065, b: 0.035, a: 1}
+      ambientIntensity: 0.75
+      reflectionIntensity: 0.63
+      sunColor: {r: 1, g: 0.62, b: 0.31, a: 1}
+      sunIntensity: 0.78
+      sunEulerAngles: {x: 21, y: -112, z: 0}
+  - area: 2
+    anchor: {fileID: 265126847}
+    preset:
+      id: harrow_estate_dusk
+      skybox: {fileID: 2100000, guid: 876255b44b7c3ab4b959db0e6d363ee9, type: 2}
+      postProcessVolume: {fileID: 100291463}
+      fogColor: {r: 0.17, g: 0.12, b: 0.23, a: 1}
+      fogDensity: 0.015
+      ambientSkyColor: {r: 0.27, g: 0.2, b: 0.4, a: 1}
+      ambientEquatorColor: {r: 0.14, g: 0.11, b: 0.2, a: 1}
+      ambientGroundColor: {r: 0.045, g: 0.032, b: 0.068, a: 1}
+      ambientIntensity: 0.61
+      reflectionIntensity: 0.48
+      sunColor: {r: 0.82, g: 0.55, b: 0.83, a: 1}
+      sunIntensity: 0.54
+      sunEulerAngles: {x: 12, y: 146, z: 0}
+  - area: 3
+    anchor: {fileID: 1308975904}
+    preset:
+      id: bloodroot_hollow_crimson
+      skybox: {fileID: 2100000, guid: 39168d37645f0f64d91e2f96f2a3f5b4, type: 2}
+      postProcessVolume: {fileID: 1092802179}
+      fogColor: {r: 0.17, g: 0.018, b: 0.025, a: 1}
+      fogDensity: 0.022
+      ambientSkyColor: {r: 0.3, g: 0.035, b: 0.055, a: 1}
+      ambientEquatorColor: {r: 0.13, g: 0.015, b: 0.025, a: 1}
+      ambientGroundColor: {r: 0.025, g: 0.004, b: 0.007, a: 1}
+      ambientIntensity: 0.47
+      reflectionIntensity: 0.35
+      sunColor: {r: 1, g: 0.18, b: 0.13, a: 1}
+      sunIntensity: 0.42
+      sunEulerAngles: {x: 8, y: -168, z: 0}
+  transitionSeconds: 8
+  areaPollSeconds: 0.25
+  areaSwitchHysteresis: 25
 --- !u!1001 &81772152
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3480,6 +3629,55 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1921174452}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &100291461
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 100291462}
+  - component: {fileID: 100291463}
+  m_Layer: 0
+  m_Name: Harrow_Estate_Dusk Volume
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &100291462
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100291461}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 81562735}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &100291463
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100291461}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.Volume
+  m_IsGlobal: 1
+  priority: 10
+  blendDistance: 0
+  weight: 0
+  sharedProfile: {fileID: 11400000, guid: de3914eeb311f0649a1aa71e64301e63, type: 2}
 --- !u!1001 &108290975
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -22286,6 +22484,7 @@ Transform:
   - {fileID: 1198836928}
   - {fileID: 70211358}
   - {fileID: 2004047399}
+  - {fileID: 81562735}
   m_Father: {fileID: 239708853}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &268044694
@@ -28992,6 +29191,55 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 9166281976291975520, guid: e50124c9152a7c844a3a1d83ded10153, type: 3}
   m_PrefabInstance: {fileID: 340976080}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &343835641
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 343835642}
+  - component: {fileID: 343835643}
+  m_Layer: 0
+  m_Name: Stillwater_Industrial_Haze Volume
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &343835642
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343835641}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 81562735}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &343835643
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343835641}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.Volume
+  m_IsGlobal: 1
+  priority: 10
+  blendDistance: 0
+  weight: 0
+  sharedProfile: {fileID: 11400000, guid: 416608280fb2a3b418b7dccea9d7c5b8, type: 2}
 --- !u!1001 &346951141
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -64328,6 +64576,55 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4376346709518956129, guid: b356054ae213e4c46aed9aa632df1810, type: 3}
   m_PrefabInstance: {fileID: 1092209777}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1092802177
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1092802178}
+  - component: {fileID: 1092802179}
+  m_Layer: 0
+  m_Name: Bloodroot_Hollow_Crimson Volume
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1092802178
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1092802177}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 81562735}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1092802179
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1092802177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.Volume
+  m_IsGlobal: 1
+  priority: 10
+  blendDistance: 0
+  weight: 0
+  sharedProfile: {fileID: 11400000, guid: c4cdf75cf57eb594c9b1971256afe0bf, type: 2}
 --- !u!1001 &1092912442
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -71642,7 +71939,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1198836927}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.42534965, y: -0.21743797, z: 0.10605158, w: 0.872096}
+  m_LocalRotation: {x: 0.23747712, y: 0.18514118, z: -0.04616088, w: 0.9524687}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -71659,8 +71956,8 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 1
-  m_Color: {r: 0.78, g: 0.84, b: 0.88, a: 1}
-  m_Intensity: 1.1
+  m_Color: {r: 0.7, g: 0.8, b: 0.72, a: 1}
+  m_Intensity: 0.58
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -82029,6 +82326,55 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1709125784205181019, guid: 9b71593cb811a934dbd78a8ab9938290, type: 3}
   m_PrefabInstance: {fileID: 1402259806}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1402850882
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1402850883}
+  - component: {fileID: 1402850884}
+  m_Layer: 0
+  m_Name: Black_Pines_Forest Volume
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1402850883
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1402850882}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 81562735}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1402850884
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1402850882}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.Volume
+  m_IsGlobal: 1
+  priority: 10
+  blendDistance: 0
+  weight: 1
+  sharedProfile: {fileID: 11400000, guid: 0cc0723692236a44983c3ee0b897359b, type: 2}
 --- !u!1001 &1407808057
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -82549,7 +82895,7 @@ MonoBehaviour:
   spawns:
   - enemyPrefab: {fileID: 5464231581442848068, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
     spawnPoint: {fileID: 1995120424}
-  - enemyPrefab: {fileID: 5464231581442848068, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
+  - enemyPrefab: {fileID: 923992382883873659, guid: 309e4ba5d962b7a4a9d2a8630fd81b80, type: 3}
     spawnPoint: {fileID: 1263755956}
   difficultyLevel: 3
   navMeshSampleRadius: 6
@@ -115495,7 +115841,7 @@ MonoBehaviour:
   disableTriggerAfterSpawn: 1
   runtimeContainer: {fileID: 849483225}
   spawns:
-  - enemyPrefab: {fileID: 1257640432060249498, guid: e81ccd077fe525944bd95804a17261ee, type: 3}
+  - enemyPrefab: {fileID: 923992382883873659, guid: 309e4ba5d962b7a4a9d2a8630fd81b80, type: 3}
     spawnPoint: {fileID: 951588208}
   difficultyLevel: 4
   navMeshSampleRadius: 6

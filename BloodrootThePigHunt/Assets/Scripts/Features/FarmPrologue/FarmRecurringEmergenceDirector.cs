@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using Bloodroot.Campaign;
 using Bloodroot.Features.AlphaEnemies;
 using UnityEngine;
-using UnityEngine.AI;
 using UnityEngine.Events;
 
 namespace Bloodroot.Features.FarmPrologue
@@ -181,20 +180,19 @@ namespace Bloodroot.Features.FarmPrologue
             }
 
             if (enemyPrefabs == null || enemyPrefabs.Length != 3 ||
-                enemyPrefabs[0] == null ||
-                enemyPrefabs[0] != enemyPrefabs[1] ||
-                enemyPrefabs[2] == null ||
-                enemyPrefabs[2] == enemyPrefabs[0] ||
-                !HasExactRecurringBoarPrefab(
+                !HasExactRecurringEnemyPrefab(
                     enemyPrefabs[0],
                     typeof(global::BoarBruteAI)) ||
-                !HasExactRecurringBoarPrefab(
+                !HasExactRecurringEnemyPrefab(
+                    enemyPrefabs[1],
+                    typeof(global::BoarBruteRootAI)) ||
+                !HasExactRecurringEnemyPrefab(
                     enemyPrefabs[2],
-                    typeof(global::BoarBruteRootAI)))
+                    typeof(global::juggernautEnemyAI)))
             {
                 error =
                     "Recurring Farm emergence requires the exact ordered " +
-                    "Boar, Boar, Boar Root prefab roster.";
+                    "regular Boar, Root Boar, Juggernaut prefab roster.";
                 return false;
             }
 
@@ -218,30 +216,17 @@ namespace Bloodroot.Features.FarmPrologue
             return true;
         }
 
-        private static bool HasExactRecurringBoarPrefab(
+        private static bool HasExactRecurringEnemyPrefab(
             GameObject prefab,
             Type expectedControllerType)
         {
-            if (prefab == null)
-                return false;
-
-            global::enemyAI[] controllers =
-                prefab.GetComponents<global::enemyAI>();
-            NavMeshAgent[] agents = prefab.GetComponents<NavMeshAgent>();
-            Animator[] animators =
-                prefab.GetComponentsInChildren<Animator>(true);
-            return controllers.Length == 1 && controllers[0].enabled &&
-                   controllers[0].GetType() == expectedControllerType &&
-                   controllers[0].transform == prefab.transform &&
-                   agents.Length == 1 && agents[0].enabled &&
-                   agents[0].transform == prefab.transform &&
-                   agents[0].agentTypeID == 0 &&
-                   (agents[0].areaMask & 1) != 0 &&
-                   Mathf.Abs(agents[0].radius - 0.5f) <= 0.001f &&
-                   Mathf.Abs(agents[0].height - 2f) <= 0.001f &&
-                   animators.Length == 1 && animators[0].enabled &&
-                   (controllers[0].animator == null ||
-                    controllers[0].animator == animators[0]);
+            return CampaignSafetyEnemyRuntimeAdapter.TryValidatePrefab(
+                       prefab,
+                       out Component controller,
+                       out _,
+                       out _,
+                       out _) &&
+                   controller.GetType() == expectedControllerType;
         }
 
         public static int GetEnemyCountForOffering(string offeringId)
@@ -406,7 +391,7 @@ namespace Bloodroot.Features.FarmPrologue
             {
                 FailWithoutCompleting(
                     offeringId,
-                    $"Root offering '{offeringId}' has no recurring Boar difficulty definition.");
+                    $"Root offering '{offeringId}' has no recurring enemy difficulty definition.");
                 yield break;
             }
 
@@ -418,7 +403,7 @@ namespace Bloodroot.Features.FarmPrologue
             ownedEnemies.Clear();
 
             prologueDirector.PublishCampaignObjective(
-                $"The Root Tree is stirring. Defeat {enemyCount} emerging boars.",
+                $"The Root Tree is stirring. Defeat {enemyCount} emerging enemies.",
                 0,
                 enemyCount);
             FarmPrologueEventUtility.Invoke(
@@ -503,7 +488,7 @@ namespace Bloodroot.Features.FarmPrologue
                     0,
                     enemyCount - liveMarkers.Count);
                 prologueDirector.PublishCampaignObjective(
-                    "Defeat the cursed boars emerging from the Root Tree.",
+                    "Defeat the cursed enemies emerging from the Root Tree.",
                     defeated,
                     enemyCount);
                 yield return null;
@@ -752,38 +737,19 @@ namespace Bloodroot.Features.FarmPrologue
             GameObject enemy,
             int difficulty)
         {
-            global::enemyAI[] controllers = enemy != null
-                ? enemy.GetComponents<global::enemyAI>()
-                : Array.Empty<global::enemyAI>();
-            NavMeshAgent[] agents = enemy != null
-                ? enemy.GetComponents<NavMeshAgent>()
-                : Array.Empty<NavMeshAgent>();
-            Animator[] animators = enemy != null
-                ? enemy.GetComponentsInChildren<Animator>(true)
-                : Array.Empty<Animator>();
-            global::enemyAI controller = controllers.Length == 1
-                ? controllers[0]
-                : null;
-            bool exactController = controller != null &&
-                (controller.GetType() == typeof(global::BoarBruteAI) ||
-                 controller.GetType() == typeof(global::BoarBruteRootAI));
-
-            if (!exactController || !controller.enabled ||
-                controllers.Length != 1 ||
-                agents.Length != 1 || !agents[0].enabled ||
-                agents[0].agentTypeID != 0 ||
-                (agents[0].areaMask & 1) == 0 ||
-                Mathf.Abs(agents[0].radius - 0.5f) > 0.001f ||
-                Mathf.Abs(agents[0].height - 2f) > 0.001f ||
-                animators.Length != 1 || !animators[0].enabled ||
-                (controller.animator != null &&
-                 controller.animator != animators[0]) ||
-                difficulty < 1 || difficulty > 5)
+            if (difficulty < 1 || difficulty > 5)
             {
                 throw new InvalidOperationException(
-                    "A recurring Farm enemy must retain the exact root " +
-                    "BoarBruteAI or BoarBruteRootAI, Humanoid NavMeshAgent, " +
-                    "enabled Animator, and Name Stone difficulty contract.");
+                    "A recurring Farm enemy requires a Name Stone difficulty from one through five.");
+            }
+
+            if (!CampaignSafetyEnemyRuntimeAdapter
+                    .TryGetExactAllowedController(
+                        enemy,
+                        out Component controller,
+                        out string controllerError))
+            {
+                throw new InvalidOperationException(controllerError);
             }
 
             if (!CampaignSafetyEnemyRuntimeAdapter.TryPrepare(
@@ -793,7 +759,13 @@ namespace Bloodroot.Features.FarmPrologue
                 throw new InvalidOperationException(compatibilityError);
             }
 
-            controller.InitializeEnemy(difficulty);
+            if (!CampaignSafetyEnemyRuntimeAdapter.TryInitialize(
+                    controller,
+                    difficulty,
+                    out string initializationError))
+            {
+                throw new InvalidOperationException(initializationError);
+            }
         }
 
         private void ResetRuntimeState()

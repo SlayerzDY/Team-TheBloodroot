@@ -212,7 +212,45 @@ namespace Bloodroot.Features.FarmPrologue
 
         private void PresentEnemyEmergence(GameObject spawnedEnemy)
         {
+            PreparePrologueWaveJuggernaut(spawnedEnemy);
             PresentExternalEnemy(spawnedEnemy);
+        }
+
+        private void PreparePrologueWaveJuggernaut(GameObject spawnedEnemy)
+        {
+            if (spawnedEnemy == null ||
+                !CampaignSafetyEnemyRuntimeAdapter
+                    .TryGetExactAllowedController(
+                        spawnedEnemy,
+                        out Component controller,
+                        out _) ||
+                controller.GetType() !=
+                    typeof(global::juggernautEnemyAI))
+            {
+                return;
+            }
+
+            if (!CampaignSafetyEnemyRuntimeAdapter.TryPrepare(
+                    spawnedEnemy,
+                    out string preparationError))
+            {
+                Debug.LogError(
+                    "The prologue Juggernaut failed its campaign spawn " +
+                    $"contract. {preparationError}",
+                    spawnedEnemy);
+                return;
+            }
+
+            if (!CampaignSafetyEnemyRuntimeAdapter.TryInitialize(
+                    controller,
+                    Mathf.Max(1, waveEncounter.currentWave),
+                    out string initializationError))
+            {
+                Debug.LogError(
+                    "The prologue Juggernaut could not apply wave " +
+                    $"difficulty. {initializationError}",
+                    spawnedEnemy);
+            }
         }
 
         /// <summary>
@@ -357,6 +395,17 @@ namespace Bloodroot.Features.FarmPrologue
                 if (chargeAI != null && uniqueBehaviours.Add(chargeAI))
                 {
                     movementBehaviours.Add(chargeAI);
+                }
+            }
+
+            foreach (juggernautEnemyAI juggernaut in
+                     spawnedEnemy.GetComponentsInChildren<juggernautEnemyAI>(
+                         true))
+            {
+                if (juggernaut != null &&
+                    uniqueBehaviours.Add(juggernaut))
+                {
+                    movementBehaviours.Add(juggernaut);
                 }
             }
 

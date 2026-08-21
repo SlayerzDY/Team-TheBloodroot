@@ -745,18 +745,38 @@ namespace Bloodroot.Features.AlphaEnemies
             if (prefab == null || spawnPoint == null)
             {
                 nextSummonAt = Time.time + summonCooldown;
+                if (prefab == null)
+                {
+                    Debug.LogWarning(
+                        $"{name}: Witch summoning requires an exact regular " +
+                        "Boar prefab. Root Boar, Juggernaut, and legacy hog " +
+                        "prefabs are rejected.",
+                        this);
+                }
                 return false;
             }
 
-            NavMeshAgent authoredAgent = prefab.GetComponent<NavMeshAgent>();
+            if (!CampaignSafetyEnemyRuntimeAdapter.TryValidatePrefab(
+                    prefab,
+                    out Component authoredController,
+                    out NavMeshAgent authoredAgent,
+                    out _,
+                    out string prefabError) ||
+                authoredController.GetType() !=
+                    typeof(global::BoarBruteAI))
+            {
+                nextSummonAt = Time.time + summonCooldown;
+                Debug.LogWarning(
+                    $"{name}: rejected a Witch minion outside the exact " +
+                    $"regular Boar contract. {prefabError}",
+                    this);
+                return false;
+            }
+
             NavMeshQueryFilter filter = new NavMeshQueryFilter
             {
-                agentTypeID = authoredAgent != null
-                    ? authoredAgent.agentTypeID
-                    : 0,
-                areaMask = authoredAgent != null
-                    ? authoredAgent.areaMask
-                    : NavMesh.AllAreas
+                agentTypeID = authoredAgent.agentTypeID,
+                areaMask = authoredAgent.areaMask
             };
             if (!NavMesh.SamplePosition(
                     spawnPoint.position,
@@ -779,10 +799,54 @@ namespace Bloodroot.Features.AlphaEnemies
                 prefab,
                 groundHit.position,
                 groundRotation);
-            NavMeshAgent spawnedAgent = minion.GetComponent<NavMeshAgent>();
-            if (spawnedAgent != null && spawnedAgent.enabled &&
-                !spawnedAgent.isOnNavMesh &&
-                !spawnedAgent.Warp(groundHit.position))
+
+            if (!CampaignSafetyEnemyRuntimeAdapter.TryPrepare(
+                    minion,
+                    out string preparationError))
+            {
+                Destroy(minion);
+                nextSummonAt = Time.time + summonCooldown;
+                Debug.LogWarning(
+                    $"{name}: the summoned regular Boar lost its campaign " +
+                    $"runtime contract and was discarded. {preparationError}",
+                    this);
+                return false;
+            }
+
+            if (!CampaignSafetyEnemyRuntimeAdapter
+                    .TryGetExactAllowedController(
+                        minion,
+                        out Component spawnedController,
+                        out string controllerError) ||
+                spawnedController.GetType() !=
+                    typeof(global::BoarBruteAI))
+            {
+                Destroy(minion);
+                nextSummonAt = Time.time + summonCooldown;
+                Debug.LogWarning(
+                    $"{name}: the summoned minion is not the exact regular " +
+                    $"Boar and was discarded. {controllerError}",
+                    this);
+                return false;
+            }
+
+            if (!CampaignSafetyEnemyRuntimeAdapter.TryGetAgent(
+                    minion,
+                    out NavMeshAgent spawnedAgent,
+                    out string agentError))
+            {
+                Destroy(minion);
+                nextSummonAt = Time.time + summonCooldown;
+                Debug.LogWarning(
+                    $"{name}: the summoned regular Boar lost its NavMesh " +
+                    $"contract and was discarded. {agentError}",
+                    this);
+                return false;
+            }
+
+            if (!spawnedAgent.isOnNavMesh &&
+                (!spawnedAgent.Warp(groundHit.position) ||
+                 !spawnedAgent.isOnNavMesh))
             {
                 Destroy(minion);
                 nextSummonAt = Time.time + summonCooldown;
@@ -792,8 +856,41 @@ namespace Bloodroot.Features.AlphaEnemies
                 return false;
             }
 
+            Transform minionTarget = secondaryAttackTarget != null
+                ? secondaryAttackTarget
+                : target;
+            Vector3 alertPosition = minionTarget != null
+                ? minionTarget.position
+                : transform.position;
+            if (!CampaignSafetyEnemyRuntimeAdapter.TryInitialize(
+                    spawnedController,
+                    difficultyLevel,
+                    out string initializationError))
+            {
+                Destroy(minion);
+                nextSummonAt = Time.time + summonCooldown;
+                Debug.LogWarning(
+                    $"{name}: the summoned regular Boar could not be " +
+                    $"initialized, so it was discarded. {initializationError}",
+                    this);
+                return false;
+            }
+
+            if (!CampaignSafetyEnemyRuntimeAdapter.TryAlert(
+                    spawnedController,
+                    alertPosition,
+                    out string alertError))
+            {
+                Destroy(minion);
+                nextSummonAt = Time.time + summonCooldown;
+                Debug.LogWarning(
+                    $"{name}: the summoned regular Boar could not be " +
+                    $"alerted, so it was discarded. {alertError}",
+                    this);
+                return false;
+            }
+
             activeMinions.Add(minion);
-            BindSpawnedMinion(minion);
             spawnPointIndex = (spawnPointIndex + 1) % minionSpawnPoints.Length;
             nextSummonAt = Time.time + summonCooldown;
             TriggerAnimator(summonTrigger);
@@ -803,77 +900,19 @@ namespace Bloodroot.Features.AlphaEnemies
             return true;
         }
 
-        private void BindSpawnedMinion(GameObject minion)
-        {
-            if (minion == null)
-            {
-                return;
-            }
-
-            Transform minionTarget = secondaryAttackTarget != null
-                ? secondaryAttackTarget
-                : target;
-            WitchSummonedHogAI summonedHog =
-                minion.GetComponent<WitchSummonedHogAI>();
-            if (summonedHog != null)
-            {
-                summonedHog.SetTarget(minionTarget);
-                summonedHog.ApplyDifficulty(
-                    difficultyLevel,
-                    healthScalar,
-                    damageScalar,
-                    speedScalar,
-                    true);
-                summonedHog.Died -= HandleSummonedHogDied;
-                summonedHog.Died += HandleSummonedHogDied;
-                return;
-            }
-
-            WereBoarController legacyMinion =
-                minion.GetComponent<WereBoarController>();
-            if (legacyMinion != null)
-            {
-                legacyMinion.SetTarget(minionTarget);
-                legacyMinion.ApplyDifficulty(
-                    difficultyLevel,
-                    healthScalar,
-                    damageScalar,
-                    speedScalar,
-                    true);
-                legacyMinion.Died -= HandleLegacyMinionDied;
-                legacyMinion.Died += HandleLegacyMinionDied;
-            }
-        }
-
-        private void HandleSummonedHogDied(WitchSummonedHogAI minion)
-        {
-            if (minion == null)
-            {
-                return;
-            }
-
-            minion.Died -= HandleSummonedHogDied;
-            activeMinions.Remove(minion.gameObject);
-        }
-
-        private void HandleLegacyMinionDied(WereBoarController minion)
-        {
-            if (minion == null)
-            {
-                return;
-            }
-
-            minion.Died -= HandleLegacyMinionDied;
-            activeMinions.Remove(minion.gameObject);
-        }
-
         private GameObject GetRandomConfiguredMinion()
         {
             int startIndex = UnityEngine.Random.Range(0, minionPrefabs.Length);
             for (int checkedCount = 0; checkedCount < minionPrefabs.Length; checkedCount++)
             {
                 GameObject prefab = minionPrefabs[(startIndex + checkedCount) % minionPrefabs.Length];
-                if (prefab != null)
+                if (CampaignSafetyEnemyRuntimeAdapter.TryValidatePrefab(
+                        prefab,
+                        out Component controller,
+                        out _,
+                        out _,
+                        out _) &&
+                    controller.GetType() == typeof(global::BoarBruteAI))
                 {
                     return prefab;
                 }
@@ -1037,21 +1076,12 @@ namespace Bloodroot.Features.AlphaEnemies
                 {
                     if (minion != null)
                     {
-                        UnbindSpawnedMinion(minion);
                         Destroy(minion);
                     }
                 }
 
                 activeMinions.Clear();
             }
-            else
-            {
-                foreach (GameObject minion in activeMinions)
-                {
-                    UnbindSpawnedMinion(minion);
-                }
-            }
-
             SpawnConfiguredLoot();
             AlphaEnemyEventUtility.Invoke(onDied, this, this, nameof(onDied));
             AlphaEnemyEventUtility.Invoke(Died, this, this, nameof(Died));
@@ -1062,28 +1092,6 @@ namespace Bloodroot.Features.AlphaEnemies
             else
             {
                 enabled = false;
-            }
-        }
-
-        private void UnbindSpawnedMinion(GameObject minion)
-        {
-            if (minion == null)
-            {
-                return;
-            }
-
-            WitchSummonedHogAI summonedHog =
-                minion.GetComponent<WitchSummonedHogAI>();
-            if (summonedHog != null)
-            {
-                summonedHog.Died -= HandleSummonedHogDied;
-            }
-
-            WereBoarController legacyMinion =
-                minion.GetComponent<WereBoarController>();
-            if (legacyMinion != null)
-            {
-                legacyMinion.Died -= HandleLegacyMinionDied;
             }
         }
 

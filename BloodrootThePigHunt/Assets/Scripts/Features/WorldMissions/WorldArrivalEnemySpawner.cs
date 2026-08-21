@@ -59,8 +59,8 @@ namespace Bloodroot.Features.WorldMissions
         [SerializeField] private UnityEvent enemiesSpawned = new UnityEvent();
 
         private readonly List<GameObject> spawnedEnemies = new List<GameObject>();
-        private readonly List<global::enemyAI> activeControllers =
-            new List<global::enemyAI>();
+        private readonly List<Component> activeControllers =
+            new List<Component>();
         private bool hasSpawned;
         private string lastFailure = string.Empty;
         private float nextAlertAt;
@@ -146,17 +146,24 @@ namespace Bloodroot.Features.WorldMissions
             Vector3 playerPosition = player.transform.position;
             for (int index = activeControllers.Count - 1; index >= 0; index--)
             {
-                global::enemyAI controller = activeControllers[index];
+                Component controller = activeControllers[index];
                 if (controller == null)
                 {
                     activeControllers.RemoveAt(index);
                     continue;
                 }
 
-                // Safety's enemyAI does not retain a world-relative roaming
-                // origin. Keeping finite arrival enemies alerted prevents a
-                // disengaged enemy from navigating toward world origin.
-                controller.Alert(playerPosition);
+                // Keep every finite arrival enemy alerted through the shared
+                // adapter. This preserves the Boars' world-relative roaming
+                // origin and reaches Juggernaut's protected alert contract.
+                if (!CampaignSafetyEnemyRuntimeAdapter.TryAlert(
+                        controller,
+                        playerPosition,
+                        out string alertError))
+                {
+                    activeControllers.RemoveAt(index);
+                    Debug.LogWarning(alertError, this);
+                }
             }
         }
 
@@ -248,22 +255,21 @@ namespace Bloodroot.Features.WorldMissions
                         $"{spawn.EnemyPrefab.name} (Arrival Spawn {index + 1:00})";
                     created.Add(instance);
 
-                    global::enemyAI controller = instance
-                        .GetComponentInChildren<global::enemyAI>(true);
-                    NavMeshAgent agent = instance
-                        .GetComponentInChildren<NavMeshAgent>(true);
-                    if (controller == null || agent == null)
+                    if (!CampaignSafetyEnemyRuntimeAdapter
+                            .TryGetExactAllowedController(
+                                instance,
+                                out Component controller,
+                                out string controllerError))
                     {
-                        throw new InvalidOperationException(
-                            $"Spawned enemy '{instance.name}' lost its exact " +
-                            "enemyAI/NavMeshAgent contract.");
+                        throw new InvalidOperationException(controllerError);
                     }
 
-                    if (!IsExactArrivalBoarController(controller))
+                    if (!CampaignSafetyEnemyRuntimeAdapter.TryGetAgent(
+                            instance,
+                            out NavMeshAgent agent,
+                            out string agentError))
                     {
-                        throw new InvalidOperationException(
-                            $"Spawned enemy '{instance.name}' is not the " +
-                            "authored Boar or Boar Root family.");
+                        throw new InvalidOperationException(agentError);
                     }
 
                     if (!CampaignSafetyEnemyRuntimeAdapter.TryPrepare(
@@ -283,8 +289,23 @@ namespace Bloodroot.Features.WorldMissions
                             "to the baked NavMesh.");
                     }
 
-                    controller.InitializeEnemy(difficultyLevel);
-                    controller.Alert(player.transform.position);
+                    if (!CampaignSafetyEnemyRuntimeAdapter.TryInitialize(
+                            controller,
+                            difficultyLevel,
+                            out string initializationError))
+                    {
+                        throw new InvalidOperationException(
+                            initializationError);
+                    }
+
+                    if (!CampaignSafetyEnemyRuntimeAdapter.TryAlert(
+                            controller,
+                            player.transform.position,
+                            out string alertError))
+                    {
+                        throw new InvalidOperationException(alertError);
+                    }
+
                     activeControllers.Add(controller);
                 }
 
@@ -450,26 +471,17 @@ namespace Bloodroot.Features.WorldMissions
                     return false;
                 }
 
-                global::enemyAI[] controllers = spawn.EnemyPrefab
-                    .GetComponentsInChildren<global::enemyAI>(true);
-                NavMeshAgent[] agents = spawn.EnemyPrefab
-                    .GetComponentsInChildren<NavMeshAgent>(true);
-                Animator[] animators = spawn.EnemyPrefab
-                    .GetComponentsInChildren<Animator>(true);
-                if (spawn.EnemyPrefab.scene.IsValid() ||
-                    controllers.Length != 1 || !controllers[0].enabled ||
-                    !IsExactArrivalBoarController(controllers[0]) ||
-                    controllers[0].transform != spawn.EnemyPrefab.transform ||
-                    agents.Length != 1 || !agents[0].enabled ||
-                    agents[0].transform != spawn.EnemyPrefab.transform ||
-                    agents[0].agentTypeID != 0 ||
-                    (agents[0].areaMask & WalkableAreaMask) == 0 ||
-                    Mathf.Abs(agents[0].radius - 0.5f) > 0.001f ||
-                    Mathf.Abs(agents[0].height - 2f) > 0.001f ||
-                    animators.Length < 1)
+                if (!CampaignSafetyEnemyRuntimeAdapter.TryValidatePrefab(
+                        spawn.EnemyPrefab,
+                        out _,
+                        out _,
+                        out _,
+                        out string prefabError))
                 {
                     error =
-                        $"Arrival spawn {index + 1} must reference one compatible enemy asset with enabled enemyAI, Humanoid NavMeshAgent, and Animator.";
+                        $"Arrival spawn {index + 1} must reference one exact " +
+                        "regular Boar, Root Boar, or Juggernaut prefab. " +
+                        prefabError;
                     return false;
                 }
             }
@@ -529,17 +541,6 @@ namespace Bloodroot.Features.WorldMissions
             Vector3 local = box.transform.InverseTransformPoint(playerPosition) -
                 box.center;
             return local.z >= -(box.size.z * 0.5f);
-        }
-
-        private static bool IsExactArrivalBoarController(
-            global::enemyAI controller)
-        {
-            if (controller == null)
-                return false;
-
-            Type controllerType = controller.GetType();
-            return controllerType == typeof(global::BoarBruteAI) ||
-                   controllerType == typeof(global::BoarBruteRootAI);
         }
 
         private void OnDrawGizmosSelected()
