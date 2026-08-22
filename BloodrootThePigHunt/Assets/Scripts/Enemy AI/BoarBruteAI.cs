@@ -20,12 +20,12 @@ public class BoarBruteAI : enemyAI
     Coroutine runAwayRoutine;
     [SerializeField] int runDistance;
     // Sound Effects
-    [SerializeField] AudioClip[] chargeSound;
-    [SerializeField, Range(0f, 1f)] float chargeSoundVolume;
-    [SerializeField] AudioClip[] damageSounds;
-    [SerializeField, Range(0f, 1f)] float damageSoundVolume;
-    [SerializeField] AudioClip[] trotSounds;
-    [SerializeField, Range(0f, 1f)] float trotSoundVolume;
+    //[SerializeField] AudioClip[] chargeSound;
+    //[SerializeField, Range(0f, 1f)] float chargeSoundVolume;
+    //[SerializeField] AudioClip[] damageSounds;
+    //[SerializeField, Range(0f, 1f)] float damageSoundVolume;
+    //[SerializeField] AudioClip[] trotSounds;
+    //[SerializeField, Range(0f, 1f)] float trotSoundVolume;
     // Non-serialized Variables
     public bool charging;
     float timer;

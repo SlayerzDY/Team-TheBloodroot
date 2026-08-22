@@ -7,6 +7,8 @@ public class EnemyAudioControl : MonoBehaviour
     public AudioClip[] idleSound;
     public AudioClip[] actionSound;
     public AudioClip[] deathSound;
+    public AudioClip[] HurtSound;
+    public AudioClip[] ReloadSound;
 
     //==========================================================================================
     // Declare Functions
@@ -27,6 +29,18 @@ public class EnemyAudioControl : MonoBehaviour
     //------------------------------------------------------------------------------------------
 
     public void PlayIdleSound() { PlaySound(idleSound, 0.5f, 0.8f, 0.9f, 1.1f); }
+
+    //==========================================================================================
+    // Function, Play Hurt Sounds
+    //------------------------------------------------------------------------------------------
+
+    public void PlayHurtSound() { PlaySound(HurtSound, 0.5f, 0.8f, 0.9f, 1.1f); }
+
+    //==========================================================================================
+    // Function, Play Reload Sounds
+    //------------------------------------------------------------------------------------------
+
+    public void PlayReloadSound() { PlaySound(ReloadSound, 0.5f, 0.8f, 0.9f, 1.1f); }
 
     //==========================================================================================
     // Function, Play Death Sounds

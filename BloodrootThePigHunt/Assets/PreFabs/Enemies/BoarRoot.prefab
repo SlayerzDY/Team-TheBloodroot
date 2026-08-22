@@ -26,15 +26,15 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 145d6f5c312e63847ae2491227417050, type: 2}
     - target: {fileID: 4190179351161707122, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 55.104862
+      value: 37.588104
       objectReference: {fileID: 0}
     - target: {fileID: 4190179351161707122, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.113
+      value: 2.18
       objectReference: {fileID: 0}
     - target: {fileID: 4190179351161707122, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -28.57976
+      value: -45.3
       objectReference: {fileID: 0}
     - target: {fileID: 4190179351161707122, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
       propertyPath: m_LocalRotation.w
@@ -71,6 +71,10 @@ PrefabInstance:
     - target: {fileID: 5873702240648637653, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
       propertyPath: m_LocalPosition.y
       value: -2.113
+      objectReference: {fileID: 0}
+    - target: {fileID: 6388563050362958215, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
+      propertyPath: m_BaseOffset
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: -2624448967457116415, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
@@ -142,7 +146,7 @@ MonoBehaviour:
   trotSoundVolume: 0
   charging: 0
   RootTrap: {fileID: 8805823926485247629, guid: 15b53257dbe6bac4ba83a86845b7e7ff, type: 3}
-  SpawnChance: 50
+  SpawnChance: 1
 --- !u!4 &4046647553792901338 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7100000000000000004, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}

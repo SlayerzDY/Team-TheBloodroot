@@ -54,7 +54,7 @@ public class juggernautEnemyAI : MonoBehaviour, IDamage
     protected virtual void Start() {
         stoppingDistanceOrig = stoppingDistance;
         animator = GetComponentInChildren<Animator>();
-        if (animator == null) { Debug.LogWarning("Boar missing Animator component! Proceeding without animations."); }
+        //if (animator == null) { Debug.LogWarning("Boar missing Animator component! Proceeding without animations."); }
         isUnalived = false;
         manager = FindAnyObjectByType<waveManager>();
         startingPos = transform.position;
@@ -175,6 +175,7 @@ public class juggernautEnemyAI : MonoBehaviour, IDamage
         if (isDead) { return; }
         HP -= amount;
         if (HP <= 0) {
+            GetComponent<EnemyAudioControl>().PlayDeathSound();
             Die();
         } else {
             StartCoroutine(flashRed());

@@ -219,10 +219,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a9f19e20c1b89a488f132a893bd9559, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAudioControl
-  movementSound: []
-  idleSound: []
-  actionSound: []
-  deathSound: []
+  movementSound:
+  - {fileID: 8300000, guid: daa4a7c75ef8b384fa6880e57aa3d994, type: 3}
+  - {fileID: 8300000, guid: 51927cdc7ee1a5f48b0cdb74ca53f0ba, type: 3}
+  - {fileID: 8300000, guid: 5b107ff74d7157a4c8cec4852cd3adcf, type: 3}
+  idleSound:
+  - {fileID: 8300000, guid: bacc07ca58173c94f8980b10fe078396, type: 3}
+  actionSound:
+  - {fileID: 8300000, guid: ee56248d24f4e674ba6447282e5ae526, type: 3}
+  deathSound:
+  - {fileID: 0}
+  HurtSound: []
+  ReloadSound: []
 --- !u!114 &520038797132088737
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -230,7 +238,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2486310311355277485}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f156460f6bb39804aa274de96ba45562, type: 3}
   m_Name: 
@@ -396,7 +404,7 @@ NavMeshAgent:
   m_AutoBraking: 0
   m_AutoRepath: 1
   m_Height: 2
-  m_BaseOffset: 1
+  m_BaseOffset: 2
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
 --- !u!95 &606404834372069064
@@ -742,8 +750,28 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5703809270293624016, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5465813076485398271}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3428095728455170753, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
+      insertIndex: 1
+      addedObject: {fileID: 7718175045740089062}
   m_SourcePrefab: {fileID: 100100000, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
+--- !u!1 &103758878010100083 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3428095728455170753, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
+  m_PrefabInstance: {fileID: 3378731889963529138}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7718175045740089062
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 103758878010100083}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96af859f73d3a424090e5eec993da101, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AnimatorSoundBridge
 --- !u!4 &737306705245082569 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2655111993512091771, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
