@@ -83,8 +83,9 @@ public class audioManager : MonoBehaviour
     {
         if (enemyTransform == null) { return; }
 
-        for (int i = 0; i < poolList.Count; i++)
+        for (int i = poolList.Count - 1; i >= 0; i--)
         {
+            if (poolList[i] == null) { poolList.RemoveAt(i); continue; }
             if (poolList[i].gameObject.activeInHierarchy)
             {
                 if (poolList[i].transform.parent == enemyTransform || poolList[i].transform.IsChildOf(enemyTransform))
@@ -242,8 +243,9 @@ public class audioManager : MonoBehaviour
 
     private AudioSource GetPooledAudioSource()
     {
-        for (int i = 0; i < poolList.Count; i++)
+        for (int i = poolList.Count - 1; i >= 0; i--)
         {
+            if (poolList[i] == null) { poolList.RemoveAt(i); continue; }
             if (!poolList[i].gameObject.activeInHierarchy)
             {
                 return poolList[i];
