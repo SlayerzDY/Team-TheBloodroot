@@ -264,20 +264,20 @@ namespace Bloodroot.Features.WorldMissions
                         throw new InvalidOperationException(controllerError);
                     }
 
-                    if (!CampaignSafetyEnemyRuntimeAdapter.TryGetAgent(
-                            instance,
-                            out NavMeshAgent agent,
-                            out string agentError))
-                    {
-                        throw new InvalidOperationException(agentError);
-                    }
-
                     if (!CampaignSafetyEnemyRuntimeAdapter.TryPrepare(
                             instance,
                             out string compatibilityError))
                     {
                         throw new InvalidOperationException(
                             compatibilityError);
+                    }
+
+                    if (!CampaignSafetyEnemyRuntimeAdapter.TryGetAgent(
+                            instance,
+                            out NavMeshAgent agent,
+                            out string agentError))
+                    {
+                        throw new InvalidOperationException(agentError);
                     }
 
                     if (!agent.isOnNavMesh &&

@@ -170,12 +170,14 @@ namespace Bloodroot.Features.AlphaEnemies
                 return false;
             }
 
-            NavMeshAgent[] agents =
-                prefab.GetComponentsInChildren<NavMeshAgent>(true);
-            Animator[] animators =
-                prefab.GetComponentsInChildren<Animator>(true);
-            agent = agents.Length == 1 ? agents[0] : null;
-            animator = animators.Length == 1 ? animators[0] : null;
+            if (!TryResolveSingletonComponents(
+                    controller,
+                    out agent,
+                    out animator,
+                    out error))
+            {
+                return false;
+            }
 
             bool disabledApprovedSourceController =
                 controller.GetType() == typeof(global::juggernautEnemyAI);
@@ -189,7 +191,6 @@ namespace Bloodroot.Features.AlphaEnemies
                 (!controllerBehaviour.enabled &&
                  !disabledApprovedSourceController) ||
                 agent == null || !agent.enabled ||
-                agent.transform != prefab.transform ||
                 agent.agentTypeID != 0 ||
                 (agent.areaMask & WalkableAreaMask) == 0 ||
                 Mathf.Abs(agent.radius - requiredAgentRadius) > 0.001f ||
@@ -240,21 +241,13 @@ namespace Bloodroot.Features.AlphaEnemies
                 return false;
             }
 
-            if (controller is global::enemyAI boar)
+            if (!TryResolveSingletonComponents(
+                    controller,
+                    out agent,
+                    out _,
+                    out error))
             {
-                agent = boar.agent != null
-                    ? boar.agent
-                    : boar.GetComponent<NavMeshAgent>();
-            }
-            else if (controller is global::juggernautEnemyAI juggernaut)
-            {
-                agent = juggernaut.agent != null
-                    ? juggernaut.agent
-                    : juggernaut.GetComponent<NavMeshAgent>();
-            }
-            else if (controller is WereBoarController wereBoar)
-            {
-                agent = wereBoar.GetComponent<NavMeshAgent>();
+                return false;
             }
 
             if (agent == null || !agent.enabled)
@@ -286,29 +279,33 @@ namespace Bloodroot.Features.AlphaEnemies
             {
                 if (controller is global::enemyAI boar)
                 {
-                    boar.agent ??= boar.GetComponent<NavMeshAgent>();
-                    boar.animator ??=
-                        boar.GetComponentInChildren<Animator>(true);
-                    if (boar.agent == null || !boar.agent.enabled ||
-                        boar.animator == null || !boar.animator.enabled)
+                    if (!TryBindSpawnedComponents(
+                            boar,
+                            out NavMeshAgent agent,
+                            out Animator animator,
+                            out error))
                     {
-                        error =
-                            $"'{boar.name}' requires an enabled root NavMeshAgent and enabled Animator.";
                         return false;
                     }
+
+                    // The Safety Boar visual Animator lives below the
+                    // gameplay root. Bind the components from this live clone
+                    // instead of retaining a cached serialized reference.
+                    boar.agent = agent;
+                    boar.animator = animator;
 
                     BoarStartingPositionField.SetValue(
                         boar,
                         boar.transform.position);
                     BoarStoppingDistanceField.SetValue(
                         boar,
-                        boar.agent.stoppingDistance);
+                        agent.stoppingDistance);
 
                     if (IsExactRawScreecherController(boar))
                     {
                         global::ScreecherAI screecher =
                             boar.GetComponent<global::ScreecherAI>();
-                        screecher.agent = boar.agent;
+                        screecher.agent = agent;
                         screecher.enabled = true;
                     }
 
@@ -316,19 +313,17 @@ namespace Bloodroot.Features.AlphaEnemies
                 }
                 else if (controller is global::juggernautEnemyAI juggernaut)
                 {
-                    juggernaut.agent ??=
-                        juggernaut.GetComponent<NavMeshAgent>();
-                    juggernaut.animator ??=
-                        juggernaut.GetComponentInChildren<Animator>(true);
-                    if (juggernaut.agent == null ||
-                        !juggernaut.agent.enabled ||
-                        juggernaut.animator == null ||
-                        !juggernaut.animator.enabled)
+                    if (!TryBindSpawnedComponents(
+                            juggernaut,
+                            out NavMeshAgent agent,
+                            out Animator animator,
+                            out error))
                     {
-                        error =
-                            $"'{juggernaut.name}' requires an enabled root NavMeshAgent and enabled Animator.";
                         return false;
                     }
+
+                    juggernaut.agent = agent;
+                    juggernaut.animator = animator;
 
                     int authoredStoppingDistance =
                         (int)JuggernautAuthoredStoppingDistanceField.GetValue(
@@ -343,19 +338,22 @@ namespace Bloodroot.Features.AlphaEnemies
                 }
                 else if (controller is WereBoarController wereBoar)
                 {
-                    NavMeshAgent agent =
-                        wereBoar.GetComponent<NavMeshAgent>();
-                    Animator animator =
-                        wereBoar.GetComponentInChildren<Animator>(true);
                     GameObject player = global::gameManager.instance != null
                         ? global::gameManager.instance.player
                         : null;
-                    if (agent == null || !agent.enabled ||
-                        animator == null || !animator.enabled ||
-                        player == null)
+                    if (player == null)
                     {
                         error =
-                            $"'{wereBoar.name}' requires an enabled root NavMeshAgent, enabled Animator, and authoritative Player.";
+                            $"'{wereBoar.name}' requires an authoritative Player.";
+                        return false;
+                    }
+
+                    if (!TryBindSpawnedComponents(
+                            wereBoar,
+                            out _,
+                            out _,
+                            out error))
+                    {
                         return false;
                     }
 
@@ -470,6 +468,82 @@ namespace Bloodroot.Features.AlphaEnemies
         private static bool IsIntField(FieldInfo field)
         {
             return field != null && field.FieldType == typeof(int);
+        }
+
+        private static bool TryBindSpawnedComponents(
+            Component controller,
+            out NavMeshAgent agent,
+            out Animator animator,
+            out string error)
+        {
+            agent = null;
+            animator = null;
+            if (controller == null)
+            {
+                error = "The spawned campaign enemy controller is missing.";
+                return false;
+            }
+
+            if (!TryResolveSingletonComponents(
+                    controller,
+                    out agent,
+                    out animator,
+                    out error))
+            {
+                return false;
+            }
+
+            // Campaign spawn preparation owns the initial enabled state. A
+            // disabled component is valid here as long as this live clone can
+            // enable it before it is warped and initialized.
+            agent.enabled = true;
+            animator.enabled = true;
+            if (!agent.enabled || !animator.enabled)
+            {
+                error =
+                    $"'{controller.name}' could not enable its spawned NavMeshAgent or Animator.";
+                return false;
+            }
+
+            error = string.Empty;
+            return true;
+        }
+
+        private static bool TryResolveSingletonComponents(
+            Component controller,
+            out NavMeshAgent agent,
+            out Animator animator,
+            out string error)
+        {
+            agent = null;
+            animator = null;
+            if (controller == null)
+            {
+                error = "The campaign enemy controller is missing.";
+                return false;
+            }
+
+            // The exact controller remains on the gameplay root, but Safety
+            // visuals can keep both movement and animation below it. Every
+            // approved source is required to expose one of each, so use the
+            // same singleton resolution in prefab validation, preparation,
+            // and post-prepare agent retrieval.
+            NavMeshAgent[] agents =
+                controller.GetComponentsInChildren<NavMeshAgent>(true);
+            Animator[] animators =
+                controller.GetComponentsInChildren<Animator>(true);
+            if (agents.Length != 1 || agents[0] == null ||
+                animators.Length != 1 || animators[0] == null)
+            {
+                error =
+                    $"'{controller.name}' requires exactly one NavMeshAgent and one Animator in its controller hierarchy.";
+                return false;
+            }
+
+            agent = agents[0];
+            animator = animators[0];
+            error = string.Empty;
+            return true;
         }
 
         private static bool IsExactRawScreecherController(
