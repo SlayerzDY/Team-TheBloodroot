@@ -107,7 +107,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 437eae58d8566464eab8ab12a592b262, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoarBruteRootAI
-  HP: 3
+  HP: 10
   drops:
   - {fileID: 8911751490674975600, guid: 2bc31b8eae8adf9418d8a3af10c91310, type: 3}
   genericPickupShell: {fileID: 817942340654339044, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
@@ -122,13 +122,13 @@ MonoBehaviour:
   gunPivot: {fileID: 4046647553792901340}
   shootPos: {fileID: 4046647553792901338}
   shootRate: 1
-  gunRotateSpeed: 10
-  faceTargetSpeed: 10
+  gunRotateSpeed: 20
+  faceTargetSpeed: 100
   spawner: {fileID: 0}
   damageMultiplier: 1
   isMelee: 1
   meleeDamage: 1
-  meleeRange: 2
+  meleeRange: 3
   healthGrowth: 1.15
   damageGrowth: 1.08
   chargeSpeed: 10
@@ -140,7 +140,7 @@ MonoBehaviour:
   runDistance: 20
   charging: 0
   RootTrap: {fileID: 8805823926485247629, guid: 15b53257dbe6bac4ba83a86845b7e7ff, type: 3}
-  SpawnChance: 1
+  SpawnChance: 75
 --- !u!4 &4046647553792901338 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7100000000000000004, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}

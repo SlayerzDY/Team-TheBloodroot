@@ -8,6 +8,11 @@ public class BoarBruteRootAI : BoarBruteAI
     public override void StartCharge()
     {
         base.StartCharge();
+    }
+
+    protected override void MeleeAttack()
+    {
+        base.MeleeAttack();
         if (RootTrap == null) { return; }
         int rand = Random.Range(0, 100);
         if (rand < SpawnChance)
