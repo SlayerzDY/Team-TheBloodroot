@@ -24,8 +24,8 @@ namespace Bloodroot.Features.AlphaMenu
         [SerializeField] private AudioClip confirmClip;
         [SerializeField] private AudioClip cancelClip;
 
-        [Header("Authored Menu Music")]
-        public AudioClip backgroundMusicClip;
+        //[Header("Authored Menu Music")]
+        //public AudioClip backgroundMusicClip;
 
         public static AlphaMenuAudio Instance => instance;
 
@@ -74,12 +74,12 @@ namespace Bloodroot.Features.AlphaMenu
             menuAudioSource.ignoreListenerPause = true;
             menuAudioSource.volume = 1f;
 
-            if (menuMusicSource != null && backgroundMusicClip != null)
-            {
-                menuMusicSource.clip = backgroundMusicClip;
-                menuMusicSource.loop = true;
-                menuMusicSource.Play();
-            }
+            //if (menuMusicSource != null && backgroundMusicClip != null)
+            //{
+            //    menuMusicSource.clip = backgroundMusicClip;
+            //    menuMusicSource.loop = true;
+            //    menuMusicSource.Play();
+            //}
 
         }
 

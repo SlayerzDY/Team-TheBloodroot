@@ -12,14 +12,20 @@ public class audioManager : MonoBehaviour
     //==========================================================================================
     // Declare Variables
     //==========================================================================================
+    // public vari
     public static audioManager instance;
     public AudioMixer mainMix;
     public AudioMixerGroup sfxGroup;
     public AudioMixerGroup musicGroup;
     public AudioSource audPlayer;
     public AudioSource musicSpace;
+    public AudioClip mainMenuMusic;
+    public AudioClip hubMusic;
+    public AudioClip openWorldDefaultMusic;
     public int poolSize;
+    //private variablees
     private List<AudioSource> poolList = new List<AudioSource>();
+    private Coroutine musicFadeCoroutine;
     //==========================================================================================
     // Declare Functions
     //==========================================================================================
@@ -32,7 +38,6 @@ public class audioManager : MonoBehaviour
             instance = this;
             DontDestroyOnLoad(gameObject);
             InitializePool();
-            UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
         }
         else { Destroy(gameObject);}
     }
@@ -125,17 +130,66 @@ public class audioManager : MonoBehaviour
     }
 
     //==========================================================================================
+    // Function, Enable and disable
+    //------------------------------------------------------------------------------------------
+
+    void OnEnable()
+    {
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    //==========================================================================================
+    // Function, Fadee Music track
+    //------------------------------------------------------------------------------------------
+
+    private System.Collections.IEnumerator FadeMusicTransition(AudioClip newTrack, float fadeTime)
+    {
+        float targetMaxVolume = 0.5f;
+        if (musicSpace.clip != null && musicSpace.isPlaying)
+        {
+            float startVolume = musicSpace.volume;
+            while (musicSpace.volume > 0)
+            {
+                musicSpace.volume -= startVolume * (Time.deltaTime / fadeTime);
+                yield return null;
+            }
+        }
+
+        musicSpace.Stop();
+        musicSpace.clip = newTrack;
+        musicSpace.outputAudioMixerGroup = musicGroup;
+        musicSpace.spatialBlend = 0.0f;
+        musicSpace.loop = true;
+
+        if (newTrack != null)
+        {
+            musicSpace.Play();
+            musicSpace.volume = 0f;
+            while (musicSpace.volume < targetMaxVolume)
+            {
+                musicSpace.volume += targetMaxVolume * (Time.deltaTime / fadeTime);
+                yield return null;
+            }
+            musicSpace.volume = targetMaxVolume;
+        }
+    }
+
+    //==========================================================================================
     // Function, Switch Music track
     //------------------------------------------------------------------------------------------
 
     public void SwitchBackMuic(AudioClip newTrack)
     {
 
-        if(musicSpace == null || musicSpace.clip == newTrack) {return;}
-        musicSpace.Stop();
-        musicSpace.clip = newTrack;
-        musicSpace.loop = true;
-        musicSpace.Play();
+        if (musicSpace == null) { return; }
+        if (musicSpace.clip == newTrack && musicSpace.isPlaying) { return; }
+        if (musicFadeCoroutine != null) { StopCoroutine(musicFadeCoroutine); }
+        musicFadeCoroutine = StartCoroutine(FadeMusicTransition(newTrack, 1.5f));
 
     }
 
@@ -157,7 +211,7 @@ public class audioManager : MonoBehaviour
             // mussic
             float savedMussic = PlayerPrefs.GetFloat("MusicVolumeSave", 0.4f);
             float dbMusic = Mathf.Log10(Mathf.Max(0.0001f, savedMussic)) * 20;
-            mainMix.SetFloat("MusicVol", dbSFX);
+            mainMix.SetFloat("MusicVol", dbMusic);
 
         }
 
@@ -167,7 +221,14 @@ public class audioManager : MonoBehaviour
     // Function, When A new Scenee loads
     //------------------------------------------------------------------------------------------
 
-    void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode) {ApplySettings(); }
+    void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode) {
+       
+        ApplySettings();
+        if (scene.name == "MainMenu"){  SwitchBackMuic(mainMenuMusic); }
+        else if (scene.name == "Farm_PrologueHub") {  SwitchBackMuic(hubMusic); }
+        else if (scene.name == "Bloodroot_OpenWorld") {  SwitchBackMuic(openWorldDefaultMusic);}
+
+    }
 
     //==========================================================================================
     // Function, Cleeeanup
@@ -198,8 +259,27 @@ public class audioManager : MonoBehaviour
     private System.Collections.IEnumerator DisableSourceAfterPlaying(AudioSource source, float delay)
     {
         yield return new WaitForSecondsRealtime(delay);
-        source.gameObject.SetActive(false);
-        source.gameObject.transform.SetParent(this.transform);
+        if (source != null && source.gameObject != null)
+        {
+            source.Stop(); 
+            source.gameObject.SetActive(false); 
+            if (this != null && transform != null) {source.gameObject.transform.SetParent(this.transform); }
+        }
+    }
+
+    //==========================================================================================
+    // Function, Set the volume to pause
+    //------------------------------------------------------------------------------------------
+
+    public void SetPauseMute(bool isPaused)
+    {
+        if (mainMix == null) { return; }
+        if (isPaused)
+        {
+            mainMix.SetFloat("MusicVol", -80f);
+            mainMix.SetFloat("SFXVol", -80f);
+        }
+        else { ApplySettings();}
     }
 
 }
