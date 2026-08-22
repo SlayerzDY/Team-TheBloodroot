@@ -342,7 +342,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 3183336189735230685}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
         m_MethodName: 
         m_Mode: 1
@@ -543,7 +543,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &189332655
 RectTransform:
   m_ObjectHideFlags: 0
@@ -557,7 +557,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1796077323}
-  m_Father: {fileID: 3469107367207003996}
+  m_Father: {fileID: 248813922}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -715,6 +715,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
+--- !u!224 &248813922 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 1856443771790681283, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
+  m_PrefabInstance: {fileID: 2876893488616602247}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &257288496
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1349,7 +1354,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 3183336189735230685}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
         m_MethodName: 
         m_Mode: 1
@@ -7625,11 +7630,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ab42b32f9dceab542844f62f9e2157a6, type: 3}
---- !u!1 &704207842170080792 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3326222989237154975, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-  m_PrefabInstance: {fileID: 2876893488616602247}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1600330110465013531 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3591977644675075484, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
@@ -7803,7 +7803,7 @@ PrefabInstance:
     - target: {fileID: 6970637296006004547, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
       propertyPath: pauseMenu
       value: 
-      objectReference: {fileID: 704207842170080792}
+      objectReference: {fileID: 0}
     - target: {fileID: 6970637296006004547, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
       propertyPath: optionSubMenu
       value: 
@@ -7819,27 +7819,17 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 1856443771790681283, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 189332655}
     - targetCorrespondingSourceObject: {fileID: 5994916447461654037, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 793060208}
     - targetCorrespondingSourceObject: {fileID: 5994916447461654037, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 68617229}
-    - targetCorrespondingSourceObject: {fileID: 1713753418992983515, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      insertIndex: 2
-      addedObject: {fileID: 189332655}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
---- !u!1 &3183336189735230685 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 847164933114177114, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-  m_PrefabInstance: {fileID: 2876893488616602247}
-  m_PrefabAsset: {fileID: 0}
---- !u!224 &3469107367207003996 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 1713753418992983515, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-  m_PrefabInstance: {fileID: 2876893488616602247}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &3930729281790550368
 PrefabInstance:
   m_ObjectHideFlags: 0
