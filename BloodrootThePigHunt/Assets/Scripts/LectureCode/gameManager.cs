@@ -623,9 +623,32 @@ public class gameManager : MonoBehaviour
         }
         if (loadedData._savgunInv != null)
         {
-            player.gunInv = new List<gunStats>(loadedData._savgunInv);
+            player.gunInv = new List<gunStats>(loadedData._savgunInv.Length);
+            for (int i = 0; i < loadedData._savgunInv.Length; i++) {
+                WeaponSaveData saved = loadedData._savgunInv[i];
+                if (saved == null || string.IsNullOrEmpty(saved.itemID)) { continue; }
+                gunStats template = weaponDatabase.GetByID(saved.itemID);
+                if (template == null) { Debug.LogWarning("No item found for ID: " + saved.itemID); continue; }
+                player.gunInv[i] = new gunStats {
+                    itemID = template.itemID,
+                    gunModel = template.gunModel,
+                    shootDamage = template.shootDamage,
+                    shootDistance = template.shootDistance,
+                    shootRate = template.shootRate,
+                    ammoCurr = template.ammoCurr,
+                    ammoMax = template.ammoMax,
+                    bullet = template.bullet,
+                    shootSound = template.shootSound,
+                    shootSoundVolume = template.shootSoundVolume,
+                    reloadSound = template.reloadSound,
+                    reloadSoundVolume = template.reloadSoundVolume,
+                    bulletCount = template.bulletCount,
+                    spread = template.spread,
+                    gunType = template.gunType
+                };
+            }
         }
-        Debug.Log("Game loaded successfully!");
+        //Debug.Log("Game loaded successfully!");
     }
     public void OpenLevelForGameManager(string levelName)
     {

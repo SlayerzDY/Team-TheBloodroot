@@ -3365,7 +3365,7 @@ namespace Bloodroot.Campaign
             if (applyGuns)
             {
                 controller.gunInv = loadedData._savgunInv != null
-                    ? new List<gunStats>(loadedData._savgunInv)
+                    ? new WeaponSaveData[loadedData._savgunInv.Length]
                     : new List<gunStats>();
                 controller.gunInv.RemoveAll(gun => gun == null);
                 controller.gunInvPos = controller.gunInv.Count > 0
