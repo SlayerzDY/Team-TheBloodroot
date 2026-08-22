@@ -49,16 +49,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Item
   item:
-    itemName: ItemPickupMaster
+    itemName: Leather
     itemDescription: Wonderful bits of dead pig!
-    icon: {fileID: 21300000, guid: 13002bd83cec13a4b93704504e4f1cc6, type: 3}
+    icon: {fileID: 21300000, guid: 768fb2c35c8c65d4ba2afe09821f8e98, type: 3}
     weight: 0.1
     quantity: 1
     stackSize: 99
     itemMesh: {fileID: 919132149155446097, guid: 089573e79cecb77498bf6f6423ae4424, type: 3}
     pickupSound: []
     itemIncreases: {fileID: 11400000, guid: 1fd5b603596412145bd58b5bbe757e2b, type: 2}
-    itemID: ItemPickupMaster54518541561
+    itemID: 
   canInteract: 1
 --- !u!114 &1807892849295950277
 MonoBehaviour:
@@ -74,7 +74,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Dissolver
   dissolveMaterial: {fileID: 2100000, guid: 5c357d2d49026a741ac452c015da1536, type: 2}
   model: {fileID: 4942448490666211775}
-  dissolveDuration: 1
+  dissolveDuration: 2
   dissolveStrength: 0
   flashDuration: 0.5
   flashStartStrength: 0

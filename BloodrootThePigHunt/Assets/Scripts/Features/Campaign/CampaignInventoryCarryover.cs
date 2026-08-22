@@ -20,8 +20,8 @@ namespace Bloodroot.Campaign
             return new CampaignStableInventoryCheckpoint
             {
                 isAuthoritative = true,
-                itemIds = new string[20],
-                quantities = new int[20],
+                itemIds = Array.Empty<string>(),
+                quantities = Array.Empty<int>(),
                 inventoryWeight = 0f
             };
         }
@@ -74,6 +74,8 @@ namespace Bloodroot.Campaign
     [DisallowMultipleComponent]
     public sealed class CampaignInventoryCarryover : MonoBehaviour
     {
+        internal const int MaximumSupportedInventoryCapacity = 4096;
+
         private const string SafetyRifleStableItemId = "m1_garand";
         private const string SafetyRifleItemId = "M1 Garand57457457";
         private const string SafetyRifleAmmoStableItemId =
@@ -97,10 +99,11 @@ namespace Bloodroot.Campaign
         private const string SafetyTruckKeyItemId = "Car Key2358932";
         private const string SafetyLeatherStableItemId = "leather";
         private const string SafetyLeatherItemId = "Leather4634576";
-        private const string SafetyPickupMasterStableItemId =
+        // Online Safety now uses the blank-ID master pickup as a Leather
+        // template. Retain its former stable ID only as a checkpoint alias;
+        // new captures normalize both prefab forms to the Leather binding.
+        private const string LegacySafetyPickupMasterStableItemId =
             "item_pickup_master";
-        private const string SafetyPickupMasterItemId =
-            "ItemPickupMaster54518541561";
 
         [SerializeField] private CampaignInventoryItemBinding[] itemCatalog =
             Array.Empty<CampaignInventoryItemBinding>();
@@ -951,9 +954,6 @@ namespace Bloodroot.Campaign
                 case SafetyLeatherStableItemId:
                     expectedItemId = SafetyLeatherItemId;
                     return true;
-                case SafetyPickupMasterStableItemId:
-                    expectedItemId = SafetyPickupMasterItemId;
-                    return true;
                 default:
                     expectedItemId = string.Empty;
                     return false;
@@ -966,19 +966,19 @@ namespace Bloodroot.Campaign
             out string error)
         {
             checkpoint = null;
-            if (inventory == null || inventory.inventoryItems == null ||
-                inventory.inventoryItems.Length != 20)
+            if (!TryGetInventoryCapacity(
+                    inventory,
+                    out int inventoryCapacity,
+                    out error))
             {
-                error =
-                    "Stable Safety inventory capture requires the authored 20-slot Inventory.";
                 return false;
             }
 
             if (!ValidateStableInventoryCatalog(out error))
                 return false;
 
-            string[] itemIds = new string[20];
-            int[] quantities = new int[20];
+            string[] itemIds = new string[inventoryCapacity];
+            int[] quantities = new int[inventoryCapacity];
             float expectedWeight = 0f;
             for (int slot = 0; slot < inventory.inventoryItems.Length; slot++)
             {
@@ -1093,7 +1093,7 @@ namespace Bloodroot.Campaign
                 return false;
             }
 
-            var restored = new ItemStats[20];
+            var restored = new ItemStats[checkpoint.itemIds.Length];
             float expectedWeight = 0f;
             for (int slot = 0; slot < restored.Length; slot++)
             {
@@ -1231,6 +1231,14 @@ namespace Bloodroot.Campaign
             out CampaignInventoryItemBinding binding)
         {
             string candidate = itemId?.Trim() ?? string.Empty;
+            if (string.Equals(
+                    candidate,
+                    LegacySafetyPickupMasterStableItemId,
+                    StringComparison.Ordinal))
+            {
+                candidate = SafetyLeatherStableItemId;
+            }
+
             foreach (CampaignInventoryItemBinding entry in
                      EnumerateStableInventoryCatalog())
             {
@@ -1525,7 +1533,7 @@ namespace Bloodroot.Campaign
                 // These four owned tokens intentionally adapt Safety items
                 // with campaign-specific presentation or stack rules. Their
                 // durable ID must resolve exactly through ItemDatabase, while
-                // key/leather/master remain exact native fingerprints.
+                // key/leather remain exact native fingerprints.
                 bool campaignSemanticAlias =
                     string.Equals(
                         binding.ItemId,
@@ -1702,6 +1710,19 @@ namespace Bloodroot.Campaign
             List<ItemStats> reconciledItems;
             try
             {
+                // Inventory.Start is Safety's public authority for the
+                // currently authored capacity. Establish it before decoding
+                // a checkpoint whose older array may have a different shape.
+                inventory.Start();
+                inventory.inventoryWeight = 0f;
+                if (!TryGetInventoryCapacity(
+                        inventory,
+                        out int inventoryCapacity,
+                        out string capacityError))
+                {
+                    throw new InvalidOperationException(capacityError);
+                }
+
                 if (!CampaignSafetySaveIntegration.TryLoadGameData(
                         out GameData loadedData,
                         out string loadError))
@@ -1737,6 +1758,7 @@ namespace Bloodroot.Campaign
                 else if (!TryDecodeSafetyInventory(
                              loadedData,
                              manager.itemDatabase,
+                             inventoryCapacity,
                              out loadedInventory,
                              out string safetyInventoryError))
                 {
@@ -1755,21 +1777,11 @@ namespace Bloodroot.Campaign
                 if (!TryBuildReconciledInventory(
                         loadedInventory,
                         hasSnapshot,
+                        inventoryCapacity,
                         out reconciledItems,
                         out string reconcileError))
                 {
                     throw new InvalidOperationException(reconcileError);
-                }
-
-                // Establish the authored 20-slot public Inventory contract
-                // while it remains disabled. Re-enable it without adding yet;
-                // the next frame lets Unity invoke any pending native Start.
-                inventory.Start();
-                inventory.inventoryWeight = 0f;
-                if (GetInventorySlotCount(inventory) != 20)
-                {
-                    throw new InvalidOperationException(
-                        "The Safety Player Inventory must author exactly 20 slots.");
                 }
 
             }
@@ -2100,6 +2112,16 @@ namespace Bloodroot.Campaign
             bool campaignSnapshotChanged = false;
             try
             {
+                inventory.Start();
+                inventory.inventoryWeight = 0f;
+                if (!TryGetInventoryCapacity(
+                        inventory,
+                        out int inventoryCapacity,
+                        out string capacityError))
+                {
+                    throw new InvalidOperationException(capacityError);
+                }
+
                 string sceneName = SceneManager.GetActiveScene().name;
                 bool pairedCheckpoint =
                     TryApplyPairedHotkeySnapshot(sceneName);
@@ -2151,6 +2173,7 @@ namespace Bloodroot.Campaign
                 else if (!TryDecodeSafetyInventory(
                              hotkeyLoadedData,
                              manager.itemDatabase,
+                             inventoryCapacity,
                              out loadedInventory,
                              out string safetyInventoryError))
                 {
@@ -2161,6 +2184,7 @@ namespace Bloodroot.Campaign
                 if (!TryBuildReconciledInventory(
                         loadedInventory,
                         hasSnapshot,
+                        inventoryCapacity,
                         out List<ItemStats> reconciledItems,
                         out string error) ||
                     !TryPopulateFreshInventory(
@@ -2646,6 +2670,7 @@ namespace Bloodroot.Campaign
         private bool TryBuildReconciledInventory(
             ItemStats[] safetyLoadedItems,
             bool campaignSnapshotIsAuthoritative,
+            int inventoryCapacity,
             out List<ItemStats> reconciledItems,
             out string error)
         {
@@ -2653,16 +2678,35 @@ namespace Bloodroot.Campaign
             if (!ValidateStableInventoryCatalog(out error))
                 return false;
 
-            ItemStats[] loaded = safetyLoadedItems ?? Array.Empty<ItemStats>();
-            if (loaded.Length > 20)
+            if (!IsSupportedInventoryCapacity(inventoryCapacity))
             {
-                error =
-                    "Safety inventory exceeds the authored 20-slot Player contract.";
+                error = "The current Safety Inventory capacity is invalid.";
                 return false;
             }
 
-            var slots = new ItemStats[20];
-            for (int slot = 0; slot < loaded.Length; slot++)
+            ItemStats[] loaded = safetyLoadedItems ?? Array.Empty<ItemStats>();
+            if (loaded.Length > MaximumSupportedInventoryCapacity)
+            {
+                error = "Safety inventory checkpoint exceeds the bounded slot limit.";
+                return false;
+            }
+
+            for (int slot = inventoryCapacity; slot < loaded.Length; slot++)
+            {
+                ItemStats overflow = loaded[slot];
+                if (overflow != null &&
+                    (!string.IsNullOrWhiteSpace(overflow.itemName) ||
+                     overflow.quantity != 0))
+                {
+                    error =
+                        $"Safety inventory contains occupied legacy slot {slot} beyond the current {inventoryCapacity}-slot Player contract.";
+                    return false;
+                }
+            }
+
+            var slots = new ItemStats[inventoryCapacity];
+            int loadedSlots = Mathf.Min(loaded.Length, inventoryCapacity);
+            for (int slot = 0; slot < loadedSlots; slot++)
             {
                 ItemStats item = loaded[slot];
                 string itemName = item?.itemName?.Trim() ?? string.Empty;
@@ -2754,7 +2798,7 @@ namespace Bloodroot.Campaign
                         if (destination < 0)
                         {
                             error =
-                                $"The reconciled Safety inventory cannot fit '{itemName}' in 20 slots.";
+                                $"The reconciled Safety inventory cannot fit '{itemName}' in the current {inventoryCapacity}-slot Player contract.";
                             return false;
                         }
 
@@ -2778,11 +2822,17 @@ namespace Bloodroot.Campaign
         private static bool TryDecodeSafetyInventory(
             GameData loadedData,
             ItemDatabase itemDatabase,
+            int inventoryCapacity,
             out ItemStats[] decodedItems,
             out string error)
         {
-            const int inventoryCapacity = 20;
             decodedItems = Array.Empty<ItemStats>();
+            if (!IsSupportedInventoryCapacity(inventoryCapacity))
+            {
+                error = "The current Safety Inventory capacity is invalid.";
+                return false;
+            }
+
             if (loadedData == null)
             {
                 error = "Safety GameData is missing.";
@@ -2797,6 +2847,12 @@ namespace Bloodroot.Campaign
 
             ItemSaveData[] savedItems = loadedData._savInventory ??
                                         Array.Empty<ItemSaveData>();
+            if (savedItems.Length > MaximumSupportedInventoryCapacity)
+            {
+                error = "Safety inventory save exceeds the bounded slot limit.";
+                return false;
+            }
+
             for (int slot = inventoryCapacity; slot < savedItems.Length; slot++)
             {
                 ItemSaveData overflow = savedItems[slot];
@@ -2872,10 +2928,8 @@ namespace Bloodroot.Campaign
         {
             inventory.Start();
             inventory.inventoryWeight = 0f;
-            if (GetInventorySlotCount(inventory) != 20)
+            if (!TryGetInventoryCapacity(inventory, out _, out error))
             {
-                error =
-                    "The Safety Player Inventory did not initialize 20 slots.";
                 return false;
             }
 
@@ -2906,11 +2960,11 @@ namespace Bloodroot.Campaign
                 if (!ValidateStableInventoryCatalog(out error))
                     return false;
 
-                if (inventory == null || inventory.inventoryItems == null ||
-                    inventory.inventoryItems.Length != 20)
+                if (!TryGetInventoryCapacity(
+                        inventory,
+                        out int inventoryCapacity,
+                        out error))
                 {
-                    error =
-                        "Inventory exact-slot rebuild requires an empty 20-slot public state.";
                     return false;
                 }
 
@@ -2931,14 +2985,14 @@ namespace Bloodroot.Campaign
                     return false;
                 }
 
-                var desired = new ItemStats[20];
+                var desired = new ItemStats[inventoryCapacity];
                 int sourceIndex = 0;
                 foreach (ItemStats item in items ?? Array.Empty<ItemStats>())
                 {
                     if (sourceIndex >= desired.Length)
                     {
                         error =
-                            "Inventory exact-slot rebuild received more than 20 slots.";
+                            $"Inventory exact-slot rebuild received more than the current {inventoryCapacity} slots.";
                         return false;
                     }
 
@@ -3081,15 +3135,15 @@ namespace Bloodroot.Campaign
             try
             {
                 ItemStats[] original = source ?? Array.Empty<ItemStats>();
-                if (original.Length > 20)
+                if (!IsSupportedInventoryCapacity(original.Length))
                 {
                     clones = Array.Empty<ItemStats>();
                     error =
-                        "Inventory rollback snapshot exceeds the 20-slot contract.";
+                        "Inventory rollback snapshot has an invalid Safety capacity.";
                     return false;
                 }
 
-                var copied = new ItemStats[20];
+                var copied = new ItemStats[original.Length];
                 for (int slot = 0; slot < original.Length; slot++)
                 {
                     ItemStats item = original[slot];
@@ -3263,9 +3317,42 @@ namespace Bloodroot.Campaign
         private static int GetInventorySlotCount(Inventory inventory)
         {
             int count = 0;
-            while (count < 4096 && inventory.IsValidIndex(count))
+            while (count < MaximumSupportedInventoryCapacity &&
+                   inventory.IsValidIndex(count))
                 count++;
             return count;
+        }
+
+        private static bool IsSupportedInventoryCapacity(int capacity)
+        {
+            return capacity > 0 &&
+                   capacity <= MaximumSupportedInventoryCapacity;
+        }
+
+        private static bool TryGetInventoryCapacity(
+            Inventory inventory,
+            out int capacity,
+            out string error)
+        {
+            capacity = 0;
+            if (inventory == null || inventory.inventoryItems == null)
+            {
+                error = "The Safety Player Inventory is unavailable.";
+                return false;
+            }
+
+            capacity = GetInventorySlotCount(inventory);
+            if (!IsSupportedInventoryCapacity(capacity) ||
+                capacity != inventory.inventoryItems.Length)
+            {
+                error =
+                    "The Safety Player Inventory did not initialize a valid bounded slot array.";
+                capacity = 0;
+                return false;
+            }
+
+            error = string.Empty;
+            return true;
         }
 
         private static bool IsGameplayScene(string sceneName)
@@ -3714,10 +3801,12 @@ namespace Bloodroot.Campaign
                 manager.itemDatabase == null ||
                 inventory == null || manager.playerController != controller ||
                 inventory.inventoryItems == null ||
-                inventory.inventoryItems.Length != 20)
+                inventory.inventoryItems.Length <= 0 ||
+                inventory.inventoryItems.Length >
+                    CampaignInventoryCarryover.MaximumSupportedInventoryCapacity)
             {
                 error =
-                    "The active Safety gameManager, ItemDatabase, Player, controller, and 20-slot Inventory are not fully bound.";
+                    "The active Safety gameManager, ItemDatabase, Player, controller, and bounded Inventory are not fully bound.";
                 return false;
             }
 
@@ -3992,8 +4081,9 @@ namespace Bloodroot.Campaign
         {
             if (checkpoint == null || !checkpoint.isAuthoritative ||
                 checkpoint.itemIds == null || checkpoint.quantities == null ||
-                checkpoint.itemIds.Length != 20 ||
-                checkpoint.quantities.Length != 20 ||
+                checkpoint.itemIds.Length >
+                    CampaignInventoryCarryover.MaximumSupportedInventoryCapacity ||
+                checkpoint.quantities.Length != checkpoint.itemIds.Length ||
                 float.IsNaN(checkpoint.inventoryWeight) ||
                 float.IsInfinity(checkpoint.inventoryWeight) ||
                 checkpoint.inventoryWeight < 0f)
@@ -4003,7 +4093,15 @@ namespace Bloodroot.Campaign
                 return false;
             }
 
-            for (int slot = 0; slot < 20; slot++)
+            if (checkpoint.itemIds.Length == 0 &&
+                checkpoint.inventoryWeight > 0.001f)
+            {
+                error =
+                    "An empty stable Safety inventory checkpoint cannot carry weight.";
+                return false;
+            }
+
+            for (int slot = 0; slot < checkpoint.itemIds.Length; slot++)
             {
                 bool emptyId = string.IsNullOrWhiteSpace(
                     checkpoint.itemIds[slot]);

@@ -50,6 +50,47 @@ public class buttonFunctions : MonoBehaviour {
         manager.NotifyPlayerRespawned();
         manager.stateUnpause();
     }
+
+    //==========================================================================================
+    // Function, Return to Hub
+    //==========================================================================================
+
+    public void ReturnToHub()
+    {
+        gameManager manager = gameManager.instance;
+
+        if (manager == null)
+        {
+            Debug.LogError("Respawn requires the authored GameManager.");
+            return;
+        }
+
+        if (manager.playerController == null)
+        {
+            manager.updatePlayer();
+        }
+
+        if (manager.playerController == null)
+        {
+            Debug.LogError("Respawn requires the authored player controller.");
+            return;
+        }
+        if (gameManager.instance != null)
+        {
+            // Restore real gameplay time before the replacement scene starts.
+            // This prevents a freshly loaded manager from capturing a paused
+            // time scale as its baseline.
+            gameManager.instance.stateUnpause();
+        }
+
+        gameManager.instance.Save();
+        OpenLevelHub("Farm_PrologueHub");
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        manager.playerController.spawnPlayer();
+        manager.NotifyPlayerRespawned();
+        manager.stateUnpause();
+    }
+
     //==========================================================================================
     // Function, Restart
     //==========================================================================================

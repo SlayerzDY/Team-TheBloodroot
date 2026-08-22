@@ -4,7 +4,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 //==============================================================================================
@@ -15,7 +14,6 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     // Define Variables
     //==========================================================================================
     // Test Variables
-    [SerializeField] public GameObject testContainer; 
     [SerializeField] CharacterController controller;
     [SerializeField] LayerMask ignoreLayer;
     float camRotX, camRotY;
@@ -129,12 +127,12 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         controller.Move(playerVel * Time.deltaTime);
         playerVel.y -= gravity * Time.deltaTime;
         shootTimer += Time.deltaTime;
-        if (Input.GetButton("Fire1") && gunInv.Count > 0 && gunInv[gunInvPos].ammoCurr > 0 && shootTimer > gunInv[gunInvPos].shootRate) { shoot(); }
-        if (gunInv.Count > 0) {
-            Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * gunInv[gunInvPos].shootDistance, Color.red);
-                animator.SetBool("IsAiming", true);
+        if (Input.GetButton("Fire1") && gunInv.Count > 0 && gunInv[gunInvPos].ammoCurr > 10 && shootTimer > gunInv[gunInvPos].shootRate) { shoot(); }
+        if (gunInv.Count > 0)
+        {
+          Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * gunInv[gunInvPos].shootDistance, Color.red);
         }
-        reload();
+         reload();
     }
     //==========================================================================================
     // Function, Sprint
@@ -177,6 +175,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     IEnumerator playSteps()
     {
         isPlayingSteps = true;
+        if (audioManager.instance == null) { yield return null; }
         if (audSteps.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(audSteps[Random.Range(0, audSteps.Length)], audStepsVolume); }
         if (isSprinting)
         {
@@ -207,11 +206,12 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     // Function, Shoot
     //==========================================================================================
     void shoot() {
+        if (gunInv == null) { return; }
+        if (gunInv[gunInvPos] == null) { return; }
         shootTimer = 0;
         gunInv[gunInvPos].ammoCurr--;
-        ScoreboardManager.GetOrCreate().AddShotFired();
+        //ScoreboardManager.GetOrCreate().AddShotFired();
         updatePlayerAmmo();
-
         if (gunInv[gunInvPos].shootSound.Count() > 0) {
             if (gunInv[gunInvPos].shootSound.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(gunInv[gunInvPos].shootSound[Random.Range(0, gunInv[gunInvPos].shootSound.Length)], gunInv[gunInvPos].shootSoundVolume); }
             int randomInt = Random.Range(0, gunInv[gunInvPos].shootSound.Count());
@@ -695,13 +695,14 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     //==========================================================================================
     // Function, Change Gun
     //==========================================================================================
-    void changeGun()
+    public void changeGun()
     {
         // Assign Visuals
         updatePlayerAmmo();
         gunModel.GetComponent<MeshFilter>().sharedMesh = gunInv[gunInvPos].gunModel.GetComponent<MeshFilter>().sharedMesh;
         gunModel.GetComponent<MeshRenderer>().sharedMaterial = gunInv[gunInvPos].gunModel.GetComponent<MeshRenderer>().sharedMaterial;
         animator.SetInteger("WeaponType", gunInv[gunInvPos].gunType);
+        animator.SetBool("IsAiming", true);
     }
 //==========================================================================================
 // Function, Select Gun
@@ -739,9 +740,6 @@ void selectGun()
         {
             if (!inventory.IsSlotEmpty(i))
             {
-                //inventory.RemoveItem(inventory.inventoryItems[i].itemName, 1, false);
-                //inventory.RemoveMultipleItems("M1 Garand Ammo");
-                inventory.TransferToNewInventory(testContainer, "M1 Garand Ammo");
                 break;
             }
         }

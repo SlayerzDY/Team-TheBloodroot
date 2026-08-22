@@ -16,13 +16,16 @@ namespace Bloodroot.Features.AlphaMenu
 
         [Header("Authored Audio Routing")]
         [SerializeField] private AudioSource menuAudioSource;
+        public AudioSource menuMusicSource;
 
         [Header("Authored Menu SFX")]
         [SerializeField] private AudioClip pointerHoverClip;
         [SerializeField] private AudioClip selectionChangedClip;
         [SerializeField] private AudioClip confirmClip;
         [SerializeField] private AudioClip cancelClip;
-        public AudioClip backgroundMusicClip;
+
+        //[Header("Authored Menu Music")]
+        //public AudioClip backgroundMusicClip;
 
         public static AlphaMenuAudio Instance => instance;
 
@@ -50,7 +53,7 @@ namespace Bloodroot.Features.AlphaMenu
             }
 
             instance = this;
-            DontDestroyOnLoad(gameObject);
+           // DontDestroyOnLoad(gameObject);
 
             if (menuAudioSource == null)
             {
@@ -71,19 +74,19 @@ namespace Bloodroot.Features.AlphaMenu
             menuAudioSource.ignoreListenerPause = true;
             menuAudioSource.volume = 1f;
 
-            if (menuAudioSource != null && backgroundMusicClip != null)
-            {
-                menuAudioSource.clip = backgroundMusicClip;
-                menuAudioSource.loop = true;
-                menuAudioSource.Play();
-            }
+            //if (menuMusicSource != null && backgroundMusicClip != null)
+            //{
+            //    menuMusicSource.clip = backgroundMusicClip;
+            //    menuMusicSource.loop = true;
+            //    menuMusicSource.Play();
+            //}
 
         }
 
-        public void ChangeVolume(float volumeValue)
-        {
-            if (menuAudioSource != null) { menuAudioSource.volume = volumeValue; }
-        }
+        //public void ChangeVolume(float volumeValue)
+        //{
+        //    if (menuAudioSource != null) { menuAudioSource.volume = volumeValue; }
+        //}
 
         private void OnDestroy()
         {
@@ -156,7 +159,9 @@ namespace Bloodroot.Features.AlphaMenu
                 return;
             }
 
-            menuAudioSource.PlayOneShot(clip);
+            if (audioManager.instance != null) { audioManager.instance.audPlayer.PlayOneShot(clip); }
+            else if (menuAudioSource != null ) { menuAudioSource.PlayOneShot(clip); }
+
         }
 
 #if UNITY_EDITOR

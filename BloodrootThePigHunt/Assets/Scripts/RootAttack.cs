@@ -5,9 +5,9 @@ public class RootAttack : MonoBehaviour
 {
     [Header("Root Settings")]
     [SerializeField] GameObject rootPrefab;
-    [SerializeField] AudioClip[] backgroundAudio;
-    [SerializeField] AudioClip mainAudio;
-    [SerializeField] float audioVolume;
+    //[SerializeField] AudioClip[] backgroundAudio;
+    //[SerializeField] AudioClip mainAudio;
+    //[SerializeField] float audioVolume;
     [SerializeField] float transformDuration;
     [SerializeField] int rootCount = 8;
     [SerializeField] float rootSpread = 5f;
@@ -78,8 +78,10 @@ public class RootAttack : MonoBehaviour
         }
     }
     private void playSound() {
-        int randAudio = Random.Range(0, backgroundAudio.Length);
-        audioManager.instance.audPlayer.PlayOneShot(backgroundAudio[Random.Range(0, backgroundAudio.Length)], audioVolume);
-        audioManager.instance.audPlayer.PlayOneShot(mainAudio, audioVolume);
+        //int randAudio = Random.Range(0, backgroundAudio.Length);
+        //audioManager.instance.audPlayer.PlayOneShot(backgroundAudio[Random.Range(0, backgroundAudio.Length)], audioVolume);
+        //audioManager.instance.audPlayer.PlayOneShot(mainAudio, audioVolume);
+
+        GetComponent<EnemyAudioControl>().PlayActionSound();
     }
 }

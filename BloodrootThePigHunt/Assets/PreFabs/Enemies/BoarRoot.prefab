@@ -20,17 +20,21 @@ PrefabInstance:
       propertyPath: 'drops.Array.data[0]'
       value: 
       objectReference: {fileID: 8731680815952161017, guid: 8b3610a9ff3a5ba4abacdd05a4c8309b, type: 3}
+    - target: {fileID: 3584619749363051082, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 145d6f5c312e63847ae2491227417050, type: 2}
     - target: {fileID: 4190179351161707122, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 72.93334
+      value: 37.588104
       objectReference: {fileID: 0}
     - target: {fileID: 4190179351161707122, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.0699999
+      value: 2.18
       objectReference: {fileID: 0}
     - target: {fileID: 4190179351161707122, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -47.338417
+      value: -45.3
       objectReference: {fileID: 0}
     - target: {fileID: 4190179351161707122, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
       propertyPath: m_LocalRotation.w
@@ -63,6 +67,14 @@ PrefabInstance:
     - target: {fileID: 5464231581442848068, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
       propertyPath: m_Name
       value: BoarRoot
+      objectReference: {fileID: 0}
+    - target: {fileID: 5873702240648637653, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -2.113
+      objectReference: {fileID: 0}
+    - target: {fileID: 6388563050362958215, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
+      propertyPath: m_BaseOffset
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: -2624448967457116415, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
@@ -105,12 +117,13 @@ MonoBehaviour:
   FOV: 45
   roamDist: 30
   roamPauseTime: 3
+  stoppingDistance: 0
   bullet: {fileID: 5433222104674597542, guid: 600056e04222aaa4fa06a983ce4ed432, type: 3}
   gunPivot: {fileID: 4046647553792901340}
   shootPos: {fileID: 4046647553792901338}
-  shootRate: 0
-  gunRotateSpeed: 0
-  faceTargetSpeed: 0
+  shootRate: 1
+  gunRotateSpeed: 10
+  faceTargetSpeed: 10
   spawner: {fileID: 0}
   damageMultiplier: 1
   isMelee: 1
@@ -118,17 +131,16 @@ MonoBehaviour:
   meleeRange: 2
   healthGrowth: 1.15
   damageGrowth: 1.08
-  chargeSpeed: 0
-  chargeTime: 0
-  chargeSound: []
-  chargeSoundVolume: 0
-  damageSounds: []
-  damageSoundVolume: 0
-  trotSounds: []
-  trotSoundVolume: 0
+  chargeSpeed: 10
+  chargeTime: 1
+  circlePoints: 16
+  waypointTolerance: 0.5
+  sampleTolerance: 2
+  randomChanceComplete: 9
+  runDistance: 20
   charging: 0
   RootTrap: {fileID: 8805823926485247629, guid: 15b53257dbe6bac4ba83a86845b7e7ff, type: 3}
-  SpawnChance: 50
+  SpawnChance: 10
 --- !u!4 &4046647553792901338 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7100000000000000004, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
