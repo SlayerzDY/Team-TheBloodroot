@@ -64,7 +64,7 @@ public class UpgradeTable : MonoBehaviour, IInteract
         else
         {
             if (upgradeWindow != null) upgradeWindow.ShowNotification("Failed: Not enough materials!", false);
-            gameManager.instance.ToastMenu(true, "Insufficient crafting materials!");
+            //gameManager.instance.ToastMenu(true, "Insufficient crafting materials!");
             //Debug.LogWarning("Insufficient crafting materials!");
         }
 
@@ -75,7 +75,7 @@ public class UpgradeTable : MonoBehaviour, IInteract
     {
         string stat = seleectedUpgrade.statToUpgrade.ToLower();
 
-        if (stat == "damage" || stat == "attack" || stat == "shootdamage")
+        if (stat == "Damage" || stat == "Attack" || stat == "ShootDamage")
         {
             if (seleectedUpgrade.targetGun != null)
             {
@@ -108,17 +108,17 @@ public class UpgradeTable : MonoBehaviour, IInteract
         {
             case "ammo":
                 break;
-            case "health":
-            case "hp":
+            case "Health":
+            case "HP":
                 ctrler.healthMultiplier += seleectedUpgrade.upgradeValue;
                 ctrler.healthMultiplier = Mathf.Clamp(ctrler.healthMultiplier, 1f, 4f);
-                ctrler.UpdateUpgradedStats("health");
+                ctrler.UpdateUpgradedStats("Health");
                 break;
 
-            case "stamina":
+            case "Stamina":
                 ctrler.staminaMultiplier += seleectedUpgrade.upgradeValue;
                 ctrler.staminaMultiplier = Mathf.Clamp(ctrler.staminaMultiplier, 1f, 4f);
-                ctrler.UpdateUpgradedStats("stamina");
+                ctrler.UpdateUpgradedStats("Stamina");
                 break;
         }
 
