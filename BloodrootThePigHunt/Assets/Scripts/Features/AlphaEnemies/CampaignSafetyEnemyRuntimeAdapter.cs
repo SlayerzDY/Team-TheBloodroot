@@ -7,10 +7,9 @@ namespace Bloodroot.Features.AlphaEnemies
 {
     /// <summary>
     /// Narrow compatibility boundary for campaign-owned instances of the
-    /// three enemies approved for level population. The online Safety Boar
-    /// controllers and Juggernaut do not share a base controller, and both
-    /// keep roaming state private, so campaign spawners use this adapter
-    /// instead of modifying Safety code or prefabs.
+    /// approved level-population enemies. The online Safety controllers and
+    /// the campaign Wereboar do not share one runtime contract, so campaign
+    /// spawners use this adapter instead of modifying Safety code or prefabs.
     /// </summary>
     public static class CampaignSafetyEnemyRuntimeAdapter
     {
@@ -75,8 +74,9 @@ namespace Bloodroot.Features.AlphaEnemies
         }
 
         /// <summary>
-        /// True only for the exact regular Boar, Root Boar, or Juggernaut
-        /// controller. Derived or legacy enemy controllers fail closed.
+        /// True only for an exact regular Boar, Root Boar, Juggernaut,
+        /// raw Safety Screecher, or campaign Wereboar controller. Derived and
+        /// legacy enemy controllers fail closed.
         /// </summary>
         public static bool IsExactAllowedController(Component controller)
         {
@@ -86,7 +86,9 @@ namespace Bloodroot.Features.AlphaEnemies
             Type controllerType = controller.GetType();
             return controllerType == typeof(global::BoarBruteAI) ||
                    controllerType == typeof(global::BoarBruteRootAI) ||
-                   controllerType == typeof(global::juggernautEnemyAI);
+                   controllerType == typeof(global::juggernautEnemyAI) ||
+                   controllerType == typeof(WereBoarController) ||
+                   IsExactRawScreecherController(controller);
         }
 
         public static bool TryGetExactAllowedController(
@@ -105,7 +107,9 @@ namespace Bloodroot.Features.AlphaEnemies
                 enemy.GetComponentsInChildren<global::enemyAI>(true);
             global::juggernautEnemyAI[] juggernauts =
                 enemy.GetComponentsInChildren<global::juggernautEnemyAI>(true);
-            if (boarFamily.Length + juggernauts.Length != 1)
+            WereBoarController[] wereBoars =
+                enemy.GetComponentsInChildren<WereBoarController>(true);
+            if (boarFamily.Length + juggernauts.Length + wereBoars.Length != 1)
             {
                 error =
                     $"'{enemy.name}' must contain exactly one approved campaign enemy controller.";
@@ -114,11 +118,13 @@ namespace Bloodroot.Features.AlphaEnemies
 
             controller = boarFamily.Length == 1
                 ? boarFamily[0]
-                : juggernauts[0];
+                : juggernauts.Length == 1
+                    ? juggernauts[0]
+                    : wereBoars[0];
             if (!IsExactAllowedController(controller))
             {
                 error =
-                    $"'{enemy.name}' is not the exact regular Boar, Root Boar, or Juggernaut controller.";
+                    $"'{enemy.name}' is not an exact approved Boar, Root Boar, Juggernaut, raw Screecher, or Wereboar controller.";
                 controller = null;
                 return false;
             }
@@ -173,6 +179,10 @@ namespace Bloodroot.Features.AlphaEnemies
 
             bool disabledApprovedSourceController =
                 controller.GetType() == typeof(global::juggernautEnemyAI);
+            bool isWereBoar = controller.GetType() ==
+                              typeof(WereBoarController);
+            float requiredAgentRadius = isWereBoar ? 0.78f : 0.5f;
+            float requiredAgentHeight = isWereBoar ? 2.35f : 2f;
             Behaviour controllerBehaviour = controller as Behaviour;
             if (controller.transform != prefab.transform ||
                 controllerBehaviour == null ||
@@ -182,12 +192,33 @@ namespace Bloodroot.Features.AlphaEnemies
                 agent.transform != prefab.transform ||
                 agent.agentTypeID != 0 ||
                 (agent.areaMask & WalkableAreaMask) == 0 ||
-                Mathf.Abs(agent.radius - 0.5f) > 0.001f ||
-                Mathf.Abs(agent.height - 2f) > 0.001f ||
+                Mathf.Abs(agent.radius - requiredAgentRadius) > 0.001f ||
+                Mathf.Abs(agent.height - requiredAgentHeight) > 0.001f ||
                 animator == null || !animator.enabled)
             {
                 error =
-                    $"'{prefab.name}' must retain one exact approved root controller, enabled Humanoid Walkable NavMeshAgent, and enabled Animator.";
+                    $"'{prefab.name}' must retain one exact approved root controller, its approved enabled Walkable NavMeshAgent envelope, and one enabled Animator.";
+                return false;
+            }
+
+            if (IsExactRawScreecherController(controller))
+            {
+                global::ScreecherAI screecher =
+                    controller.GetComponent<global::ScreecherAI>();
+                if (screecher == null || !screecher.enabled ||
+                    screecher.agent != agent)
+                {
+                    error =
+                        $"'{prefab.name}' must retain the raw Safety ScreecherAI on the controller root and bind it to the root NavMeshAgent.";
+                    return false;
+                }
+            }
+
+            if (isWereBoar &&
+                controller.GetComponent<WereBoarController>() != controller)
+            {
+                error =
+                    $"'{prefab.name}' must retain its exact Wereboar controller on the NavMeshAgent root.";
                 return false;
             }
 
@@ -220,6 +251,10 @@ namespace Bloodroot.Features.AlphaEnemies
                 agent = juggernaut.agent != null
                     ? juggernaut.agent
                     : juggernaut.GetComponent<NavMeshAgent>();
+            }
+            else if (controller is WereBoarController wereBoar)
+            {
+                agent = wereBoar.GetComponent<NavMeshAgent>();
             }
 
             if (agent == null || !agent.enabled)
@@ -268,6 +303,15 @@ namespace Bloodroot.Features.AlphaEnemies
                     BoarStoppingDistanceField.SetValue(
                         boar,
                         boar.agent.stoppingDistance);
+
+                    if (IsExactRawScreecherController(boar))
+                    {
+                        global::ScreecherAI screecher =
+                            boar.GetComponent<global::ScreecherAI>();
+                        screecher.agent = boar.agent;
+                        screecher.enabled = true;
+                    }
+
                     boar.enabled = true;
                 }
                 else if (controller is global::juggernautEnemyAI juggernaut)
@@ -297,6 +341,27 @@ namespace Bloodroot.Features.AlphaEnemies
                         (float)authoredStoppingDistance);
                     juggernaut.enabled = true;
                 }
+                else if (controller is WereBoarController wereBoar)
+                {
+                    NavMeshAgent agent =
+                        wereBoar.GetComponent<NavMeshAgent>();
+                    Animator animator =
+                        wereBoar.GetComponentInChildren<Animator>(true);
+                    GameObject player = global::gameManager.instance != null
+                        ? global::gameManager.instance.player
+                        : null;
+                    if (agent == null || !agent.enabled ||
+                        animator == null || !animator.enabled ||
+                        player == null)
+                    {
+                        error =
+                            $"'{wereBoar.name}' requires an enabled root NavMeshAgent, enabled Animator, and authoritative Player.";
+                        return false;
+                    }
+
+                    wereBoar.SetTarget(player.transform);
+                    wereBoar.enabled = true;
+                }
             }
             catch (Exception exception)
             {
@@ -324,10 +389,22 @@ namespace Bloodroot.Features.AlphaEnemies
             try
             {
                 if (controller is global::enemyAI boar)
+                {
                     boar.InitializeEnemy(difficultyLevel);
+                }
+                else if (controller is global::juggernautEnemyAI juggernaut)
+                {
+                    juggernaut.InitializeEnemy(difficultyLevel);
+                }
                 else
-                    ((global::juggernautEnemyAI)controller)
-                        .InitializeEnemy(difficultyLevel);
+                {
+                    ((WereBoarController)controller).ApplyDifficulty(
+                        difficultyLevel,
+                        1f,
+                        1f,
+                        1f,
+                        true);
+                }
             }
             catch (Exception exception)
             {
@@ -357,11 +434,16 @@ namespace Bloodroot.Features.AlphaEnemies
                 {
                     boar.Alert(playerPosition);
                 }
-                else
+                else if (controller is global::juggernautEnemyAI)
                 {
                     JuggernautAlertMethod.Invoke(
                         controller,
                         new object[] { playerPosition });
+                }
+                else
+                {
+                    ((WereBoarController)controller)
+                        .AlertToPosition(playerPosition);
                 }
             }
             catch (Exception exception)
@@ -388,6 +470,22 @@ namespace Bloodroot.Features.AlphaEnemies
         private static bool IsIntField(FieldInfo field)
         {
             return field != null && field.FieldType == typeof(int);
+        }
+
+        private static bool IsExactRawScreecherController(
+            Component controller)
+        {
+            if (controller == null ||
+                controller.GetType() != typeof(global::enemyAI))
+            {
+                return false;
+            }
+
+            global::ScreecherAI[] screechers =
+                controller.GetComponents<global::ScreecherAI>();
+            return screechers.Length == 1 &&
+                   screechers[0] != null &&
+                   screechers[0].GetType() == typeof(global::ScreecherAI);
         }
     }
 }

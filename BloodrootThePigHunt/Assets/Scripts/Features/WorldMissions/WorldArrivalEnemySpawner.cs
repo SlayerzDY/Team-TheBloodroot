@@ -154,8 +154,8 @@ namespace Bloodroot.Features.WorldMissions
                 }
 
                 // Keep every finite arrival enemy alerted through the shared
-                // adapter. This preserves the Boars' world-relative roaming
-                // origin and reaches Juggernaut's protected alert contract.
+                // adapter. Arrival encounters intentionally pursue across the
+                // region after their one-time authored activation.
                 if (!CampaignSafetyEnemyRuntimeAdapter.TryAlert(
                         controller,
                         playerPosition,
@@ -480,7 +480,8 @@ namespace Bloodroot.Features.WorldMissions
                 {
                     error =
                         $"Arrival spawn {index + 1} must reference one exact " +
-                        "regular Boar, Root Boar, or Juggernaut prefab. " +
+                        "regular Boar, Root Boar, Juggernaut, raw Screecher, " +
+                        "or campaign Wereboar prefab. " +
                         prefabError;
                     return false;
                 }
