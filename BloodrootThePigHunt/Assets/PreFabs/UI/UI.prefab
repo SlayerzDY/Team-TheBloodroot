@@ -2934,6 +2934,7 @@ RectTransform:
   - {fileID: 2474103402010883745}
   - {fileID: 243706509220998478}
   - {fileID: 221829308516399429}
+  - {fileID: 8666666454339338638}
   - {fileID: 239534593567349413}
   - {fileID: 6323366847049060482}
   - {fileID: 2415739188045417824}
@@ -6186,6 +6187,7 @@ MonoBehaviour:
   enemyCountText: {fileID: 88122773877197998}
   congratulations: {fileID: 0}
   itemDatabase: {fileID: 2963261659027704776}
+  weaponDatabase: {fileID: 5794497145864204877}
   menuInteractable: {fileID: 701768318657575118}
   checkpointPopup: {fileID: 0}
   toastMessage: {fileID: 3205917836236911129}
@@ -14562,6 +14564,58 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!1 &8861380709249426777
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8666666454339338638}
+  - component: {fileID: 5794497145864204877}
+  m_Layer: 5
+  m_Name: weaponDatabase
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 2147483647
+  m_IsActive: 1
+--- !u!224 &8666666454339338638
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8861380709249426777}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1856443771790681283}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &5794497145864204877
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8861380709249426777}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44a0e444feeca3144a029c830c36132b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponDatabase
+  allItemPrefabs:
+  - {fileID: 8073039291464298825, guid: d735c77958dcb8d44bef4492f896649a, type: 3}
+  - {fileID: 788871128110202958, guid: d34e35594392833469ecd3be381256c8, type: 3}
+  - {fileID: 9000881845347671241, guid: de5f096efd9425e4599eadb08a4f9336, type: 3}
 --- !u!1 &8944464749359814415
 GameObject:
   m_ObjectHideFlags: 0

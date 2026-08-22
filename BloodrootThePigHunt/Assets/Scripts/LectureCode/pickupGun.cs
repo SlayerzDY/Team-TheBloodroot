@@ -9,7 +9,7 @@ public class pickupGun : MonoBehaviour, IInteract {
     //==========================================================================================
     // Define Variables
     //==========================================================================================
-    [SerializeField] gunStats gun;
+    [SerializeField] public gunStats gun;
     bool pickedUp;
     //==========================================================================================
     // Define Functions
