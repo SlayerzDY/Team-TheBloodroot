@@ -46,6 +46,7 @@ public class gameManager : MonoBehaviour
 
     [Header("Other Stuf That Needs Sorted")]
     [SerializeField] public ItemDatabase itemDatabase;
+    [SerializeField] public WeaponDatabase weaponDatabase;
     public GameObject menuInteractable;
     // Public Variables
     public GameObject checkpointPopup;

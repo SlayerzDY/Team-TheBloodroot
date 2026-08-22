@@ -10,6 +10,7 @@ public class gunStats : ScriptableObject {
     //==========================================================================================
     // Define Variables
     //==========================================================================================
+    public string itemID;
     public GameObject gunModel;
     [Range(1, 10)] public int shootDamage;
     [Range(5, 1000)] public int shootDistance;
