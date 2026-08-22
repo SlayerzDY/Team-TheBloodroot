@@ -63,7 +63,7 @@ public class gameManager : MonoBehaviour
     public GameObject playerSpawnPos;
     public int totalItemsFed = 0;
     // Private Variables
-    private float timer = 0;
+    //private float timer = 0;
     private float timeScaleOrig;
     //private int gameGoalCount;
     //private bool waveManagerControlsWin;
@@ -81,7 +81,7 @@ public class gameManager : MonoBehaviour
     public Image fadeImagee;
     public float fadeSped = 25f;
     //public string hubSceneName = "Farm_PrologueHub";
-    private bool ProceedToHub = false;
+    //private bool ProceedToHub = false;
     private bool amDying = false;
     public GameObject losePromptText;
     public buttonFunctions buttonfunc;
@@ -176,7 +176,7 @@ public class gameManager : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.F5)) Save();
         if (Input.GetKeyDown(KeyCode.F9)) Load();
-        timer += Time.deltaTime;
+        //timer += Time.deltaTime;
     }
 
     //==========================================================================================

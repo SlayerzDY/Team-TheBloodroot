@@ -73,7 +73,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     Vector3 playerVel;
     bool isSprinting;
     bool isPlayingSteps;
-    private bool isJumping;
+    //private bool isJumping;
     //==========================================================================================
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     //==========================================================================================
@@ -101,7 +101,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             //animator.SetFloat("Speed", agent.velocity.magnitude / agent.speed, 0.1f, Time.deltaTime);
             //animator.SetFloat("Speed", this.playerVel.magnitude / this.speed, 0.1f, Time.deltaTime);
             animator.SetFloat("Speed", this.speed, 0.1f, Time.deltaTime);
-            isJumping = false;
+            //isJumping = false;
             movement();
             useFlashlight();
             if (Input.GetKeyDown(KeyCode.K)) { LoadTestScene(); }
@@ -128,7 +128,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         playerVel.y -= gravity * Time.deltaTime;
         shootTimer += Time.deltaTime;
         if (Input.GetButton("Fire1") && gunInv.Count > 0 && gunInv[gunInvPos].ammoCurr > 10 && shootTimer > gunInv[gunInvPos].shootRate) { shoot(); }
-        if (gunInv.Count > 0)
+        if (gunInv.Count > 0)   
         {
           Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * gunInv[gunInvPos].shootDistance, Color.red);
         }
@@ -161,13 +161,13 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         updatePlayerWeight();
         Inventory inv = this.GetComponent<Inventory>();
         if (inv == null) { return; }
-        if (inv.inventoryWeight >= inv.weightThreshold) { 
-            speed = (int)(speed * (inv.weightThreshold / inv.inventoryWeight)); 
-            if (speed <= 0) { speed = 1; }
-            if (speed > speedOrig) { speed = speedOrig; }
-        } else {
-            speed = speedOrig;
-        }
+        //if (inv.inventoryWeight >= inv.weightThreshold) { 
+        //    speed = (int)(speed * (inv.weightThreshold / inv.inventoryWeight)); 
+        //    if (speed <= 3) { speed = 3; }
+        //    if (speed > speedOrig) { speed = speedOrig; }
+        //} else {
+        //    speed = speedOrig;
+        //}
     }
     //==========================================================================================
     // Function, Play Steps
@@ -196,7 +196,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             if (audJump.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(audJump[Random.Range(0, audJump.Length)], audJumpVolume); }
             playerVel.y = jumpSpeed;
             animator.SetBool("IsJumping", true);
-            isJumping = true;
+            //isJumping = true;
             jumpCount++;
             StaminaReduction(jumpCost);
         }
@@ -406,20 +406,13 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     public void updatePlayerWeight()
     {
         Inventory inv = GetComponent<Inventory>();
-        if (inv == null) { return; }
+        //if (inv == null) { return; }
         if (gameManager.instance == null || gameManager.instance.AmmoCount == null)
         {
             return;
         }
-
-        if (gunInv.Count > 0)
-        {
-            gameManager.instance.weight.text = $"{inv.inventoryWeight} / {inv.weightThreshold}";
-        }
-        else
-        {
-            gameManager.instance.weight.text = $"0 / {inv.weightThreshold}";
-        }
+        gameManager.instance.weight.text = $"{(int)inv.inventoryWeight} / {inv.weightThreshold} lb";
+        //gameManager.instance.weight.text = $"0 / {inv.weightThreshold} lb";
     }
     //==========================================================================================
     // Function, Flash Damage
@@ -788,9 +781,9 @@ void selectGun()
     //==========================================================================================
     public void UpdateUpgradedStats(string statType = "all")
     {
-        if (statType == "all" || statType == "health" || statType == "hp") { HP = Mathf.RoundToInt(HPOrig * healthMultiplier); }
+        if (statType == "all" || statType == "Health" || statType == "HP") { HP = Mathf.RoundToInt(HPOrig * healthMultiplier); }
 
-        if (statType == "all" || statType == "stamina") { stam = stamOrig * staminaMultiplier;}
+        if (statType == "all" || statType == "Stamina") { stam = stamOrig * staminaMultiplier;}
     }
 
 }
