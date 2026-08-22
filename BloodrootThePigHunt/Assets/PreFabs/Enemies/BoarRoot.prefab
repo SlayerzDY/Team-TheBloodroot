@@ -121,9 +121,9 @@ MonoBehaviour:
   bullet: {fileID: 5433222104674597542, guid: 600056e04222aaa4fa06a983ce4ed432, type: 3}
   gunPivot: {fileID: 4046647553792901340}
   shootPos: {fileID: 4046647553792901338}
-  shootRate: 0
-  gunRotateSpeed: 0
-  faceTargetSpeed: 0
+  shootRate: 1
+  gunRotateSpeed: 10
+  faceTargetSpeed: 10
   spawner: {fileID: 0}
   damageMultiplier: 1
   isMelee: 1
@@ -131,22 +131,16 @@ MonoBehaviour:
   meleeRange: 2
   healthGrowth: 1.15
   damageGrowth: 1.08
-  chargeSpeed: 0
-  chargeTime: 0
-  circlePoints: 8
+  chargeSpeed: 10
+  chargeTime: 1
+  circlePoints: 16
   waypointTolerance: 0.5
   sampleTolerance: 2
   randomChanceComplete: 9
-  runDistance: 0
-  chargeSound: []
-  chargeSoundVolume: 0
-  damageSounds: []
-  damageSoundVolume: 0
-  trotSounds: []
-  trotSoundVolume: 0
+  runDistance: 20
   charging: 0
   RootTrap: {fileID: 8805823926485247629, guid: 15b53257dbe6bac4ba83a86845b7e7ff, type: 3}
-  SpawnChance: 1
+  SpawnChance: 10
 --- !u!4 &4046647553792901338 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7100000000000000004, guid: c8ad7f826e5d0ab4492f0a5a73e86d54, type: 3}
