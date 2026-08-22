@@ -73,10 +73,15 @@ public class enemyAI : MonoBehaviour, IDamage
     //==========================================================================================
     protected virtual void checkRoam()
     {
-        if (agent.remainingDistance < 0.01f)
+        if(agent == null) {  return; }
+
+        if (!isDead)
         {
-            roamTimer += Time.deltaTime;
-            if (roamTimer > roamPauseTime) { roam(); }
+            if (agent.remainingDistance < 0.01f)
+            {
+                roamTimer += Time.deltaTime;
+                if (roamTimer > roamPauseTime) { roam(); }
+            }
         }
     }
     //==========================================================================================

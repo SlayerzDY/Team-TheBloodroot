@@ -187,6 +187,7 @@ public class gameManager : MonoBehaviour
         Time.timeScale = 0;
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
+        if (audioManager.instance != null) audioManager.instance.SetPauseMute(isPaused);
     }
     //==========================================================================================
     // Function, StateUnpause
@@ -198,6 +199,7 @@ public class gameManager : MonoBehaviour
         Time.timeScale = timeScaleOrig;
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
+        if (audioManager.instance != null) audioManager.instance.SetPauseMute(isPaused);
 
         if (menuActive != null)
         {
