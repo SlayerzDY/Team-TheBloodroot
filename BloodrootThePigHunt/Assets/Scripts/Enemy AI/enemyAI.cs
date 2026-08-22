@@ -240,8 +240,8 @@ public class enemyAI : MonoBehaviour, IDamage
         if (HP <= 0) {
             // Die reports the death to WaveManager,
             // then starts the dissolve effect.
-            GetComponent<EnemyAudioControl>().PlayDeathSound();
             Die();
+            GetComponent<EnemyAudioControl>().PlayDeathSound();
         } else {
             StartCoroutine(flashRed());
         }
@@ -264,12 +264,12 @@ public class enemyAI : MonoBehaviour, IDamage
         isDead = true;
         playerInTrigger = false;
         //ScoreboardManager.GetOrCreate().AddEnemyPigKilled();
-        foreach (Collider enemyCollider in GetComponentsInChildren<Collider>()) {
-            enemyCollider.enabled = false;
-        }
-        if (agent != null && agent.isOnNavMesh) {
-            agent.isStopped = true;
-        }
+        //foreach (Collider enemyCollider in GetComponentsInChildren<Collider>()) {
+        //    enemyCollider.enabled = false;
+        //}
+        //if (agent != null && agent.isOnNavMesh) {
+        //    agent.isStopped = true;
+        //}
         // This reduces enemiesRemaining and allows the
         // WaveManager to start the following wave.
         if (manager == null) {
