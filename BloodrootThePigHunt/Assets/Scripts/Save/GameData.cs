@@ -56,7 +56,7 @@ public class GameData
     {
         if (player == null || playerInv == null)
         {
-            Debug.Log("Please Assign Player Controller and Inventory!");
+            //Debug.Log("Please Assign Player Controller and Inventory!");
             return;
         }
         _savplayerPosition = new float[3] {
@@ -82,6 +82,9 @@ public class GameData
         if (player.gunInv != null)
         {
             _savgunInv = new List<gunStats>(player.gunInv);
+        } else
+        {
+            _savgunInv = new List<gunStats>();
         }
         _savgunInvPos = player.gunInvPos;
         _savhasFlashlight = player.hasFlashlight;

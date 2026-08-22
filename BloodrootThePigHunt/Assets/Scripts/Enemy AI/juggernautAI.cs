@@ -36,7 +36,7 @@ public class juggernautEnemyAI : MonoBehaviour, IDamage
     [SerializeField] MobSpawner spawner;
     [SerializeField] float damageMultiplier;  
     [SerializeField] float healthGrowth = 1.15f;
-    [SerializeField] float damageGrowth = 1.08f;
+    //[SerializeField] float damageGrowth = 1.08f;
     Vector3 playerDir;
     Vector3 startingPos;
     float shootTimer;
@@ -46,7 +46,7 @@ public class juggernautEnemyAI : MonoBehaviour, IDamage
     float angleToPlayer;
     float roamTimer;
     float stoppingDistanceOrig;
-    private bool isUnalived;
+    //private bool isUnalived;
     private bool isRunning;
     //==========================================================================================
     // Function, Start
@@ -54,8 +54,8 @@ public class juggernautEnemyAI : MonoBehaviour, IDamage
     protected virtual void Start() {
         stoppingDistanceOrig = stoppingDistance;
         animator = GetComponentInChildren<Animator>();
-        if (animator == null) { Debug.LogWarning("Boar missing Animator component! Proceeding without animations."); }
-        isUnalived = false;
+        //if (animator == null) { Debug.LogWarning("Boar missing Animator component! Proceeding without animations."); }
+        //isUnalived = false;
         manager = FindAnyObjectByType<waveManager>();
         startingPos = transform.position;
         agent.updateRotation = false;
@@ -175,6 +175,7 @@ public class juggernautEnemyAI : MonoBehaviour, IDamage
         if (isDead) { return; }
         HP -= amount;
         if (HP <= 0) {
+            GetComponent<EnemyAudioControl>().PlayDeathSound();
             Die();
         } else {
             StartCoroutine(flashRed());
@@ -193,7 +194,7 @@ public class juggernautEnemyAI : MonoBehaviour, IDamage
     protected virtual void Die()
     {
         // Prevent one enemy from being counted twice.
-        isUnalived = true;
+        //isUnalived = true;
         if (isDead) { return; }
         isDead = true;
         playerInTrigger = false;

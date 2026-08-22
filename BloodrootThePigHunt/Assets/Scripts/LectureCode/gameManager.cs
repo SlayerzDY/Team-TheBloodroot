@@ -46,6 +46,7 @@ public class gameManager : MonoBehaviour
 
     [Header("Other Stuf That Needs Sorted")]
     [SerializeField] public ItemDatabase itemDatabase;
+    [SerializeField] public WeaponDatabase weaponDatabase;
     public GameObject menuInteractable;
     // Public Variables
     public GameObject checkpointPopup;
@@ -63,7 +64,7 @@ public class gameManager : MonoBehaviour
     public GameObject playerSpawnPos;
     public int totalItemsFed = 0;
     // Private Variables
-    private float timer = 0;
+    //private float timer = 0;
     private float timeScaleOrig;
     //private int gameGoalCount;
     //private bool waveManagerControlsWin;
@@ -81,7 +82,7 @@ public class gameManager : MonoBehaviour
     public Image fadeImagee;
     public float fadeSped = 25f;
     //public string hubSceneName = "Farm_PrologueHub";
-    private bool ProceedToHub = false;
+    //private bool ProceedToHub = false;
     private bool amDying = false;
     public GameObject losePromptText;
     public buttonFunctions buttonfunc;
@@ -117,9 +118,9 @@ public class gameManager : MonoBehaviour
         timeScaleOrig = GetPlayableTimeScale(Time.timeScale);
         //ScoreboardManager.GetOrCreate();
 
-        timeText.gameObject.SetActive(false);
+       // timeText.gameObject.SetActive(false);
         enemyCountText.gameObject.SetActive(false);
-        congratulations.gameObject.SetActive(false);
+        //congratulations.gameObject.SetActive(false);
 
         //start game with the dense with x amount of enemies
         RootInteraction = FindAnyObjectByType<TreeRootInteraction>();
@@ -176,7 +177,7 @@ public class gameManager : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.F5)) Save();
         if (Input.GetKeyDown(KeyCode.F9)) Load();
-        timer += Time.deltaTime;
+        //timer += Time.deltaTime;
     }
 
     //==========================================================================================
@@ -187,6 +188,7 @@ public class gameManager : MonoBehaviour
         Time.timeScale = 0;
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
+        if (audioManager.instance != null) audioManager.instance.SetPauseMute(isPaused);
     }
     //==========================================================================================
     // Function, StateUnpause
@@ -198,6 +200,7 @@ public class gameManager : MonoBehaviour
         Time.timeScale = timeScaleOrig;
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
+        if (audioManager.instance != null) audioManager.instance.SetPauseMute(isPaused);
 
         if (menuActive != null)
         {
@@ -281,7 +284,7 @@ public class gameManager : MonoBehaviour
 
         //StartCoroutine(LoseFadeRoutine());
 
-        OpenLevelForGameManager("Farm_PrologueHub");
+        //OpenLevelForGameManager("Farm_PrologueHub");
 
         if (menuActive != null)
         {
@@ -466,7 +469,7 @@ public class gameManager : MonoBehaviour
         if (congratulations != null) { congratulations.text = $"Wave Defense has been cleared"; }
         yield return new WaitForSeconds(5.0f);
         if (congratulations != null) { congratulations.gameObject.SetActive(false); }
-        Debug.Log("You Completed the Defense the Hub is safe");
+        //Debug.Log("You Completed the Defense the Hub is safe");
         DefensesBeat++;
 
     }
@@ -556,9 +559,9 @@ public class gameManager : MonoBehaviour
     public void Save() {
         // Get References Needed
         playerController player = gameManager.instance.player.GetComponent<playerController>();
-        if (player == null) { Debug.Log("Please Assign Player Controller!"); return; }
+        if (player == null) { Debug.LogError("Please Assign Player Controller!"); return; }
         Inventory playerInv = gameManager.instance.player.GetComponent<Inventory>();
-        if (playerInv == null) { Debug.Log("Please Assign Player Inventory!"); return; }
+        if (playerInv == null) { Debug.LogError("Please Assign Player Inventory!"); return; }
         // Pass live references into the constructor
         GameData dataToSave = new GameData(player, playerInv);
         SaveSystem.SaveGame(dataToSave);
@@ -570,12 +573,12 @@ public class gameManager : MonoBehaviour
     {
         // Pull the saved data from Save System
         GameData loadedData = SaveSystem.LoadGame();
-        if (loadedData == null) { Debug.Log("No save data to load!"); return; }
+        //if (loadedData == null) { Debug.Log("No save data to load!"); return; }
         // Get live references
         playerController player = gameManager.instance.player.GetComponent<playerController>();
         Inventory playerInv = gameManager.instance.player.GetComponent<Inventory>();
         ItemDatabase itemDatabase = gameManager.instance.itemDatabase;
-        Debug.Log($"player: {player}, playerInv: {playerInv}, itemDatabase: {itemDatabase}");
+        //Debug.Log($"player: {player}, playerInv: {playerInv}, itemDatabase: {itemDatabase}");
         if (player == null || playerInv == null || itemDatabase == null) { Debug.Log("Missing Player, Inventory, or ItemDatabase!"); return; }
         // Apply saved stats back to the player
         player.HP = loadedData._savHP;

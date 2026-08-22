@@ -29,11 +29,10 @@ Transform:
   m_GameObject: {fileID: 898197673373007063}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0, y: 0.809, z: 0.092}
+  m_LocalPosition: {x: 0, y: 0.809, z: 0.013}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 5000059684323624109}
+  m_Children: []
   m_Father: {fileID: 5028720492388589776}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &837484319751511661
@@ -49,8 +48,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::cameraController
   sens: 10
-  lockVertMin: -90
-  lockVertMax: 90
+  lockVertMin: -70
+  lockVertMax: 30
 --- !u!20 &897183568886256928
 Camera:
   m_ObjectHideFlags: 0
@@ -180,13 +179,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1316479912308118710}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.043604456, y: 0.026152011, z: 0.0011418217, w: 0.9987059}
-  m_LocalPosition: {x: -0.013, y: 0.443, z: -0.052}
+  m_LocalRotation: {x: -0.040196214, y: 0.031137446, z: 0.11954384, w: 0.99152607}
+  m_LocalPosition: {x: 0.082, y: 0.8, z: -0.089}
   m_LocalScale: {x: 0.25000003, y: 0.25, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5000059684323624109}
-  m_LocalEulerAnglesHint: {x: -5, y: 3, z: 0}
+  m_LocalEulerAnglesHint: {x: -5, y: 3, z: 13.618}
 --- !u!33 &2473608554783051911
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -270,13 +269,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2090553889130754505}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.640683, y: 0.0061478615, z: -0.05151096, w: -0.76605105}
-  m_LocalPosition: {x: 0.112, y: -0.337, z: 0.412}
+  m_LocalRotation: {x: -0.64068294, y: 0.0061478615, z: -0.05151096, w: -0.76605105}
+  m_LocalPosition: {x: 0.101, y: 1.49, z: 0.336}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 9215448509803119699}
-  m_Father: {fileID: 699826136247196992}
+  m_Father: {fileID: 6708914341681198381}
   m_LocalEulerAnglesHint: {x: 79.181, y: 17.545, z: -337.761}
 --- !u!33 &2289748506706658666
 MeshFilter:
@@ -394,7 +393,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ed6b382c36eac7438b2c834a13764b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  testContainer: {fileID: 0}
   controller: {fileID: 2856513904029994221}
   ignoreLayer:
     serializedVersion: 2
@@ -831,7 +829,10 @@ PrefabInstance:
     - {fileID: 5074120417355765180, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
     - {fileID: 2264416404359897767, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 2655111993512091771, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5000059684323624109}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c8a1631c918379e4d836fa9efc15b08c, type: 3}
 --- !u!137 &2624943611051514747 stripped

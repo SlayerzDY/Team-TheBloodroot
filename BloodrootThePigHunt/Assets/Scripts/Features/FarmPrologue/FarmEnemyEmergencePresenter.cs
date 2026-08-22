@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using Bloodroot.Features.AlphaEnemies;
 using UnityEngine;
 using UnityEngine.AI;
@@ -45,12 +44,6 @@ namespace Bloodroot.Features.FarmPrologue
 
         private readonly Dictionary<GameObject, EmergenceState>
             activeEmergences = new();
-        private static readonly BindingFlags SafetyEnemyFieldFlags =
-            BindingFlags.Instance | BindingFlags.NonPublic;
-        private static readonly FieldInfo SafetyEnemyStartingPositionField =
-            typeof(enemyAI).GetField("startingPos", SafetyEnemyFieldFlags);
-        private static readonly FieldInfo SafetyEnemyStoppingDistanceField =
-            typeof(enemyAI).GetField("stoppingDistanceOrig", SafetyEnemyFieldFlags);
         private static bool warnedAboutSafetyEnemyContract;
         private bool isBound;
         private int emergenceTriggerHash;
@@ -219,7 +212,45 @@ namespace Bloodroot.Features.FarmPrologue
 
         private void PresentEnemyEmergence(GameObject spawnedEnemy)
         {
+            PreparePrologueWaveJuggernaut(spawnedEnemy);
             PresentExternalEnemy(spawnedEnemy);
+        }
+
+        private void PreparePrologueWaveJuggernaut(GameObject spawnedEnemy)
+        {
+            if (spawnedEnemy == null ||
+                !CampaignSafetyEnemyRuntimeAdapter
+                    .TryGetExactAllowedController(
+                        spawnedEnemy,
+                        out Component controller,
+                        out _) ||
+                controller.GetType() !=
+                    typeof(global::juggernautEnemyAI))
+            {
+                return;
+            }
+
+            if (!CampaignSafetyEnemyRuntimeAdapter.TryPrepare(
+                    spawnedEnemy,
+                    out string preparationError))
+            {
+                Debug.LogError(
+                    "The prologue Juggernaut failed its campaign spawn " +
+                    $"contract. {preparationError}",
+                    spawnedEnemy);
+                return;
+            }
+
+            if (!CampaignSafetyEnemyRuntimeAdapter.TryInitialize(
+                    controller,
+                    Mathf.Max(1, waveEncounter.currentWave),
+                    out string initializationError))
+            {
+                Debug.LogError(
+                    "The prologue Juggernaut could not apply wave " +
+                    $"difficulty. {initializationError}",
+                    spawnedEnemy);
+            }
         }
 
         /// <summary>
@@ -277,50 +308,15 @@ namespace Bloodroot.Features.FarmPrologue
         private static void PrepareSafetyEnemyCompatibility(
             GameObject spawnedEnemy)
         {
-            enemyAI[] safetyEnemies =
-                spawnedEnemy.GetComponentsInChildren<enemyAI>(true);
-
-            foreach (enemyAI safetyEnemy in safetyEnemies)
+            if (!CampaignSafetyEnemyRuntimeAdapter.TryPrepare(
+                    spawnedEnemy,
+                    out string problem) &&
+                !warnedAboutSafetyEnemyContract)
             {
-                if (safetyEnemy == null)
-                    continue;
-
-                if (safetyEnemy.agent == null)
-                {
-                    safetyEnemy.agent =
-                        safetyEnemy.GetComponent<NavMeshAgent>();
-                }
-
-                if (safetyEnemy.animator == null)
-                {
-                    safetyEnemy.animator =
-                        safetyEnemy.GetComponentInChildren<Animator>(true);
-                }
-
-                if (SafetyEnemyStartingPositionField == null ||
-                    SafetyEnemyStoppingDistanceField == null)
-                {
-                    if (!warnedAboutSafetyEnemyContract)
-                    {
-                        warnedAboutSafetyEnemyContract = true;
-                        Debug.LogWarning(
-                            "Farm safety-enemy compatibility could not cache " +
-                            "the online safety roaming contract because its " +
-                            "private field layout changed.");
-                    }
-
-                    continue;
-                }
-
-                if (safetyEnemy.agent != null)
-                {
-                    SafetyEnemyStartingPositionField.SetValue(
-                        safetyEnemy,
-                        safetyEnemy.transform.position);
-                    SafetyEnemyStoppingDistanceField.SetValue(
-                        safetyEnemy,
-                        safetyEnemy.agent.stoppingDistance);
-                }
+                warnedAboutSafetyEnemyContract = true;
+                Debug.LogWarning(
+                    "Farm safety-enemy compatibility failed closed. " +
+                    problem);
             }
         }
 
@@ -402,33 +398,14 @@ namespace Bloodroot.Features.FarmPrologue
                 }
             }
 
-            foreach (ScreecherAI screecherAI in
-                     spawnedEnemy.GetComponentsInChildren<ScreecherAI>(true))
+            foreach (juggernautEnemyAI juggernaut in
+                     spawnedEnemy.GetComponentsInChildren<juggernautEnemyAI>(
+                         true))
             {
-                if (screecherAI != null &&
-                    uniqueBehaviours.Add(screecherAI))
+                if (juggernaut != null &&
+                    uniqueBehaviours.Add(juggernaut))
                 {
-                    movementBehaviours.Add(screecherAI);
-                }
-            }
-
-            foreach (RegularHog regularHog in
-                     spawnedEnemy.GetComponentsInChildren<RegularHog>(true))
-            {
-                if (regularHog != null &&
-                    uniqueBehaviours.Add(regularHog))
-                {
-                    movementBehaviours.Add(regularHog);
-                }
-            }
-
-            foreach (WitchSummonedHogAI ownedHogAI in
-                     spawnedEnemy.GetComponentsInChildren<WitchSummonedHogAI>(true))
-            {
-                if (ownedHogAI != null &&
-                    uniqueBehaviours.Add(ownedHogAI))
-                {
-                    movementBehaviours.Add(ownedHogAI);
+                    movementBehaviours.Add(juggernaut);
                 }
             }
 
@@ -725,25 +702,17 @@ namespace Bloodroot.Features.FarmPrologue
 
         private static void RefreshSafetyEnemyOrigin(GameObject enemy)
         {
-            if (enemy == null || SafetyEnemyStartingPositionField == null)
+            if (enemy == null)
                 return;
 
-            foreach (enemyAI safetyEnemy in
-                     enemy.GetComponentsInChildren<enemyAI>(true))
+            if (!CampaignSafetyEnemyRuntimeAdapter.TryPrepare(
+                    enemy,
+                    out string problem))
             {
-                if (safetyEnemy == null)
-                    continue;
-
-                try
-                {
-                    SafetyEnemyStartingPositionField.SetValue(
-                        safetyEnemy,
-                        safetyEnemy.transform.position);
-                }
-                catch (Exception exception)
-                {
-                    Debug.LogException(exception, safetyEnemy);
-                }
+                Debug.LogWarning(
+                    $"Could not refresh the emerged Safety enemy's authored " +
+                    $"roaming origin. {problem}",
+                    enemy);
             }
         }
 

@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8740598040924119038}
+  - component: {fileID: 5822093339033036501}
   - component: {fileID: 5848815664764282800}
   - component: {fileID: 6649248045313612006}
-  - component: {fileID: -5892788172628357444}
   - component: {fileID: 1673740098413015076}
   - component: {fileID: 4054523134020191913}
   - component: {fileID: 8346228078949359004}
@@ -41,6 +41,25 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
+--- !u!114 &5822093339033036501
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8805823926485247629}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a9f19e20c1b89a488f132a893bd9559, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAudioControl
+  movementSound: []
+  idleSound: []
+  actionSound:
+  - {fileID: 8300000, guid: 40a44dbd75e3e794e8663032dbdfef59, type: 3}
+  deathSound: []
+  HurtSound: []
+  ReloadSound: []
 --- !u!114 &5848815664764282800
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -54,18 +73,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RootAttack
   rootPrefab: {fileID: 919132149155446097, guid: 658149cb6bf73a046986848f7f0ae0f5, type: 3}
-  backgroundAudio:
-  - {fileID: 8300000, guid: abee399eaf5d6dd4483242ced735b83b, type: 3}
-  - {fileID: 8300000, guid: 6cfc842db309a314ebca4503b46fe63f, type: 3}
-  - {fileID: 8300000, guid: 922a4941ea9463647987a9d7009ac1f6, type: 3}
-  - {fileID: 8300000, guid: 922a4941ea9463647987a9d7009ac1f6, type: 3}
-  - {fileID: 8300000, guid: 922a4941ea9463647987a9d7009ac1f6, type: 3}
-  - {fileID: 8300000, guid: beedca317a7a2ba4188be95aa7d2ab7f, type: 3}
-  - {fileID: 8300000, guid: 9505d59bbef2a9c42918d7e09cb07c93, type: 3}
-  mainAudio: {fileID: 8300000, guid: 40a44dbd75e3e794e8663032dbdfef59, type: 3}
-  audioVolume: 0.5
   transformDuration: 2
-  rootCount: 3
+  rootCount: 2
   rootSpread: 20
   isPlayerBullet: 1
   despawnTime: 10
@@ -86,21 +95,6 @@ MonoBehaviour:
   InteractLayer:
     serializedVersion: 2
     m_Bits: 1024
---- !u!114 &-5892788172628357444
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8805823926485247629}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 696fbadf7fcabb443b53b7260ee757c8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerCaptured
-  holdTime: 1
-  releaseTime: 1
-  damageSound: {fileID: 8300000, guid: dbe78b045c2987a458acb451e0b9afdb, type: 3}
 --- !u!114 &1673740098413015076
 MonoBehaviour:
   m_ObjectHideFlags: 0
