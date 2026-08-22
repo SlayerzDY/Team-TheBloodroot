@@ -69,6 +69,7 @@ public class BoarBruteAI : enemyAI
         startOffset.y = 0f;
         float startAngle = Mathf.Atan2(startOffset.z, startOffset.x);
         for (int i = 1; i < circlePoints; i++) {
+            if (agent == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh) { yield break; }
             int rand = Random.Range(0, randomChanceComplete) + 1;
             if (rand <= 8) { continue; }
             playerPos = gameManager.instance.player.transform.position;
@@ -79,14 +80,14 @@ public class BoarBruteAI : enemyAI
             if (NavMesh.SamplePosition(candidatePoint, out NavMeshHit hit, sampleTolerance, NavMesh.AllAreas)) {
                 waypoint = hit.position;
             } else {
-                Debug.Log($"Waypoint {i} sample FAILED at {candidatePoint}");
+                //Debug.Log($"Waypoint {i} sample FAILED at {candidatePoint}");
                 waypoint = transform.position;
             }
+            if (agent == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh) { yield break; }
             agent.SetDestination(waypoint);
-            if (agent != null) {
-                while (agent.pathPending || agent.remainingDistance > waypointTolerance) {
-                    yield return null;
-                }
+            while (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh
+                   && (agent.pathPending || agent.remainingDistance > waypointTolerance)) {
+                yield return null;
             }
         }
         shouldUpdate = true;

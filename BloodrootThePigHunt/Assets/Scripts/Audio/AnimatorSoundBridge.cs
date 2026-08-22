@@ -18,6 +18,8 @@ public class AnimatorSoundBridge : MonoBehaviour
 
     public void StopEnemySounds()
     {
+        if (audioManager.instance == null) { return; }
+        if (mainAudio == null) { return; }
         if (mainAudio != null && audioManager.instance != null) { audioManager.instance.StopAllSoundsOnObject(transform.root);}
     }
 }
