@@ -240,8 +240,8 @@ public class enemyAI : MonoBehaviour, IDamage
         if (HP <= 0) {
             // Die reports the death to WaveManager,
             // then starts the dissolve effect.
-            Die();
             GetComponent<EnemyAudioControl>().PlayDeathSound();
+            Die();
         } else {
             StartCoroutine(flashRed());
         }
