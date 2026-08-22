@@ -127,11 +127,12 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         controller.Move(playerVel * Time.deltaTime);
         playerVel.y -= gravity * Time.deltaTime;
         shootTimer += Time.deltaTime;
-        if (Input.GetButton("Fire1") && gunInv.Count > 0 && gunInv[gunInvPos].ammoCurr > 0 && shootTimer > gunInv[gunInvPos].shootRate) { shoot(); }
-        //if (gunInv.Count > 0) {
-        //    Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * gunInv[gunInvPos].shootDistance, Color.red);
-        //}
-        reload();
+        if (Input.GetButton("Fire1") && gunInv.Count > 0 && gunInv[gunInvPos].ammoCurr > 10 && shootTimer > gunInv[gunInvPos].shootRate) { shoot(); }
+        if (gunInv.Count > 0)
+        {
+          Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * gunInv[gunInvPos].shootDistance, Color.red);
+        }
+         reload();
     }
     //==========================================================================================
     // Function, Sprint
@@ -209,7 +210,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         if (gunInv[gunInvPos] == null) { return; }
         shootTimer = 0;
         gunInv[gunInvPos].ammoCurr--;
-        ScoreboardManager.GetOrCreate().AddShotFired();
+        //ScoreboardManager.GetOrCreate().AddShotFired();
         updatePlayerAmmo();
         if (gunInv[gunInvPos].shootSound.Count() > 0) {
             if (gunInv[gunInvPos].shootSound.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(gunInv[gunInvPos].shootSound[Random.Range(0, gunInv[gunInvPos].shootSound.Length)], gunInv[gunInvPos].shootSoundVolume); }

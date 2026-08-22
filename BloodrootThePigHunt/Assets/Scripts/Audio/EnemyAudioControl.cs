@@ -45,7 +45,7 @@ public class EnemyAudioControl : MonoBehaviour
         AudioClip currendSound = sound[Random.Range(0, sound.Length)];
         float randomVol = Random.Range(minVol, maxVol);
         float randomPit = Random.Range(minPitch, maxPitch);
-        audioManager.instance.PlaySpatialSounds(currendSound, transform.root.position, randomVol, randomPit);
+        audioManager.instance.PlaySpatialSounds(currendSound, transform.root, randomVol, randomPit);
 
     }
     

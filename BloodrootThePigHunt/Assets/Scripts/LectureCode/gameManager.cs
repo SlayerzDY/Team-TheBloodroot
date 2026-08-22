@@ -281,7 +281,7 @@ public class gameManager : MonoBehaviour
 
         //StartCoroutine(LoseFadeRoutine());
 
-        OpenLevelForGameManager("Farm_PrologueHub");
+        //OpenLevelForGameManager("Farm_PrologueHub");
 
         if (menuActive != null)
         {

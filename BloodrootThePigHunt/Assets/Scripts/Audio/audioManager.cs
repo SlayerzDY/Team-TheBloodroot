@@ -71,10 +71,31 @@ public class audioManager : MonoBehaviour
     }
 
     //==========================================================================================
+    // Function, Stop Pool items a
+    //------------------------------------------------------------------------------------------
+
+    public void StopAllSoundsOnObject(Transform enemyTransform)
+    {
+        if (enemyTransform == null) { return; }
+
+        for (int i = 0; i < poolList.Count; i++)
+        {
+            if (poolList[i].gameObject.activeInHierarchy)
+            {
+                if (poolList[i].transform.parent == enemyTransform || poolList[i].transform.IsChildOf(enemyTransform))
+                {
+                    poolList[i].Stop();
+                    poolList[i].gameObject.SetActive(false);
+                    poolList[i].transform.SetParent(this.transform);
+                }
+            }
+        }
+    }
+    //==========================================================================================
     // Function, Play Spatial sound / 3d sound effects
     //------------------------------------------------------------------------------------------
 
-    public void PlaySpatialSounds(AudioClip clip, Vector3 pos, float vol = 1f, float pitch = 1f)
+    public void PlaySpatialSounds(AudioClip clip, Transform enemyPos, float vol = 1f, float pitch = 1f)
     {
 
         if (clip == null) { return; }
@@ -82,7 +103,7 @@ public class audioManager : MonoBehaviour
         if(Camera.main != null)
         {
 
-            float disToPlay = Vector3.Distance(Camera.main.transform.position, pos);
+            float disToPlay = Vector3.Distance(Camera.main.transform.position, enemyPos.position);
             if (disToPlay > 50f) { return; }
 
         }
@@ -90,8 +111,8 @@ public class audioManager : MonoBehaviour
         AudioSource availableSource = GetPooledAudioSource();
         if (availableSource != null)
         {
-            availableSource.gameObject.transform.SetParent(null);
-            availableSource.gameObject.transform.position = pos;
+            availableSource.gameObject.transform.SetParent(enemyPos);
+            availableSource.gameObject.transform.localPosition = Vector3.zero;
             availableSource.gameObject.SetActive(true);
             availableSource.clip = clip;
             availableSource.volume = vol;
@@ -102,6 +123,7 @@ public class audioManager : MonoBehaviour
         }
 
     }
+
     //==========================================================================================
     // Function, Switch Music track
     //------------------------------------------------------------------------------------------
@@ -175,7 +197,7 @@ public class audioManager : MonoBehaviour
 
     private System.Collections.IEnumerator DisableSourceAfterPlaying(AudioSource source, float delay)
     {
-        yield return new WaitForSeconds(delay);
+        yield return new WaitForSecondsRealtime(delay);
         source.gameObject.SetActive(false);
         source.gameObject.transform.SetParent(this.transform);
     }

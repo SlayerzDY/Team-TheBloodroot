@@ -11,4 +11,9 @@ public class AnimatorSoundBridge : MonoBehaviour
     public void PlayIdleSound() => mainAudio.PlayIdleSound();
 
     public void PlayActionSound() => mainAudio.PlayActionSound();
+
+    public void StopEnemySounds()
+    {
+        if (mainAudio != null && audioManager.instance != null) { audioManager.instance.StopAllSoundsOnObject(transform.root);}
+    }
 }

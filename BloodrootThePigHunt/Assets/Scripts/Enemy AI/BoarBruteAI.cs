@@ -217,6 +217,13 @@ public class BoarBruteAI : enemyAI
         animator.SetTrigger("Damage");
         base.TakeDamage(amount);
     }
+
+    protected override void Die()
+    {
+        animator.SetTrigger("Die");
+        base.Die();
+    }
+
     //==========================================================================================
 }
 //==============================================================================================
