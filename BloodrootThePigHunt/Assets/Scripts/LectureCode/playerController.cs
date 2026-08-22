@@ -161,13 +161,13 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         updatePlayerWeight();
         Inventory inv = this.GetComponent<Inventory>();
         if (inv == null) { return; }
-        if (inv.inventoryWeight >= inv.weightThreshold) { 
-            speed = (int)(speed * (inv.weightThreshold / inv.inventoryWeight)); 
-            if (speed <= 0) { speed = 1; }
-            if (speed > speedOrig) { speed = speedOrig; }
-        } else {
-            speed = speedOrig;
-        }
+        //if (inv.inventoryWeight >= inv.weightThreshold) { 
+        //    speed = (int)(speed * (inv.weightThreshold / inv.inventoryWeight)); 
+        //    if (speed <= 3) { speed = 3; }
+        //    if (speed > speedOrig) { speed = speedOrig; }
+        //} else {
+        //    speed = speedOrig;
+        //}
     }
     //==========================================================================================
     // Function, Play Steps
@@ -406,20 +406,13 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     public void updatePlayerWeight()
     {
         Inventory inv = GetComponent<Inventory>();
-        if (inv == null) { return; }
+        //if (inv == null) { return; }
         if (gameManager.instance == null || gameManager.instance.AmmoCount == null)
         {
             return;
         }
-
-        if (gunInv.Count > 0)
-        {
-            gameManager.instance.weight.text = $"{inv.inventoryWeight} / {inv.weightThreshold}";
-        }
-        else
-        {
-            gameManager.instance.weight.text = $"0 / {inv.weightThreshold}";
-        }
+        gameManager.instance.weight.text = $"{(int)inv.inventoryWeight} / {inv.weightThreshold} lb";
+        //gameManager.instance.weight.text = $"0 / {inv.weightThreshold} lb";
     }
     //==========================================================================================
     // Function, Flash Damage

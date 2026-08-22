@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 1807892849295950277}
   - component: {fileID: 6681448343115540539}
   - component: {fileID: 4942448490666211775}
+  - component: {fileID: -3709432721299045937}
   - component: {fileID: 895034978919146484}
   m_Layer: 10
   m_Name: Item_Pickup_Master
@@ -49,16 +50,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Item
   item:
-    itemName: Leather
+    itemName: Super Heavy
     itemDescription: Wonderful bits of dead pig!
-    icon: {fileID: 21300000, guid: 768fb2c35c8c65d4ba2afe09821f8e98, type: 3}
-    weight: 0.1
+    icon: {fileID: 21300000, guid: 31eb1eff574124e4d91a6679f6f4f7ba, type: 3}
+    weight: 1000
     quantity: 1
-    stackSize: 99
+    stackSize: 1
     itemMesh: {fileID: 919132149155446097, guid: 089573e79cecb77498bf6f6423ae4424, type: 3}
     pickupSound: []
     itemIncreases: {fileID: 11400000, guid: 1fd5b603596412145bd58b5bbe757e2b, type: 2}
-    itemID: 
+    itemID: SuperHeavy13242135234
   canInteract: 1
 --- !u!114 &1807892849295950277
 MonoBehaviour:
@@ -136,6 +137,27 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!135 &-3709432721299045937
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 817942340654339044}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.5
+  m_Center: {x: 0.0024543405, y: -0.00033582747, z: 0.025178298}
 --- !u!135 &895034978919146484
 SphereCollider:
   m_ObjectHideFlags: 0
