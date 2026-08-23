@@ -4,7 +4,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 //==============================================================================================
@@ -15,7 +14,6 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     // Define Variables
     //==========================================================================================
     // Test Variables
-    [SerializeField] public GameObject testContainer; 
     [SerializeField] CharacterController controller;
     [SerializeField] LayerMask ignoreLayer;
     float camRotX, camRotY;
@@ -75,7 +73,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     Vector3 playerVel;
     bool isSprinting;
     bool isPlayingSteps;
-    private bool isJumping;
+    //private bool isJumping;
     //==========================================================================================
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     //==========================================================================================
@@ -93,6 +91,19 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         speedOrig = speed;
         if (!newGame) { gameManager.instance.Load(); }
         gameManager.instance.updatePlayer();
+        StartCoroutine(ExecuteAfterDelay(0.1f));
+        if (PersistOutsideWorld.instance == null) { return; }
+        if (PersistOutsideWorld.instance.state) {
+            gameManager.instance.Load();
+        }
+
+
+    }
+
+    private IEnumerator ExecuteAfterDelay(float delayInSeconds)
+    {
+        yield return new WaitForSeconds(delayInSeconds);
+
         spawnPlayer();
     }
     //==========================================================================================
@@ -103,10 +114,12 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             //animator.SetFloat("Speed", agent.velocity.magnitude / agent.speed, 0.1f, Time.deltaTime);
             //animator.SetFloat("Speed", this.playerVel.magnitude / this.speed, 0.1f, Time.deltaTime);
             animator.SetFloat("Speed", this.speed, 0.1f, Time.deltaTime);
-            isJumping = false;
+            //isJumping = false;
             movement();
             useFlashlight();
-            if (Input.GetKeyDown(KeyCode.K)) { LoadTestScene(); }
+            //if (Input.GetKeyDown(KeyCode.K)) { LoadTestScene(); }
+            if (Input.GetKeyDown(KeyCode.F5)) { gameManager.instance.Save(); }
+            if (Input.GetKeyDown(KeyCode.F9)) { gameManager.instance.Load(); }
         }
         sprint();
         if (isSprinting) { StaminaReduction(stamReduction); } else { if (stam <= stamOrig) { StaminaRegen(); }}
@@ -130,11 +143,11 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         playerVel.y -= gravity * Time.deltaTime;
         shootTimer += Time.deltaTime;
         if (Input.GetButton("Fire1") && gunInv.Count > 0 && gunInv[gunInvPos].ammoCurr > 0 && shootTimer > gunInv[gunInvPos].shootRate) { shoot(); }
-        if (gunInv.Count > 0) {
-            Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * gunInv[gunInvPos].shootDistance, Color.red);
-                animator.SetBool("IsAiming", true);
+        if (gunInv.Count > 0)   
+        {
+          Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * gunInv[gunInvPos].shootDistance, Color.red);
         }
-        reload();
+         reload();
     }
     //==========================================================================================
     // Function, Sprint
@@ -163,13 +176,13 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         updatePlayerWeight();
         Inventory inv = this.GetComponent<Inventory>();
         if (inv == null) { return; }
-        if (inv.inventoryWeight >= inv.weightThreshold) { 
-            speed = (int)(speed * (inv.weightThreshold / inv.inventoryWeight)); 
-            if (speed <= 0) { speed = 1; }
-            if (speed > speedOrig) { speed = speedOrig; }
-        } else {
-            speed = speedOrig;
-        }
+        //if (inv.inventoryWeight >= inv.weightThreshold) { 
+        //    speed = (int)(speed * (inv.weightThreshold / inv.inventoryWeight)); 
+        //    if (speed <= 3) { speed = 3; }
+        //    if (speed > speedOrig) { speed = speedOrig; }
+        //} else {
+        //    speed = speedOrig;
+        //}
     }
     //==========================================================================================
     // Function, Play Steps
@@ -177,6 +190,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     IEnumerator playSteps()
     {
         isPlayingSteps = true;
+        if (audioManager.instance == null) { yield break; }
         if (audSteps.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(audSteps[Random.Range(0, audSteps.Length)], audStepsVolume); }
         if (isSprinting)
         {
@@ -197,7 +211,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             if (audJump.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(audJump[Random.Range(0, audJump.Length)], audJumpVolume); }
             playerVel.y = jumpSpeed;
             animator.SetBool("IsJumping", true);
-            isJumping = true;
+            //isJumping = true;
             jumpCount++;
             StaminaReduction(jumpCost);
         }
@@ -207,11 +221,12 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     // Function, Shoot
     //==========================================================================================
     void shoot() {
+        if (gunInv == null) { return; }
+        if (gunInv[gunInvPos] == null) { return; }
         shootTimer = 0;
         gunInv[gunInvPos].ammoCurr--;
-        ScoreboardManager.GetOrCreate().AddShotFired();
+        //ScoreboardManager.GetOrCreate().AddShotFired();
         updatePlayerAmmo();
-
         if (gunInv[gunInvPos].shootSound.Count() > 0) {
             if (gunInv[gunInvPos].shootSound.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(gunInv[gunInvPos].shootSound[Random.Range(0, gunInv[gunInvPos].shootSound.Length)], gunInv[gunInvPos].shootSoundVolume); }
             int randomInt = Random.Range(0, gunInv[gunInvPos].shootSound.Count());
@@ -406,20 +421,13 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     public void updatePlayerWeight()
     {
         Inventory inv = GetComponent<Inventory>();
-        if (inv == null) { return; }
+        //if (inv == null) { return; }
         if (gameManager.instance == null || gameManager.instance.AmmoCount == null)
         {
             return;
         }
-
-        if (gunInv.Count > 0)
-        {
-            gameManager.instance.weight.text = $"{inv.inventoryWeight} / {inv.weightThreshold}";
-        }
-        else
-        {
-            gameManager.instance.weight.text = $"0 / {inv.weightThreshold}";
-        }
+        gameManager.instance.weight.text = $"{(int)inv.inventoryWeight} / {inv.weightThreshold} lb";
+        //gameManager.instance.weight.text = $"0 / {inv.weightThreshold} lb";
     }
     //==========================================================================================
     // Function, Flash Damage
@@ -695,25 +703,26 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     //==========================================================================================
     // Function, Change Gun
     //==========================================================================================
-    void changeGun()
+    public void changeGun()
     {
         // Assign Visuals
         updatePlayerAmmo();
         gunModel.GetComponent<MeshFilter>().sharedMesh = gunInv[gunInvPos].gunModel.GetComponent<MeshFilter>().sharedMesh;
         gunModel.GetComponent<MeshRenderer>().sharedMaterial = gunInv[gunInvPos].gunModel.GetComponent<MeshRenderer>().sharedMaterial;
         animator.SetInteger("WeaponType", gunInv[gunInvPos].gunType);
+        animator.SetBool("IsAiming", true);
     }
 //==========================================================================================
 // Function, Select Gun
 //==========================================================================================
 void selectGun()
     {
-        if (Input.GetAxis("Mouse ScrollWheel") > 0 && gunInvPos < gunInv.Count - 1)
+        if (Input.GetAxis("Mouse ScrollWheel") > 0f && gunInvPos < gunInv.Count - 1)
         {
             gunInvPos++;
             changeGun();
         }
-        else if (Input.GetAxis("Mouse ScrollWheel") > 0 && gunInvPos > 0)
+        else if (Input.GetAxis("Mouse ScrollWheel") < 0f && gunInvPos > 0)
         {
             gunInvPos--;
             changeGun();
@@ -723,11 +732,31 @@ void selectGun()
     // Function, Spawn Player
     //==========================================================================================
     public void spawnPlayer() {
+
         controller.transform.position = gameManager.instance.playerSpawnPos.transform.position;
         Physics.SyncTransforms();
         HP = HPOrig;
         updatePlayerAmmo();
         updatePlayerUI();
+        if (gunInv != null) {
+            if (gunInv.Count > 0) {
+                changeGun();
+            }
+        }
+        Inventory playerInv = this.GetComponent<Inventory>();
+        if (playerInv == null) { return; }
+        if (playerInv.inventoryItems == null) { return; }
+        if (playerInv.inventoryItems == null || playerInv.inventoryItems.Length < 1) { return; }
+        if (playerInv.inventoryItems[0] == null) { return; }
+        if (playerInv.inventoryItems[0].itemName == null) { return; }
+        for (int i = 0; i < playerInv.inventoryItems.Length; i++) {
+            if (playerInv.inventoryItems == null) { continue; }
+            if (playerInv.inventoryItems[i] == null) { continue; } 
+            if (playerInv.inventoryItems[i].itemName == null) { continue; }
+            if (playerInv.inventoryItems[i].itemName == "Radar") {
+                gameManager.instance.ActivateRadar(true);
+            }
+        }
     }
     //==========================================================================================
     // Function, Test Remove Item
@@ -739,9 +768,6 @@ void selectGun()
         {
             if (!inventory.IsSlotEmpty(i))
             {
-                //inventory.RemoveItem(inventory.inventoryItems[i].itemName, 1, false);
-                //inventory.RemoveMultipleItems("M1 Garand Ammo");
-                inventory.TransferToNewInventory(testContainer, "M1 Garand Ammo");
                 break;
             }
         }
@@ -790,9 +816,9 @@ void selectGun()
     //==========================================================================================
     public void UpdateUpgradedStats(string statType = "all")
     {
-        if (statType == "all" || statType == "health" || statType == "hp") { HP = Mathf.RoundToInt(HPOrig * healthMultiplier); }
+        if (statType == "all" || statType == "Health" || statType == "HP") { HPOrig = Mathf.RoundToInt(HPOrig * healthMultiplier); HP = HPOrig; }
 
-        if (statType == "all" || statType == "stamina") { stam = stamOrig * staminaMultiplier;}
+        if (statType == "all" || statType == "Stamina") { stamOrig = stamOrig * staminaMultiplier; stam = stamOrig; }
     }
 
 }

@@ -31,7 +31,7 @@ public class buttonFunctions : MonoBehaviour {
 
         if (manager == null)
         {
-            Debug.LogError("Respawn requires the authored GameManager.");
+
             return;
         }
 
@@ -42,7 +42,7 @@ public class buttonFunctions : MonoBehaviour {
 
         if (manager.playerController == null)
         {
-            Debug.LogError("Respawn requires the authored player controller.");
+
             return;
         }
         gameManager.instance.Save();
@@ -50,6 +50,57 @@ public class buttonFunctions : MonoBehaviour {
         manager.NotifyPlayerRespawned();
         manager.stateUnpause();
     }
+
+    //==========================================================================================
+    // Function, Return to MainMenu
+    //==========================================================================================
+
+    public void ReturnToMainMenu()
+    {
+        gameManager.instance.Save();
+        OpenLevel("MainMenu");
+    }
+
+    //==========================================================================================
+    // Function, Return to Hub
+    //==========================================================================================
+
+    public void ReturnToHub()
+    {
+        gameManager manager = gameManager.instance;
+
+        if (manager == null)
+        {
+
+            return;
+        }
+
+        if (manager.playerController == null)
+        {
+            manager.updatePlayer();
+        }
+
+        if (manager.playerController == null)
+        {
+
+            return;
+        }
+        if (gameManager.instance != null)
+        {
+            // Restore real gameplay time before the replacement scene starts.
+            // This prevents a freshly loaded manager from capturing a paused
+            // time scale as its baseline.
+            gameManager.instance.stateUnpause();
+        }
+
+        gameManager.instance.Save();
+        OpenLevelHub("Farm_PrologueHub");
+        //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        //manager.playerController.spawnPlayer();
+        //manager.NotifyPlayerRespawned();
+        //manager.stateUnpause();
+    }
+
     //==========================================================================================
     // Function, Restart
     //==========================================================================================
@@ -92,7 +143,7 @@ public class buttonFunctions : MonoBehaviour {
             playerController controller = gameManager.instance.player.GetComponent<playerController>();
             if (controller == null) { return; }
             controller.LoadLevel(levelName);
-            gameManager.instance.checkpoint("PlayerSpawnPosBlackPines");
+            gameManager.instance.checkpoint("PlayerSpawnPos");
     }
     //==========================================================================================
     // Function, Open Level
@@ -102,7 +153,7 @@ public class buttonFunctions : MonoBehaviour {
             playerController controller = gameManager.instance.player.GetComponent<playerController>();
             if (controller == null) { return; }
             controller.LoadLevel(levelName);
-        gameManager.instance.checkpoint("PlayerSpawnPosStillwater");
+        gameManager.instance.checkpoint("PlayerSpawnPos");
     }
     //==========================================================================================
     // Function, Open Level
@@ -112,7 +163,7 @@ public class buttonFunctions : MonoBehaviour {
             playerController controller = gameManager.instance.player.GetComponent<playerController>();
             if (controller == null) { return; }
             controller.LoadLevel(levelName);
-        gameManager.instance.checkpoint("PlayerSpawnPosHarrowEstate");
+        gameManager.instance.checkpoint("PlayerSpawnPos");
     }
     //==========================================================================================
     // Function, Open Level
@@ -122,7 +173,7 @@ public class buttonFunctions : MonoBehaviour {
             playerController controller = gameManager.instance.player.GetComponent<playerController>();
             if (controller == null) { return; }
             controller.LoadLevel(levelName);
-        gameManager.instance.checkpoint("PlayerSpawnPosBloodRootHollow");
+        gameManager.instance.checkpoint("PlayerSpawnPos");
     }
     //==========================================================================================
     // Function, Open Level

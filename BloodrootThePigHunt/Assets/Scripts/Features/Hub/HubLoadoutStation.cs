@@ -522,7 +522,7 @@ namespace Bloodroot.Features.Hub
                 failureReason = rolledBack
                     ? $"Loadout application failed ({exception.GetType().Name}); all granted quantities were rolled back."
                     : $"Loadout application failed ({exception.GetType().Name}) and automatic rollback could not restore every starting quantity.";
-                Debug.LogException(exception, this);
+
                 return false;
             }
 
@@ -579,7 +579,7 @@ namespace Bloodroot.Features.Hub
             }
             catch (Exception rollbackException)
             {
-                Debug.LogException(rollbackException, this);
+
                 return false;
             }
         }

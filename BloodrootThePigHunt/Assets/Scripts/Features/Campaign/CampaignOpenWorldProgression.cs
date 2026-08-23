@@ -240,13 +240,7 @@ namespace Bloodroot.Campaign
                 if (!configurationErrorLogged)
                 {
                     configurationErrorLogged = true;
-                    Debug.LogError(
-                        "Open-world campaign progression requires exactly " +
-                        "one serialized barrier for Stillwater Feed Mill, " +
-                        "Harrow Estate, and Bloodroot Hollow plus four unique " +
-                        "mission roots in campaign order. Barriers and mission " +
-                        "roots remain fail-closed until configuration is valid.",
-                        this);
+
                 }
             }
             else
@@ -361,11 +355,7 @@ namespace Bloodroot.Campaign
             if (Time.unscaledTime >= nextBoundaryCorrectionWarningTime)
             {
                 nextBoundaryCorrectionWarningTime = Time.unscaledTime + 2f;
-                Debug.LogWarning(
-                    $"Open-world boundary guard stopped travel into locked " +
-                    $"area {constrainedArea}. The authored Border collider " +
-                    $"was also restored to its fail-closed state.",
-                    this);
+
             }
         }
 

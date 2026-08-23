@@ -192,11 +192,7 @@ namespace Bloodroot.Features.WorldMissions
 
                 if (root == gameObject)
                 {
-                    Debug.LogError(
-                        "WorldMissionPowerState cannot toggle its own " +
-                        "GameObject. Keep the controller on an always-active " +
-                        "mission systems root.",
-                        this);
+
                     continue;
                 }
 

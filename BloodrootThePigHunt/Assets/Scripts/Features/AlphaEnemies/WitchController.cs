@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
 using UnityEngine.Events;
 
 namespace Bloodroot.Features.AlphaEnemies
@@ -140,6 +139,15 @@ namespace Bloodroot.Features.AlphaEnemies
         public event Action<WitchController> Died;
         public event Action ShieldBroken;
         public event Action<GameObject> MinionSummoned;
+
+        /// <summary>
+        /// Audio-safe combat timing bridge. Each cue is emitted once after
+        /// its underlying combat action has completed successfully. This
+        /// event neither owns nor plays AudioClips; <see
+        /// cref="WitchCombatAudioHooks"/> turns it into inspector-visible
+        /// UnityEvents on the authored witch prefabs.
+        /// </summary>
+        public event Action<WitchCombatAudioCue> CombatAudioCue;
 
         public WitchVariant Variant => variant;
         public Transform Target => target;
@@ -365,6 +373,7 @@ namespace Bloodroot.Features.AlphaEnemies
             PlayClip(hitClip);
             AlphaEnemyEventUtility.Invoke(onDamaged, this, this, nameof(onDamaged));
             AlphaEnemyEventUtility.Invoke(Damaged, this, this, nameof(Damaged));
+            RaiseCombatAudioCue(WitchCombatAudioCue.DamageTaken);
             if (currentHealth == 0)
             {
                 Die();
@@ -640,9 +649,7 @@ namespace Bloodroot.Features.AlphaEnemies
                     else if (!projectileWarningIssued)
                     {
                         projectileWarningIssued = true;
-                        Debug.LogWarning(
-                            $"{name}: configured magic projectile has neither AlphaEnemyProjectile nor Damage; it will not receive witch damage scaling.",
-                            this);
+
                     }
                 }
             }
@@ -654,6 +661,7 @@ namespace Bloodroot.Features.AlphaEnemies
             }
             TriggerAnimator(castTrigger);
             PlayClip(castClip);
+            RaiseCombatAudioCue(WitchCombatAudioCue.ProjectileAttack);
             return true;
         }
 
@@ -748,26 +756,30 @@ namespace Bloodroot.Features.AlphaEnemies
                 return false;
             }
 
-            NavMeshAgent authoredAgent = prefab.GetComponent<NavMeshAgent>();
-            NavMeshQueryFilter filter = new NavMeshQueryFilter
-            {
-                agentTypeID = authoredAgent != null
-                    ? authoredAgent.agentTypeID
-                    : 0,
-                areaMask = authoredAgent != null
-                    ? authoredAgent.areaMask
-                    : NavMesh.AllAreas
-            };
-            if (!NavMesh.SamplePosition(
-                    spawnPoint.position,
-                    out NavMeshHit groundHit,
-                    minionGroundSampleRadius,
-                    filter))
+            if (!CampaignSafetyEnemyRuntimeAdapter.TryValidatePrefab(
+                    prefab,
+                    out Component authoredController,
+                    out _,
+                    out _,
+                    out string prefabError) ||
+                authoredController.GetType() !=
+                    typeof(global::BoarBruteAI))
             {
                 nextSummonAt = Time.time + summonCooldown;
-                Debug.LogWarning(
-                    $"{name}: no compatible NavMesh was found within {minionGroundSampleRadius:0.#}m of minion spawn '{spawnPoint.name}'. Summon skipped.",
-                    this);
+
+                return false;
+            }
+
+            if (!CampaignSafetyEnemyRuntimeAdapter
+                    .TryResolveGroundedSpawnPosition(
+                        prefab,
+                        spawnPoint.position,
+                        minionGroundSampleRadius,
+                        out var groundHit,
+                        out _))
+            {
+                nextSummonAt = Time.time + summonCooldown;
+
                 return false;
             }
 
@@ -779,92 +791,59 @@ namespace Bloodroot.Features.AlphaEnemies
                 prefab,
                 groundHit.position,
                 groundRotation);
-            NavMeshAgent spawnedAgent = minion.GetComponent<NavMeshAgent>();
-            if (spawnedAgent != null && spawnedAgent.enabled &&
-                !spawnedAgent.isOnNavMesh &&
-                !spawnedAgent.Warp(groundHit.position))
+
+            if (!CampaignSafetyEnemyRuntimeAdapter
+                    .TryPrepareGroundedSpawn(
+                        minion,
+                        groundHit,
+                        out Component spawnedController,
+                        out _) ||
+                spawnedController.GetType() !=
+                    typeof(global::BoarBruteAI))
             {
                 Destroy(minion);
                 nextSummonAt = Time.time + summonCooldown;
-                Debug.LogWarning(
-                    $"{name}: the summoned minion could not attach to its authored NavMesh and was discarded.",
-                    this);
+
+                return false;
+            }
+
+            Transform minionTarget = secondaryAttackTarget != null
+                ? secondaryAttackTarget
+                : target;
+            Vector3 alertPosition = minionTarget != null
+                ? minionTarget.position
+                : transform.position;
+            if (!CampaignSafetyEnemyRuntimeAdapter.TryInitialize(
+                    spawnedController,
+                    difficultyLevel,
+                    out string initializationError))
+            {
+                Destroy(minion);
+                nextSummonAt = Time.time + summonCooldown;
+
+                return false;
+            }
+
+            if (!CampaignSafetyEnemyRuntimeAdapter.TryAlert(
+                    spawnedController,
+                    alertPosition,
+                    out string alertError))
+            {
+                Destroy(minion);
+                nextSummonAt = Time.time + summonCooldown;
+
                 return false;
             }
 
             activeMinions.Add(minion);
-            BindSpawnedMinion(minion);
             spawnPointIndex = (spawnPointIndex + 1) % minionSpawnPoints.Length;
             nextSummonAt = Time.time + summonCooldown;
             TriggerAnimator(summonTrigger);
             PlayClip(summonClip);
             AlphaEnemyEventUtility.Invoke(onMinionSummoned, minion, this, nameof(onMinionSummoned));
             AlphaEnemyEventUtility.Invoke(MinionSummoned, minion, this, nameof(MinionSummoned));
+            RaiseCombatAudioCue(WitchCombatAudioCue.MinionSummoned);
             return true;
-        }
-
-        private void BindSpawnedMinion(GameObject minion)
-        {
-            if (minion == null)
-            {
-                return;
-            }
-
-            Transform minionTarget = secondaryAttackTarget != null
-                ? secondaryAttackTarget
-                : target;
-            WitchSummonedHogAI summonedHog =
-                minion.GetComponent<WitchSummonedHogAI>();
-            if (summonedHog != null)
-            {
-                summonedHog.SetTarget(minionTarget);
-                summonedHog.ApplyDifficulty(
-                    difficultyLevel,
-                    healthScalar,
-                    damageScalar,
-                    speedScalar,
-                    true);
-                summonedHog.Died -= HandleSummonedHogDied;
-                summonedHog.Died += HandleSummonedHogDied;
-                return;
-            }
-
-            WereBoarController legacyMinion =
-                minion.GetComponent<WereBoarController>();
-            if (legacyMinion != null)
-            {
-                legacyMinion.SetTarget(minionTarget);
-                legacyMinion.ApplyDifficulty(
-                    difficultyLevel,
-                    healthScalar,
-                    damageScalar,
-                    speedScalar,
-                    true);
-                legacyMinion.Died -= HandleLegacyMinionDied;
-                legacyMinion.Died += HandleLegacyMinionDied;
-            }
-        }
-
-        private void HandleSummonedHogDied(WitchSummonedHogAI minion)
-        {
-            if (minion == null)
-            {
-                return;
-            }
-
-            minion.Died -= HandleSummonedHogDied;
-            activeMinions.Remove(minion.gameObject);
-        }
-
-        private void HandleLegacyMinionDied(WereBoarController minion)
-        {
-            if (minion == null)
-            {
-                return;
-            }
-
-            minion.Died -= HandleLegacyMinionDied;
-            activeMinions.Remove(minion.gameObject);
         }
 
         private GameObject GetRandomConfiguredMinion()
@@ -873,7 +852,13 @@ namespace Bloodroot.Features.AlphaEnemies
             for (int checkedCount = 0; checkedCount < minionPrefabs.Length; checkedCount++)
             {
                 GameObject prefab = minionPrefabs[(startIndex + checkedCount) % minionPrefabs.Length];
-                if (prefab != null)
+                if (CampaignSafetyEnemyRuntimeAdapter.TryValidatePrefab(
+                        prefab,
+                        out Component controller,
+                        out _,
+                        out _,
+                        out _) &&
+                    controller.GetType() == typeof(global::BoarBruteAI))
                 {
                     return prefab;
                 }
@@ -944,6 +929,7 @@ namespace Bloodroot.Features.AlphaEnemies
                 PlayClip(shieldBreakClip);
                 AlphaEnemyEventUtility.Invoke(onShieldBroken, this, nameof(onShieldBroken));
                 AlphaEnemyEventUtility.Invoke(ShieldBroken, this, nameof(ShieldBroken));
+                RaiseCombatAudioCue(WitchCombatAudioCue.ShieldBroken);
             }
         }
 
@@ -988,10 +974,9 @@ namespace Bloodroot.Features.AlphaEnemies
                 _ => shieldBearerHealthMultiplier
             };
             float variantDamage = variant == WitchVariant.Matriarch ? matriarchDamageMultiplier : 1f;
-            // A serialized base value of one is the explicit one-hit testing
-            // contract. Do not let difficulty or variant multipliers inflate
-            // it; restoring a production value above one restores scaling.
-            scaledMaxHealth = baseMaxHealth == 1
+            // A one-health authored witch remains a one-hit test target even
+            // when a scene applies a difficulty or variant multiplier.
+            scaledMaxHealth = baseMaxHealth <= 1
                 ? 1
                 : Mathf.Max(1, Mathf.RoundToInt(
                     baseMaxHealth * variantHealth * healthScalar *
@@ -1031,27 +1016,22 @@ namespace Bloodroot.Features.AlphaEnemies
             SetAnimatorFlying(false);
             TriggerAnimator(deathTrigger);
             PlayClip(deathClip);
+            // The death state is now irreversible, but loot and delayed
+            // destruction have not happened yet. Audio listeners can safely
+            // start a death cue here without racing the destroy delay.
+            RaiseCombatAudioCue(WitchCombatAudioCue.DeathStarted);
             if (destroySpawnedMinionsOnDeath)
             {
                 foreach (GameObject minion in activeMinions)
                 {
                     if (minion != null)
                     {
-                        UnbindSpawnedMinion(minion);
                         Destroy(minion);
                     }
                 }
 
                 activeMinions.Clear();
             }
-            else
-            {
-                foreach (GameObject minion in activeMinions)
-                {
-                    UnbindSpawnedMinion(minion);
-                }
-            }
-
             SpawnConfiguredLoot();
             AlphaEnemyEventUtility.Invoke(onDied, this, this, nameof(onDied));
             AlphaEnemyEventUtility.Invoke(Died, this, this, nameof(Died));
@@ -1065,33 +1045,25 @@ namespace Bloodroot.Features.AlphaEnemies
             }
         }
 
-        private void UnbindSpawnedMinion(GameObject minion)
-        {
-            if (minion == null)
-            {
-                return;
-            }
-
-            WitchSummonedHogAI summonedHog =
-                minion.GetComponent<WitchSummonedHogAI>();
-            if (summonedHog != null)
-            {
-                summonedHog.Died -= HandleSummonedHogDied;
-            }
-
-            WereBoarController legacyMinion =
-                minion.GetComponent<WereBoarController>();
-            if (legacyMinion != null)
-            {
-                legacyMinion.Died -= HandleLegacyMinionDied;
-            }
-        }
-
         protected virtual void OnEncounterPrepared() { }
 
         protected virtual void OnHealthChanged() { }
 
         protected virtual void OnDying() { }
+
+        /// <summary>
+        /// Lets derived witches expose a successful specialty attack (for
+        /// example the Matriarch's Heartroot pulse) through the same audio
+        /// integration path as the shared controller attacks.
+        /// </summary>
+        protected void RaiseCombatAudioCue(WitchCombatAudioCue cue)
+        {
+            AlphaEnemyEventUtility.Invoke(
+                CombatAudioCue,
+                cue,
+                this,
+                nameof(CombatAudioCue));
+        }
 
         private void SpawnConfiguredLoot()
         {
@@ -1194,6 +1166,7 @@ namespace Bloodroot.Features.AlphaEnemies
             }
 
             audioSource.PlayOneShot(selected);
+            RaiseCombatAudioCue(WitchCombatAudioCue.AmbientStarted);
             ambientClipPlaying = true;
             ambientEndsAt = Time.time + selected.length /
                 Mathf.Max(0.01f, Mathf.Abs(audioSource.pitch));

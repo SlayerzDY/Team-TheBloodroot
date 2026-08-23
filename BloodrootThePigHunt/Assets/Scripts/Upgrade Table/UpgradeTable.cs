@@ -13,14 +13,15 @@ public class UpgradeTable : MonoBehaviour, IInteract
     {
 
         upgradeWindow = FindAnyObjectByType<UpgradeUI>(FindObjectsInactive.Include);
-        if (upgradeWindow == null) { Debug.LogWarning("Table cannont find the ui"); }
+        if (upgradeWindow == null) {
+            return; 
+        }
 
     }
 
     public void SendInteract(Collider target)
     {
         if(upgradeWindow != null && tableInventory.Count > 0){ upgradeWindow.OpenPanelMulti(tableInventory, this); }
-        else { Debug.LogWarning("Table empty or missing its ui window"); }
 
     }
 
@@ -42,7 +43,6 @@ public class UpgradeTable : MonoBehaviour, IInteract
 
         if (itemComponent == null || itemComponent.item == null)
         {
-            Debug.LogError("The object dropped in Required Item is missing an Item script or its scriptable data slot");
             return;
         }
 
@@ -59,8 +59,7 @@ public class UpgradeTable : MonoBehaviour, IInteract
         else
         {
             if (upgradeWindow != null) upgradeWindow.ShowNotification("Failed: Not enough materials!", false);
-            gameManager.instance.ToastMenu(true, "Insufficient crafting materials!");
-            //Debug.LogWarning("Insufficient crafting materials!");
+            //gameManager.instance.ToastMenu(true, "Insufficient crafting materials!");
         }
 
 
@@ -70,7 +69,7 @@ public class UpgradeTable : MonoBehaviour, IInteract
     {
         string stat = seleectedUpgrade.statToUpgrade.ToLower();
 
-        if (stat == "damage" || stat == "attack" || stat == "shootdamage")
+        if (stat == "Damage" || stat == "Attack" || stat == "ShootDamage")
         {
             if (seleectedUpgrade.targetGun != null)
             {
@@ -80,20 +79,17 @@ public class UpgradeTable : MonoBehaviour, IInteract
                 if (gunType.Contains("pistol"))
                 {
                     ctrler.pistolDamageMultiplier += upgradeAmount;
-                    gameManager.instance.ToastMenu(true, $"Pistol upgraded to x{ctrler.pistolDamageMultiplier}");
-                    //Debug.Log($"Pistol upgraded to {ctrler.pistolDamageMultiplier}x");
+                    //gameManager.instance.ToastMenu(true, $"Pistol upgraded to x{ctrler.pistolDamageMultiplier}");
                 }
                 else if (gunType.Contains("rifle"))
                 {
                     ctrler.rifleDamageMultiplier += upgradeAmount;
-                    gameManager.instance.ToastMenu(true, $"Rifle upgraded to {ctrler.rifleDamageMultiplier}x");
-                    //Debug.Log($"Rifle upgraded to {ctrler.rifleDamageMultiplier}x");
+                    //gameManager.instance.ToastMenu(true, $"Rifle upgraded to {ctrler.rifleDamageMultiplier}x");
                 }
                 else if (gunType.Contains("shotgun"))
                 {
                     ctrler.shotgunDamageMultiplier += upgradeAmount;
-                    gameManager.instance.ToastMenu(true, $"Shotgun upgraded to {ctrler.shotgunDamageMultiplier}x");
-                    //Debug.Log($"Shotgun upgraded to {ctrler.shotgunDamageMultiplier}x");
+                    //gameManager.instance.ToastMenu(true, $"Shotgun upgraded to {ctrler.shotgunDamageMultiplier}x");
                 }
             }
             return;
@@ -103,17 +99,17 @@ public class UpgradeTable : MonoBehaviour, IInteract
         {
             case "ammo":
                 break;
-            case "health":
-            case "hp":
+            case "Health":
+            case "HP":
                 ctrler.healthMultiplier += seleectedUpgrade.upgradeValue;
                 ctrler.healthMultiplier = Mathf.Clamp(ctrler.healthMultiplier, 1f, 4f);
-                ctrler.UpdateUpgradedStats("health");
+                ctrler.UpdateUpgradedStats("Health");
                 break;
 
-            case "stamina":
+            case "Stamina":
                 ctrler.staminaMultiplier += seleectedUpgrade.upgradeValue;
                 ctrler.staminaMultiplier = Mathf.Clamp(ctrler.staminaMultiplier, 1f, 4f);
-                ctrler.UpdateUpgradedStats("stamina");
+                ctrler.UpdateUpgradedStats("Stamina");
                 break;
         }
 

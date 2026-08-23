@@ -333,30 +333,5 @@ namespace Bloodroot.OpenWorld
             return false;
         }
 
-        private void OnDrawGizmosSelected()
-        {
-            Color previousColor = Gizmos.color;
-            Gizmos.color = new Color(0.85f, 0.12f, 0.2f, 0.8f);
-
-            Collider[] ownedColliders =
-                blockingColliders ?? Array.Empty<Collider>();
-
-            foreach (Collider ownedCollider in ownedColliders)
-            {
-                if (ownedCollider is not BoxCollider barrierCollider)
-                {
-                    continue;
-                }
-
-                Matrix4x4 previousMatrix = Gizmos.matrix;
-                Gizmos.matrix = barrierCollider.transform.localToWorldMatrix;
-                Gizmos.DrawWireCube(
-                    barrierCollider.center,
-                    barrierCollider.size);
-                Gizmos.matrix = previousMatrix;
-            }
-
-            Gizmos.color = previousColor;
-        }
     }
 }

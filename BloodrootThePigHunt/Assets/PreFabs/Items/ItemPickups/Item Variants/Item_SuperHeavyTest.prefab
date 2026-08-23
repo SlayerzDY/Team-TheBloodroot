@@ -8,21 +8,25 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -3709432721299045937, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
+      propertyPath: m_Radius
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 817942340654339044, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: m_Name
       value: Item_SuperHeavyTest
       objectReference: {fileID: 0}
     - target: {fileID: 4559782537062358527, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 69.71438
       objectReference: {fileID: 0}
     - target: {fileID: 4559782537062358527, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 1.5539719
       objectReference: {fileID: 0}
     - target: {fileID: 4559782537062358527, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -33.257557
       objectReference: {fileID: 0}
     - target: {fileID: 4559782537062358527, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: m_LocalRotation.w
@@ -53,6 +57,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4822712193961387962, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
+      propertyPath: item.icon
+      value: 
+      objectReference: {fileID: 21300000, guid: 31eb1eff574124e4d91a6679f6f4f7ba, type: 3}
+    - target: {fileID: 4822712193961387962, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: item.itemID
       value: SuperHeavy13242135234
       objectReference: {fileID: 0}
@@ -60,6 +68,10 @@ PrefabInstance:
       propertyPath: item.weight
       value: 1000
       objectReference: {fileID: 0}
+    - target: {fileID: 4822712193961387962, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
+      propertyPath: item.itemMesh
+      value: 
+      objectReference: {fileID: 919132149155446097, guid: 089573e79cecb77498bf6f6423ae4424, type: 3}
     - target: {fileID: 4822712193961387962, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
       propertyPath: item.itemName
       value: Super Heavy
@@ -72,6 +84,18 @@ PrefabInstance:
       propertyPath: item.stackSize
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4822712193961387962, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
+      propertyPath: item.itemDescription
+      value: Wonderful bits of dead pig!
+      objectReference: {fileID: 0}
+    - target: {fileID: 4942448490666211775, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 3d44c90a3d61ff345a1126dd327983a3, type: 2}
+    - target: {fileID: 6681448343115540539, guid: 10f052bb3168cca4e9b79c51d831fca3, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 2616682858060250926, guid: 089573e79cecb77498bf6f6423ae4424, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

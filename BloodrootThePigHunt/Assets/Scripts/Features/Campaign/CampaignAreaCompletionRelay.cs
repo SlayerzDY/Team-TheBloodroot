@@ -137,15 +137,15 @@ namespace Bloodroot.Campaign
             {
                 return;
             }
+            callback.Invoke();
+            //try
+            //{
 
-            try
-            {
-                callback.Invoke();
-            }
-            catch (Exception exception)
-            {
-                Debug.LogException(exception, this);
-            }
+            //}
+            //catch (Exception exception)
+            //{
+
+            //}
         }
     }
 }

@@ -35,15 +35,6 @@ namespace Bloodroot.Campaign
 
         private void Awake()
         {
-            Collider trigger = GetComponent<Collider>();
-
-            if (trigger != null && !trigger.isTrigger)
-            {
-                Debug.LogError(
-                    "Campaign locked-area feedback requires an authored " +
-                    "trigger collider.",
-                    this);
-            }
         }
 
         private void OnEnable()

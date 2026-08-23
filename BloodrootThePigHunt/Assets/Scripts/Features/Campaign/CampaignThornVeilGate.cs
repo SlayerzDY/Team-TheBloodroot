@@ -75,8 +75,7 @@ namespace Bloodroot.Campaign
             BindStateService();
             bool shouldOpen = state != null &&
                               ValidateAuthoredGate() &&
-                              state.Current.CanEnterHollow &&
-                              state.HasAllNameStonesOffered;
+                              state.Current.CanEnterHollow;
             ApplyGateState(shouldOpen);
             return isOpen;
         }
@@ -86,9 +85,7 @@ namespace Bloodroot.Campaign
             if (blockedRoot != null && blockedRoot == openRoot)
             {
                 open = false;
-                Debug.LogError(
-                    $"{name}: blocked and open thorn-veil roots must be different objects.",
-                    this);
+
             }
 
             bool changed = !hasAppliedState || isOpen != open;

@@ -28,11 +28,20 @@ public class Item : MonoBehaviour, IInteract {
         //    item.itemPickup = gameObject;
         //}
     }
+    private void OnTriggerEnter(Collider other) {
+        Inventory pick = other.GetComponent<Inventory>();
+        if (pick == null)
+        {
+            pick = other.GetComponentInParent<Inventory>();
+        }
+        SendInteract(this.GetComponent<Collider>());
+    }
     //==========================================================================================
     // Function, Start
     //------------------------------------------------------------------------------------------
     public void Start() {
-        if (this.GetComponent<Dissolver>() != null) { this.GetComponent<Dissolver>().StartCoroutine(this.GetComponent<Dissolver>().dissolveReturn()); }
+        //if (this.GetComponent<Dissolver>() == null) return;
+        //if (this.GetComponent<Dissolver>() != null) { this.GetComponent<Dissolver>().StartCoroutine(this.GetComponent<Dissolver>().dissolveReturn()); }
     }
     //==========================================================================================
     // Function, Apply Mesh to Self
@@ -54,11 +63,15 @@ public class Item : MonoBehaviour, IInteract {
         if (!canInteract) { return; }
         // If the Interact Target Doesn't have Item Stats, Return
         canInteract = false;
-        if (target.GetComponent<Item>() == null) { return; }
+        //if (target.GetComponent<Item>() == null) { return; }
         if (gameManager.instance != null && gameManager.instance.player != null) {
             Inventory playerInv = gameManager.instance.player.GetComponent<Inventory>();
             if (playerInv == null) { return; }
             playerInv.AddItem(target.gameObject);
+            SphereCollider[] spheres = GetComponents<SphereCollider>();
+            foreach (SphereCollider s in spheres) {
+                s.enabled = false;
+            }
             if (target.GetComponent<Dissolver>() != null) { target.GetComponent<Dissolver>().StartCoroutine(target.GetComponent<Dissolver>().dissolve()); }
         }
     }

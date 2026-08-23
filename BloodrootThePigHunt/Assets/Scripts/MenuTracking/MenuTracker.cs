@@ -38,7 +38,7 @@ public class MenuTracker : MonoBehaviour
     //==========================================================================================
     void Update()
     {
-        
+
     }
 
     //==========================================================================================
@@ -48,7 +48,7 @@ public class MenuTracker : MonoBehaviour
     public void AddMenu(GameObject menu)
     {
         previousMenus.Add(menu);
-        Debug.Log(menu.ToString() + " has been added to queue");
+
     }
     //==========================================================================================
     // Function, Remove Last Menu 
@@ -59,10 +59,6 @@ public class MenuTracker : MonoBehaviour
         {
             int size = previousMenus.Count;
             previousMenus.RemoveAt(size - 1);
-        }
-        else
-        {
-            Debug.Log("There are no previous menus to remove");
         }
     }
     //==========================================================================================
@@ -77,7 +73,7 @@ public class MenuTracker : MonoBehaviour
             Instance.RemoveLast();
             removed++;
         }
-        Debug.Log(removed + "/" +  size + " removed from queue");
+
     }
     //==========================================================================================
     // Function, Previous Menu
@@ -92,7 +88,7 @@ public class MenuTracker : MonoBehaviour
 
         }
         else {
-            Debug.Log("No previous menu found in queue");
+
             return null; 
         }
     }

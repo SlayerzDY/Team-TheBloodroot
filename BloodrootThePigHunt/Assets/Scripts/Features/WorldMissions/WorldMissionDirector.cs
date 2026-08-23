@@ -136,7 +136,7 @@ namespace Bloodroot.Features.WorldMissions
 
             if (!ValidateConfiguration(out string problem))
             {
-                Debug.LogError(problem, this);
+
                 ForwardRejection(problem);
                 return false;
             }
@@ -266,7 +266,7 @@ namespace Bloodroot.Features.WorldMissions
                     string reason =
                         $"Objective '{objective.ObjectiveId}' could not be " +
                         "activated from its current state.";
-                    Debug.LogError(reason, objective);
+
                     ForwardRejection(reason);
                     return;
                 }
@@ -478,10 +478,7 @@ namespace Bloodroot.Features.WorldMissions
 
             if (objective != currentObjective)
             {
-                Debug.LogError(
-                    $"Required objective '{objective.ObjectiveId}' completed " +
-                    "outside the active mission step.",
-                    objective);
+
                 return;
             }
 
@@ -548,7 +545,7 @@ namespace Bloodroot.Features.WorldMissions
 
         private void RejectCampaignCompletion(string reason)
         {
-            Debug.LogError(reason, this);
+
             ForwardRejection(reason);
             WorldMissionEventUtility.Invoke(
                 campaignCompletionRejected,

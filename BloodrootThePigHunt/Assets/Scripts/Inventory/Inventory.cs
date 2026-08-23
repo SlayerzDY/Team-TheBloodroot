@@ -137,6 +137,7 @@ public class Inventory : MonoBehaviour {
             return;
         }
         FindNextAvailableIndex(objectSpawn);
+        gameManager.instance.player.GetComponent<playerController>()?.handleWeight();
     }
     //==========================================================================================
     // Overload Function, Add Item (Index)
@@ -149,6 +150,7 @@ public class Inventory : MonoBehaviour {
             return;
         }
         FindNextAvailableIndex(objectSpawn, index);
+        gameManager.instance.player.GetComponent<playerController>()?.handleWeight();
     }
     //==========================================================================================
     // Function, Add Item
@@ -162,6 +164,7 @@ public class Inventory : MonoBehaviour {
         }
         // Execute Add Item Function
         FindNextAvailableIndex(item);
+        gameManager.instance.player.GetComponent<playerController>()?.handleWeight();
     }
     //==========================================================================================
     // Function, Remove Item    
@@ -173,6 +176,7 @@ public class Inventory : MonoBehaviour {
         if (spawnItem) { SpawnItem(item.GetComponent<Item>().item); }
         // Execute Remove Item Function
         KillItem(itemStats.itemName, itemStats.quantity, spawnItem);
+        gameManager.instance.player.GetComponent<playerController>()?.handleWeight();
     }
     //==========================================================================================
     // Overload Function, Remove Item By Index
@@ -184,6 +188,7 @@ public class Inventory : MonoBehaviour {
         if (spawnItem) { SpawnItem(item.GetComponent<Item>().item); }
         // Execute Remove Item Function
         KillItem(itemStats.itemName, itemStats.quantity, spawnItem, index);
+        gameManager.instance.player.GetComponent<playerController>()?.handleWeight();
     }
     //==========================================================================================
     // Overload Function, Remove Item By String Name and Amount
@@ -194,6 +199,7 @@ public class Inventory : MonoBehaviour {
         if (amount <= 0) { return; }
         // Execute Remove Item Function
         KillItem(name, amount, spawnItem);
+        gameManager.instance.player.GetComponent<playerController>()?.handleWeight();
     }
     //==========================================================================================
     // Overload Function, Remove Item By String Name and Amount and Index
@@ -204,6 +210,7 @@ public class Inventory : MonoBehaviour {
         if (amount <= 0) { return; }
         // Execute Remove Item Function
         KillItem(name, amount, spawnItem, index);
+        gameManager.instance.player.GetComponent<playerController>()?.handleWeight();
     }
     //==========================================================================================
     // Overload Function, Remove Item By Index
@@ -214,6 +221,7 @@ public class Inventory : MonoBehaviour {
         if (amount <= 0) { return; }
         // Execute Remove Item Function
         KillItem(itemName, amount, spawnItem, index);
+        gameManager.instance.player.GetComponent<playerController>()?.handleWeight();
     }
     //==========================================================================================
     // Function, Remove Multiple Items
@@ -227,6 +235,7 @@ public class Inventory : MonoBehaviour {
         if (currItemQuantity.Value <= 0) { return false; }
         // Execute Remove Item Function
         KillItem(currItemQuantity.Key.itemName, currItemQuantity.Value, spawnItem);
+        gameManager.instance.player.GetComponent<playerController>()?.handleWeight();
         return true;
     }
     //==========================================================================================
@@ -242,6 +251,7 @@ public class Inventory : MonoBehaviour {
         if (currItemQuantity.Value <= 0) { return false; }
         // Execute Remove Item Function
         KillItem(currItemQuantity.Key.itemName, currItemQuantity.Value, spawnItem);
+        gameManager.instance.player.GetComponent<playerController>()?.handleWeight();
         return true;
     }
     //==========================================================================================
@@ -260,6 +270,7 @@ public class Inventory : MonoBehaviour {
         newInv.AddItem(item);
         // Remove Item from our Inventory
         KillItem(currItemQuantity.Key.itemName, currItemQuantity.Value, false);
+        gameManager.instance.player.GetComponent<playerController>()?.handleWeight();
         return true;
     }
     //==========================================================================================
@@ -277,6 +288,7 @@ public class Inventory : MonoBehaviour {
         newInv.AddItem(item);
         // Remove Item from our Inventory
         KillItem(currItemQuantity.Key.itemName, currItemQuantity.Value, false);
+        gameManager.instance.player.GetComponent<playerController>()?.handleWeight();
         return true;
     }
     //==========================================================================================
@@ -296,6 +308,7 @@ public class Inventory : MonoBehaviour {
         newInv.AddItem(transferData);
         // Remove Item from our Inventory
         KillItem(currItemQuantity.Key.itemName, currItemQuantity.Value, false);
+        gameManager.instance.player.GetComponent<playerController>()?.handleWeight();
         return true;
     }
     //==========================================================================================

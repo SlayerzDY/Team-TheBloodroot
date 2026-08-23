@@ -22,6 +22,22 @@ namespace Bloodroot.Features.AlphaEnemies
         Matriarch
     }
 
+    /// <summary>
+    /// Runtime moments exposed by <see cref="WitchController"/> for the
+    /// audio pass. A cue is raised only after its underlying gameplay action
+    /// has succeeded; it does not play, own, or require an audio asset.
+    /// </summary>
+    public enum WitchCombatAudioCue
+    {
+        DamageTaken,
+        ProjectileAttack,
+        MinionSummoned,
+        ShieldBroken,
+        HeartrootPulse,
+        DeathStarted,
+        AmbientStarted
+    }
+
     public enum WitchEncounterState
     {
         Idle,
@@ -168,8 +184,8 @@ namespace Bloodroot.Features.AlphaEnemies
 
         private static void LogSubscriberException(UnityEngine.Object context, string eventName, Exception exception)
         {
-            Debug.LogError($"{context?.name ?? "Alpha enemy"}: subscriber for {eventName} threw an exception. Remaining subscribers were protected.", context);
-            Debug.LogException(exception, context);
+
+
         }
     }
 }

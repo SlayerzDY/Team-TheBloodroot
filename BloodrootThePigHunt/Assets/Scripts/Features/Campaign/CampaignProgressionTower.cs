@@ -149,7 +149,7 @@ namespace Bloodroot.Campaign
                     interactionCollider,
                     out string objectiveRejection))
             {
-                // Hollow's durable compatibility credit may already be saved.
+                // Hollow's durable cylinder activation may already be saved.
                 // A bounded reconciliation completes the transient objective
                 // once the mission director reaches the authored state.
                 QueueReconciliation();
@@ -287,13 +287,11 @@ namespace Bloodroot.Campaign
                     continue;
                 }
 
-                bool hollowCreditSaved =
+                bool hollowTowerSaved =
                     area == CampaignAreaId.BloodrootHollow &&
-                    state.Current.IsNameStoneOffered(CampaignNameStoneIds.Nell) &&
-                    state.Current.IsFarmEmergenceCompleted(
-                        CampaignNameStoneIds.Nell);
+                    state.Current.HollowTowerActivated;
 
-                if (!objective.IsComplete && hollowCreditSaved &&
+                if (!objective.IsComplete && hollowTowerSaved &&
                     objective.IsAvailable && objective.Director != null &&
                     objective.Director.CurrentObjective == objective)
                 {

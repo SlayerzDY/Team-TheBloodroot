@@ -79,12 +79,8 @@ namespace Bloodroot.Features.AlphaEnemies
                     inventory,
                     item,
                     quantityBefore);
-                Debug.LogError(
-                    rolledBack
-                        ? $"{name}: Inventory.AddItem threw; any observable partial grant was rolled back and the loot pickup was left in the world."
-                        : $"{name}: Inventory.AddItem threw and the approved public hooks could not verify a full rollback. The loot pickup remains active for diagnosis.",
-                    this);
-                Debug.LogException(exception, this);
+
+
                 return false;
             }
 
@@ -95,11 +91,7 @@ namespace Bloodroot.Features.AlphaEnemies
                     inventory,
                     item,
                     quantityBefore);
-                Debug.LogError(
-                    rolledBack
-                        ? $"{name}: Inventory accepted {Mathf.Max(0, acceptedQuantity)} of {item.quantity} configured items after a conservative public-API capacity preflight. The unexpected grant was rolled back and the pickup remains active."
-                        : $"{name}: Inventory accepted {Mathf.Max(0, acceptedQuantity)} of {item.quantity} configured items and the approved public hooks could not restore the starting quantity. The pickup remains active for diagnosis.",
-                    this);
+
                 return false;
             }
 
@@ -217,9 +209,7 @@ namespace Bloodroot.Features.AlphaEnemies
             }
             catch (Exception rollbackException)
             {
-                Debug.LogError(
-                    $"{name}: Inventory rollback threw: {rollbackException.Message}",
-                    this);
+
                 return false;
             }
         }

@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using Bloodroot.Features.AlphaEnemies;
 using UnityEngine;
 using UnityEngine.AI;
@@ -11,7 +10,7 @@ namespace Bloodroot.Features.FarmPrologue
     /// <summary>
     /// Presentation-only listener for enemies spawned by the prologue wave.
     /// It temporarily gates only the spawned enemy's movement components while
-    /// raising it from below its authored NavMesh spawn position. Enemy AI and
+    /// running an authored reveal at a grounded NavMesh position. Enemy AI and
     /// encounter ownership remain with their existing systems.
     /// </summary>
     [DisallowMultipleComponent]
@@ -20,19 +19,13 @@ namespace Bloodroot.Features.FarmPrologue
         [Header("Existing Wave Hook")]
         [SerializeField] private waveManager waveEncounter;
 
-        [Header("Ground Emergence")]
+        [Header("Grounded Emergence Reveal")]
         [SerializeField] private bool animateGroundEmergence = true;
-        [SerializeField, Min(0.01f)] private float emergenceDepth = 1.75f;
-        [SerializeField, Min(0f)] private float rendererHeightDepthMultiplier = 0.9f;
-        [SerializeField, Min(0.01f)] private float maximumEmergenceDepth = 4f;
         [SerializeField, Min(0.01f)] private float emergenceDuration = 1.1f;
         [SerializeField, Min(0f)] private float emergenceStaggerSeconds = 0.08f;
         [Tooltip("Maximum local distance used to validate the enemy's authored surface against its own NavMesh agent type and area mask.")]
         [SerializeField, Min(0.01f)]
         private float navMeshSurfaceSampleRadius = 3f;
-        [SerializeField] private AnimationCurve riseCurve =
-            AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
-
         [Header("Authored Emergence Presentation")]
         [SerializeField] private Animator[] emergenceAnimators =
             Array.Empty<Animator>();
@@ -45,13 +38,6 @@ namespace Bloodroot.Features.FarmPrologue
 
         private readonly Dictionary<GameObject, EmergenceState>
             activeEmergences = new();
-        private static readonly BindingFlags SafetyEnemyFieldFlags =
-            BindingFlags.Instance | BindingFlags.NonPublic;
-        private static readonly FieldInfo SafetyEnemyStartingPositionField =
-            typeof(enemyAI).GetField("startingPos", SafetyEnemyFieldFlags);
-        private static readonly FieldInfo SafetyEnemyStoppingDistanceField =
-            typeof(enemyAI).GetField("stoppingDistanceOrig", SafetyEnemyFieldFlags);
-        private static bool warnedAboutSafetyEnemyContract;
         private bool isBound;
         private int emergenceTriggerHash;
         private float nextEmergenceStartTime;
@@ -63,7 +49,6 @@ namespace Bloodroot.Features.FarmPrologue
             public GameObject Enemy;
             public Transform EnemyTransform;
             public Vector3 SurfacePosition;
-            public float Depth;
             public NavMeshAgent Agent;
             public bool AgentWasEnabled;
             public bool AgentWasOnNavMesh;
@@ -135,11 +120,6 @@ namespace Bloodroot.Features.FarmPrologue
 
         private void OnValidate()
         {
-            emergenceDepth = Mathf.Max(0.01f, emergenceDepth);
-            rendererHeightDepthMultiplier =
-                Mathf.Max(0f, rendererHeightDepthMultiplier);
-            maximumEmergenceDepth =
-                Mathf.Max(emergenceDepth, maximumEmergenceDepth);
             emergenceDuration = Mathf.Max(0.01f, emergenceDuration);
             emergenceStaggerSeconds = Mathf.Max(0f, emergenceStaggerSeconds);
             navMeshSurfaceSampleRadius =
@@ -176,9 +156,8 @@ namespace Bloodroot.Features.FarmPrologue
             float staggerSeconds)
         {
             animateGroundEmergence = enabled;
-            emergenceDepth = Mathf.Max(0.01f, depth);
-            maximumEmergenceDepth =
-                Mathf.Max(emergenceDepth, maximumEmergenceDepth);
+            // Keep the historical signature for existing authoring callers,
+            // but never move a live enemy below its validated ground point.
             emergenceDuration = Mathf.Max(0.01f, duration);
             emergenceStaggerSeconds = Mathf.Max(0f, staggerSeconds);
         }
@@ -187,9 +166,8 @@ namespace Bloodroot.Features.FarmPrologue
             float heightMultiplier,
             float maximumDepth)
         {
-            rendererHeightDepthMultiplier = Mathf.Max(0f, heightMultiplier);
-            maximumEmergenceDepth =
-                Mathf.Max(emergenceDepth, maximumDepth);
+            // Retained as a source-compatible no-op now that grounded reveal
+            // animation never offsets an enemy below terrain.
         }
 
         public void ConfigureNavMeshProjection(float maximumSampleRadius)
@@ -219,7 +197,24 @@ namespace Bloodroot.Features.FarmPrologue
 
         private void PresentEnemyEmergence(GameObject spawnedEnemy)
         {
-            PresentExternalEnemy(spawnedEnemy);
+            if (!TryPrepareGroundedEnemy(
+                    spawnedEnemy,
+                    out Component controller))
+            {
+                RetireRejectedEnemy(spawnedEnemy);
+                return;
+            }
+
+            if (controller != null && controller.GetType() ==
+                typeof(global::juggernautEnemyAI))
+            {
+                _ = CampaignSafetyEnemyRuntimeAdapter.TryInitialize(
+                    controller,
+                    Mathf.Max(1, waveEncounter.currentWave),
+                    out _);
+            }
+
+            PresentPreparedExternalEnemy(spawnedEnemy);
         }
 
         /// <summary>
@@ -245,10 +240,24 @@ namespace Bloodroot.Features.FarmPrologue
             if (spawnedEnemy == null)
                 return;
 
+            if (!TryPrepareGroundedEnemy(
+                    spawnedEnemy,
+                    out _))
+            {
+                RetireRejectedEnemy(spawnedEnemy);
+                return;
+            }
+
+            PresentPreparedExternalEnemy(spawnedEnemy, coroutineHost);
+        }
+
+        private void PresentPreparedExternalEnemy(
+            GameObject spawnedEnemy,
+            MonoBehaviour coroutineHost = null)
+        {
             if (activeEmergences.ContainsKey(spawnedEnemy))
                 return;
 
-            PrepareSafetyEnemyCompatibility(spawnedEnemy);
             PlayAuthoredPresentation();
 
             if (animateGroundEmergence)
@@ -274,53 +283,44 @@ namespace Bloodroot.Features.FarmPrologue
                 this);
         }
 
-        private static void PrepareSafetyEnemyCompatibility(
-            GameObject spawnedEnemy)
+        private bool TryPrepareGroundedEnemy(
+            GameObject spawnedEnemy,
+            out Component controller)
         {
-            enemyAI[] safetyEnemies =
-                spawnedEnemy.GetComponentsInChildren<enemyAI>(true);
-
-            foreach (enemyAI safetyEnemy in safetyEnemies)
+            controller = null;
+            if (spawnedEnemy == null ||
+                !CampaignSafetyEnemyRuntimeAdapter
+                    .TryResolveGroundedSpawnPosition(
+                        spawnedEnemy,
+                        spawnedEnemy.transform.position,
+                        navMeshSurfaceSampleRadius,
+                        out NavMeshHit groundedPosition,
+                        out _))
             {
-                if (safetyEnemy == null)
-                    continue;
+                return false;
+            }
 
-                if (safetyEnemy.agent == null)
-                {
-                    safetyEnemy.agent =
-                        safetyEnemy.GetComponent<NavMeshAgent>();
-                }
+            return CampaignSafetyEnemyRuntimeAdapter
+                .TryPrepareGroundedSpawn(
+                    spawnedEnemy,
+                    groundedPosition,
+                    out controller,
+                    out _);
+        }
 
-                if (safetyEnemy.animator == null)
-                {
-                    safetyEnemy.animator =
-                        safetyEnemy.GetComponentInChildren<Animator>(true);
-                }
+        private static void RetireRejectedEnemy(GameObject spawnedEnemy)
+        {
+            if (spawnedEnemy == null)
+                return;
 
-                if (SafetyEnemyStartingPositionField == null ||
-                    SafetyEnemyStoppingDistanceField == null)
-                {
-                    if (!warnedAboutSafetyEnemyContract)
-                    {
-                        warnedAboutSafetyEnemyContract = true;
-                        Debug.LogWarning(
-                            "Farm safety-enemy compatibility could not cache " +
-                            "the online safety roaming contract because its " +
-                            "private field layout changed.");
-                    }
-
-                    continue;
-                }
-
-                if (safetyEnemy.agent != null)
-                {
-                    SafetyEnemyStartingPositionField.SetValue(
-                        safetyEnemy,
-                        safetyEnemy.transform.position);
-                    SafetyEnemyStoppingDistanceField.SetValue(
-                        safetyEnemy,
-                        safetyEnemy.agent.stoppingDistance);
-                }
+            spawnedEnemy.SetActive(false);
+            if (Application.isPlaying)
+            {
+                Destroy(spawnedEnemy);
+            }
+            else
+            {
+                DestroyImmediate(spawnedEnemy);
             }
         }
 
@@ -333,7 +333,6 @@ namespace Bloodroot.Features.FarmPrologue
                 Enemy = spawnedEnemy,
                 EnemyTransform = spawnedEnemy.transform,
                 SurfacePosition = spawnedEnemy.transform.position,
-                Depth = CalculateEmergenceDepth(spawnedEnemy),
                 Agent = spawnedEnemy.GetComponent<NavMeshAgent>()
             };
 
@@ -342,21 +341,13 @@ namespace Bloodroot.Features.FarmPrologue
 
             if (!TryPrepareValidatedSurface(state))
             {
-                RestoreMovement(state);
-                Debug.LogWarning(
-                    $"{name}: skipped ground-emergence movement gating for " +
-                    $"'{spawnedEnemy.name}' because no valid nearby NavMesh " +
-                    "surface could be resolved. The enemy remains active.",
-                    spawnedEnemy);
+                RetireRejectedEnemy(spawnedEnemy);
                 return;
             }
 
             RefreshSafetyEnemyOrigin(spawnedEnemy);
             GateMovement(state);
             activeEmergences.Add(spawnedEnemy, state);
-
-            state.EnemyTransform.position =
-                state.SurfacePosition + Vector3.down * state.Depth;
 
             float now = Time.time;
             float scheduledStart = Mathf.Max(now, nextEmergenceStartTime);
@@ -402,33 +393,14 @@ namespace Bloodroot.Features.FarmPrologue
                 }
             }
 
-            foreach (ScreecherAI screecherAI in
-                     spawnedEnemy.GetComponentsInChildren<ScreecherAI>(true))
+            foreach (juggernautEnemyAI juggernaut in
+                     spawnedEnemy.GetComponentsInChildren<juggernautEnemyAI>(
+                         true))
             {
-                if (screecherAI != null &&
-                    uniqueBehaviours.Add(screecherAI))
+                if (juggernaut != null &&
+                    uniqueBehaviours.Add(juggernaut))
                 {
-                    movementBehaviours.Add(screecherAI);
-                }
-            }
-
-            foreach (RegularHog regularHog in
-                     spawnedEnemy.GetComponentsInChildren<RegularHog>(true))
-            {
-                if (regularHog != null &&
-                    uniqueBehaviours.Add(regularHog))
-                {
-                    movementBehaviours.Add(regularHog);
-                }
-            }
-
-            foreach (WitchSummonedHogAI ownedHogAI in
-                     spawnedEnemy.GetComponentsInChildren<WitchSummonedHogAI>(true))
-            {
-                if (ownedHogAI != null &&
-                    uniqueBehaviours.Add(ownedHogAI))
-                {
-                    movementBehaviours.Add(ownedHogAI);
+                    movementBehaviours.Add(juggernaut);
                 }
             }
 
@@ -513,7 +485,7 @@ namespace Bloodroot.Features.FarmPrologue
         {
             if (state.Agent == null ||
                 !TrySampleSurface(
-                    state.Agent,
+                    state.Enemy,
                     state.SurfacePosition,
                     out Vector3 projectedSurface))
             {
@@ -522,7 +494,8 @@ namespace Bloodroot.Features.FarmPrologue
 
             if (state.AgentWasEnabled)
             {
-                if (!state.Agent.Warp(projectedSurface))
+                if (!state.Agent.Warp(projectedSurface) ||
+                    !state.Agent.isOnNavMesh)
                 {
                     return false;
                 }
@@ -537,27 +510,22 @@ namespace Bloodroot.Features.FarmPrologue
         }
 
         private bool TrySampleSurface(
-            NavMeshAgent agent,
+            GameObject enemy,
             Vector3 requestedPosition,
             out Vector3 sampledPosition)
         {
             sampledPosition = requestedPosition;
 
-            if (agent == null || !IsFinite(requestedPosition))
+            if (enemy == null || !IsFinite(requestedPosition))
                 return false;
 
-            var queryFilter = new NavMeshQueryFilter
-            {
-                agentTypeID = agent.agentTypeID,
-                areaMask = agent.areaMask
-            };
-
-            if (!NavMesh.SamplePosition(
-                    requestedPosition,
-                    out NavMeshHit hit,
-                    SanitizeSampleRadius(navMeshSurfaceSampleRadius),
-                    queryFilter) ||
-                !IsFinite(hit.position))
+            if (!CampaignSafetyEnemyRuntimeAdapter
+                    .TryResolveGroundedSpawnPosition(
+                        enemy,
+                        requestedPosition,
+                        SanitizeSampleRadius(navMeshSurfaceSampleRadius),
+                        out NavMeshHit hit,
+                        out _))
             {
                 return false;
             }
@@ -591,9 +559,6 @@ namespace Bloodroot.Features.FarmPrologue
             }
 
             float elapsed = 0f;
-            Vector3 buriedPosition =
-                state.SurfacePosition + Vector3.down * state.Depth;
-
             while (elapsed < emergenceDuration)
             {
                 if (!IsEnemyAlive(state))
@@ -603,17 +568,6 @@ namespace Bloodroot.Features.FarmPrologue
                 }
 
                 elapsed += Time.deltaTime;
-                float normalized =
-                    Mathf.Clamp01(elapsed / emergenceDuration);
-                float curved = riseCurve == null
-                    ? normalized
-                    : Mathf.Clamp01(riseCurve.Evaluate(normalized));
-
-                state.EnemyTransform.position =
-                    Vector3.LerpUnclamped(
-                        buriedPosition,
-                        state.SurfacePosition,
-                        curved);
                 yield return null;
             }
 
@@ -635,7 +589,7 @@ namespace Bloodroot.Features.FarmPrologue
 
             if (state.Agent != null &&
                 TrySampleSurface(
-                    state.Agent,
+                    state.Enemy,
                     state.SurfacePosition,
                     out Vector3 projectedSurface))
             {
@@ -645,10 +599,9 @@ namespace Bloodroot.Features.FarmPrologue
 
             // SurfacePosition was validated before movement was gated. If a
             // dynamic NavMesh update temporarily prevents the second sample,
-            // restoring to that last valid point still fails presentation
-            // open and releases the enemy's original components.
+            // restoring to that last valid grounded point still fails the
+            // presentation open without dropping the enemy below terrain.
             state.EnemyTransform.position = restoreSurface;
-            RefreshSafetyEnemyOrigin(state.Enemy);
 
             if (state.Agent != null)
             {
@@ -657,10 +610,14 @@ namespace Bloodroot.Features.FarmPrologue
                     state.Agent.enabled = true;
                 }
 
-                if (state.AgentWasEnabled && state.Agent.enabled &&
-                    state.Agent.isOnNavMesh)
+                if (state.AgentWasEnabled && state.Agent.enabled)
                 {
-                    state.Agent.Warp(restoreSurface);
+                    if (!state.Agent.Warp(restoreSurface) ||
+                        !state.Agent.isOnNavMesh)
+                    {
+                        RetireRejectedEnemy(state.Enemy);
+                        return;
+                    }
 
                     if (state.AgentWasOnNavMesh)
                     {
@@ -672,6 +629,8 @@ namespace Bloodroot.Features.FarmPrologue
                     state.Agent.enabled = false;
                 }
             }
+
+            RefreshSafetyEnemyOrigin(state.Enemy);
 
             RestorePhysics(state);
 
@@ -725,26 +684,12 @@ namespace Bloodroot.Features.FarmPrologue
 
         private static void RefreshSafetyEnemyOrigin(GameObject enemy)
         {
-            if (enemy == null || SafetyEnemyStartingPositionField == null)
+            if (enemy == null)
                 return;
 
-            foreach (enemyAI safetyEnemy in
-                     enemy.GetComponentsInChildren<enemyAI>(true))
-            {
-                if (safetyEnemy == null)
-                    continue;
-
-                try
-                {
-                    SafetyEnemyStartingPositionField.SetValue(
-                        safetyEnemy,
-                        safetyEnemy.transform.position);
-                }
-                catch (Exception exception)
-                {
-                    Debug.LogException(exception, safetyEnemy);
-                }
-            }
+            _ = CampaignSafetyEnemyRuntimeAdapter.TryPrepare(
+                enemy,
+                out _);
         }
 
         private void ForgetEmergence(EmergenceState state)
@@ -789,7 +734,7 @@ namespace Bloodroot.Features.FarmPrologue
                     }
                     catch (Exception exception)
                     {
-                        Debug.LogException(exception, animator);
+
                     }
                 }
             }
@@ -805,7 +750,7 @@ namespace Bloodroot.Features.FarmPrologue
                 }
                 catch (Exception exception)
                 {
-                    Debug.LogException(exception, effect);
+
                 }
             }
         }
@@ -815,43 +760,6 @@ namespace Bloodroot.Features.FarmPrologue
             return state != null &&
                    state.Enemy != null &&
                    state.EnemyTransform != null;
-        }
-
-        private float CalculateEmergenceDepth(GameObject spawnedEnemy)
-        {
-            Renderer[] renderers =
-                spawnedEnemy.GetComponentsInChildren<Renderer>(true);
-            bool hasBounds = false;
-            Bounds combinedBounds = default;
-
-            foreach (Renderer renderer in renderers)
-            {
-                if (renderer == null ||
-                    renderer is ParticleSystemRenderer ||
-                    renderer is TrailRenderer)
-                {
-                    continue;
-                }
-
-                if (!hasBounds)
-                {
-                    combinedBounds = renderer.bounds;
-                    hasBounds = true;
-                }
-                else
-                {
-                    combinedBounds.Encapsulate(renderer.bounds);
-                }
-            }
-
-            float heightScaledDepth = hasBounds
-                ? combinedBounds.size.y * rendererHeightDepthMultiplier
-                : emergenceDepth;
-
-            return Mathf.Clamp(
-                Mathf.Max(emergenceDepth, heightScaledDepth),
-                emergenceDepth,
-                maximumEmergenceDepth);
         }
 
         private void RefreshTriggerHash()
