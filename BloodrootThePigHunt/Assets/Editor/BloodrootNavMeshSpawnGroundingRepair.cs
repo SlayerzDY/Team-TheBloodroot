@@ -39,6 +39,54 @@ public static class BloodrootNavMeshSpawnGroundingRepair
     private const float SpawnVolumeSampleDistance = 0.75f;
     private const float MinimumSafeSpawnVolumeSize = 0.5f;
 
+    private readonly struct FarmSpawnVolumeSpec
+    {
+        public FarmSpawnVolumeSpec(
+            string markerName,
+            Vector2 center,
+            Vector2 localSize)
+        {
+            MarkerName = markerName;
+            Center = center;
+            LocalSize = localSize;
+        }
+
+        public string MarkerName { get; }
+        public Vector2 Center { get; }
+        public Vector2 LocalSize { get; }
+    }
+
+    // These three transforms are shared by the Farm's initial MobSpawner and
+    // recurring emergence director. Their compact volumes sit well inside the
+    // fence and away from the chore interaction cluster.
+    private static readonly FarmSpawnVolumeSpec[] FarmSpawnVolumes =
+    {
+        new FarmSpawnVolumeSpec(
+            "EMERGENCE_ZONE_01",
+            new Vector2(45f, 27f),
+            new Vector2(12f, 4f)),
+        new FarmSpawnVolumeSpec(
+            "EMERGENCE_ZONE_02",
+            new Vector2(27.2f, -28.3f),
+            new Vector2(24f, 4f)),
+        new FarmSpawnVolumeSpec(
+            "EMERGENCE_ZONE_03",
+            new Vector2(41f, -31.3f),
+            new Vector2(8f, 4f))
+    };
+
+    // Conservative interior polygon, inset from every physical fence edge.
+    // Proving the complete spawn rectangle is inside this polygon also proves
+    // random points selected by MobSpawner cannot land outside the Farm pen.
+    private static readonly Vector2[] FarmFenceInterior =
+    {
+        new Vector2(22f, -67f),
+        new Vector2(93f, -67f),
+        new Vector2(93f, 30f),
+        new Vector2(29f, 30f),
+        new Vector2(22f, 22f)
+    };
+
     [MenuItem("Tools/Bloodroot/Navigation/Repair Campaign Spawn Grounding")]
     public static void RepairAndValidateFromMenu()
     {
@@ -345,6 +393,11 @@ public static class BloodrootNavMeshSpawnGroundingRepair
 
         changes = 0;
         int markerCount = 0;
+        Dictionary<string, Transform> authoredMarkers =
+            FindAndAuthorFarmSpawnVolumes(scene, ref changes);
+        Physics.SyncTransforms();
+        ValidateFarmSpawnerMarkerOwnership(scene, authoredMarkers);
+        ValidateFarmFenceContainment(authoredMarkers);
 
         foreach (FarmRecurringEmergenceDirector director in
                  FindComponents<FarmRecurringEmergenceDirector>(scene))
@@ -394,6 +447,9 @@ public static class BloodrootNavMeshSpawnGroundingRepair
             }
         }
 
+        Physics.SyncTransforms();
+        ValidateFarmFenceContainment(authoredMarkers);
+
         if (changes > 0)
         {
             EditorSceneManager.MarkSceneDirty(scene);
@@ -405,6 +461,227 @@ public static class BloodrootNavMeshSpawnGroundingRepair
         }
 
         return markerCount;
+    }
+
+    private static Dictionary<string, Transform> FindAndAuthorFarmSpawnVolumes(
+        Scene scene,
+        ref int changes)
+    {
+        var markers = new Dictionary<string, Transform>(StringComparer.Ordinal);
+        foreach (FarmSpawnVolumeSpec spec in FarmSpawnVolumes)
+        {
+            Transform marker = RequireSingleSceneTransform(scene, spec.MarkerName);
+            BoxCollider box = marker.GetComponent<BoxCollider>();
+            if (box == null)
+            {
+                throw new InvalidOperationException(
+                    "Farm spawn marker '" + spec.MarkerName +
+                    "' requires its authored BoxCollider volume.");
+            }
+
+            Vector3 position = marker.position;
+            Vector3 expectedPosition = new Vector3(
+                spec.Center.x,
+                position.y,
+                spec.Center.y);
+            if ((position - expectedPosition).sqrMagnitude > 0.000001f)
+            {
+                marker.position = expectedPosition;
+                changes++;
+            }
+
+            Vector3 size = box.size;
+            Vector3 expectedSize = new Vector3(
+                spec.LocalSize.x,
+                size.y,
+                spec.LocalSize.y);
+            if ((size - expectedSize).sqrMagnitude > 0.000001f)
+            {
+                box.size = expectedSize;
+                changes++;
+            }
+
+            markers.Add(spec.MarkerName, marker);
+        }
+
+        return markers;
+    }
+
+    private static Transform RequireSingleSceneTransform(
+        Scene scene,
+        string objectName)
+    {
+        var matches = new List<Transform>();
+        foreach (GameObject root in scene.GetRootGameObjects())
+        {
+            foreach (Transform candidate in
+                     root.GetComponentsInChildren<Transform>(true))
+            {
+                if (candidate != null && string.Equals(
+                        candidate.name,
+                        objectName,
+                        StringComparison.Ordinal))
+                {
+                    matches.Add(candidate);
+                }
+            }
+        }
+
+        if (matches.Count != 1)
+        {
+            throw new InvalidOperationException(
+                "Expected exactly one Farm spawn marker named '" + objectName +
+                "'; found " + matches.Count + ".");
+        }
+
+        return matches[0];
+    }
+
+    private static void ValidateFarmSpawnerMarkerOwnership(
+        Scene scene,
+        IReadOnlyDictionary<string, Transform> authoredMarkers)
+    {
+        Transform[] expected = FarmSpawnVolumes
+            .Select(spec => authoredMarkers[spec.MarkerName])
+            .ToArray();
+        FarmRecurringEmergenceDirector[] directors =
+            FindComponents<FarmRecurringEmergenceDirector>(scene);
+        global::MobSpawner[] spawners = FindComponents<global::MobSpawner>(scene);
+        if (directors.Length == 0 || spawners.Length == 0)
+        {
+            throw new InvalidOperationException(
+                "Farm enemy spawning requires both its recurring director and MobSpawner.");
+        }
+
+        foreach (FarmRecurringEmergenceDirector director in directors)
+        {
+            Transform[] actual = director.SpawnPoints.ToArray();
+            if (actual.Length != expected.Length ||
+                actual.Any(marker => marker == null) ||
+                actual.Distinct().Count() != actual.Length ||
+                !actual.SequenceEqual(expected))
+            {
+                throw new InvalidOperationException(
+                    "Farm recurring emergence does not use exactly the three " +
+                    "fence-contained spawn markers in canonical order.");
+            }
+        }
+
+        foreach (global::MobSpawner spawner in spawners)
+        {
+            SerializedProperty points = new SerializedObject(spawner)
+                .FindProperty("spawnPoint");
+            var actual = new List<Transform>();
+            if (points != null && points.isArray)
+            {
+                for (int index = 0; index < points.arraySize; index++)
+                {
+                    Transform marker = points.GetArrayElementAtIndex(index)
+                        .objectReferenceValue as Transform;
+                    if (marker != null)
+                    {
+                        actual.Add(marker);
+                    }
+                }
+            }
+
+            if (points == null || !points.isArray ||
+                points.arraySize != expected.Length ||
+                actual.Count != expected.Length ||
+                actual.Distinct().Count() != actual.Count ||
+                !actual.SequenceEqual(expected))
+            {
+                throw new InvalidOperationException(
+                    "Farm MobSpawner does not use exactly the three " +
+                    "fence-contained spawn markers in canonical order.");
+            }
+        }
+    }
+
+    private static void ValidateFarmFenceContainment(
+        IReadOnlyDictionary<string, Transform> authoredMarkers)
+    {
+        foreach (KeyValuePair<string, Transform> pair in authoredMarkers)
+        {
+            BoxCollider box = pair.Value != null
+                ? pair.Value.GetComponent<BoxCollider>()
+                : null;
+            if (box == null)
+            {
+                throw new InvalidOperationException(
+                    "Farm spawn marker '" + pair.Key +
+                    "' has no volume to validate against the fence.");
+            }
+
+            Vector3 center = box.center;
+            Vector3 extents = box.size * 0.5f;
+            Vector3[] localCorners =
+            {
+                new Vector3(center.x - extents.x, center.y, center.z - extents.z),
+                new Vector3(center.x - extents.x, center.y, center.z + extents.z),
+                new Vector3(center.x + extents.x, center.y, center.z - extents.z),
+                new Vector3(center.x + extents.x, center.y, center.z + extents.z)
+            };
+
+            foreach (Vector3 localCorner in localCorners)
+            {
+                Vector3 worldCorner = box.transform.TransformPoint(localCorner);
+                if (!IsInsidePolygon(
+                        new Vector2(worldCorner.x, worldCorner.z),
+                        FarmFenceInterior))
+                {
+                    throw new InvalidOperationException(
+                        "Farm spawn volume '" + pair.Key +
+                        "' crosses the fenced-in gameplay area at " +
+                        worldCorner + ".");
+                }
+            }
+        }
+    }
+
+    private static bool IsInsidePolygon(
+        Vector2 point,
+        IReadOnlyList<Vector2> polygon)
+    {
+        bool inside = false;
+        for (int index = 0, previous = polygon.Count - 1;
+             index < polygon.Count;
+             previous = index++)
+        {
+            Vector2 start = polygon[previous];
+            Vector2 end = polygon[index];
+            if (DistanceToSegment(point, start, end) <= 0.001f)
+            {
+                return true;
+            }
+
+            bool crosses = (end.y > point.y) != (start.y > point.y);
+            if (crosses && point.x <
+                (start.x - end.x) * (point.y - end.y) /
+                (start.y - end.y) + end.x)
+            {
+                inside = !inside;
+            }
+        }
+
+        return inside;
+    }
+
+    private static float DistanceToSegment(
+        Vector2 point,
+        Vector2 start,
+        Vector2 end)
+    {
+        Vector2 segment = end - start;
+        float denominator = segment.sqrMagnitude;
+        if (denominator <= 0.000001f)
+        {
+            return Vector2.Distance(point, start);
+        }
+
+        float amount = Mathf.Clamp01(
+            Vector2.Dot(point - start, segment) / denominator);
+        return Vector2.Distance(point, start + segment * amount);
     }
 
     private static int RepairOpenWorldSpawnMarkers(out int changes)

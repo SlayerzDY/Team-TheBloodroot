@@ -3,10 +3,12 @@ using System;
 using System.Collections.Generic;
 using Bloodroot.Campaign;
 using Bloodroot.Features.AlphaEnemies;
+using Bloodroot.Features.FarmPrologue;
 using Bloodroot.Features.Hub;
 using Bloodroot.Features.WorldMissions;
 using TMPro;
 using UnityEditor;
+using UnityEditor.Events;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.AI;
@@ -53,6 +55,16 @@ public static class BloodrootBetaCampaignCleanup
         "Assets/PreFabs/Items/ItemPickups/Item Variants/Item_Stone.prefab";
     private const string SafetyCursedItemPickupPath =
         "Assets/PreFabs/Items/ItemPickups/Item Variants/Item_CursedItem.prefab";
+    private const string PrologueCursedObjectName =
+        "Prologue Cursed Object Pickup";
+    private const string PrologueCursedObjectPresentationName =
+        "Protected Cursed Object Presentation";
+    private static readonly Vector3 PrologueCursedObjectPosition =
+        new Vector3(57.976902f, 0f, 9.5f);
+    private static readonly Vector3 PrologueCursedObjectPresentationPosition =
+        new Vector3(0f, 0.11514783f, 0f);
+    private static readonly Vector3 PrologueCursedObjectPresentationScale =
+        new Vector3(0.0985897f, 0.066987135f, 0.04837508f);
 
     private const string BoarPath = "Assets/PreFabs/Enemies/Boar.prefab";
     private const string RootBoarPath = "Assets/PreFabs/Enemies/BoarRoot.prefab";
@@ -185,6 +197,61 @@ public static class BloodrootBetaCampaignCleanup
         }
     }
 
+    [MenuItem("Tools/Bloodroot/Campaign/Repair Farm Prologue Cursed Object")]
+    public static void RepairFarmPrologueCursedObjectFromMenu()
+    {
+        RepairFarmPrologueCursedObjectBatch();
+    }
+
+    /// <summary>
+    /// Repairs only the authored Farm prologue pickup. This intentionally
+    /// leaves the rest of the beta cleanup and the Open World untouched.
+    /// </summary>
+    public static void RepairFarmPrologueCursedObjectBatch()
+    {
+        if (Application.isPlaying || EditorApplication.isCompiling ||
+            EditorApplication.isUpdating)
+        {
+            throw new InvalidOperationException(
+                "The Farm cursed-object repair requires an idle Unity Editor in Edit Mode.");
+        }
+
+        SceneSetup[] originalSetup = EditorSceneManager.GetSceneManagerSetup();
+        bool restoreSetup = !Application.isBatchMode &&
+                            originalSetup != null &&
+                            originalSetup.Length > 0;
+        try
+        {
+            Scene scene = EditorSceneManager.OpenScene(
+                FarmScenePath,
+                OpenSceneMode.Single);
+            int changes = EnsureFarmPrologueCursedObjectPickup(scene);
+            ValidateFarmPrologueCursedObjectPickup(scene);
+
+            if (changes > 0)
+            {
+                EditorSceneManager.MarkSceneDirty(scene);
+                if (!EditorSceneManager.SaveScene(scene, FarmScenePath))
+                {
+                    throw new InvalidOperationException(
+                        "Unity could not save the repaired Farm cursed object.");
+                }
+            }
+
+            AssetDatabase.SaveAssets();
+            Console.WriteLine(
+                "BLOODROOT_FARM_CURSED_OBJECT_REPAIR: PASS changes=" +
+                changes + ".");
+        }
+        finally
+        {
+            if (restoreSetup)
+            {
+                EditorSceneManager.RestoreSceneManagerSetup(originalSetup);
+            }
+        }
+    }
+
     private static void ApplySceneCatalog(string scenePath, bool cleanFarmHub)
     {
         Scene scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
@@ -241,6 +308,8 @@ public static class BloodrootBetaCampaignCleanup
             EditorUtility.SetDirty(offering);
         }
 
+        EnsureFarmPrologueCursedObjectPickup(scene);
+
         foreach (WorldMissionEvidenceSource source in
                  FindComponents<WorldMissionEvidenceSource>(scene))
         {
@@ -288,6 +357,430 @@ public static class BloodrootBetaCampaignCleanup
         }
 
         ValidateFarmHubCleanup(scene);
+    }
+
+    private static int EnsureFarmPrologueCursedObjectPickup(Scene scene)
+    {
+        FarmPrologueCursedObjectPickup[] pickups =
+            FindComponents<FarmPrologueCursedObjectPickup>(scene);
+        if (pickups.Length > 1)
+        {
+            throw new InvalidOperationException(
+                "Farm prologue repair found duplicate campaign cursed-object " +
+                "proxies: " + pickups.Length + ".");
+        }
+
+        CampaignStateService state = FindSingleComponent<CampaignStateService>(scene);
+        CampaignInventoryCarryover carryover =
+            FindSingleComponent<CampaignInventoryCarryover>(scene);
+        FarmPrologueDirector director =
+            FindSingleComponent<FarmPrologueDirector>(scene);
+        GameObject token = RequirePrefab(PrologueCursedObjectPickupPath);
+        GameObject safetyPresentation = RequirePrefab(SafetyCursedItemPickupPath);
+        int changes = 0;
+        FarmPrologueCursedObjectPickup pickup;
+        if (pickups.Length == 0)
+        {
+            GameObject parent = FindGameObject(
+                scene,
+                "Generated Alpha Shared Farm Systems");
+            if (parent == null)
+            {
+                throw new InvalidOperationException(
+                    "Farm prologue repair cannot find its shared systems root.");
+            }
+
+            GameObject createdProxy = new GameObject(PrologueCursedObjectName);
+            if (createdProxy.scene != scene)
+            {
+                SceneManager.MoveGameObjectToScene(createdProxy, scene);
+            }
+            createdProxy.transform.SetParent(parent.transform, false);
+            createdProxy.AddComponent<BoxCollider>();
+            pickup = createdProxy.AddComponent<FarmPrologueCursedObjectPickup>();
+
+            FarmObjectivePresenter presenter =
+                FindSingleComponent<FarmObjectivePresenter>(scene);
+            UnityEventTools.AddPersistentListener(
+                pickup.PickupRejectedEvent,
+                presenter.ShowRejectedStatus);
+            changes++;
+        }
+        else
+        {
+            pickup = pickups[0];
+        }
+
+        changes += RemoveStandaloneSafetyCursedItemPickups(
+            scene,
+            safetyPresentation);
+
+        GameObject proxy = pickup.gameObject;
+        if (!string.Equals(proxy.name, PrologueCursedObjectName,
+                StringComparison.Ordinal))
+        {
+            proxy.name = PrologueCursedObjectName;
+            changes++;
+        }
+
+        if (!proxy.activeSelf)
+        {
+            proxy.SetActive(true);
+            changes++;
+        }
+
+        if (proxy.layer != 10)
+        {
+            proxy.layer = 10;
+            changes++;
+        }
+
+        if (!proxy.CompareTag("Interact"))
+        {
+            proxy.tag = "Interact";
+            changes++;
+        }
+
+        if ((pickup.transform.position - PrologueCursedObjectPosition)
+            .sqrMagnitude > 0.000001f)
+        {
+            pickup.transform.position = PrologueCursedObjectPosition;
+            changes++;
+        }
+
+        BoxCollider interactionCollider = proxy.GetComponent<BoxCollider>();
+        if (interactionCollider == null)
+        {
+            throw new InvalidOperationException(
+                "The Farm campaign cursed-object proxy is missing its BoxCollider.");
+        }
+
+        if (interactionCollider.isTrigger)
+        {
+            interactionCollider.isTrigger = false;
+            changes++;
+        }
+
+        changes += SetVector3(
+            interactionCollider.center,
+            new Vector3(0f, 0.75f, 0f),
+            value => interactionCollider.center = value);
+        changes += SetVector3(
+            interactionCollider.size,
+            new Vector3(1.25f, 1.5f, 1.25f),
+            value => interactionCollider.size = value);
+
+        GameObject presentation = pickup.PresentationRoot;
+        if (!IsExactPrefabInstance(presentation, safetyPresentation))
+        {
+            if (presentation != null)
+            {
+                if (!presentation.transform.IsChildOf(pickup.transform))
+                {
+                    throw new InvalidOperationException(
+                        "The Farm cursed-object proxy references presentation " +
+                        "outside its owned hierarchy.");
+                }
+
+                UnityEngine.Object.DestroyImmediate(presentation);
+            }
+
+            presentation = PrefabUtility.InstantiatePrefab(
+                safetyPresentation,
+                scene) as GameObject;
+            if (presentation == null)
+            {
+                throw new InvalidOperationException(
+                    "Unity could not instantiate Safety's cursed-item presentation.");
+            }
+
+            presentation.transform.SetParent(pickup.transform, false);
+            presentation.transform.localPosition =
+                PrologueCursedObjectPresentationPosition;
+            presentation.transform.localRotation = Quaternion.identity;
+            presentation.transform.localScale =
+                PrologueCursedObjectPresentationScale;
+            changes++;
+        }
+
+        if (!string.Equals(
+                presentation.name,
+                PrologueCursedObjectPresentationName,
+                StringComparison.Ordinal))
+        {
+            presentation.name = PrologueCursedObjectPresentationName;
+            changes++;
+        }
+
+        if (presentation.transform.parent != pickup.transform)
+        {
+            presentation.transform.SetParent(pickup.transform, false);
+            changes++;
+        }
+
+        changes += SetVector3(
+            presentation.transform.localPosition,
+            PrologueCursedObjectPresentationPosition,
+            value => presentation.transform.localPosition = value);
+        if (Quaternion.Angle(
+                presentation.transform.localRotation,
+                Quaternion.identity) > 0.001f)
+        {
+            presentation.transform.localRotation = Quaternion.identity;
+            changes++;
+        }
+
+        changes += SetVector3(
+            presentation.transform.localScale,
+            PrologueCursedObjectPresentationScale,
+            value => presentation.transform.localScale = value);
+
+        foreach (Collider childCollider in
+                 presentation.GetComponentsInChildren<Collider>(true))
+        {
+            if (childCollider != null && childCollider.enabled)
+            {
+                childCollider.enabled = false;
+                changes++;
+            }
+        }
+
+        foreach (MonoBehaviour behaviour in
+                 presentation.GetComponentsInChildren<MonoBehaviour>(true))
+        {
+            if (behaviour != null && behaviour.enabled &&
+                (behaviour is global::IInteract ||
+                 behaviour is global::Dissolver))
+            {
+                behaviour.enabled = false;
+                changes++;
+            }
+        }
+
+        if (presentation.activeSelf)
+        {
+            presentation.SetActive(false);
+            changes++;
+        }
+
+        SerializedObject serialized = new SerializedObject(pickup);
+        bool requiresConfigure =
+            serialized.FindProperty("campaignState")?.objectReferenceValue != state ||
+            serialized.FindProperty("inventoryCarryover")?.objectReferenceValue != carryover ||
+            serialized.FindProperty("cursedItemTemplate")?.objectReferenceValue != token ||
+            serialized.FindProperty("prologueDirector")?.objectReferenceValue != director ||
+            serialized.FindProperty("presentationRoot")?.objectReferenceValue != presentation ||
+            serialized.FindProperty("interactionCollider")?.objectReferenceValue !=
+            interactionCollider;
+        if (requiresConfigure)
+        {
+            global::Inventory inventory = serialized
+                .FindProperty("playerInventory")?.objectReferenceValue as
+                global::Inventory;
+            pickup.Configure(
+                state,
+                carryover,
+                token,
+                inventory,
+                director,
+                presentation,
+                interactionCollider);
+            changes++;
+        }
+
+        if (interactionCollider.enabled)
+        {
+            interactionCollider.enabled = false;
+            changes++;
+        }
+
+        if (changes > 0)
+        {
+            EditorUtility.SetDirty(pickup);
+            EditorUtility.SetDirty(interactionCollider);
+            EditorUtility.SetDirty(presentation);
+        }
+
+        return changes;
+    }
+
+    private static int RemoveStandaloneSafetyCursedItemPickups(
+        Scene scene,
+        GameObject safetyPresentationPrefab)
+    {
+        var roots = new HashSet<GameObject>();
+        foreach (global::Item item in FindComponents<global::Item>(scene))
+        {
+            if (item == null || item.transform.parent != null ||
+                !string.Equals(
+                    item.item?.itemName?.Trim(),
+                    "Cursed Item",
+                    StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            if (!IsKnownLegacyCursedItemPickup(
+                    item.gameObject,
+                    safetyPresentationPrefab))
+            {
+                throw new InvalidOperationException(
+                    "Farm cursed-object repair found an unknown standalone " +
+                    "Safety cursed-item pickup named '" + item.name +
+                    "' at " + item.transform.position + ".");
+            }
+
+            roots.Add(item.gameObject);
+        }
+
+        foreach (GameObject root in roots)
+        {
+            UnityEngine.Object.DestroyImmediate(root);
+        }
+
+        return roots.Count;
+    }
+
+    private static bool IsKnownLegacyCursedItemPickup(
+        GameObject candidate,
+        GameObject safetyPresentationPrefab)
+    {
+        if (!IsExactPrefabInstance(candidate, safetyPresentationPrefab))
+        {
+            return false;
+        }
+
+        string[] expectedNames =
+        {
+            "Item_CursedItem",
+            "Item_CursedItem (1)",
+            "Item_CursedItem (2)",
+            "Item_CursedItem (3)",
+            "Item_CursedItem (4)"
+        };
+        if (Array.IndexOf(expectedNames, candidate.name) < 0)
+        {
+            return false;
+        }
+
+        Vector3 position = candidate.transform.position;
+        return position.x >= 66.5f && position.x <= 68.5f &&
+               position.y >= -0.25f && position.y <= 0.5f &&
+               position.z >= -64.5f && position.z <= -62f;
+    }
+
+    private static void ValidateFarmPrologueCursedObjectPickup(Scene scene)
+    {
+        FarmPrologueCursedObjectPickup pickup =
+            FindSingleComponent<FarmPrologueCursedObjectPickup>(scene);
+        GameObject expectedToken = RequirePrefab(PrologueCursedObjectPickupPath);
+        GameObject expectedPresentation = RequirePrefab(SafetyCursedItemPickupPath);
+        global::ItemStats tokenItem =
+            CampaignInventoryTokenUtility.GetItemStats(expectedToken);
+
+        if (pickup == null || !pickup.isActiveAndEnabled ||
+            !pickup.gameObject.activeInHierarchy ||
+            !pickup.HasExclusiveInteractionAuthority ||
+            pickup.CursedItemTemplate != expectedToken ||
+            tokenItem == null ||
+            !string.Equals(tokenItem.itemName, "CursedItem", StringComparison.Ordinal) ||
+            tokenItem.quantity != 1 || tokenItem.stackSize != 1 ||
+            pickup.InteractionCollider == null ||
+            pickup.InteractionCollider.enabled ||
+            pickup.InteractionCollider.isTrigger ||
+            pickup.PresentationRoot == null ||
+            pickup.PresentationRoot.activeSelf ||
+            !IsExactPrefabInstance(pickup.PresentationRoot, expectedPresentation))
+        {
+            throw new InvalidOperationException(
+                "The Farm campaign cursed-object proxy is not authored safely.");
+        }
+
+        if (pickup.PickupRejectedEvent == null ||
+            pickup.PickupRejectedEvent.GetPersistentEventCount() == 0)
+        {
+            throw new InvalidOperationException(
+                "The Farm campaign cursed-object proxy lost its rejection feedback wiring.");
+        }
+
+        global::Dissolver[] dissolvers = pickup.PresentationRoot
+            .GetComponentsInChildren<global::Dissolver>(true);
+        if (dissolvers.Length != 1 || dissolvers[0] == null ||
+            dissolvers[0].enabled)
+        {
+            throw new InvalidOperationException(
+                "The Farm cursed-object presentation requires exactly one " +
+                "authored, initially disabled Dissolver.");
+        }
+
+        foreach (Collider childCollider in pickup.PresentationRoot
+                     .GetComponentsInChildren<Collider>(true))
+        {
+            if (childCollider != null && childCollider.enabled)
+            {
+                throw new InvalidOperationException(
+                    "The protected cursed-object presentation has an enabled collider.");
+            }
+        }
+
+        foreach (MonoBehaviour behaviour in pickup.PresentationRoot
+                     .GetComponentsInChildren<MonoBehaviour>(true))
+        {
+            if (behaviour != null && behaviour.enabled &&
+                behaviour is global::IInteract)
+            {
+                throw new InvalidOperationException(
+                    "The protected cursed-object presentation can bypass its " +
+                    "campaign interaction proxy.");
+            }
+        }
+
+        foreach (global::Item item in FindComponents<global::Item>(scene))
+        {
+            if (item != null && item.transform.parent == null &&
+                string.Equals(
+                    item.item?.itemName?.Trim(),
+                    "Cursed Item",
+                    StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException(
+                    "A standalone Safety cursed-item pickup remains in the Farm scene.");
+            }
+        }
+    }
+
+    private static bool IsExactPrefabInstance(
+        GameObject instance,
+        GameObject expectedPrefab)
+    {
+        if (instance == null || expectedPrefab == null ||
+            !PrefabUtility.IsPartOfPrefabInstance(instance) ||
+            PrefabUtility.GetNearestPrefabInstanceRoot(instance) != instance)
+        {
+            return false;
+        }
+
+        string expectedPath = AssetDatabase.GetAssetPath(expectedPrefab);
+        string instancePath =
+            PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(instance);
+        return string.Equals(
+            instancePath,
+            expectedPath,
+            StringComparison.Ordinal);
+    }
+
+    private static int SetVector3(
+        Vector3 current,
+        Vector3 expected,
+        Action<Vector3> apply)
+    {
+        if ((current - expected).sqrMagnitude <= 0.000001f)
+        {
+            return 0;
+        }
+
+        apply(expected);
+        return 1;
     }
 
     private static void RetireFarmHubPresentation(Scene scene)
@@ -425,6 +918,8 @@ public static class BloodrootBetaCampaignCleanup
             throw new InvalidOperationException(
                 "Farm Hub cleanup removed a required travel, spawn, or cursed-object interaction.");
         }
+
+        ValidateFarmPrologueCursedObjectPickup(scene);
     }
 
     private static void ApplyOpenWorld()

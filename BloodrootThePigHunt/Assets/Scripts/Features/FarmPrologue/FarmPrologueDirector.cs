@@ -486,6 +486,17 @@ namespace Bloodroot.Features.FarmPrologue
             StopPhaseRoutine();
             StopGroundRumble();
             SetPhase(FarmProloguePhase.AwaitingOffering);
+
+            // The prologue owns the transition that makes this pickup
+            // available. Commit the reveal here instead of relying only on a
+            // separate scene listener noticing the phase change later.
+            ResolveCampaignReferences();
+            if (campaignState != null &&
+                !campaignState.PrologueCursedObjectRevealed)
+            {
+                campaignState.TryRevealPrologueCursedObject();
+            }
+
             PublishObjective(
                 "The cursed object surfaced. Recover it and carry it to the Root Tree.",
                 0,
