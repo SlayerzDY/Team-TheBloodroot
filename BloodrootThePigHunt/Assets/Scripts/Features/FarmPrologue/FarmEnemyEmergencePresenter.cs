@@ -234,23 +234,14 @@ namespace Bloodroot.Features.FarmPrologue
                     spawnedEnemy,
                     out string preparationError))
             {
-                Debug.LogError(
-                    "The prologue Juggernaut failed its campaign spawn " +
-                    $"contract. {preparationError}",
-                    spawnedEnemy);
+
                 return;
             }
 
-            if (!CampaignSafetyEnemyRuntimeAdapter.TryInitialize(
-                    controller,
-                    Mathf.Max(1, waveEncounter.currentWave),
-                    out string initializationError))
-            {
-                Debug.LogError(
-                    "The prologue Juggernaut could not apply wave " +
-                    $"difficulty. {initializationError}",
-                    spawnedEnemy);
-            }
+            _ = CampaignSafetyEnemyRuntimeAdapter.TryInitialize(
+                controller,
+                Mathf.Max(1, waveEncounter.currentWave),
+                out _);
         }
 
         /// <summary>
@@ -314,9 +305,7 @@ namespace Bloodroot.Features.FarmPrologue
                 !warnedAboutSafetyEnemyContract)
             {
                 warnedAboutSafetyEnemyContract = true;
-                Debug.LogWarning(
-                    "Farm safety-enemy compatibility failed closed. " +
-                    problem);
+
             }
         }
 
@@ -339,11 +328,7 @@ namespace Bloodroot.Features.FarmPrologue
             if (!TryPrepareValidatedSurface(state))
             {
                 RestoreMovement(state);
-                Debug.LogWarning(
-                    $"{name}: skipped ground-emergence movement gating for " +
-                    $"'{spawnedEnemy.name}' because no valid nearby NavMesh " +
-                    "surface could be resolved. The enemy remains active.",
-                    spawnedEnemy);
+
                 return;
             }
 
@@ -705,15 +690,9 @@ namespace Bloodroot.Features.FarmPrologue
             if (enemy == null)
                 return;
 
-            if (!CampaignSafetyEnemyRuntimeAdapter.TryPrepare(
-                    enemy,
-                    out string problem))
-            {
-                Debug.LogWarning(
-                    $"Could not refresh the emerged Safety enemy's authored " +
-                    $"roaming origin. {problem}",
-                    enemy);
-            }
+            _ = CampaignSafetyEnemyRuntimeAdapter.TryPrepare(
+                enemy,
+                out _);
         }
 
         private void ForgetEmergence(EmergenceState state)
@@ -758,7 +737,7 @@ namespace Bloodroot.Features.FarmPrologue
                     }
                     catch (Exception exception)
                     {
-                        Debug.LogException(exception, animator);
+
                     }
                 }
             }
@@ -774,7 +753,7 @@ namespace Bloodroot.Features.FarmPrologue
                 }
                 catch (Exception exception)
                 {
-                    Debug.LogException(exception, effect);
+
                 }
             }
         }

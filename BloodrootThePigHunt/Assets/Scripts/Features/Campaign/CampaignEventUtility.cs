@@ -23,7 +23,7 @@ namespace Bloodroot.Campaign
             }
             catch (Exception exception)
             {
-                Debug.LogException(exception, context);
+
             }
         }
 
@@ -41,7 +41,7 @@ namespace Bloodroot.Campaign
             }
             catch (Exception exception)
             {
-                Debug.LogException(exception, context);
+
             }
         }
 
@@ -58,7 +58,7 @@ namespace Bloodroot.Campaign
                 }
                 catch (Exception exception)
                 {
-                    Debug.LogException(exception, context);
+
                 }
             }
         }
@@ -79,7 +79,7 @@ namespace Bloodroot.Campaign
                 }
                 catch (Exception exception)
                 {
-                    Debug.LogException(exception, context);
+
                 }
             }
         }
@@ -101,7 +101,7 @@ namespace Bloodroot.Campaign
                 }
                 catch (Exception exception)
                 {
-                    Debug.LogException(exception, context);
+
                 }
             }
         }
@@ -125,7 +125,7 @@ namespace Bloodroot.Campaign
                 }
                 catch (Exception exception)
                 {
-                    Debug.LogException(exception, context);
+
                 }
             }
         }

@@ -51,8 +51,7 @@ public class TruckEscapeKeyPickup : MonoBehaviour
 
         if (truckEnding == null)
         {
-            Debug.LogError(
-                "TruckEscapeKeyPickup could not find TruckEscapeEnding.");
+
             return;
         }
 

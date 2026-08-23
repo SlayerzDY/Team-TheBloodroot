@@ -468,11 +468,6 @@ namespace Bloodroot.Features.WorldMissions
             string normalized = string.IsNullOrWhiteSpace(reason)
                 ? "Landmark enemy spawning was rejected."
                 : reason;
-            if (!string.Equals(lastFailure, normalized, StringComparison.Ordinal))
-            {
-                Debug.LogError(normalized, this);
-            }
-
             lastFailure = normalized;
             return false;
         }
@@ -519,34 +514,5 @@ namespace Bloodroot.Features.WorldMissions
                    candidateTransform.IsChildOf(player.transform);
         }
 
-        private void OnDrawGizmosSelected()
-        {
-            Collider trigger = proximityTrigger != null
-                ? proximityTrigger
-                : GetComponent<BoxCollider>();
-            if (trigger is BoxCollider box)
-            {
-                Gizmos.color = new Color(0.15f, 0.65f, 1f, 0.8f);
-                Matrix4x4 previous = Gizmos.matrix;
-                Gizmos.matrix = box.transform.localToWorldMatrix;
-                Gizmos.DrawWireCube(box.center, box.size);
-                Gizmos.matrix = previous;
-            }
-
-            if (spawns == null)
-                return;
-
-            Gizmos.color = new Color(0.9f, 0.1f, 0.1f, 0.9f);
-            foreach (WorldLandmarkEnemySpawnDefinition spawn in spawns)
-            {
-                if (spawn?.SpawnPoint == null)
-                    continue;
-
-                Gizmos.DrawWireSphere(spawn.SpawnPoint.position, 0.75f);
-                Gizmos.DrawRay(
-                    spawn.SpawnPoint.position,
-                    spawn.SpawnPoint.forward * 2f);
-            }
-        }
     }
 }

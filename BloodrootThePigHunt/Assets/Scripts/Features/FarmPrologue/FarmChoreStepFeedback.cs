@@ -50,23 +50,6 @@ namespace Bloodroot.Features.FarmPrologue
         {
             ResolvePersistentRoot();
 
-            if (pendingRoot != null && pendingRoot == completedRoot)
-            {
-                Debug.LogWarning(
-                    "FarmChoreStepFeedback requires different pending and " +
-                    "completed presentation roots.",
-                    this);
-            }
-
-            if (persistentRoot != null &&
-                (persistentRoot == pendingRoot ||
-                 persistentRoot == completedRoot))
-            {
-                Debug.LogWarning(
-                    "FarmChoreStepFeedback requires its persistent, pending, " +
-                    "and completed presentation roots to be different.",
-                    this);
-            }
         }
 
         public void Configure(

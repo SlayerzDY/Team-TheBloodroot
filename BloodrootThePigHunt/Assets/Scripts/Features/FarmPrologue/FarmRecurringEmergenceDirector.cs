@@ -445,7 +445,7 @@ namespace Bloodroot.Features.FarmPrologue
                         Destroy(enemy);
                     }
 
-                    Debug.LogException(exception, this);
+
                     spawnFailed = true;
                     break;
                 }
@@ -533,7 +533,7 @@ namespace Bloodroot.Features.FarmPrologue
 
         private void FailWithoutCompleting(string offeringId, string reason)
         {
-            Debug.LogError(reason, this);
+
             prologueDirector?.PublishCampaignObjective(reason, 0, 1);
             FarmPrologueEventUtility.Invoke(
                 emergenceFailed,

@@ -61,10 +61,6 @@ namespace Bloodroot.Campaign
             }
             while (Time.unscaledTime <= deadline);
 
-            Debug.LogWarning(
-                $"Campaign spawn '{destinationId}' could not find a player " +
-                $"tagged '{playerTag}' within {playerLookupTimeout:0.##} seconds.",
-                this);
         }
 
         public bool HasMatchingPendingSpawn()
@@ -110,10 +106,6 @@ namespace Bloodroot.Campaign
             }
             catch (Exception exception)
             {
-                Debug.LogError(
-                    $"Campaign spawn '{destinationId}' could not place the " +
-                    $"player: {exception.Message}",
-                    this);
                 return false;
             }
             finally
@@ -161,10 +153,6 @@ namespace Bloodroot.Campaign
             }
             catch (UnityException exception)
             {
-                Debug.LogError(
-                    $"Campaign spawn player tag '{playerTag}' is invalid: " +
-                    exception.Message,
-                    this);
                 return null;
             }
         }
@@ -176,17 +164,5 @@ namespace Bloodroot.Campaign
             playerLookupTimeout = Mathf.Max(0f, playerLookupTimeout);
         }
 
-        private void OnDrawGizmosSelected()
-        {
-            Transform destination =
-                arrivalTransform != null ? arrivalTransform : transform;
-            Color previousColor = Gizmos.color;
-            Gizmos.color = new Color(0.18f, 0.75f, 0.95f, 0.9f);
-            Gizmos.DrawWireSphere(destination.position, 0.5f);
-            Gizmos.DrawRay(
-                destination.position,
-                destination.forward * 1.5f);
-            Gizmos.color = previousColor;
-        }
     }
 }

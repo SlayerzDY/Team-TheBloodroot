@@ -150,7 +150,7 @@ public class waveManager : MonoBehaviour
         CampaignEventUtility.Invoke(CurseStarted, this);
         StartNextWave();
 
-        Debug.Log("Wave encounter started.");
+
     }
 
     public void RegularPigKilled(GameObject pig)
@@ -194,8 +194,7 @@ public class waveManager : MonoBehaviour
 
         if (gameManager.instance == null)
         {
-            Debug.LogError(
-                "WaveManager cannot find GameManager.");
+
             return;
         }
 
@@ -231,9 +230,7 @@ public class waveManager : MonoBehaviour
 
             if (!spawnerStarted)
             {
-                Debug.LogError(
-                    "WaveManager could not start the spawner. " +
-                    "This wave was stopped so the game does not get stuck.");
+
 
                 waveActive = false;
                 enemiesRemaining = 0;
@@ -267,9 +264,7 @@ public class waveManager : MonoBehaviour
             enemiesExpectedThisWave,
             this);
 
-        Debug.Log(
-            $"Wave {currentWave} started with " +
-            $"{enemiesRemaining} enemies.");
+
 
         if (enemiesRemaining == 0)
         {
@@ -332,9 +327,7 @@ public class waveManager : MonoBehaviour
             enemiesExpectedThisWave,
             this);
 
-        Debug.Log(
-            $"Enemy defeated. " +
-            $"{enemiesRemaining} enemies remaining.");
+
 
         if (enemiesRemaining == 0)
         {
@@ -358,16 +351,15 @@ public class waveManager : MonoBehaviour
 
         ActiveBloodMoonModifier = null;
 
-       // ScoreboardManager.GetOrCreate().AddWaveSurvived(completedBloodMoon);
         CampaignEventUtility.Invoke(WaveCompleted, currentWave, this);
         RefreshWaveUI();
         PlayWaveSound(waveCompleteClip);
 
-        Debug.Log($"Wave {currentWave} completed.");
+
 
         if (currentWave >= totalWaves)
         {
-            Debug.Log("All waves completed.");
+
             FinalWaveCleared = true;
             CampaignEventUtility.Invoke(AllWavesCompleted, this);
             ShowAllWavesCleared();

@@ -31,7 +31,7 @@ public class buttonFunctions : MonoBehaviour {
 
         if (manager == null)
         {
-            Debug.LogError("Respawn requires the authored GameManager.");
+
             return;
         }
 
@@ -42,7 +42,7 @@ public class buttonFunctions : MonoBehaviour {
 
         if (manager.playerController == null)
         {
-            Debug.LogError("Respawn requires the authored player controller.");
+
             return;
         }
         gameManager.instance.Save();
@@ -70,7 +70,7 @@ public class buttonFunctions : MonoBehaviour {
 
         if (manager == null)
         {
-            Debug.LogError("Respawn requires the authored GameManager.");
+
             return;
         }
 
@@ -81,7 +81,7 @@ public class buttonFunctions : MonoBehaviour {
 
         if (manager.playerController == null)
         {
-            Debug.LogError("Respawn requires the authored player controller.");
+
             return;
         }
         if (gameManager.instance != null)

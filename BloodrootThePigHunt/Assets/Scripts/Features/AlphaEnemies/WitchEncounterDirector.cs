@@ -140,7 +140,7 @@ namespace Bloodroot.Features.AlphaEnemies
 
             if (!ValidateSequentialWaveContract(out string waveError))
             {
-                Debug.LogError($"{name}: {waveError}", this);
+
                 return false;
             }
 
@@ -152,9 +152,7 @@ namespace Bloodroot.Features.AlphaEnemies
                 progress.HeartrootCarried || progress.HeartrootBurned ||
                 progress.CampaignCompleted)
             {
-                Debug.LogError(
-                    $"{name}: a durable accepted thorn-veil crossing is required before the witch encounter can begin.",
-                    this);
+
                 return false;
             }
 
@@ -162,9 +160,7 @@ namespace Bloodroot.Features.AlphaEnemies
             DisableAltarMechanic();
             if (playerTarget == null)
             {
-                Debug.LogError(
-                    $"{name}: the authoritative Player is required before the witch encounter can begin.",
-                    this);
+
                 return false;
             }
 
@@ -184,9 +180,7 @@ namespace Bloodroot.Features.AlphaEnemies
             {
                 if (!progress.HeartrootExposed)
                 {
-                    Debug.LogError(
-                        $"{name}: all three durable witch defeats exist without an exposed Heartroot fact.",
-                        this);
+
                     return false;
                 }
 
@@ -385,9 +379,7 @@ namespace Bloodroot.Features.AlphaEnemies
                 !campaignState.TryRecordHollowWitchDefeated(
                     currentWaveIndex))
             {
-                Debug.LogError(
-                    $"{name}: witch wave {currentWaveIndex + 1} died, but its campaign save was rejected. No later wave will activate.",
-                    this);
+
                 FailEncounter();
                 return;
             }
@@ -441,9 +433,7 @@ namespace Bloodroot.Features.AlphaEnemies
                 !progress.HeartrootExposed ||
                 !campaignState.TryCompleteCampaignFromFinalWitch())
             {
-                Debug.LogError(
-                    $"{name}: final-witch victory was blocked because its durable campaign save failed.",
-                    this);
+
                 FailEncounter();
                 return;
             }
@@ -458,9 +448,7 @@ namespace Bloodroot.Features.AlphaEnemies
             global::gameManager manager = global::gameManager.instance;
             if (manager == null)
             {
-                Debug.LogError(
-                    $"{name}: final-witch victory was saved, but the GameManager is unavailable to show the Win menu.",
-                    this);
+
                 return;
             }
 
@@ -581,9 +569,7 @@ namespace Bloodroot.Features.AlphaEnemies
             global::gameManager manager = global::gameManager.instance;
             if (manager == null)
             {
-                Debug.LogError(
-                    $"{name}: defense failed, but the authored GameManager is unavailable to show the Lose menu.",
-                    this);
+
                 return;
             }
 
@@ -634,9 +620,7 @@ namespace Bloodroot.Features.AlphaEnemies
             failureReloadRoutine = null;
             if (!scene.IsValid() || string.IsNullOrWhiteSpace(scene.name))
             {
-                Debug.LogError(
-                    $"{name}: cannot retry the failed defense because its scene is not a valid loaded scene.",
-                    this);
+
                 yield break;
             }
 

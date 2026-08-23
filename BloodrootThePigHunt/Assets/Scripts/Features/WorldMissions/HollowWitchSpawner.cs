@@ -102,11 +102,10 @@ namespace Bloodroot.Features.WorldMissions
             }
 
             CampaignStateService state = ResolveStateService();
-            if (state == null || !state.Current.CanEnterHollow ||
-                !state.HasAllNameStonesOffered)
+            if (state == null || !state.Current.CanEnterHollow)
             {
                 return Reject(
-                    "All four offered Name Stones and completed Hollow prerequisites are required.");
+                    "Activate the final progression cylinder after Harrow before entering the Hollow.");
             }
 
             bool finaleAlreadyRecovered =
@@ -380,9 +379,7 @@ namespace Bloodroot.Features.WorldMissions
                 }
                 catch (UnityException exception)
                 {
-                    Debug.LogError(
-                        $"{name}: player tag '{playerTag}' is not configured. {exception.Message}",
-                        this);
+
                     return false;
                 }
 

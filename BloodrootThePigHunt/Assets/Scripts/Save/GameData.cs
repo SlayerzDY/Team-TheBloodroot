@@ -68,9 +68,7 @@ internal static class SafetyWeaponSaveUtility
             gunStats definition = weaponDatabase.GetByID(saved.itemID);
             if (definition == null)
             {
-                Debug.LogWarning(
-                    "Skipped a saved weapon with unknown itemID '" +
-                    saved.itemID + "'.");
+
                 continue;
             }
 
@@ -136,7 +134,6 @@ public class GameData
     {
         if (player == null || playerInv == null)
         {
-            //Debug.Log("Please Assign Player Controller and Inventory!");
             return;
         }
         List<gunStats> playergunInv = player.gunInv;

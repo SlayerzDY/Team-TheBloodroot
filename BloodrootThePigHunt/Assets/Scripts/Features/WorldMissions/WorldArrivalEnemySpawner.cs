@@ -162,7 +162,7 @@ namespace Bloodroot.Features.WorldMissions
                         out string alertError))
                 {
                     activeControllers.RemoveAt(index);
-                    Debug.LogWarning(alertError, this);
+
                 }
             }
         }
@@ -504,11 +504,6 @@ namespace Bloodroot.Features.WorldMissions
             string normalized = string.IsNullOrWhiteSpace(reason)
                 ? "Arrival enemy spawning was rejected."
                 : reason;
-            if (!string.Equals(lastFailure, normalized, StringComparison.Ordinal))
-            {
-                Debug.LogError(normalized, this);
-            }
-
             lastFailure = normalized;
             return false;
         }
@@ -544,34 +539,5 @@ namespace Bloodroot.Features.WorldMissions
             return local.z >= -(box.size.z * 0.5f);
         }
 
-        private void OnDrawGizmosSelected()
-        {
-            Collider trigger = arrivalTrigger != null
-                ? arrivalTrigger
-                : GetComponent<BoxCollider>();
-            if (trigger is BoxCollider box)
-            {
-                Gizmos.color = new Color(1f, 0.75f, 0.1f, 0.75f);
-                Matrix4x4 previous = Gizmos.matrix;
-                Gizmos.matrix = box.transform.localToWorldMatrix;
-                Gizmos.DrawWireCube(box.center, box.size);
-                Gizmos.matrix = previous;
-            }
-
-            if (spawns == null)
-                return;
-
-            Gizmos.color = new Color(0.9f, 0.1f, 0.1f, 0.9f);
-            foreach (WorldArrivalEnemySpawnDefinition spawn in spawns)
-            {
-                if (spawn?.SpawnPoint != null)
-                {
-                    Gizmos.DrawWireSphere(spawn.SpawnPoint.position, 0.75f);
-                    Gizmos.DrawRay(
-                        spawn.SpawnPoint.position,
-                        spawn.SpawnPoint.forward * 2f);
-                }
-            }
-        }
     }
 }

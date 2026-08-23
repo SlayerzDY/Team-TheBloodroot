@@ -38,7 +38,6 @@ public class RadarRotata : MonoBehaviour
 
         transform.localRotation = Quaternion.Euler(0f, 0f, currentLocalAngle - 90f);
 
-        //Debug.DrawRay(playerTransform.position, rayDirection * radarRadius, Color.cyan);
 
         if (Physics.Raycast(playerTransform.position, rayDirection, out hit, radarRadius, Enemy))
         { 

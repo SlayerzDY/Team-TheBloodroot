@@ -81,9 +81,7 @@ namespace Bloodroot.Features.WorldMissions
             if (objective != null)
                 return true;
 
-            Debug.LogError(
-                "World mission defense relay has no defense objective assigned.",
-                this);
+
             return false;
         }
     }

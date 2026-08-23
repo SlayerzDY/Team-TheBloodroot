@@ -130,9 +130,7 @@ namespace Bloodroot.Features.AlphaEnemies
                 }
                 catch (UnityException exception)
                 {
-                    Debug.LogError(
-                        $"{name}: player tag '{playerTag}' is not configured. {exception.Message}",
-                        this);
+
                     return false;
                 }
 

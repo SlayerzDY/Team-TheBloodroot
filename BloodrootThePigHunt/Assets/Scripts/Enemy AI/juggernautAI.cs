@@ -54,7 +54,6 @@ public class juggernautEnemyAI : MonoBehaviour, IDamage
     protected virtual void Start() {
         stoppingDistanceOrig = stoppingDistance;
         animator = GetComponentInChildren<Animator>();
-        //if (animator == null) { Debug.LogWarning("Boar missing Animator component! Proceeding without animations."); }
         //isUnalived = false;
         manager = FindAnyObjectByType<waveManager>();
         startingPos = transform.position;
@@ -215,7 +214,7 @@ public class juggernautEnemyAI : MonoBehaviour, IDamage
         // Handles dropped Items
         for (int i = 0; i < drops.Length; i++) {
             Item item = drops[i].GetComponent<Item>();
-            if (item.item.itemName == null) { Debug.Log(drops[i].name + " is not an item."); continue; }
+            if (item.item.itemName == null) {  continue; }
             Vector2 randomCircle = Random.insideUnitCircle.normalized * 5;
             Vector3 randomPosition = transform.position + new Vector3(randomCircle.x, 0f, randomCircle.y);
             Quaternion localRotation = transform.localRotation;
@@ -274,7 +273,7 @@ public class juggernautEnemyAI : MonoBehaviour, IDamage
         playerDir = gameManager.instance.player.transform.position - transform.position;
         float distToPlayer = playerDir.magnitude;
         angleToPlayer = Vector3.Angle(playerDir, transform.forward);
-        Debug.DrawRay(transform.position, playerDir, Color.red);
+
 
         RaycastHit hit;
         if (Physics.Raycast(transform.position, playerDir, out hit))

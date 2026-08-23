@@ -142,9 +142,7 @@ namespace Bloodroot.Features.AlphaEnemies
                 if (!pulseWarningIssued)
                 {
                     pulseWarningIssued = true;
-                    Debug.LogWarning(
-                        $"{name}: Matriarch pulse prefab requires WitchAreaPulse.",
-                        this);
+
                 }
 
                 nextPulseAt = Time.time + pulseCooldown;

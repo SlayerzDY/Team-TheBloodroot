@@ -25,8 +25,7 @@ public class waveTrigger : MonoBehaviour
 
         if (manager == null)
         {
-            Debug.LogWarning(
-                "Wave Manager has not been assigned.");
+
             return;
         }
 

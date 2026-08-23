@@ -116,11 +116,7 @@ namespace Bloodroot.Features.WorldMissions
 
                 if (root == gameObject)
                 {
-                    Debug.LogError(
-                        "A WorldMissionObjectiveMarker cannot toggle its own " +
-                        "GameObject because it would stop receiving state " +
-                        "changes.",
-                        this);
+
                     continue;
                 }
 

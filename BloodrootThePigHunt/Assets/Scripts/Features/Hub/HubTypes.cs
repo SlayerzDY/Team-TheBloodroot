@@ -47,7 +47,7 @@ namespace Bloodroot.Features.Hub
                 }
                 catch (Exception exception)
                 {
-                    Debug.LogException(exception, context);
+
                 }
             }
         }
@@ -68,7 +68,7 @@ namespace Bloodroot.Features.Hub
                 }
                 catch (Exception exception)
                 {
-                    Debug.LogException(exception, context);
+
                 }
             }
         }
@@ -91,7 +91,7 @@ namespace Bloodroot.Features.Hub
                 }
                 catch (Exception exception)
                 {
-                    Debug.LogException(exception, context);
+
                 }
             }
         }
@@ -115,7 +115,7 @@ namespace Bloodroot.Features.Hub
                 }
                 catch (Exception exception)
                 {
-                    Debug.LogException(exception, context);
+
                 }
             }
         }
@@ -133,7 +133,7 @@ namespace Bloodroot.Features.Hub
             }
             catch (Exception exception)
             {
-                Debug.LogException(exception, context);
+
             }
         }
 
@@ -151,7 +151,7 @@ namespace Bloodroot.Features.Hub
             }
             catch (Exception exception)
             {
-                Debug.LogException(exception, context);
+
             }
         }
 
@@ -170,7 +170,7 @@ namespace Bloodroot.Features.Hub
             }
             catch (Exception exception)
             {
-                Debug.LogException(exception, context);
+
             }
         }
 
@@ -190,7 +190,7 @@ namespace Bloodroot.Features.Hub
             }
             catch (Exception exception)
             {
-                Debug.LogException(exception, context);
+
             }
         }
     }

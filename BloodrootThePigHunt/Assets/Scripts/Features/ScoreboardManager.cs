@@ -114,7 +114,7 @@ public class ScoreboardManager : MonoBehaviour
             scoreboardText.text = finalText;
         }
 
-        Debug.Log(finalText);
+
     }
 
     void HideScoreboard()

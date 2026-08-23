@@ -8,9 +8,7 @@ namespace Bloodroot.Features.WorldMissions
 {
     /// <summary>
     /// Durable, story-aware IInteract bridge for one authored evidence group.
-    /// Campaign progress is committed before mission credit, while the legacy
-    /// Inventory remains an implementation detail of the optional generic
-    /// Name Stone token award.
+    /// Campaign progress is committed before mission credit.
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Collider))]
@@ -32,7 +30,7 @@ namespace Bloodroot.Features.WorldMissions
         [SerializeField] private Collider[] interactionColliders =
             Array.Empty<Collider>();
 
-        [Header("Optional Name Stone Award")]
+        [Header("Retired Award Migration")]
         [SerializeField] private string nameStoneId = string.Empty;
         [SerializeField] private GameObject nameStonePickupObject;
         [SerializeField] private Inventory inventory;
@@ -96,7 +94,9 @@ namespace Bloodroot.Features.WorldMissions
             evidenceId = evidenceId?.Trim() ?? string.Empty;
             storyTitle = storyTitle?.Trim() ?? string.Empty;
             storyBody = storyBody?.Trim() ?? string.Empty;
-            nameStoneId = nameStoneId?.Trim() ?? string.Empty;
+            nameStoneId = string.Empty;
+            nameStonePickupObject = null;
+            inventory = null;
             visibleBeforeCollectionRoots ??= Array.Empty<GameObject>();
             visibleAfterCollectionRoots ??= Array.Empty<GameObject>();
             interactionColliders ??= Array.Empty<Collider>();
@@ -134,9 +134,9 @@ namespace Bloodroot.Features.WorldMissions
                                             Array.Empty<GameObject>();
             interactionColliders = authoredInteractionColliders ??
                                    Array.Empty<Collider>();
-            nameStoneId = awardedNameStoneId?.Trim() ?? string.Empty;
-            nameStonePickupObject = authoredNameStonePickup;
-            inventory = authoredInventory;
+            nameStoneId = string.Empty;
+            nameStonePickupObject = null;
+            inventory = null;
             durablyCollected = false;
             objectiveCredited = false;
             ClearRollbackState();
@@ -202,41 +202,8 @@ namespace Bloodroot.Features.WorldMissions
                 return;
             }
 
-            string stoneId = NameStoneId;
-            bool mustGrantStone = stoneId.Length > 0 &&
-                                  !state.IsNameStoneExtracted(stoneId);
-            bool tokenGranted = false;
-            Inventory awardedInventory = null;
-            ItemStats awardedItem = null;
-            int startingTokenQuantity = 0;
-
-            if (mustGrantStone &&
-                !TryGrantNameStoneToken(
-                    out awardedInventory,
-                    out awardedItem,
-                    out startingTokenQuantity,
-                    out string awardError))
+            if (!state.TryRecordEvidence(EvidenceId, area))
             {
-                Reject(awardError);
-                return;
-            }
-
-            tokenGranted = mustGrantStone;
-            if (!state.TryRecordEvidence(EvidenceId, area, stoneId))
-            {
-                if (tokenGranted &&
-                    !TryRollbackToken(
-                        awardedInventory,
-                        awardedItem,
-                        startingTokenQuantity))
-                {
-                    Reject(
-                        "Campaign progress was not saved and the provisional " +
-                        "Name Stone could not be rolled back. Collection is " +
-                        "blocked until inventory recovery succeeds.");
-                    return;
-                }
-
                 Reject("Evidence could not be saved. Please try again.");
                 return;
             }
@@ -334,19 +301,14 @@ namespace Bloodroot.Features.WorldMissions
             CampaignStateService state = boundState ??
                                          CampaignStateService.Instance;
             string id = EvidenceId;
-            string stoneId = NameStoneId;
             bool evidenceSaved = state != null &&
-                                 state.IsEvidenceCollected(id);
-            bool stoneSaved = stoneId.Length == 0 ||
-                              (state != null &&
-                               state.IsNameStoneExtracted(stoneId));
-            durablyCollected = evidenceSaved && stoneSaved;
+                                  state.IsEvidenceCollected(id);
+            durablyCollected = evidenceSaved;
             ApplyCollectedPresentation(durablyCollected);
 
             if (!durablyCollected || state == null)
                 return;
 
-            TryReconcileDurableNameStoneToken(state);
             TryCreditDurableObjective(PrimaryInteractionCollider());
         }
 
@@ -369,25 +331,6 @@ namespace Bloodroot.Features.WorldMissions
             if (!state.IsAreaUnlocked(area))
             {
                 error = "This campaign area is still locked.";
-                return false;
-            }
-
-            string requiredStoneId =
-                CampaignEvidenceIds.RequiredNameStoneId(id);
-            if (!string.Equals(
-                    requiredStoneId,
-                    NameStoneId,
-                    StringComparison.Ordinal))
-            {
-                error = requiredStoneId.Length == 0
-                    ? "This evidence is not authored to award a Name Stone."
-                    : "This evidence is missing its canonical Name Stone award.";
-                return false;
-            }
-
-            if (requiredStoneId.Length > 0 &&
-                !TryGetValidNameStoneItem(out _, out error))
-            {
                 return false;
             }
 
@@ -460,9 +403,7 @@ namespace Bloodroot.Features.WorldMissions
             catch (Exception exception)
             {
                 TryRollbackToken(targetInventory, item, startingQuantity);
-                Debug.LogError(
-                    $"Name Stone inventory award failed: {exception.Message}",
-                    this);
+
                 error = "Inventory could not accept the Name Stone.";
                 return false;
             }
@@ -590,9 +531,7 @@ namespace Bloodroot.Features.WorldMissions
             }
             catch (Exception exception)
             {
-                Debug.LogError(
-                    $"Name Stone inventory rollback failed: {exception.Message}",
-                    this);
+
             }
 
             rollbackInventory = targetInventory;

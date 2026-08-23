@@ -37,27 +37,20 @@ public class WeaponDatabase : MonoBehaviour
         {
             if (prefab == null || prefab.gun == null)
             {
-                Debug.LogWarning(
-                    "WeaponDatabase ignored a pickup without a gun definition.",
-                    this);
+
                 continue;
             }
 
             string itemID = prefab.gun.itemID;
             if (string.IsNullOrWhiteSpace(itemID))
             {
-                Debug.LogError(
-                    "WeaponDatabase ignored '" + prefab.name +
-                    "' because its gun definition has no itemID.",
-                    this);
+
                 continue;
             }
 
             if (lookup.ContainsKey(itemID))
             {
-                Debug.LogError(
-                    "WeaponDatabase ignored duplicate itemID '" + itemID + "'.",
-                    this);
+
                 continue;
             }
 

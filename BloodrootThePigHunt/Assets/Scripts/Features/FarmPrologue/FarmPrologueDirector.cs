@@ -218,28 +218,8 @@ namespace Bloodroot.Features.FarmPrologue
             completionSaveMaxRetrySeconds =
                 Mathf.Max(0.1f, completionSaveMaxRetrySeconds);
 
-            if (waveManagerRoot != null &&
-                waveManagerRoot == mobSpawnerRoot)
-            {
-                Debug.LogWarning(
-                    "FarmPrologueDirector needs separate WaveManager and " +
-                    "MobSpawner roots for deterministic combat startup.",
-                    this);
-            }
-
             if (gameplayInputBehaviours == null)
                 return;
-
-            foreach (Behaviour inputBehaviour in gameplayInputBehaviours)
-            {
-                if (inputBehaviour == this)
-                {
-                    Debug.LogWarning(
-                        "FarmPrologueDirector cannot gate itself. Remove it " +
-                        "from Gameplay Input Behaviours.",
-                        this);
-                }
-            }
         }
 
         public void BeginPrologue()
@@ -845,7 +825,7 @@ namespace Bloodroot.Features.FarmPrologue
                 }
                 catch (Exception exception)
                 {
-                    Debug.LogException(exception, this);
+
                     saveFailureReason =
                         "The safe hub remains locked because campaign " +
                         "completion raised an unexpected save error.";
@@ -859,7 +839,7 @@ namespace Bloodroot.Features.FarmPrologue
 
             if (!saved)
             {
-                Debug.LogError(saveFailureReason, this);
+
                 SetPhase(FarmProloguePhase.CompletionPending);
                 string retryMessage =
                     saveFailureReason +
@@ -1081,7 +1061,7 @@ namespace Bloodroot.Features.FarmPrologue
             }
             catch (Exception exception)
             {
-                Debug.LogException(exception, this);
+
             }
             finally
             {
@@ -1327,9 +1307,7 @@ namespace Bloodroot.Features.FarmPrologue
 
             if (!scene.IsValid() || !scene.isLoaded)
             {
-                Debug.LogError(
-                    "Farm prologue could not reload because its scene is not loaded.",
-                    this);
+
                 return;
             }
 
@@ -1358,7 +1336,7 @@ namespace Bloodroot.Features.FarmPrologue
             }
             catch (Exception exception)
             {
-                Debug.LogException(exception, this);
+
                 HandleFarmSceneReloadFailure(
                     "The Farm scene could not reload to reset the active encounter.");
             }
@@ -1746,7 +1724,7 @@ namespace Bloodroot.Features.FarmPrologue
                     }
                     catch (Exception exception)
                     {
-                        Debug.LogException(exception, this);
+
                     }
                 }
                 return;
@@ -1769,7 +1747,7 @@ namespace Bloodroot.Features.FarmPrologue
                     }
                     catch (Exception exception)
                     {
-                        Debug.LogException(exception, this);
+
                     }
                 }
             }

@@ -17,7 +17,7 @@ namespace Bloodroot.Features.AlphaEnemies
         [SerializeField] private bool resolveTargetFromGameManager = true;
 
         [Header("Vitals")]
-        [SerializeField, Min(1)] private int baseMaxHealth = 360;
+        [SerializeField, Min(1)] private int baseMaxHealth = 1;
         [SerializeField, Min(0)] private int baseRushDamage = 45;
         [SerializeField, Min(0f)] private float deathDestroyDelay = 4f;
 
@@ -171,7 +171,7 @@ namespace Bloodroot.Features.AlphaEnemies
                 if (!targetWarningIssued)
                 {
                     targetWarningIssued = true;
-                    Debug.LogWarning($"{name}: WereBoarController requires a live target before it can patrol or attack.", this);
+
                 }
 
                 FailClosed();
@@ -183,7 +183,7 @@ namespace Bloodroot.Features.AlphaEnemies
             if (!canNavigate && !navMeshWarningIssued)
             {
                 navMeshWarningIssued = true;
-                Debug.LogWarning($"{name}: WereBoarController requires an active NavMeshAgent placed on a baked NavMesh.", this);
+
             }
 
             if (!canNavigate)
@@ -841,8 +841,13 @@ namespace Bloodroot.Features.AlphaEnemies
             float oldMaximum = Mathf.Max(1, scaledMaxHealth);
             float oldRatio = currentHealth > 0 ? currentHealth / oldMaximum : 1f;
             int levelOffset = Mathf.Max(0, difficultyLevel - 1);
-            scaledMaxHealth = Mathf.Max(1, Mathf.RoundToInt(
-                baseMaxHealth * healthScalar * (1f + healthPerLevel * levelOffset)));
+            // Preserve the authored one-health beta test value even when a
+            // difficulty scalar is supplied by a spawner.
+            scaledMaxHealth = baseMaxHealth <= 1
+                ? 1
+                : Mathf.Max(1, Mathf.RoundToInt(
+                    baseMaxHealth * healthScalar *
+                    (1f + healthPerLevel * levelOffset)));
             scaledRushDamage = Mathf.Max(0, Mathf.RoundToInt(
                 baseRushDamage * damageScalar * (1f + damagePerLevel * levelOffset)));
             scaledSpeedMultiplier = Mathf.Max(0.01f,

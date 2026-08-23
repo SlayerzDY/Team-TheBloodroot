@@ -36,7 +36,6 @@ public class Interact : MonoBehaviour, IInteract {
         } else { 
             if (gameManager.instance != null) { gameManager.instance.menuInteractable.SetActive(true); }
             interactObject.collider.gameObject.SendMessage("SendInteract", interactObject.collider, SendMessageOptions.DontRequireReceiver);
-            //Debug.Log(interactObject.collider.name);
         }
     }
 
@@ -55,10 +54,7 @@ public class Interact : MonoBehaviour, IInteract {
     // Function, Draw Raycast
     //==========================================================================================
     void DrawRaycast() {
-        Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * InteractRange, Color.green);
-        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out interactObject, InteractRange, InteractLayer)) {
-            
-        } else {
+        if (!Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out interactObject, InteractRange, InteractLayer)) {
             interactObject = new RaycastHit();
         }
     }

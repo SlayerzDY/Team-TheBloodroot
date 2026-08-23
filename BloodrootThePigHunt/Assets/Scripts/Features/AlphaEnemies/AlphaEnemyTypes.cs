@@ -184,8 +184,8 @@ namespace Bloodroot.Features.AlphaEnemies
 
         private static void LogSubscriberException(UnityEngine.Object context, string eventName, Exception exception)
         {
-            Debug.LogError($"{context?.name ?? "Alpha enemy"}: subscriber for {eventName} threw an exception. Remaining subscribers were protected.", context);
-            Debug.LogException(exception, context);
+
+
         }
     }
 }

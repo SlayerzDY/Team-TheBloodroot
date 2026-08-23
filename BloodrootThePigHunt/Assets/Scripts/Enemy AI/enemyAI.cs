@@ -55,13 +55,12 @@ public class enemyAI : MonoBehaviour, IDamage
     protected float stoppingDistanceOrig;
     protected bool isCharging;
     protected bool isUnalived;
-  
+
     //==========================================================================================
     // Function, Start
     //==========================================================================================
     protected virtual void Start() {
         animator = GetComponentInChildren<Animator>();
-        if (animator == null) { Debug.LogWarning("Boar missing Animator component! Proceeding without animations."); }
         isUnalived = false;
         boarBrute = GetComponent<BoarBruteAI>();
         if (model != null) { colorOrig = model.material.color; }
@@ -281,7 +280,7 @@ public class enemyAI : MonoBehaviour, IDamage
         Dissolver dissolver = GetComponent<Dissolver>();
         for (int i = 0; i < drops.Length; i++) {
             Item item = drops[i].GetComponent<Item>();
-            if (item.item.itemName == null) { Debug.Log(drops[i].name + " is not an item."); continue; }
+            if (item.item.itemName == null) {  continue; }
             Vector2 randomCircle = Random.insideUnitCircle.normalized * 5;
             Vector3 randomPosition = transform.position + new Vector3(randomCircle.x, 0f, randomCircle.y);
             Quaternion localRotation = transform.localRotation;
@@ -342,7 +341,7 @@ public class enemyAI : MonoBehaviour, IDamage
         shootTimer += Time.deltaTime;
         playerDir = gameManager.instance.player.transform.position - transform.position;
         angleToPlayer = Vector3.Angle(playerDir, transform.forward);
-        Debug.DrawRay(transform.position, playerDir, Color.red);
+
         // Hey I see you!!
         RaycastHit hit;
         if (Physics.Raycast(transform.position, playerDir, out hit)) {

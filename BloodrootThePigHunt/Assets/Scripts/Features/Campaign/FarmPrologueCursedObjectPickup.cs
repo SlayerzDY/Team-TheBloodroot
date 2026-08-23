@@ -249,7 +249,7 @@ namespace Bloodroot.Campaign
             }
             catch (Exception exception)
             {
-                Debug.LogException(exception, this);
+
                 bool durablyCollected = TryRecoverFailedClaim(
                     carryover,
                     inventory,
@@ -571,7 +571,7 @@ namespace Bloodroot.Campaign
             }
             catch (Exception exception)
             {
-                Debug.LogException(exception, this);
+
                 FailPickupDissolve(
                     "Safety's Dissolver could not be prepared");
             }
@@ -607,7 +607,7 @@ namespace Bloodroot.Campaign
             }
             catch (Exception exception)
             {
-                Debug.LogException(exception, this);
+
                 FailPickupDissolve(
                     "Safety's dissolve coroutine could not start");
                 yield break;
@@ -701,10 +701,7 @@ namespace Bloodroot.Campaign
 
         private void FailPickupDissolve(string reason)
         {
-            Debug.LogWarning(
-                $"The cursed object was secured, but its Safety dissolve " +
-                $"presentation was hidden immediately because {reason}.",
-                this);
+
 
             pickupDissolveInProgress = false;
             pickupDissolveRoutine = null;

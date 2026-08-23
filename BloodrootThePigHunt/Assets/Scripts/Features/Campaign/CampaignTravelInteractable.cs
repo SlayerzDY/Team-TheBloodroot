@@ -19,10 +19,7 @@ namespace Bloodroot.Campaign
         {
             if (sceneTravel == null)
             {
-                Debug.LogError(
-                    "Campaign travel interaction has no authored " +
-                    "CampaignSceneTravel reference.",
-                    this);
+
                 return;
             }
 

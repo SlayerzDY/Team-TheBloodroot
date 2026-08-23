@@ -36,7 +36,7 @@ namespace Bloodroot.Campaign
         public const string SerializedItemId =
             "BloodrootExposedHeartrootV1";
         public const string ItemName = "ExposedHeartroot";
-        public const int RequiredCatalogCount = 7;
+        public const int RequiredCatalogCount = 6;
 
         private static readonly string[] OrderedRequiredStableIds =
         {
@@ -44,7 +44,6 @@ namespace Bloodroot.Campaign
             "m1_garand_ammo",
             "radar",
             "cursed_root_shard",
-            "name_stone",
             "car_key",
             StableId
         };
@@ -370,6 +369,7 @@ namespace Bloodroot.Campaign
             HarrowUnlocked = data.harrowUnlocked;
             HarrowCompleted = data.harrowCompleted;
             HollowUnlocked = data.hollowUnlocked;
+            HollowTowerActivated = data.hollowTowerActivated;
             HollowCompleted = data.hollowCompleted;
             HollowVeilCrossed = data.hollowVeilCrossed;
             DefeatedWitchCount = Mathf.Clamp(
@@ -436,6 +436,8 @@ namespace Bloodroot.Campaign
 
         public bool HollowUnlocked { get; }
 
+        public bool HollowTowerActivated { get; }
+
         public bool HollowCompleted { get; }
 
         public bool HollowVeilCrossed { get; }
@@ -495,7 +497,7 @@ namespace Bloodroot.Campaign
         }
 
         public bool CanEnterHollow =>
-            HarrowCompleted && HasAllNameStonesOffered;
+            HarrowCompleted && HollowTowerActivated;
 
         public bool IsEvidenceCollected(string evidenceId)
         {
@@ -582,7 +584,7 @@ namespace Bloodroot.Campaign
     [Serializable]
     internal sealed class CampaignSaveData
     {
-        public const int CurrentVersion = 7;
+        public const int CurrentVersion = 8;
 
         public int saveVersion = CurrentVersion;
         public bool prologueCompleted;
@@ -594,6 +596,7 @@ namespace Bloodroot.Campaign
         public bool harrowUnlocked;
         public bool harrowCompleted;
         public bool hollowUnlocked;
+        public bool hollowTowerActivated;
         public bool hollowCompleted;
         public bool hollowVeilCrossed;
         public int defeatedWitchCount;
@@ -641,6 +644,7 @@ namespace Bloodroot.Campaign
                 harrowUnlocked = harrowUnlocked,
                 harrowCompleted = harrowCompleted,
                 hollowUnlocked = hollowUnlocked,
+                hollowTowerActivated = hollowTowerActivated,
                 hollowCompleted = hollowCompleted,
                 hollowVeilCrossed = hollowVeilCrossed,
                 defeatedWitchCount = defeatedWitchCount,
@@ -753,16 +757,33 @@ namespace Bloodroot.Campaign
             }
             else
             {
+                var migratedInventoryIds =
+                    new List<string>(carriedInventoryItemIds.Length);
+                var migratedInventoryQuantities =
+                    new List<int>(carriedInventoryQuantities.Length);
                 for (int index = 0;
                      index < carriedInventoryItemIds.Length;
                      index++)
                 {
-                    carriedInventoryItemIds[index] =
-                        carriedInventoryItemIds[index]?.Trim() ?? string.Empty;
-                    carriedInventoryQuantities[index] = Mathf.Max(
+                    string itemId = carriedInventoryItemIds[index]?.Trim() ??
+                                    string.Empty;
+                    if (string.Equals(
+                            itemId,
+                            "name_stone",
+                            StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    migratedInventoryIds.Add(itemId);
+                    migratedInventoryQuantities.Add(Mathf.Max(
                         0,
-                        carriedInventoryQuantities[index]);
+                        carriedInventoryQuantities[index]));
                 }
+
+                carriedInventoryItemIds = migratedInventoryIds.ToArray();
+                carriedInventoryQuantities =
+                    migratedInventoryQuantities.ToArray();
             }
 
             // Repair saves fail-closed at the first incomplete prerequisite.
@@ -777,6 +798,7 @@ namespace Bloodroot.Campaign
                 harrowUnlocked = false;
                 harrowCompleted = false;
                 hollowUnlocked = false;
+                hollowTowerActivated = false;
                 hollowCompleted = false;
             }
             else
@@ -790,6 +812,7 @@ namespace Bloodroot.Campaign
                     harrowUnlocked = false;
                     harrowCompleted = false;
                     hollowUnlocked = false;
+                    hollowTowerActivated = false;
                     hollowCompleted = false;
                 }
                 else
@@ -801,6 +824,7 @@ namespace Bloodroot.Campaign
                         harrowUnlocked = false;
                         harrowCompleted = false;
                         hollowUnlocked = false;
+                        hollowTowerActivated = false;
                         hollowCompleted = false;
                     }
                     else
@@ -810,14 +834,13 @@ namespace Bloodroot.Campaign
                         if (!harrowCompleted)
                         {
                             hollowUnlocked = false;
+                            hollowTowerActivated = false;
                             hollowCompleted = false;
                         }
                         else
                         {
-                            // Hollow remains reachable after Harrow so the
-                            // player can approach and inspect the veil. Actual
-                            // entry is separately derived from all four
-                            // offered stones through CanEnterHollow.
+                            // The final progression cylinder controls access
+                            // through CanEnterHollow after Harrow.
                             hollowUnlocked = true;
                         }
                     }
@@ -833,52 +856,43 @@ namespace Bloodroot.Campaign
         }
 
         /// <summary>
-        /// The simplified tower campaign replaces the old Name Stone chores.
-        /// Completed regions therefore imply their hidden compatibility stone
-        /// and a resolved Farm emergence. Existing offered stones are also
-        /// treated as resolved so Continue never creates surprise hub combat.
-        /// The prologue cursed-object transaction is intentionally untouched.
+        /// Retires legacy offering state while preserving completed campaign
+        /// history. The final Hollow cylinder is now the only entry authority.
         /// </summary>
         private void NormalizeTowerCampaignProgress(int loadedVersion)
         {
-            if (blackPinesCompleted)
+            bool legacyHollowAccess = HasAllNameStonesOffered() ||
+                                      hollowVeilCrossed ||
+                                      hollowCompleted ||
+                                      heartrootExposed ||
+                                      heartrootCarried ||
+                                      heartrootBurned ||
+                                      campaignCompleted;
+            if (harrowCompleted && legacyHollowAccess)
             {
-                ApplyTowerStoneCredit(CampaignNameStoneIds.Esther);
+                hollowTowerActivated = true;
             }
 
-            if (stillwaterCompleted)
-            {
-                ApplyTowerStoneCredit(CampaignNameStoneIds.Ruth);
-            }
-
-            if (harrowCompleted)
-            {
-                ApplyTowerStoneCredit(CampaignNameStoneIds.Naomi);
-            }
-
-            foreach (string nameStoneId in CampaignNameStoneIds.All)
-            {
-                if (IsNameStoneOffered(nameStoneId) &&
-                    !IsFarmEmergenceCompleted(nameStoneId))
-                {
-                    TryAddCompletedFarmEmergence(nameStoneId);
-                }
-            }
-
-            if (loadedVersion < 7 &&
-                CampaignNameStoneIds.IsCanonical(pendingRootOfferingId))
+            // Keep these serialized fields solely so older saves load, then
+            // discard their retired values before gameplay reads the state.
+            extractedNameStoneIds = Array.Empty<string>();
+            offeredNameStoneIds = Array.Empty<string>();
+            pendingNameStoneOfferId = string.Empty;
+            if (CampaignNameStoneIds.IsCanonical(pendingRootOfferingId))
             {
                 pendingRootOfferingId = string.Empty;
             }
 
-            if (loadedVersion < 7 && CampaignNameStoneIds.IsCanonical(
-                    activeFarmEmergenceOfferingId))
+            if (CampaignNameStoneIds.IsCanonical(activeFarmEmergenceOfferingId))
             {
                 activeFarmEmergenceOfferingId = string.Empty;
             }
 
-            if (loadedVersion < 7)
-                pendingNameStoneOfferId = string.Empty;
+            completedFarmEmergenceOfferingIds = ContainsId(
+                    completedFarmEmergenceOfferingIds,
+                    CampaignRootOfferingIds.PrologueCursedObject)
+                ? new[] { CampaignRootOfferingIds.PrologueCursedObject }
+                : Array.Empty<string>();
         }
 
         private void NormalizeHeartrootFinaleProgress(int loadedVersion)
@@ -896,8 +910,7 @@ namespace Bloodroot.Campaign
                 heartrootCarried = true;
             }
 
-            bool canEnterHollow =
-                harrowCompleted && HasAllNameStonesOffered();
+            bool canEnterHollow = harrowCompleted && hollowTowerActivated;
             if (!canEnterHollow)
             {
                 hollowCompleted = false;
@@ -1163,76 +1176,25 @@ namespace Bloodroot.Campaign
         }
 
         /// <summary>
-        /// Applies the hidden legacy bookkeeping represented by a completed
-        /// regional progression cylinder. Hollow is intentionally excluded:
-        /// its final Nell credit belongs to the Hollow cylinder itself.
+        /// Regional cylinders now complete their normal area progression only.
         /// </summary>
         public bool ApplyTowerCompletionCredits(CampaignAreaId area)
         {
-            return area switch
-            {
-                CampaignAreaId.BlackPines =>
-                    ApplyTowerStoneCredit(CampaignNameStoneIds.Esther),
-                CampaignAreaId.StillwaterFeedMill =>
-                    ApplyTowerStoneCredit(CampaignNameStoneIds.Ruth),
-                CampaignAreaId.HarrowEstate =>
-                    ApplyTowerStoneCredit(CampaignNameStoneIds.Naomi),
-                _ => false
-            };
+            return false;
         }
 
         /// <summary>
-        /// Durably opening the Hollow cylinder supplies the last hidden
-        /// compatibility stone. This keeps the existing thorn-veil and witch
-        /// finale authority intact without exposing the retired stone chores.
+        /// Durably activates the final Hollow cylinder.
         /// </summary>
         public bool ApplyHollowTowerCredit()
         {
-            return ApplyTowerStoneCredit(CampaignNameStoneIds.Nell);
-        }
-
-        private bool ApplyTowerStoneCredit(string nameStoneId)
-        {
-            string id = nameStoneId?.Trim() ?? string.Empty;
-            if (!CampaignNameStoneIds.IsCanonical(id))
+            if (!harrowCompleted || hollowTowerActivated)
+            {
                 return false;
-
-            bool changed = false;
-            if (!IsNameStoneExtracted(id))
-            {
-                changed |= TryAddExtractedNameStone(id);
             }
 
-            if (!IsNameStoneOffered(id))
-            {
-                changed |= TryAddOfferedNameStone(id);
-            }
-
-            if (!IsFarmEmergenceCompleted(id))
-            {
-                changed |= TryAddCompletedFarmEmergence(id);
-            }
-
-            if (string.Equals(
-                    pendingRootOfferingId,
-                    id,
-                    StringComparison.Ordinal))
-            {
-                pendingRootOfferingId = string.Empty;
-                changed = true;
-            }
-
-            if (string.Equals(
-                    activeFarmEmergenceOfferingId,
-                    id,
-                    StringComparison.Ordinal))
-            {
-                activeFarmEmergenceOfferingId = string.Empty;
-                changed = true;
-            }
-
-            pendingNameStoneOfferId = string.Empty;
-            return changed;
+            hollowTowerActivated = true;
+            return true;
         }
 
         private void NormalizeQuestProgress()

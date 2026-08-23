@@ -316,7 +316,7 @@ namespace Bloodroot.Campaign
 
             if (!ValidateConfiguration(out string configurationError))
             {
-                Debug.LogError(configurationError, this);
+
                 return false;
             }
 
@@ -403,10 +403,7 @@ namespace Bloodroot.Campaign
                     controller.gunInvPos = loadedSelectionBefore;
                     rifleGrantSucceeded = false;
                     succeeded = false;
-                    Debug.LogError(
-                        "Campaign loadout equipment could not equip the " +
-                        $"Safety-loaded rifle: {exception.Message}",
-                        this);
+
                 }
             }
 
@@ -452,10 +449,7 @@ namespace Bloodroot.Campaign
                 {
                     rifleGrantSucceeded = false;
                     succeeded = false;
-                    Debug.LogError(
-                        "Campaign loadout equipment could not grant the " +
-                        $"authored rifle: {exception.Message}",
-                        this);
+
                 }
             }
 
@@ -475,10 +469,7 @@ namespace Bloodroot.Campaign
                 {
                     radarActivationSucceeded = false;
                     succeeded = false;
-                    Debug.LogError(
-                        "Campaign loadout equipment could not activate the " +
-                        $"authored radar: {exception.Message}",
-                        this);
+
                 }
             }
 

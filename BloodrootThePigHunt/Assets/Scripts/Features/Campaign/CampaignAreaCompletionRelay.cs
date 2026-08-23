@@ -144,7 +144,7 @@ namespace Bloodroot.Campaign
             }
             catch (Exception exception)
             {
-                Debug.LogException(exception, this);
+
             }
         }
     }

@@ -62,9 +62,7 @@ namespace Bloodroot.Features.AlphaMenu
 
             if (menuAudioSource == null)
             {
-                Debug.LogError(
-                    "AlphaMenuAudio requires its authored AudioSource.",
-                    this);
+
                 enabled = false;
                 return;
             }

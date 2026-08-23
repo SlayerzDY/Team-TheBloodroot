@@ -104,7 +104,7 @@ public class MobSpawner : MonoBehaviour
     {
         if (regularPig == null)
         {
-            Debug.LogError("MobSpawner cannot spawn regular pigs because no regular pig prefab is assigned.");
+
             return;
         }
 
@@ -135,7 +135,7 @@ public class MobSpawner : MonoBehaviour
 
         if (enemyToSpawn == null)
         {
-            Debug.LogError("MobSpawner cannot spawn because no enemy prefab is assigned.");
+
             isWaveActive = false;
             return;
         }
@@ -209,7 +209,7 @@ public class MobSpawner : MonoBehaviour
 
         if (spawnPoint == null || spawnPoint.Length == 0)
         {
-            Debug.LogError("MobSpawner cannot spawn because it has no spawn points.");
+
             isWaveActive = false;
             return false;
         }
@@ -219,7 +219,7 @@ public class MobSpawner : MonoBehaviour
 
         if (center == null)
         {
-            Debug.LogError("MobSpawner contains an empty spawn point reference.");
+
             isWaveActive = false;
             return false;
         }

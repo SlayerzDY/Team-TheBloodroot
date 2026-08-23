@@ -359,14 +359,14 @@ namespace Bloodroot.Campaign
                     // The campaign and paired Safety files are already the
                     // durable authority. Never roll them back after commit;
                     // presentation reconstructs from those facts on reload.
-                    Debug.LogException(presentationException, this);
+
                 }
 
                 return true;
             }
             catch (Exception exception)
             {
-                Debug.LogException(exception, this);
+
                 if (pairCommitted)
                 {
                     lastFailureReason = string.Empty;
@@ -776,7 +776,7 @@ namespace Bloodroot.Campaign
             lastFailureReason = string.IsNullOrWhiteSpace(reason)
                 ? "The Heartroot transaction was rejected."
                 : reason.Trim();
-            Debug.LogWarning(lastFailureReason, this);
+
             CampaignEventUtility.Invoke(
                 burning ? burnRejected : recoveryRejected,
                 this);

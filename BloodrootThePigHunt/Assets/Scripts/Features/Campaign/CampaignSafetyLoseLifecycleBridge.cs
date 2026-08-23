@@ -149,10 +149,7 @@ namespace Bloodroot.Campaign
                 boundManager != configuredManager ||
                 boundManager.gameObject != gameObject)
             {
-                Debug.LogError(
-                    "CampaignSafetyLoseLifecycleBridge received PlayerLost " +
-                    "from an unrecognized gameManager.",
-                    this);
+
                 return;
             }
 
@@ -166,11 +163,7 @@ namespace Bloodroot.Campaign
 
             if (controller == null)
             {
-                Debug.LogError(
-                    "CampaignSafetyLoseLifecycleBridge could not normalize " +
-                    "lethal player stats because the Safety playerController " +
-                    "is unavailable.",
-                    this);
+
                 return;
             }
 
@@ -183,13 +176,6 @@ namespace Bloodroot.Campaign
             // Farm. Restore its existing upgraded maxima before that save so a
             // lethal HP value cannot survive into the next gameplay scene.
             controller.UpdateUpgradedStats("all");
-            if (controller.HP <= 0)
-            {
-                Debug.LogError(
-                    "CampaignSafetyLoseLifecycleBridge could not restore a " +
-                    "positive player health value before Safety saved.",
-                    this);
-            }
         }
 
         private void HandlePlayerRespawned()

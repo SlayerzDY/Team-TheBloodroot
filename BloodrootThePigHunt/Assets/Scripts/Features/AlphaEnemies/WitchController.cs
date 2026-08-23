@@ -650,9 +650,7 @@ namespace Bloodroot.Features.AlphaEnemies
                     else if (!projectileWarningIssued)
                     {
                         projectileWarningIssued = true;
-                        Debug.LogWarning(
-                            $"{name}: configured magic projectile has neither AlphaEnemyProjectile nor Damage; it will not receive witch damage scaling.",
-                            this);
+
                     }
                 }
             }
@@ -756,14 +754,6 @@ namespace Bloodroot.Features.AlphaEnemies
             if (prefab == null || spawnPoint == null)
             {
                 nextSummonAt = Time.time + summonCooldown;
-                if (prefab == null)
-                {
-                    Debug.LogWarning(
-                        $"{name}: Witch summoning requires an exact regular " +
-                        "Boar prefab. Root Boar, Juggernaut, and legacy hog " +
-                        "prefabs are rejected.",
-                        this);
-                }
                 return false;
             }
 
@@ -777,10 +767,7 @@ namespace Bloodroot.Features.AlphaEnemies
                     typeof(global::BoarBruteAI))
             {
                 nextSummonAt = Time.time + summonCooldown;
-                Debug.LogWarning(
-                    $"{name}: rejected a Witch minion outside the exact " +
-                    $"regular Boar contract. {prefabError}",
-                    this);
+
                 return false;
             }
 
@@ -796,9 +783,7 @@ namespace Bloodroot.Features.AlphaEnemies
                     filter))
             {
                 nextSummonAt = Time.time + summonCooldown;
-                Debug.LogWarning(
-                    $"{name}: no compatible NavMesh was found within {minionGroundSampleRadius:0.#}m of minion spawn '{spawnPoint.name}'. Summon skipped.",
-                    this);
+
                 return false;
             }
 
@@ -817,10 +802,7 @@ namespace Bloodroot.Features.AlphaEnemies
             {
                 Destroy(minion);
                 nextSummonAt = Time.time + summonCooldown;
-                Debug.LogWarning(
-                    $"{name}: the summoned regular Boar lost its campaign " +
-                    $"runtime contract and was discarded. {preparationError}",
-                    this);
+
                 return false;
             }
 
@@ -834,10 +816,7 @@ namespace Bloodroot.Features.AlphaEnemies
             {
                 Destroy(minion);
                 nextSummonAt = Time.time + summonCooldown;
-                Debug.LogWarning(
-                    $"{name}: the summoned minion is not the exact regular " +
-                    $"Boar and was discarded. {controllerError}",
-                    this);
+
                 return false;
             }
 
@@ -848,10 +827,7 @@ namespace Bloodroot.Features.AlphaEnemies
             {
                 Destroy(minion);
                 nextSummonAt = Time.time + summonCooldown;
-                Debug.LogWarning(
-                    $"{name}: the summoned regular Boar lost its NavMesh " +
-                    $"contract and was discarded. {agentError}",
-                    this);
+
                 return false;
             }
 
@@ -861,9 +837,7 @@ namespace Bloodroot.Features.AlphaEnemies
             {
                 Destroy(minion);
                 nextSummonAt = Time.time + summonCooldown;
-                Debug.LogWarning(
-                    $"{name}: the summoned minion could not attach to its authored NavMesh and was discarded.",
-                    this);
+
                 return false;
             }
 
@@ -880,10 +854,7 @@ namespace Bloodroot.Features.AlphaEnemies
             {
                 Destroy(minion);
                 nextSummonAt = Time.time + summonCooldown;
-                Debug.LogWarning(
-                    $"{name}: the summoned regular Boar could not be " +
-                    $"initialized, so it was discarded. {initializationError}",
-                    this);
+
                 return false;
             }
 
@@ -894,10 +865,7 @@ namespace Bloodroot.Features.AlphaEnemies
             {
                 Destroy(minion);
                 nextSummonAt = Time.time + summonCooldown;
-                Debug.LogWarning(
-                    $"{name}: the summoned regular Boar could not be " +
-                    $"alerted, so it was discarded. {alertError}",
-                    this);
+
                 return false;
             }
 
@@ -1040,10 +1008,9 @@ namespace Bloodroot.Features.AlphaEnemies
                 _ => shieldBearerHealthMultiplier
             };
             float variantDamage = variant == WitchVariant.Matriarch ? matriarchDamageMultiplier : 1f;
-            // A serialized base value of one is the explicit one-hit testing
-            // contract. Do not let difficulty or variant multipliers inflate
-            // it; restoring a production value above one restores scaling.
-            scaledMaxHealth = baseMaxHealth == 1
+            // A one-health authored witch remains a one-hit test target even
+            // when a scene applies a difficulty or variant multiplier.
+            scaledMaxHealth = baseMaxHealth <= 1
                 ? 1
                 : Mathf.Max(1, Mathf.RoundToInt(
                     baseMaxHealth * variantHealth * healthScalar *

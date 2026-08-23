@@ -105,9 +105,7 @@ namespace Bloodroot.Features.AlphaEnemies
                 if (!navMeshWarningIssued)
                 {
                     navMeshWarningIssued = true;
-                    Debug.LogWarning(
-                        $"{name}: summoned hog requires an active NavMeshAgent on a baked NavMesh.",
-                        this);
+
                 }
 
                 return;
