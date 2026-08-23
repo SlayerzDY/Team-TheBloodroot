@@ -228,7 +228,7 @@ namespace Bloodroot.Features.AlphaMenu
                     $"Safety saves: {resetError}");
                 return;
             }
-
+            PersistOutsideWorld.instance.SaveData(false);
             BeginSceneLoad(newGameSceneName);
         }
 
@@ -254,10 +254,9 @@ namespace Bloodroot.Features.AlphaMenu
                 FailAction("No resumable campaign progress was found.");
                 return;
             }
-
+            PersistOutsideWorld.instance.SaveData(false);
             string targetScene = GetContinueTarget(state.Current);
             BeginSceneLoad(targetScene);
-            gameManager.instance.Load();
         }
 
         public void ShowOptions()
