@@ -30,6 +30,74 @@ public class WeaponSaveData
     //==========================================================================================
 }
 //==============================================================================================
+// Restore runtime guns from Safety's serializable weapon identifiers.
+//==============================================================================================
+internal static class SafetyWeaponSaveUtility
+{
+    public static bool TryRestoreRuntimeInventory(
+        WeaponSaveData[] savedWeapons,
+        int savedSelectionIndex,
+        WeaponDatabase weaponDatabase,
+        out List<gunStats> restoredWeapons,
+        out int restoredSelectionIndex,
+        out string error)
+    {
+        restoredWeapons = new List<gunStats>();
+        restoredSelectionIndex = 0;
+
+        if (savedWeapons == null || savedWeapons.Length == 0)
+        {
+            error = string.Empty;
+            return true;
+        }
+
+        if (weaponDatabase == null)
+        {
+            error =
+                "Safety weapon loading requires a configured WeaponDatabase.";
+            return false;
+        }
+
+        int restoredSelectedSlot = -1;
+        for (int savedSlot = 0; savedSlot < savedWeapons.Length; savedSlot++)
+        {
+            WeaponSaveData saved = savedWeapons[savedSlot];
+            if (saved == null || string.IsNullOrWhiteSpace(saved.itemID))
+                continue;
+
+            gunStats definition = weaponDatabase.GetByID(saved.itemID);
+            if (definition == null)
+            {
+                Debug.LogWarning(
+                    "Skipped a saved weapon with unknown itemID '" +
+                    saved.itemID + "'.");
+                continue;
+            }
+
+            gunStats runtimeWeapon = UnityEngine.Object.Instantiate(definition);
+            runtimeWeapon.name = definition.name + " (Safety Save Runtime)";
+            runtimeWeapon.hideFlags = HideFlags.DontSave;
+            restoredWeapons.Add(runtimeWeapon);
+
+            if (savedSlot == savedSelectionIndex)
+                restoredSelectedSlot = restoredWeapons.Count - 1;
+        }
+
+        if (restoredWeapons.Count > 0)
+        {
+            restoredSelectionIndex = restoredSelectedSlot >= 0
+                ? restoredSelectedSlot
+                : Mathf.Clamp(
+                    savedSelectionIndex,
+                    0,
+                    restoredWeapons.Count - 1);
+        }
+
+        error = string.Empty;
+        return true;
+    }
+}
+//==============================================================================================
 // Declare Game Data
 //==============================================================================================
 [Serializable]
@@ -53,11 +121,10 @@ public class GameData
     //------------------------------------------------------------------------------------------
     public GameData()
     {
-        List<gunStats> playergunInv = gameManager.instance.player.GetComponent<playerController>()?.gunInv;
         _savHP = 100;
         _savstam = 100f;
         _savplayerPosition = new float[] { 0f, 0f, 0f };
-        _savgunInv = new WeaponSaveData[playergunInv.Count];
+        _savgunInv = Array.Empty<WeaponSaveData>();
         _savhasFlashlight = false;
         _savInventory = new ItemSaveData[30];
         _savinventoryWeight = 0;
@@ -72,7 +139,7 @@ public class GameData
             //Debug.Log("Please Assign Player Controller and Inventory!");
             return;
         }
-        List<gunStats> playergunInv = gameManager.instance.player.GetComponent<playerController>()?.gunInv;
+        List<gunStats> playergunInv = player.gunInv;
         _savplayerPosition = new float[3] {
             player.transform.position.x,
             player.transform.position.y,

@@ -3364,16 +3364,27 @@ namespace Bloodroot.Campaign
             controller.hasFlashlight = loadedData._savhasFlashlight;
             if (applyGuns)
             {
-                controller.gunInv = loadedData._savgunInv != null
-                    ? new WeaponSaveData[loadedData._savgunInv.Length]
-                    : new List<gunStats>();
-                controller.gunInv.RemoveAll(gun => gun == null);
-                controller.gunInvPos = controller.gunInv.Count > 0
-                    ? Mathf.Clamp(
+                WeaponDatabase weaponDatabase =
+                    gameManager.instance != null
+                        ? gameManager.instance.weaponDatabase
+                        : null;
+                if (SafetyWeaponSaveUtility.TryRestoreRuntimeInventory(
+                        loadedData._savgunInv,
                         loadedData._savgunInvPos,
-                        0,
-                        controller.gunInv.Count - 1)
-                    : 0;
+                        weaponDatabase,
+                        out List<gunStats> restoredGuns,
+                        out int restoredGunSelection,
+                        out string gunRestoreError))
+                {
+                    controller.gunInv = restoredGuns;
+                    controller.gunInvPos = restoredGunSelection;
+                }
+                else
+                {
+                    Debug.LogError(
+                        "Safety F9 rollback could not restore its weapon " +
+                        "inventory: " + gunRestoreError);
+                }
             }
 
             if (applyPosition && loadedData._savplayerPosition != null &&
@@ -4047,7 +4058,7 @@ namespace Bloodroot.Campaign
             {
                 loadedData = SaveSystem.LoadGame() ?? new GameData();
                 loadedData._savInventory ??= Array.Empty<ItemSaveData>();
-                loadedData._savgunInv ??= new List<gunStats>();
+                loadedData._savgunInv ??= Array.Empty<WeaponSaveData>();
                 error = string.Empty;
                 return true;
             }
@@ -4080,7 +4091,7 @@ namespace Bloodroot.Campaign
                 }
 
                 GameData data = SaveSystem.LoadGame() ?? new GameData();
-                data._savgunInv = new List<gunStats>();
+                data._savgunInv = Array.Empty<WeaponSaveData>();
                 data._savgunInvPos = 0;
                 SaveSystem.SaveGame(data);
                 error = string.Empty;

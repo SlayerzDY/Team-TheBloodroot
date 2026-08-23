@@ -22,6 +22,22 @@ namespace Bloodroot.Features.AlphaEnemies
         Matriarch
     }
 
+    /// <summary>
+    /// Runtime moments exposed by <see cref="WitchController"/> for the
+    /// audio pass. A cue is raised only after its underlying gameplay action
+    /// has succeeded; it does not play, own, or require an audio asset.
+    /// </summary>
+    public enum WitchCombatAudioCue
+    {
+        DamageTaken,
+        ProjectileAttack,
+        MinionSummoned,
+        ShieldBroken,
+        HeartrootPulse,
+        DeathStarted,
+        AmbientStarted
+    }
+
     public enum WitchEncounterState
     {
         Idle,

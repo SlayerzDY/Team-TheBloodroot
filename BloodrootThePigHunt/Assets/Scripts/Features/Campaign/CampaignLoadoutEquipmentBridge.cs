@@ -561,7 +561,17 @@ namespace Bloodroot.Campaign
                 return false;
             }
 
-            List<gunStats> guns = controller.gunInv ?? new List<gunStats>();
+            // JsonUtility cannot preserve runtime ScriptableObject gun
+            // references across Safety saves. A source player can therefore
+            // briefly retain null/destroyed entries or an out-of-range
+            // selection while its authoritative campaign checkpoint is being
+            // captured. Those entries cannot represent owned equipment, so
+            // remove only them before taking the stable snapshot. Any live
+            // gun that is not one of the authored definitions remains a hard
+            // failure below; this is deliberately not a permissive fallback
+            // for unknown or corrupt gun data.
+            SanitizeSafetyGunInventory(controller);
+            List<gunStats> guns = controller.gunInv;
             string[] ids = new string[guns.Count];
             int[] ammo = new int[guns.Count];
             for (int index = 0; index < guns.Count; index++)
@@ -937,8 +947,18 @@ namespace Bloodroot.Campaign
             gunStats candidate,
             gunStats definition)
         {
-            return candidate != null && definition != null &&
-                   candidate.gunModel == definition.gunModel &&
+            if (candidate == null || definition == null)
+                return false;
+
+            // Pickups can hand the canonical authored ScriptableObject
+            // directly to Safety. Treat that exact object as its own durable
+            // identity even if a safe runtime system has altered a mutable
+            // presentation field. Runtime clones still have to match the
+            // stable visual/combat fingerprint below.
+            if (ReferenceEquals(candidate, definition))
+                return true;
+
+            return candidate.gunModel == definition.gunModel &&
                    candidate.bullet == definition.bullet &&
                    candidate.ammoMax == definition.ammoMax &&
                    candidate.gunType == definition.gunType;

@@ -141,6 +141,15 @@ namespace Bloodroot.Features.AlphaEnemies
         public event Action ShieldBroken;
         public event Action<GameObject> MinionSummoned;
 
+        /// <summary>
+        /// Audio-safe combat timing bridge. Each cue is emitted once after
+        /// its underlying combat action has completed successfully. This
+        /// event neither owns nor plays AudioClips; <see
+        /// cref="WitchCombatAudioHooks"/> turns it into inspector-visible
+        /// UnityEvents on the authored witch prefabs.
+        /// </summary>
+        public event Action<WitchCombatAudioCue> CombatAudioCue;
+
         public WitchVariant Variant => variant;
         public Transform Target => target;
         public Transform SecondaryAttackTarget => secondaryAttackTarget;
@@ -365,6 +374,7 @@ namespace Bloodroot.Features.AlphaEnemies
             PlayClip(hitClip);
             AlphaEnemyEventUtility.Invoke(onDamaged, this, this, nameof(onDamaged));
             AlphaEnemyEventUtility.Invoke(Damaged, this, this, nameof(Damaged));
+            RaiseCombatAudioCue(WitchCombatAudioCue.DamageTaken);
             if (currentHealth == 0)
             {
                 Die();
@@ -654,6 +664,7 @@ namespace Bloodroot.Features.AlphaEnemies
             }
             TriggerAnimator(castTrigger);
             PlayClip(castClip);
+            RaiseCombatAudioCue(WitchCombatAudioCue.ProjectileAttack);
             return true;
         }
 
@@ -897,6 +908,7 @@ namespace Bloodroot.Features.AlphaEnemies
             PlayClip(summonClip);
             AlphaEnemyEventUtility.Invoke(onMinionSummoned, minion, this, nameof(onMinionSummoned));
             AlphaEnemyEventUtility.Invoke(MinionSummoned, minion, this, nameof(MinionSummoned));
+            RaiseCombatAudioCue(WitchCombatAudioCue.MinionSummoned);
             return true;
         }
 
@@ -983,6 +995,7 @@ namespace Bloodroot.Features.AlphaEnemies
                 PlayClip(shieldBreakClip);
                 AlphaEnemyEventUtility.Invoke(onShieldBroken, this, nameof(onShieldBroken));
                 AlphaEnemyEventUtility.Invoke(ShieldBroken, this, nameof(ShieldBroken));
+                RaiseCombatAudioCue(WitchCombatAudioCue.ShieldBroken);
             }
         }
 
@@ -1070,6 +1083,10 @@ namespace Bloodroot.Features.AlphaEnemies
             SetAnimatorFlying(false);
             TriggerAnimator(deathTrigger);
             PlayClip(deathClip);
+            // The death state is now irreversible, but loot and delayed
+            // destruction have not happened yet. Audio listeners can safely
+            // start a death cue here without racing the destroy delay.
+            RaiseCombatAudioCue(WitchCombatAudioCue.DeathStarted);
             if (destroySpawnedMinionsOnDeath)
             {
                 foreach (GameObject minion in activeMinions)
@@ -1100,6 +1117,20 @@ namespace Bloodroot.Features.AlphaEnemies
         protected virtual void OnHealthChanged() { }
 
         protected virtual void OnDying() { }
+
+        /// <summary>
+        /// Lets derived witches expose a successful specialty attack (for
+        /// example the Matriarch's Heartroot pulse) through the same audio
+        /// integration path as the shared controller attacks.
+        /// </summary>
+        protected void RaiseCombatAudioCue(WitchCombatAudioCue cue)
+        {
+            AlphaEnemyEventUtility.Invoke(
+                CombatAudioCue,
+                cue,
+                this,
+                nameof(CombatAudioCue));
+        }
 
         private void SpawnConfiguredLoot()
         {
@@ -1202,6 +1233,7 @@ namespace Bloodroot.Features.AlphaEnemies
             }
 
             audioSource.PlayOneShot(selected);
+            RaiseCombatAudioCue(WitchCombatAudioCue.AmbientStarted);
             ambientClipPlaying = true;
             ambientEndsAt = Time.time + selected.length /
                 Mathf.Max(0.01f, Mathf.Abs(audioSource.pitch));
