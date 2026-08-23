@@ -294,6 +294,8 @@ public static class BloodrootBetaCampaignCleanup
         CampaignStateService state = FindSingleComponent<CampaignStateService>(scene);
         CampaignInventoryCarryover carryover =
             FindSingleComponent<CampaignInventoryCarryover>(scene);
+        global::Inventory playerInventory =
+            FindSingleComponent<global::Inventory>(scene);
         CampaignRootTreeOffering[] offerings =
             FindComponents<CampaignRootTreeOffering>(scene);
         foreach (CampaignRootTreeOffering offering in offerings)
@@ -303,7 +305,7 @@ public static class BloodrootBetaCampaignCleanup
                 state,
                 carryover,
                 RequirePrefab(PrologueCursedObjectPickupPath),
-                null,
+                playerInventory,
                 Array.Empty<GameObject>());
             EditorUtility.SetDirty(offering);
         }
@@ -375,6 +377,8 @@ public static class BloodrootBetaCampaignCleanup
             FindSingleComponent<CampaignInventoryCarryover>(scene);
         FarmPrologueDirector director =
             FindSingleComponent<FarmPrologueDirector>(scene);
+        global::Inventory playerInventory =
+            FindSingleComponent<global::Inventory>(scene);
         GameObject token = RequirePrefab(PrologueCursedObjectPickupPath);
         GameObject safetyPresentation = RequirePrefab(SafetyCursedItemPickupPath);
         int changes = 0;
@@ -568,25 +572,30 @@ public static class BloodrootBetaCampaignCleanup
             serialized.FindProperty("campaignState")?.objectReferenceValue != state ||
             serialized.FindProperty("inventoryCarryover")?.objectReferenceValue != carryover ||
             serialized.FindProperty("cursedItemTemplate")?.objectReferenceValue != token ||
+            serialized.FindProperty("playerInventory")?.objectReferenceValue != playerInventory ||
             serialized.FindProperty("prologueDirector")?.objectReferenceValue != director ||
             serialized.FindProperty("presentationRoot")?.objectReferenceValue != presentation ||
             serialized.FindProperty("interactionCollider")?.objectReferenceValue !=
             interactionCollider;
         if (requiresConfigure)
         {
-            global::Inventory inventory = serialized
-                .FindProperty("playerInventory")?.objectReferenceValue as
-                global::Inventory;
             pickup.Configure(
                 state,
                 carryover,
                 token,
-                inventory,
+                playerInventory,
                 director,
                 presentation,
                 interactionCollider);
             changes++;
         }
+
+        changes += EnsureFarmRootTreeOfferingInventory(
+            scene,
+            state,
+            carryover,
+            token,
+            playerInventory);
 
         if (interactionCollider.enabled)
         {
@@ -602,6 +611,43 @@ public static class BloodrootBetaCampaignCleanup
         }
 
         return changes;
+    }
+
+    private static int EnsureFarmRootTreeOfferingInventory(
+        Scene scene,
+        CampaignStateService state,
+        CampaignInventoryCarryover carryover,
+        GameObject cursedItemToken,
+        global::Inventory playerInventory)
+    {
+        CampaignRootTreeOffering offering =
+            FindSingleComponent<CampaignRootTreeOffering>(scene);
+        SerializedObject serialized = new SerializedObject(offering);
+        bool requiresConfigure =
+            serialized.FindProperty("stateService")?.objectReferenceValue != state ||
+            serialized.FindProperty("inventoryCarryover")?.objectReferenceValue != carryover ||
+            serialized.FindProperty("cursedItemPickupObject")?.objectReferenceValue !=
+            cursedItemToken ||
+            serialized.FindProperty("playerInventory")?.objectReferenceValue !=
+            playerInventory;
+        if (!requiresConfigure)
+        {
+            return 0;
+        }
+
+        GameObject offeredVisual =
+            offering.OfferedObjectVisuals != null &&
+            offering.OfferedObjectVisuals.Count > 0
+                ? offering.OfferedObjectVisuals[0]
+                : null;
+        offering.Configure(
+            state,
+            carryover,
+            cursedItemToken,
+            playerInventory,
+            new[] { offeredVisual });
+        EditorUtility.SetDirty(offering);
+        return 1;
     }
 
     private static int RemoveStandaloneSafetyCursedItemPickups(
@@ -675,13 +721,33 @@ public static class BloodrootBetaCampaignCleanup
             FindSingleComponent<FarmPrologueCursedObjectPickup>(scene);
         GameObject expectedToken = RequirePrefab(PrologueCursedObjectPickupPath);
         GameObject expectedPresentation = RequirePrefab(SafetyCursedItemPickupPath);
+        CampaignStateService expectedState =
+            FindSingleComponent<CampaignStateService>(scene);
+        CampaignInventoryCarryover expectedCarryover =
+            FindSingleComponent<CampaignInventoryCarryover>(scene);
+        global::Inventory expectedInventory =
+            FindSingleComponent<global::Inventory>(scene);
+        FarmPrologueDirector expectedDirector =
+            FindSingleComponent<FarmPrologueDirector>(scene);
         global::ItemStats tokenItem =
             CampaignInventoryTokenUtility.GetItemStats(expectedToken);
+        SerializedObject pickupData = new SerializedObject(pickup);
+        SerializedObject directorData = new SerializedObject(expectedDirector);
 
         if (pickup == null || !pickup.isActiveAndEnabled ||
             !pickup.gameObject.activeInHierarchy ||
             !pickup.HasExclusiveInteractionAuthority ||
             pickup.CursedItemTemplate != expectedToken ||
+            pickupData.FindProperty("campaignState")?.objectReferenceValue !=
+            expectedState ||
+            pickupData.FindProperty("inventoryCarryover")?.objectReferenceValue !=
+            expectedCarryover ||
+            pickupData.FindProperty("playerInventory")?.objectReferenceValue !=
+            expectedInventory ||
+            pickupData.FindProperty("prologueDirector")?.objectReferenceValue !=
+            expectedDirector ||
+            directorData.FindProperty("playerInventory")?.objectReferenceValue !=
+            expectedInventory ||
             tokenItem == null ||
             !string.Equals(tokenItem.itemName, "CursedItem", StringComparison.Ordinal) ||
             tokenItem.quantity != 1 || tokenItem.stackSize != 1 ||
@@ -694,6 +760,22 @@ public static class BloodrootBetaCampaignCleanup
         {
             throw new InvalidOperationException(
                 "The Farm campaign cursed-object proxy is not authored safely.");
+        }
+
+        CampaignRootTreeOffering offering =
+            FindSingleComponent<CampaignRootTreeOffering>(scene);
+        SerializedObject offeringData = new SerializedObject(offering);
+        if (offeringData.FindProperty("stateService")?.objectReferenceValue !=
+                expectedState ||
+            offeringData.FindProperty("inventoryCarryover")?.objectReferenceValue !=
+                expectedCarryover ||
+            offeringData.FindProperty("cursedItemPickupObject")?.objectReferenceValue !=
+                expectedToken ||
+            offeringData.FindProperty("playerInventory")?.objectReferenceValue !=
+                expectedInventory)
+        {
+            throw new InvalidOperationException(
+                "The Farm Root Tree offering is not wired to the live player inventory.");
         }
 
         if (pickup.PickupRejectedEvent == null ||
