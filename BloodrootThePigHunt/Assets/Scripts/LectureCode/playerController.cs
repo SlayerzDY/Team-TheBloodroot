@@ -92,6 +92,10 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         if (!newGame) { gameManager.instance.Load(); }
         gameManager.instance.updatePlayer();
         spawnPlayer();
+        if (PersistOutsideWorld.instance == null) { return; }
+        if (PersistOutsideWorld.instance.state) {
+            gameManager.instance.Load();
+        }
     }
     //==========================================================================================
     // Update is called once per frame
@@ -731,6 +735,9 @@ void selectGun()
         }
         Inventory playerInv = this.GetComponent<Inventory>();
         if (playerInv == null) { return; }
+        if (playerInv.inventoryItems == null) { return; }
+        if (playerInv.inventoryItems == null || playerInv.inventoryItems.Length < 1) { return; }
+        if (playerInv.inventoryItems[0] == null) { return; }
         if (playerInv.inventoryItems[0].itemName == null) { return; }
         for (int i = 0; i < playerInv.inventoryItems.Length; i++) {
             if (playerInv.inventoryItems == null) { continue; }
