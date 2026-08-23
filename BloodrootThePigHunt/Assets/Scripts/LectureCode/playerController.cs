@@ -91,11 +91,20 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         speedOrig = speed;
         if (!newGame) { gameManager.instance.Load(); }
         gameManager.instance.updatePlayer();
-        spawnPlayer();
+        StartCoroutine(ExecuteAfterDelay(0.1f));
         if (PersistOutsideWorld.instance == null) { return; }
         if (PersistOutsideWorld.instance.state) {
             gameManager.instance.Load();
         }
+
+
+    }
+
+    private IEnumerator ExecuteAfterDelay(float delayInSeconds)
+    {
+        yield return new WaitForSeconds(delayInSeconds);
+
+        spawnPlayer();
     }
     //==========================================================================================
     // Update is called once per frame
@@ -108,7 +117,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             //isJumping = false;
             movement();
             useFlashlight();
-            if (Input.GetKeyDown(KeyCode.K)) { LoadTestScene(); }
+            //if (Input.GetKeyDown(KeyCode.K)) { LoadTestScene(); }
             if (Input.GetKeyDown(KeyCode.F5)) { gameManager.instance.Save(); }
             if (Input.GetKeyDown(KeyCode.F9)) { gameManager.instance.Load(); }
         }
@@ -723,6 +732,7 @@ void selectGun()
     // Function, Spawn Player
     //==========================================================================================
     public void spawnPlayer() {
+
         controller.transform.position = gameManager.instance.playerSpawnPos.transform.position;
         Physics.SyncTransforms();
         HP = HPOrig;
