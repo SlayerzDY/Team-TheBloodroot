@@ -1696,12 +1696,12 @@ namespace Bloodroot.Campaign
                     throw new InvalidOperationException(reconcileError);
                 }
 
-                if (!TryRefreshSafetySaveAndInventoryPair(
-                        inventory,
-                        out reconcileError))
-                {
-                    throw new InvalidOperationException(reconcileError);
-                }
+                //if (!TryRefreshSafetySaveAndInventoryPair(
+                //        inventory,
+                //        out reconcileError))
+                //{
+                //    throw new InvalidOperationException(reconcileError);
+                //}
 
                 CampaignSafetySaveIntegration.CompletePendingArrival(
                     sceneName);
@@ -3053,7 +3053,7 @@ namespace Bloodroot.Campaign
 
             try
             {
-                manager.Save();
+                //manager.Save();
                 if (!TrySanitizeSafetyGunSave(out string sanitizeError))
                     throw new InvalidOperationException(sanitizeError);
 

@@ -57,6 +57,7 @@ public class buttonFunctions : MonoBehaviour {
 
     public void ReturnToMainMenu()
     {
+        gameManager.instance.Save();
         OpenLevel("MainMenu");
     }
 

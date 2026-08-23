@@ -560,6 +560,7 @@ public class gameManager : MonoBehaviour
         if (playerInv == null) {  return; }
         // Pass live references into the constructor
         GameData dataToSave = new GameData(player, playerInv);
+        Debug.Log("SavedGame");
         SaveSystem.SaveGame(dataToSave);
     }
     //==========================================================================================
