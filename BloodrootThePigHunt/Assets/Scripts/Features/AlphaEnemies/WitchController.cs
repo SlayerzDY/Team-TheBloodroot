@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
 using UnityEngine.Events;
 
 namespace Bloodroot.Features.AlphaEnemies
@@ -760,7 +759,7 @@ namespace Bloodroot.Features.AlphaEnemies
             if (!CampaignSafetyEnemyRuntimeAdapter.TryValidatePrefab(
                     prefab,
                     out Component authoredController,
-                    out NavMeshAgent authoredAgent,
+                    out _,
                     out _,
                     out string prefabError) ||
                 authoredController.GetType() !=
@@ -771,16 +770,13 @@ namespace Bloodroot.Features.AlphaEnemies
                 return false;
             }
 
-            NavMeshQueryFilter filter = new NavMeshQueryFilter
-            {
-                agentTypeID = authoredAgent.agentTypeID,
-                areaMask = authoredAgent.areaMask
-            };
-            if (!NavMesh.SamplePosition(
-                    spawnPoint.position,
-                    out NavMeshHit groundHit,
-                    minionGroundSampleRadius,
-                    filter))
+            if (!CampaignSafetyEnemyRuntimeAdapter
+                    .TryResolveGroundedSpawnPosition(
+                        prefab,
+                        spawnPoint.position,
+                        minionGroundSampleRadius,
+                        out var groundHit,
+                        out _))
             {
                 nextSummonAt = Time.time + summonCooldown;
 
@@ -796,44 +792,14 @@ namespace Bloodroot.Features.AlphaEnemies
                 groundHit.position,
                 groundRotation);
 
-            if (!CampaignSafetyEnemyRuntimeAdapter.TryPrepare(
-                    minion,
-                    out string preparationError))
-            {
-                Destroy(minion);
-                nextSummonAt = Time.time + summonCooldown;
-
-                return false;
-            }
-
             if (!CampaignSafetyEnemyRuntimeAdapter
-                    .TryGetExactAllowedController(
+                    .TryPrepareGroundedSpawn(
                         minion,
+                        groundHit,
                         out Component spawnedController,
-                        out string controllerError) ||
+                        out _) ||
                 spawnedController.GetType() !=
                     typeof(global::BoarBruteAI))
-            {
-                Destroy(minion);
-                nextSummonAt = Time.time + summonCooldown;
-
-                return false;
-            }
-
-            if (!CampaignSafetyEnemyRuntimeAdapter.TryGetAgent(
-                    minion,
-                    out NavMeshAgent spawnedAgent,
-                    out string agentError))
-            {
-                Destroy(minion);
-                nextSummonAt = Time.time + summonCooldown;
-
-                return false;
-            }
-
-            if (!spawnedAgent.isOnNavMesh &&
-                (!spawnedAgent.Warp(groundHit.position) ||
-                 !spawnedAgent.isOnNavMesh))
             {
                 Destroy(minion);
                 nextSummonAt = Time.time + summonCooldown;

@@ -12,6 +12,8 @@ namespace Bloodroot.Features.AlphaEnemies
     [RequireComponent(typeof(NavMeshAgent))]
     public sealed class WitchSummonedHogAI : MonoBehaviour, global::IDamage
     {
+        private const float MinimumNavMeshRecoveryRadius = 6f;
+
         [Header("Required Runtime References")]
         [SerializeField] private NavMeshAgent agent;
         [SerializeField] private Transform target;
@@ -100,7 +102,10 @@ namespace Bloodroot.Features.AlphaEnemies
                 return;
             }
 
-            if (!CanNavigate())
+            if (!EnemyNavMeshSafety.TryRecover(
+                    agent,
+                    transform.position,
+                    Mathf.Max(MinimumNavMeshRecoveryRadius, navMeshSampleRadius)))
             {
                 if (!navMeshWarningIssued)
                 {
@@ -114,11 +119,7 @@ namespace Bloodroot.Features.AlphaEnemies
             float distance = Vector3.Distance(transform.position, target.position);
             if (distance <= attackRange)
             {
-                agent.isStopped = true;
-                if (agent.hasPath)
-                {
-                    agent.ResetPath();
-                }
+                EnemyNavMeshSafety.Stop(agent);
 
                 RotateTowardTarget();
                 TryBiteTarget();
@@ -127,15 +128,11 @@ namespace Bloodroot.Features.AlphaEnemies
 
             if (Time.time >= nextRepathAt)
             {
-                agent.isStopped = false;
-                if (NavMesh.SamplePosition(
-                        target.position,
-                        out NavMeshHit hit,
-                        navMeshSampleRadius,
-                        agent.areaMask))
-                {
-                    agent.SetDestination(hit.position);
-                }
+                EnemyNavMeshSafety.TrySetDestination(
+                    agent,
+                    target.position,
+                    Mathf.Max(MinimumNavMeshRecoveryRadius, navMeshSampleRadius),
+                    navMeshSampleRadius);
 
                 nextRepathAt = Time.time + repathInterval;
             }
@@ -211,6 +208,11 @@ namespace Bloodroot.Features.AlphaEnemies
 
         private void RotateTowardTarget()
         {
+            if (!CanNavigate())
+            {
+                return;
+            }
+
             Vector3 direction = target.position - transform.position;
             direction.y = 0f;
             if (direction.sqrMagnitude > 0.001f)
@@ -224,7 +226,7 @@ namespace Bloodroot.Features.AlphaEnemies
 
         private bool CanNavigate()
         {
-            return agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh;
+            return EnemyNavMeshSafety.IsReady(agent);
         }
 
         private void ResolveTargetIfNeeded()
@@ -278,8 +280,7 @@ namespace Bloodroot.Features.AlphaEnemies
             currentHealth = 0;
             if (CanNavigate())
             {
-                agent.isStopped = true;
-                agent.ResetPath();
+                EnemyNavMeshSafety.Stop(agent);
             }
 
             SetCollidersEnabled(false);

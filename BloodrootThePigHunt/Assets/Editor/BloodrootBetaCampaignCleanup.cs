@@ -3,7 +3,9 @@ using System;
 using System.Collections.Generic;
 using Bloodroot.Campaign;
 using Bloodroot.Features.AlphaEnemies;
+using Bloodroot.Features.Hub;
 using Bloodroot.Features.WorldMissions;
+using TMPro;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -61,6 +63,25 @@ public static class BloodrootBetaCampaignCleanup
         "Assets/PreFabs/AlphaPlaceholders/WereBoar_PLACEHOLDER.prefab";
     private const string AmbientRootName = "__BR_AMBIENT_THREATS_V1";
     private const string AmbientMarkersName = "Markers";
+
+    // These were temporary hub presentation systems.  The Farm remains a
+    // playable hub through its existing truck, campaign state, and cursed
+    // object interactions; it no longer exposes prototype stations or
+    // floating world labels.
+    private static readonly string[] RetiredFarmHubRootNames =
+    {
+        "Mission Board Station",
+        "Loadout Station",
+        "Storage Station",
+        "Upgrade Station",
+        "Investigation Station",
+        "Mission Board",
+        "Storage Area",
+        "Upgrade Area",
+        "Hub Decorations",
+        "First Arrival Presentation",
+        "SLOT_Replaceable_Station_Visual"
+    };
 
     private sealed class AmbientAreaSpec
     {
@@ -246,6 +267,8 @@ public static class BloodrootBetaCampaignCleanup
             serialized.ApplyModifiedPropertiesWithoutUndo();
         }
 
+        RetireFarmHubPresentation(scene);
+
         var retiredRoots = new List<GameObject>();
         foreach (Transform candidate in FindTransforms(scene))
         {
@@ -262,6 +285,145 @@ public static class BloodrootBetaCampaignCleanup
         foreach (GameObject retiredRoot in retiredRoots)
         {
             UnityEngine.Object.DestroyImmediate(retiredRoot);
+        }
+
+        ValidateFarmHubCleanup(scene);
+    }
+
+    private static void RetireFarmHubPresentation(Scene scene)
+    {
+        // Keep the save-backed arrival acknowledgement, but make it entirely
+        // non-visual.  This preserves the campaign state transition without
+        // restoring the old beacon or "stations are available" world text.
+        foreach (HubArrivalDirector arrival in
+                 FindComponents<HubArrivalDirector>(scene))
+        {
+            SerializedObject serialized = new SerializedObject(arrival);
+            SerializedProperty presentationRoot = serialized.FindProperty(
+                "firstArrivalPresentationRoot");
+            SerializedProperty autoCompleteSeconds = serialized.FindProperty(
+                "autoCompleteSeconds");
+
+            if (presentationRoot != null)
+            {
+                presentationRoot.objectReferenceValue = null;
+            }
+
+            if (autoCompleteSeconds != null)
+            {
+                // HubArrivalDirector intentionally clamps the actual wait to
+                // one second, so this remains a brief silent state handoff.
+                autoCompleteSeconds.floatValue = 0.1f;
+            }
+
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(arrival);
+        }
+
+        var presentationRoots = new List<GameObject>();
+        foreach (Transform candidate in FindTransforms(scene))
+        {
+            if (candidate == null || candidate.gameObject == null ||
+                IsDescendantOfAny(candidate, presentationRoots) ||
+                !IsRetiredFarmHubPresentation(candidate.gameObject.name))
+            {
+                continue;
+            }
+
+            presentationRoots.Add(candidate.gameObject);
+        }
+
+        foreach (GameObject root in presentationRoots)
+        {
+            UnityEngine.Object.DestroyImmediate(root);
+        }
+
+        // Station functionality was prototype-only.  Remove the authored
+        // components as well as their meshes/colliders so no invisible
+        // interaction volume can survive after its presentation is gone.
+        DestroyComponents<HubStationProgression>(scene);
+        DestroyComponents<HubStationInteractable>(scene);
+        DestroyComponents<HubStationStatusPresenter>(scene);
+        DestroyComponents<HubLoadoutStation>(scene);
+        DestroyComponents<HubLoadoutFeedbackPresenter>(scene);
+        DestroyComponents<HubInvestigationBoard>(scene);
+
+        // TextMeshPro (not TextMeshProUGUI) is the authored world-space text
+        // type.  The Farm HUD remains intact; every floating label is retired.
+        TextMeshPro[] floatingTexts = FindComponents<TextMeshPro>(scene);
+        foreach (TextMeshPro floatingText in floatingTexts)
+        {
+            if (floatingText != null)
+            {
+                UnityEngine.Object.DestroyImmediate(floatingText.gameObject);
+            }
+        }
+    }
+
+    private static bool IsRetiredFarmHubPresentation(string objectName)
+    {
+        foreach (string retiredName in RetiredFarmHubRootNames)
+        {
+            if (string.Equals(
+                    objectName,
+                    retiredName,
+                    StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static void DestroyComponents<T>(Scene scene) where T : Component
+    {
+        T[] components = FindComponents<T>(scene);
+        foreach (T component in components)
+        {
+            if (component != null)
+            {
+                UnityEngine.Object.DestroyImmediate(component);
+            }
+        }
+    }
+
+    private static void ValidateFarmHubCleanup(Scene scene)
+    {
+        if (FindComponents<TextMeshPro>(scene).Length != 0)
+        {
+            throw new InvalidOperationException(
+                "Farm Hub cleanup left floating TextMeshPro presentation behind.");
+        }
+
+        if (FindComponents<HubStationProgression>(scene).Length != 0 ||
+            FindComponents<HubStationInteractable>(scene).Length != 0 ||
+            FindComponents<HubStationStatusPresenter>(scene).Length != 0 ||
+            FindComponents<HubLoadoutStation>(scene).Length != 0 ||
+            FindComponents<HubLoadoutFeedbackPresenter>(scene).Length != 0 ||
+            FindComponents<HubInvestigationBoard>(scene).Length != 0)
+        {
+            throw new InvalidOperationException(
+                "Farm Hub cleanup left a retired station component behind.");
+        }
+
+        foreach (Transform candidate in FindTransforms(scene))
+        {
+            if (candidate != null &&
+                IsRetiredFarmHubPresentation(candidate.gameObject.name))
+            {
+                throw new InvalidOperationException(
+                    "Farm Hub cleanup left retired presentation root '" +
+                    candidate.gameObject.name + "' behind.");
+            }
+        }
+
+        if (FindComponents<CampaignSceneTravel>(scene).Length == 0 ||
+            FindComponents<CampaignSpawnPoint>(scene).Length == 0 ||
+            FindComponents<CampaignRootTreeOffering>(scene).Length == 0)
+        {
+            throw new InvalidOperationException(
+                "Farm Hub cleanup removed a required travel, spawn, or cursed-object interaction.");
         }
     }
 
@@ -461,7 +623,7 @@ public static class BloodrootBetaCampaignCleanup
         int areaMask = agent != null ? agent.areaMask & 1 : 0;
         if (areaMask == 0 || !NavMesh.SamplePosition(
                 marker.position,
-                out _,
+                out NavMeshHit sample,
                 15f,
                 areaMask))
         {
@@ -469,6 +631,11 @@ public static class BloodrootBetaCampaignCleanup
                 "Ambient marker is not near the baked Walkable NavMesh: " +
                 marker.name + ".");
         }
+
+        // The marker is runtime spawn authority, not a visual guide. Keep it
+        // on the actual polygon so a later terrain or collider edit cannot
+        // leave the ambient population suspended above or below the world.
+        marker.position = sample.position;
     }
 
     private static bool IsRetiredFarmVisual(string objectName)

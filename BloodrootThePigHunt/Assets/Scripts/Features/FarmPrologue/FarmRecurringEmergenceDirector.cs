@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Bloodroot.Campaign;
 using Bloodroot.Features.AlphaEnemies;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.Events;
 
 namespace Bloodroot.Features.FarmPrologue
@@ -26,6 +27,7 @@ namespace Bloodroot.Features.FarmPrologue
         private const int FirstNameStoneEnemyCount = 5;
         private const int EnemiesAddedPerNameStone = 2;
         private const int FirstNameStoneDifficulty = 2;
+        private const float GroundedSpawnNavMeshSampleRadius = 3f;
 
         [Header("Campaign Authority")]
         [SerializeField] private CampaignStateService campaignState;
@@ -423,13 +425,29 @@ namespace Bloodroot.Features.FarmPrologue
 
                 try
                 {
+                    if (!CampaignSafetyEnemyRuntimeAdapter
+                            .TryResolveGroundedSpawnPosition(
+                                prefab,
+                                spawnPoint.position,
+                                GroundedSpawnNavMeshSampleRadius,
+                                out NavMeshHit groundedPosition,
+                                out string groundError))
+                    {
+                        throw new InvalidOperationException(
+                            $"Farm emergence point '{spawnPoint.name}' was " +
+                            $"rejected by grounded NavMesh validation. {groundError}");
+                    }
+
                     enemy = Instantiate(
                         prefab,
-                        spawnPoint.position,
+                        groundedPosition.position,
                         spawnPoint.rotation);
                     enemy.name =
                         $"Farm Emergence {offeringId} Enemy {index + 1:00}";
-                    PrepareOwnedRecurringEnemy(enemy, difficulty);
+                    PrepareOwnedRecurringEnemy(
+                        enemy,
+                        groundedPosition,
+                        difficulty);
                     FarmEmergenceEnemyMarker marker =
                         enemy.GetComponent<FarmEmergenceEnemyMarker>() ??
                         enemy.AddComponent<FarmEmergenceEnemyMarker>();
@@ -735,6 +753,7 @@ namespace Bloodroot.Features.FarmPrologue
 
         private static void PrepareOwnedRecurringEnemy(
             GameObject enemy,
+            NavMeshHit groundedPosition,
             int difficulty)
         {
             if (difficulty < 1 || difficulty > 5)
@@ -744,19 +763,13 @@ namespace Bloodroot.Features.FarmPrologue
             }
 
             if (!CampaignSafetyEnemyRuntimeAdapter
-                    .TryGetExactAllowedController(
+                    .TryPrepareGroundedSpawn(
                         enemy,
+                        groundedPosition,
                         out Component controller,
-                        out string controllerError))
+                        out string placementError))
             {
-                throw new InvalidOperationException(controllerError);
-            }
-
-            if (!CampaignSafetyEnemyRuntimeAdapter.TryPrepare(
-                    enemy,
-                    out string compatibilityError))
-            {
-                throw new InvalidOperationException(compatibilityError);
+                throw new InvalidOperationException(placementError);
             }
 
             if (!CampaignSafetyEnemyRuntimeAdapter.TryInitialize(

@@ -10,6 +10,8 @@ namespace Bloodroot.Features.AlphaEnemies
     [RequireComponent(typeof(NavMeshAgent))]
     public sealed class WereBoarController : MonoBehaviour, global::IDamage
     {
+        private const float MinimumNavMeshRecoveryRadius = 6f;
+
         [Header("Required Runtime References")]
         [SerializeField] private NavMeshAgent agent;
         [SerializeField] private Transform target;
@@ -179,7 +181,10 @@ namespace Bloodroot.Features.AlphaEnemies
             }
 
             targetWarningIssued = false;
-            bool canNavigate = CanNavigate();
+            bool canNavigate = EnemyNavMeshSafety.TryRecover(
+                agent,
+                transform.position,
+                Mathf.Max(MinimumNavMeshRecoveryRadius, navMeshSampleRadius));
             if (!canNavigate && !navMeshWarningIssued)
             {
                 navMeshWarningIssued = true;
@@ -680,18 +685,11 @@ namespace Bloodroot.Features.AlphaEnemies
 
         private bool TrySetDestination(Vector3 desiredPosition)
         {
-            if (!CanNavigate())
-            {
-                return false;
-            }
-
-            if (!NavMesh.SamplePosition(desiredPosition, out NavMeshHit hit, navMeshSampleRadius, agent.areaMask))
-            {
-                return false;
-            }
-
-            agent.isStopped = false;
-            return agent.SetDestination(hit.position);
+            return EnemyNavMeshSafety.TrySetDestination(
+                agent,
+                desiredPosition,
+                Mathf.Max(MinimumNavMeshRecoveryRadius, navMeshSampleRadius),
+                navMeshSampleRadius);
         }
 
         private bool HasReachedDestination()
@@ -711,7 +709,7 @@ namespace Bloodroot.Features.AlphaEnemies
 
         private bool CanNavigate()
         {
-            return agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh;
+            return EnemyNavMeshSafety.IsReady(agent);
         }
 
         private void FailClosed()
@@ -726,8 +724,7 @@ namespace Bloodroot.Features.AlphaEnemies
 
             if (CanNavigate())
             {
-                agent.isStopped = true;
-                agent.ResetPath();
+                EnemyNavMeshSafety.Stop(agent);
             }
 
             if (!isDead && state != WereBoarState.Patrol)
@@ -887,8 +884,7 @@ namespace Bloodroot.Features.AlphaEnemies
             SetState(WereBoarState.Dead);
             if (CanNavigate())
             {
-                agent.isStopped = true;
-                agent.ResetPath();
+                EnemyNavMeshSafety.Stop(agent);
             }
 
             SetCollidersEnabled(false);

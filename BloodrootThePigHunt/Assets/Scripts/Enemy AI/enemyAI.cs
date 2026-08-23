@@ -12,6 +12,8 @@ using UnityEngine.AI;
 //==============================================================================================
 public class enemyAI : MonoBehaviour, IDamage
 {
+    private const float NavMeshRecoveryRadius = 6f;
+
     //==========================================================================================
     // Declare Variables
     //==========================================================================================
@@ -60,6 +62,7 @@ public class enemyAI : MonoBehaviour, IDamage
     // Function, Start
     //==========================================================================================
     protected virtual void Start() {
+        if (agent == null) { agent = GetComponent<NavMeshAgent>(); }
         animator = GetComponentInChildren<Animator>();
         isUnalived = false;
         boarBrute = GetComponent<BoarBruteAI>();
@@ -72,7 +75,10 @@ public class enemyAI : MonoBehaviour, IDamage
     //==========================================================================================
     protected virtual void checkRoam()
     {
-        if(agent == null) {  return; }
+        if (!EnemyNavMeshSafety.TryRecover(
+                agent,
+                transform.position,
+                NavMeshRecoveryRadius)) { return; }
 
         if (!isDead)
         {
@@ -87,13 +93,20 @@ public class enemyAI : MonoBehaviour, IDamage
     // Function, Roam
     //==========================================================================================
     protected virtual void roam() {
+        if (!EnemyNavMeshSafety.TryRecover(
+                agent,
+                transform.position,
+                NavMeshRecoveryRadius)) { return; }
+
         roamTimer = 0;
         agent.stoppingDistance = 0;
         Vector3 ranPos = Random.insideUnitSphere * roamDist;
         ranPos += startingPos;
-        NavMeshHit hit;
-        NavMesh.SamplePosition(ranPos, out hit, roamDist, 1);
-        agent.SetDestination(hit.position);
+        EnemyNavMeshSafety.TrySetDestination(
+            agent,
+            ranPos,
+            NavMeshRecoveryRadius,
+            Mathf.Max(0.1f, roamDist));
     }
     //==========================================================================================
     // Function, ApplyBloodMoonModifier
@@ -137,8 +150,19 @@ public class enemyAI : MonoBehaviour, IDamage
     //==========================================================================================
     protected virtual void Update() {
         if (isDead) { return; }
-        if (animator != null) { animator.SetFloat("Speed", agent.velocity.magnitude); }
-        animator.SetFloat("Speed", agent.velocity.magnitude / agent.speed, 0.1f, Time.deltaTime);
+        if (!EnemyNavMeshSafety.TryRecover(
+                agent,
+                transform.position,
+                NavMeshRecoveryRadius)) { return; }
+
+        if (animator != null) {
+            animator.SetFloat("Speed", agent.velocity.magnitude);
+            animator.SetFloat(
+                "Speed",
+                agent.velocity.magnitude / Mathf.Max(0.01f, agent.speed),
+                0.1f,
+                Time.deltaTime);
+        }
         if (playerInTrigger) {
             playerDir = gameManager.instance.player.transform.position - transform.position;
             ScreecherAI screecher = GetComponent<ScreecherAI>();
@@ -185,7 +209,7 @@ public class enemyAI : MonoBehaviour, IDamage
         if (other.CompareTag("Player"))
         {
             playerInTrigger = false;
-            agent.stoppingDistance = 0;
+            if (EnemyNavMeshSafety.IsReady(agent)) { agent.stoppingDistance = 0; }
         }
     }
     //==========================================================================================
@@ -338,6 +362,13 @@ public class enemyAI : MonoBehaviour, IDamage
     // Function, Can See Player
     //==========================================================================================
     protected virtual bool canSeePlayer() {
+        if (!EnemyNavMeshSafety.TryRecover(
+                agent,
+                transform.position,
+                NavMeshRecoveryRadius) ||
+            gameManager.instance == null ||
+            gameManager.instance.player == null) { return false; }
+
         shootTimer += Time.deltaTime;
         playerDir = gameManager.instance.player.transform.position - transform.position;
         angleToPlayer = Vector3.Angle(playerDir, transform.forward);
@@ -346,7 +377,11 @@ public class enemyAI : MonoBehaviour, IDamage
         RaycastHit hit;
         if (Physics.Raycast(transform.position, playerDir, out hit)) {
             if (hit.collider.CompareTag("Player") && angleToPlayer <= FOV) {
-                agent.SetDestination(gameManager.instance.player.transform.position);
+                if (!EnemyNavMeshSafety.TrySetDestination(
+                        agent,
+                        gameManager.instance.player.transform.position,
+                        NavMeshRecoveryRadius,
+                        Mathf.Max(1f, stoppingDistanceOrig))) { return false; }
                 rotateGun();
                 faceTarget();
                 if (shootTimer >= shootRate) {

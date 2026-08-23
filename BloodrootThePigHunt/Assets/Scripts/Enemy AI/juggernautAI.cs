@@ -12,6 +12,8 @@ using UnityEngine.AI;
 //==============================================================================================
 public class juggernautEnemyAI : MonoBehaviour, IDamage
 {
+    private const float NavMeshRecoveryRadius = 6f;
+
     //==========================================================================================
     // Declare Variables
     //==========================================================================================
@@ -52,18 +54,24 @@ public class juggernautEnemyAI : MonoBehaviour, IDamage
     // Function, Start
     //==========================================================================================
     protected virtual void Start() {
+        if (agent == null) { agent = GetComponent<NavMeshAgent>(); }
         stoppingDistanceOrig = stoppingDistance;
         animator = GetComponentInChildren<Animator>();
         //isUnalived = false;
         manager = FindAnyObjectByType<waveManager>();
         startingPos = transform.position;
-        agent.updateRotation = false;
+        if (agent != null) { agent.updateRotation = false; }
         ApplyBloodMoonModifier();
     }
     //==========================================================================================
     // Function, Roam
     //==========================================================================================
     protected virtual void checkRoam() {
+        if (!EnemyNavMeshSafety.TryRecover(
+                agent,
+                transform.position,
+                NavMeshRecoveryRadius)) { return; }
+
         if (agent.remainingDistance < 0.01f) {
             roamTimer += Time.deltaTime;
             if (roamTimer > roamPauseTime) { roam(); }
@@ -73,14 +81,20 @@ public class juggernautEnemyAI : MonoBehaviour, IDamage
     // Function, Roam
     //==========================================================================================
     protected virtual void roam() {
+        if (!EnemyNavMeshSafety.TryRecover(
+                agent,
+                transform.position,
+                NavMeshRecoveryRadius)) { return; }
+
         roamTimer = 0;
         agent.stoppingDistance = 0;
         Vector3 ranPos = Random.insideUnitSphere * roamDist;
         ranPos += startingPos;
-        NavMeshHit hit;
-        if (NavMesh.SamplePosition(ranPos, out hit, roamDist, 1)) {
-            agent.SetDestination(hit.position);
-        }
+        EnemyNavMeshSafety.TrySetDestination(
+            agent,
+            ranPos,
+            NavMeshRecoveryRadius,
+            Mathf.Max(0.1f, roamDist));
     }
     //==========================================================================================
     // Function, ApplyBloodMoonModifier
@@ -104,8 +118,19 @@ public class juggernautEnemyAI : MonoBehaviour, IDamage
     //==========================================================================================
     protected virtual void Update() {
         if (isDead) { return; }
-        if (animator != null) { animator.SetFloat("Speed", agent.velocity.magnitude); }
-        animator.SetFloat("Speed", agent.velocity.magnitude / agent.speed, 0.1f, Time.deltaTime);
+        if (!EnemyNavMeshSafety.TryRecover(
+                agent,
+                transform.position,
+                NavMeshRecoveryRadius)) { return; }
+
+        if (animator != null) {
+            animator.SetFloat("Speed", agent.velocity.magnitude);
+            animator.SetFloat(
+                "Speed",
+                agent.velocity.magnitude / Mathf.Max(0.01f, agent.speed),
+                0.1f,
+                Time.deltaTime);
+        }
         if (playerInTrigger) {
             if (canSeePlayer()) {
 
@@ -130,7 +155,7 @@ public class juggernautEnemyAI : MonoBehaviour, IDamage
     protected virtual void OnTriggerExit(Collider other) {
         if (other.CompareTag("Player")) {
             playerInTrigger = false;
-            agent.stoppingDistance = 0;
+            if (EnemyNavMeshSafety.IsReady(agent)) { agent.stoppingDistance = 0; }
         }
     }
     //==========================================================================================
@@ -200,9 +225,7 @@ public class juggernautEnemyAI : MonoBehaviour, IDamage
         foreach (Collider enemyCollider in GetComponentsInChildren<Collider>()) {
             enemyCollider.enabled = false;
         }
-        if (agent != null && agent.isOnNavMesh) {
-            agent.isStopped = true;
-        }
+        EnemyNavMeshSafety.Stop(agent);
         // This reduces enemiesRemaining and allows the
         // WaveManager to start the following wave.
         if (manager == null) {
@@ -269,6 +292,13 @@ public class juggernautEnemyAI : MonoBehaviour, IDamage
     //==========================================================================================
     protected virtual bool canSeePlayer()
     {
+        if (!EnemyNavMeshSafety.TryRecover(
+                agent,
+                transform.position,
+                NavMeshRecoveryRadius) ||
+            gameManager.instance == null ||
+            gameManager.instance.player == null) { return false; }
+
         shootTimer += Time.deltaTime;
         playerDir = gameManager.instance.player.transform.position - transform.position;
         float distToPlayer = playerDir.magnitude;
@@ -291,18 +321,26 @@ public class juggernautEnemyAI : MonoBehaviour, IDamage
                     Quaternion flankOffset = Quaternion.Euler(0, 30f, 0);
                     Vector3 flankedDir = flankOffset * dirToPlayer;
                     Vector3 stopPoint = gameManager.instance.player.transform.position - flankedDir * stoppingDistanceOrig;
-                    agent.SetDestination(stopPoint);
+                    if (!EnemyNavMeshSafety.TrySetDestination(
+                            agent,
+                            stopPoint,
+                            NavMeshRecoveryRadius,
+                            Mathf.Max(1f, stoppingDistanceOrig))) { return false; }
                 }
                 else if (distToPlayer < stoppingDistanceOrig * 0.9f)
                 {
                     // too close: back away to hold range
                     Vector3 retreatPoint = transform.position - dirToPlayer * (stoppingDistanceOrig - distToPlayer);
-                    agent.SetDestination(retreatPoint);
+                    if (!EnemyNavMeshSafety.TrySetDestination(
+                            agent,
+                            retreatPoint,
+                            NavMeshRecoveryRadius,
+                            Mathf.Max(1f, stoppingDistanceOrig))) { return false; }
                 }
                 else
                 {
                     // right in the pocket: hold still
-                    agent.ResetPath();
+                    EnemyNavMeshSafety.Stop(agent);
                 }
 
                 if (shootTimer >= shootRate)

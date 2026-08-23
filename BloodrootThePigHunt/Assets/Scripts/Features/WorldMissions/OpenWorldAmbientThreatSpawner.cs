@@ -37,8 +37,6 @@ namespace Bloodroot.Features.WorldMissions
     [DisallowMultipleComponent]
     public sealed class OpenWorldAmbientThreatSpawner : MonoBehaviour
     {
-        private const int WalkableAreaMask = 1;
-
         [Header("Recurring Population")]
         [SerializeField] private Transform runtimeContainer;
         [SerializeField] private OpenWorldAmbientEnemySpawnDefinition[] spawns =
@@ -221,16 +219,13 @@ namespace Bloodroot.Features.WorldMissions
                     continue;
                 }
 
-                NavMeshAgent prefabAgent = spawn.EnemyPrefab
-                    .GetComponentInChildren<NavMeshAgent>(true);
-                int areaMask = prefabAgent != null
-                    ? prefabAgent.areaMask & WalkableAreaMask
-                    : 0;
-                if (areaMask == 0 || !NavMesh.SamplePosition(
-                        spawn.SpawnPoint.position,
-                        out NavMeshHit sampledPosition,
-                        navMeshSampleRadius,
-                        areaMask))
+                if (!CampaignSafetyEnemyRuntimeAdapter
+                        .TryResolveGroundedSpawnPosition(
+                            spawn.EnemyPrefab,
+                            spawn.SpawnPoint.position,
+                            navMeshSampleRadius,
+                            out NavMeshHit sampledPosition,
+                            out _))
                 {
                     continue;
                 }
@@ -260,19 +255,12 @@ namespace Bloodroot.Features.WorldMissions
                     runtimeContainer);
                 instance.name = spawn.EnemyPrefab.name + " (Ambient Threat)";
 
-                if (!CampaignSafetyEnemyRuntimeAdapter.TryGetExactAllowedController(
-                        instance,
-                        out Component controller,
-                        out _) ||
-                    !CampaignSafetyEnemyRuntimeAdapter.TryPrepare(
-                        instance,
-                        out _) ||
-                    !CampaignSafetyEnemyRuntimeAdapter.TryGetAgent(
-                        instance,
-                        out NavMeshAgent agent,
-                        out _) ||
-                    (!agent.isOnNavMesh &&
-                     (!agent.Warp(sampledPosition.position) || !agent.isOnNavMesh)) ||
+                if (!CampaignSafetyEnemyRuntimeAdapter
+                        .TryPrepareGroundedSpawn(
+                            instance,
+                            sampledPosition,
+                            out Component controller,
+                            out _) ||
                     !CampaignSafetyEnemyRuntimeAdapter.TryInitialize(
                         controller,
                         difficultyLevel,

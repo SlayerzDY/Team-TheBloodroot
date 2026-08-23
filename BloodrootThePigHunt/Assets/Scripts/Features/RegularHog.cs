@@ -3,6 +3,8 @@ using UnityEngine.AI;
 
 public class RegularHog : MonoBehaviour, IDamage
 {
+    private const float NavMeshRecoveryRadius = 6f;
+
     [SerializeField, Min(1)] int HP = 2;
     [SerializeField, Min(0f)] float moveSpeed = 3f;
     [SerializeField, Min(1f)] float wanderRadius = 10f;
@@ -87,9 +89,11 @@ public class RegularHog : MonoBehaviour, IDamage
         if (agent == null)
             return;
 
-        if (!agent.isOnNavMesh)
+        if (!EnemyNavMeshSafety.TryRecover(
+                agent,
+                transform.position,
+                NavMeshRecoveryRadius))
         {
-            PlaceOnNavMesh();
             return;
         }
 
@@ -149,10 +153,7 @@ public class RegularHog : MonoBehaviour, IDamage
         isDead = true;
         PlayDeathSound();
 
-        if (agent != null && agent.isOnNavMesh)
-        {
-            agent.isStopped = true;
-        }
+        EnemyNavMeshSafety.Stop(agent);
 
         if (manager == null)
         {
@@ -191,19 +192,12 @@ public class RegularHog : MonoBehaviour, IDamage
         }
     }
 
-    private void PlaceOnNavMesh()
+    private bool PlaceOnNavMesh()
     {
-        if (agent == null)
-            return;
-
-        if (NavMesh.SamplePosition(
-                transform.position,
-                out NavMeshHit hit,
-                8f,
-                NavMesh.AllAreas))
-        {
-            agent.Warp(hit.position);
-        }
+        return EnemyNavMeshSafety.TryRecover(
+            agent,
+            transform.position,
+            NavMeshRecoveryRadius);
     }
 
     private void PickNewDestination()
@@ -213,23 +207,17 @@ public class RegularHog : MonoBehaviour, IDamage
                 directionChangeTime * 0.75f,
                 directionChangeTime * 1.25f);
 
-        if (agent == null || !agent.isOnNavMesh)
-            return;
-
         Vector3 direction =
             GetDirectionAwayFromPlayer();
 
         Vector3 targetPosition =
             transform.position + direction * wanderRadius;
 
-        if (NavMesh.SamplePosition(
-                targetPosition,
-                out NavMeshHit hit,
-                wanderRadius,
-                NavMesh.AllAreas))
-        {
-            agent.SetDestination(hit.position);
-        }
+        EnemyNavMeshSafety.TrySetDestination(
+            agent,
+            targetPosition,
+            NavMeshRecoveryRadius,
+            wanderRadius);
     }
 
     private Vector3 GetDirectionAwayFromPlayer()
@@ -283,7 +271,7 @@ public class RegularHog : MonoBehaviour, IDamage
         if (audioSource == null ||
             movingSounds == null ||
             movingSounds.Length == 0 ||
-            agent == null ||
+            !EnemyNavMeshSafety.IsReady(agent) ||
             agent.velocity.sqrMagnitude < 0.05f)
         {
             return;
