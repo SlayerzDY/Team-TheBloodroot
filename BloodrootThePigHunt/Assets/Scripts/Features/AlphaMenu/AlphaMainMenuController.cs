@@ -257,6 +257,7 @@ namespace Bloodroot.Features.AlphaMenu
 
             string targetScene = GetContinueTarget(state.Current);
             BeginSceneLoad(targetScene);
+            gameManager.instance.Load();
         }
 
         public void ShowOptions()

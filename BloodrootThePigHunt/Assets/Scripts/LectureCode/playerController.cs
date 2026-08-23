@@ -105,6 +105,8 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             movement();
             useFlashlight();
             if (Input.GetKeyDown(KeyCode.K)) { LoadTestScene(); }
+            if (Input.GetKeyDown(KeyCode.F5)) { gameManager.instance.Save(); }
+            if (Input.GetKeyDown(KeyCode.F9)) { gameManager.instance.Load(); }
         }
         sprint();
         if (isSprinting) { StaminaReduction(stamReduction); } else { if (stam <= stamOrig) { StaminaRegen(); }}
@@ -725,6 +727,17 @@ void selectGun()
         if (gunInv != null) {
             if (gunInv.Count > 0) {
                 changeGun();
+            }
+        }
+        Inventory playerInv = this.GetComponent<Inventory>();
+        if (playerInv == null) { return; }
+        if (playerInv.inventoryItems[0].itemName == null) { return; }
+        for (int i = 0; i < playerInv.inventoryItems.Length; i++) {
+            if (playerInv.inventoryItems == null) { continue; }
+            if (playerInv.inventoryItems[i] == null) { continue; } 
+            if (playerInv.inventoryItems[i].itemName == null) { continue; }
+            if (playerInv.inventoryItems[i].itemName == "Radar") {
+                gameManager.instance.ActivateRadar(true);
             }
         }
     }
