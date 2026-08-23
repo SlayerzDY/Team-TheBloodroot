@@ -379,7 +379,7 @@ namespace Bloodroot.Features.WorldMissions
                 }
                 catch (UnityException exception)
                 {
-
+                    exception = exception;
                     return false;
                 }
 

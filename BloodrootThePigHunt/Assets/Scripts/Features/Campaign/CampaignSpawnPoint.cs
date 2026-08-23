@@ -100,9 +100,11 @@ namespace Bloodroot.Campaign
                     characterController.enabled = false;
                 }
 
-                player.SetPositionAndRotation(
-                    destination.position,
-                    destination.rotation);
+                //player.SetPositionAndRotation(
+                //    destination.position,
+                //    destination.rotation);
+                BypassAndCompleteHandoff();
+
             }
             catch (Exception exception)
             {
@@ -162,6 +164,17 @@ namespace Bloodroot.Campaign
             destinationId = destinationId?.Trim() ?? string.Empty;
             playerTag = playerTag?.Trim() ?? string.Empty;
             playerLookupTimeout = Mathf.Max(0f, playerLookupTimeout);
+        }
+
+        // To cleanly bypass placement while still satisfying CampaignStateService:
+        public bool BypassAndCompleteHandoff()
+        {
+            CampaignStateService stateService = CampaignStateService.Instance;
+            if (stateService != null && stateService.HasPendingSpawn(gameObject.scene.name, destinationId))
+            {
+                return stateService.CompletePendingSpawn(gameObject.scene.name, destinationId);
+            }
+            return false;
         }
 
     }

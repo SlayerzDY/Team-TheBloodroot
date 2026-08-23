@@ -16,15 +16,15 @@ namespace Bloodroot.Campaign
         {
             if (callback == null)
                 return;
+            callback.Invoke();
+            //try
+            //{
 
-            try
-            {
-                callback.Invoke();
-            }
-            catch (Exception exception)
-            {
+            //}
+            //catch (Exception exception)
+            //{
 
-            }
+            //}
         }
 
         public static void Invoke<T>(
@@ -34,15 +34,15 @@ namespace Bloodroot.Campaign
         {
             if (callback == null)
                 return;
+            callback.Invoke(argument);
+            //try
+            //{
 
-            try
-            {
-                callback.Invoke(argument);
-            }
-            catch (Exception exception)
-            {
+            //}
+            //catch (Exception exception)
+            //{
 
-            }
+            //}
         }
 
         public static void Invoke(Action callback, UnityEngine.Object context)
@@ -52,14 +52,15 @@ namespace Bloodroot.Campaign
 
             foreach (Action listener in callback.GetInvocationList())
             {
-                try
-                {
-                    listener.Invoke();
-                }
-                catch (Exception exception)
-                {
+                listener.Invoke();
+                //try
+                //{
 
-                }
+                //}
+                //catch (Exception exception)
+                //{
+
+                //}
             }
         }
 
@@ -73,14 +74,15 @@ namespace Bloodroot.Campaign
 
             foreach (Action<T> listener in callback.GetInvocationList())
             {
-                try
-                {
-                    listener.Invoke(argument);
-                }
-                catch (Exception exception)
-                {
+                listener.Invoke(argument);
+                //try
+                //{
 
-                }
+                //}
+                //catch (Exception exception)
+                //{
+
+                //}
             }
         }
 
@@ -95,14 +97,15 @@ namespace Bloodroot.Campaign
 
             foreach (Action<T1, T2> listener in callback.GetInvocationList())
             {
-                try
-                {
-                    listener.Invoke(first, second);
-                }
-                catch (Exception exception)
-                {
+                listener.Invoke(first, second);
+                //try
+                //{
 
-                }
+                //}
+                //catch (Exception exception)
+                //{
+
+                //}
             }
         }
 
@@ -119,14 +122,15 @@ namespace Bloodroot.Campaign
             foreach (Action<T1, T2, T3> listener in
                      callback.GetInvocationList())
             {
-                try
-                {
-                    listener.Invoke(first, second, third);
-                }
-                catch (Exception exception)
-                {
+                listener.Invoke(first, second, third);
+                //try
+                //{
 
-                }
+                //}
+                //catch (Exception exception)
+                //{
+
+                //}
             }
         }
     }
