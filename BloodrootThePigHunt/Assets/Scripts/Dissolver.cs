@@ -46,7 +46,9 @@ public class Dissolver : MonoBehaviour
     //==========================================================================================
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start() {
-        colorOrig = model.material.color;
+        colorOrig = model != null && model.sharedMaterial != null
+            ? model.sharedMaterial.color
+            : Color.white;
         if (dissolveMaterial != null)
         {
             localDissolveMat = new Material(dissolveMaterial);
@@ -64,10 +66,13 @@ public class Dissolver : MonoBehaviour
     // Function, dissolve
     //==========================================================================================
     public IEnumerator dissolve(bool playerDeath = false) {
+        if (localDissolveMat == null) { yield break; }
         flashToken++;
         Renderer[] allRenderers = GetComponentsInChildren<Renderer>();
         for (int i = 0; i < allRenderers.Length; i++) {
-            allRenderers[i].sharedMaterial = localDissolveMat;
+            if (allRenderers[i] != null) {
+                allRenderers[i].sharedMaterial = localDissolveMat;
+            }
         }
         float elapsedTime = 0;
         localDissolveMat.SetColor("_Color", colorOrig);
@@ -83,9 +88,11 @@ public class Dissolver : MonoBehaviour
     // Function, dissolve return
     //==========================================================================================
     public IEnumerator dissolveReturn(bool playerDeath = false) {
+        if (localDissolveMat == null) { yield break; }
         Renderer[] allRenderers = GetComponentsInChildren<Renderer>();
         Material[][] originalMaterials = new Material[allRenderers.Length][];
         for (int i = 0; i < allRenderers.Length; i++) {
+            if (allRenderers[i] == null) { continue; }
             originalMaterials[i] = allRenderers[i].sharedMaterials;
             Material[] dissolveSetup = new Material[originalMaterials[i].Length];
             for (int j = 0; j < dissolveSetup.Length; j++) {
@@ -98,7 +105,9 @@ public class Dissolver : MonoBehaviour
             yield break;
         }
         for (int i = 0; i < allRenderers.Length; i++) {
-            allRenderers[i].sharedMaterial = localDissolveMat;
+            if (allRenderers[i] != null) {
+                allRenderers[i].sharedMaterial = localDissolveMat;
+            }
         }
         float elapsedTime = 0;
         localDissolveMat.SetColor("_Color", colorOrig);
@@ -109,9 +118,12 @@ public class Dissolver : MonoBehaviour
             yield return null;
         }
         dissolveStrength = 0f;
-        // Restore the original materials back
+        // A child mesh may be despawned while the coroutine yields. Unity then
+        // reports it as a fake null, so do not restore materials through it.
         for (int i = 0; i < allRenderers.Length; i++) {
-            allRenderers[i].sharedMaterials = originalMaterials[i];
+            if (allRenderers[i] != null && originalMaterials[i] != null) {
+                allRenderers[i].sharedMaterials = originalMaterials[i];
+            }
             localDissolveMat.SetFloat("_DissolveStrength", dissolveStrength);
         }
     }
@@ -119,13 +131,22 @@ public class Dissolver : MonoBehaviour
     // Function, dissolveFlash
     //==========================================================================================
     public IEnumerator dissolveFlash(bool playerDeath = false) {
-        if (flashToken > 0) { yield break; }
+        if (localDissolveMat == null || flashToken > 0) { yield break; }
         flashToken++;
-        float cacheflashEndStrength = gameManager.instance.player.GetComponent<Dissolver>().flashEndStrength;
-        if (playerDeath) { gameManager.instance.player.GetComponent<Dissolver>().flashEndStrength = 1f; }
+        Dissolver playerDissolver = gameManager.instance != null &&
+            gameManager.instance.player != null
+            ? gameManager.instance.player.GetComponent<Dissolver>()
+            : null;
+        float cacheflashEndStrength = playerDissolver != null
+            ? playerDissolver.flashEndStrength
+            : flashEndStrength;
+        if (playerDeath && playerDissolver != null) {
+            playerDissolver.flashEndStrength = 1f;
+        }
         Renderer[] allRenderers = GetComponentsInChildren<Renderer>();
         Material[][] originalMaterials = new Material[allRenderers.Length][];
         for (int i = 0; i < allRenderers.Length; i++) {
+            if (allRenderers[i] == null) { continue; }
             originalMaterials[i] = allRenderers[i].sharedMaterials;
             Material[] dissolveSetup = new Material[originalMaterials[i].Length];
             for (int j = 0; j < dissolveSetup.Length; j++) {
@@ -152,11 +173,16 @@ public class Dissolver : MonoBehaviour
         }
         dissolveStrength = 0f;
         localDissolveMat.SetFloat("_DissolveStrength", dissolveStrength);
-        // Restore the original materials back
+        // A renderer can be destroyed during either flash loop; skip it rather
+        // than dereferencing the stale Unity object at the end of the effect.
         for (int i = 0; i < allRenderers.Length; i++) {
-            allRenderers[i].sharedMaterials = originalMaterials[i];
+            if (allRenderers[i] != null && originalMaterials[i] != null) {
+                allRenderers[i].sharedMaterials = originalMaterials[i];
+            }
         }
-        gameManager.instance.player.GetComponent<Dissolver>().flashEndStrength = cacheflashEndStrength;
+        if (playerDissolver != null) {
+            playerDissolver.flashEndStrength = cacheflashEndStrength;
+        }
         flashToken = 0;
     }
     //==========================================================================================

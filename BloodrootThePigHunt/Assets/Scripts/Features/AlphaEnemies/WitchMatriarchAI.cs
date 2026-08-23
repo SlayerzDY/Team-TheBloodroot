@@ -158,6 +158,7 @@ namespace Bloodroot.Features.AlphaEnemies
                 pulseTarget,
                 damage,
                 pulseRadius);
+            RaiseCombatAudioCue(WitchCombatAudioCue.HeartrootPulse);
             nextPulseAt = Time.time + pulseCooldown;
         }
 

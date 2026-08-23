@@ -46,6 +46,7 @@ public class gameManager : MonoBehaviour
 
     [Header("Other Stuf That Needs Sorted")]
     [SerializeField] public ItemDatabase itemDatabase;
+    [SerializeField] public WeaponDatabase weaponDatabase;
     public GameObject menuInteractable;
     // Public Variables
     public GameObject checkpointPopup;
@@ -572,18 +573,24 @@ public class gameManager : MonoBehaviour
     {
         // Pull the saved data from Save System
         GameData loadedData = SaveSystem.LoadGame();
-        //if (loadedData == null) { Debug.Log("No save data to load!"); return; }
+        if (loadedData == null) { Debug.Log("No save data to load!"); return; }
         // Get live references
-        playerController player = gameManager.instance.player.GetComponent<playerController>();
-        Inventory playerInv = gameManager.instance.player.GetComponent<Inventory>();
-        ItemDatabase itemDatabase = gameManager.instance.itemDatabase;
+        gameManager manager = gameManager.instance;
+        if (manager == null || manager.player == null)
+        {
+            Debug.Log("Missing gameManager or Player!");
+            return;
+        }
+
+        playerController player = manager.player.GetComponent<playerController>();
+        Inventory playerInv = manager.player.GetComponent<Inventory>();
+        ItemDatabase itemDatabase = manager.itemDatabase;
         //Debug.Log($"player: {player}, playerInv: {playerInv}, itemDatabase: {itemDatabase}");
         if (player == null || playerInv == null || itemDatabase == null) { Debug.Log("Missing Player, Inventory, or ItemDatabase!"); return; }
         // Apply saved stats back to the player
         player.HP = loadedData._savHP;
         player.stam = loadedData._savstam;
         player.hasFlashlight = loadedData._savhasFlashlight;
-        player.gunInvPos = loadedData._savgunInvPos;
         playerInv.inventoryWeight = loadedData._savinventoryWeight;
         // Apply position
         //if (loadedData._savplayerPosition != null && loadedData._savplayerPosition.Length >= 3)
@@ -622,9 +629,25 @@ public class gameManager : MonoBehaviour
         }
         if (loadedData._savgunInv != null)
         {
-            player.gunInv = new List<gunStats>(loadedData._savgunInv);
+            if (SafetyWeaponSaveUtility.TryRestoreRuntimeInventory(
+                    loadedData._savgunInv,
+                    loadedData._savgunInvPos,
+                    weaponDatabase,
+                    out List<gunStats> restoredGuns,
+                    out int restoredGunSelection,
+                    out string gunRestoreError))
+            {
+                player.gunInv = restoredGuns;
+                player.gunInvPos = restoredGunSelection;
+            }
+            else
+            {
+                Debug.LogError(
+                    "Saved weapons could not be restored: " +
+                    gunRestoreError);
+            }
         }
-        Debug.Log("Game loaded successfully!");
+        //Debug.Log("Game loaded successfully!");
     }
     public void OpenLevelForGameManager(string levelName)
     {

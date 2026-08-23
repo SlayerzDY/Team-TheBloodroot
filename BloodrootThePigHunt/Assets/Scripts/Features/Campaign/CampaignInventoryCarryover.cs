@@ -104,6 +104,11 @@ namespace Bloodroot.Campaign
         // new captures normalize both prefab forms to the Leather binding.
         private const string LegacySafetyPickupMasterStableItemId =
             "item_pickup_master";
+        // Safety-native items outside the authored campaign catalog retain
+        // their own durable ItemStats.itemID. The prefix keeps that namespace
+        // distinct from campaign-owned stable IDs in the context checkpoint.
+        private const string NativeSafetyInventoryItemIdPrefix =
+            "safety_native/";
 
         [SerializeField] private CampaignInventoryItemBinding[] itemCatalog =
             Array.Empty<CampaignInventoryItemBinding>();
@@ -992,25 +997,25 @@ namespace Bloodroot.Campaign
                 }
 
                 if (item.stackSize <= 0 || item.quantity > item.stackSize ||
-                    !TryFindStableInventoryBindingForItem(
+                    !TryResolveStableInventoryItem(
                         item,
-                        out CampaignInventoryItemBinding binding))
+                        out string checkpointItemId,
+                        out ItemStats definition))
                 {
                     error =
                         $"Inventory slot {slot} contains unsupported or invalid item '{item.itemName}'.";
                     return false;
                 }
 
-                ItemStats definition = binding.ItemData;
                 if (definition == null || definition.stackSize <= 0 ||
                     item.quantity > definition.stackSize)
                 {
                     error =
-                        $"Inventory slot {slot} cannot be reconstructed from stable item '{binding.ItemId}'.";
+                        $"Inventory slot {slot} cannot be reconstructed from stable item '{checkpointItemId}'.";
                     return false;
                 }
 
-                itemIds[slot] = binding.ItemId;
+                itemIds[slot] = checkpointItemId;
                 quantities[slot] = item.quantity;
                 expectedWeight += definition.weight;
             }
@@ -1103,16 +1108,15 @@ namespace Bloodroot.Campaign
                 if (itemId.Length == 0)
                     continue;
 
-                if (!TryFindStableInventoryBindingById(
+                if (!TryResolveStableCheckpointItem(
                         itemId,
-                        out CampaignInventoryItemBinding binding))
+                        out ItemStats definition))
                 {
                     error =
-                        $"Stable Safety inventory item ID '{itemId}' is not in the authored catalog.";
+                        $"Stable Safety inventory item ID '{itemId}' is not in the authored catalog or active Safety ItemDatabase.";
                     return false;
                 }
 
-                ItemStats definition = binding.ItemData;
                 if (definition == null || quantity <= 0 ||
                     quantity > definition.stackSize)
                 {
@@ -1254,6 +1258,97 @@ namespace Bloodroot.Campaign
 
             binding = null;
             return false;
+        }
+
+        private bool TryResolveStableInventoryItem(
+            ItemStats item,
+            out string checkpointItemId,
+            out ItemStats definition)
+        {
+            checkpointItemId = string.Empty;
+            definition = null;
+            if (item == null)
+                return false;
+
+            if (TryFindStableInventoryBindingForItem(
+                    item,
+                    out CampaignInventoryItemBinding binding))
+            {
+                checkpointItemId = binding.ItemId;
+                definition = binding.ItemData;
+                return true;
+            }
+
+            string serializedItemId = item.itemID?.Trim() ?? string.Empty;
+            if (!TryResolveNativeSafetyItemDefinition(
+                    serializedItemId,
+                    out definition) ||
+                !HaveSameStableItemFingerprint(item, definition))
+            {
+                definition = null;
+                return false;
+            }
+
+            checkpointItemId = NativeSafetyInventoryItemIdPrefix +
+                               serializedItemId;
+            return true;
+        }
+
+        private bool TryResolveStableCheckpointItem(
+            string checkpointItemId,
+            out ItemStats definition)
+        {
+            definition = null;
+            if (TryFindStableInventoryBindingById(
+                    checkpointItemId,
+                    out CampaignInventoryItemBinding binding))
+            {
+                definition = binding.ItemData;
+                return definition != null;
+            }
+
+            string candidate = checkpointItemId?.Trim() ?? string.Empty;
+            if (!candidate.StartsWith(
+                    NativeSafetyInventoryItemIdPrefix,
+                    StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            return TryResolveNativeSafetyItemDefinition(
+                candidate.Substring(NativeSafetyInventoryItemIdPrefix.Length),
+                out definition);
+        }
+
+        private bool TryResolveNativeSafetyItemDefinition(
+            string serializedItemId,
+            out ItemStats definition)
+        {
+            definition = null;
+            string candidate = serializedItemId?.Trim() ?? string.Empty;
+            if (candidate.Length == 0)
+                return false;
+
+            ItemDatabase itemDatabase = gameManager.instance?.itemDatabase;
+            ItemStats registered = itemDatabase?.GetByID(candidate);
+            if (registered == null ||
+                !string.Equals(
+                    registered.itemID?.Trim(),
+                    candidate,
+                    StringComparison.Ordinal) ||
+                string.IsNullOrWhiteSpace(registered.itemName) ||
+                registered.quantity <= 0 || registered.stackSize <= 0 ||
+                registered.weight < 0f ||
+                // Campaign-owned tokens must stay on their explicit stable
+                // binding path; a crafted native namespace entry must not
+                // bypass their campaign semantics.
+                TryFindStableInventoryBindingForItem(registered, out _))
+            {
+                return false;
+            }
+
+            definition = registered;
+            return true;
         }
 
         private IEnumerable<CampaignInventoryItemBinding>
@@ -2716,16 +2811,16 @@ namespace Bloodroot.Campaign
                     continue;
                 }
 
-                if (!TryFindStableInventoryBindingForItem(
+                if (!TryResolveStableInventoryItem(
                         item,
-                        out CampaignInventoryItemBinding binding))
+                        out _,
+                        out ItemStats definition))
                 {
                     error =
-                        $"Safety inventory item '{itemName}' is not in the authored stable catalog.";
+                        $"Safety inventory item '{itemName}' is not in the authored stable catalog or active Safety ItemDatabase.";
                     return false;
                 }
 
-                ItemStats definition = binding.ItemData;
                 if (definition == null || definition.stackSize <= 0 ||
                     item.quantity > definition.stackSize)
                 {
@@ -3004,16 +3099,16 @@ namespace Bloodroot.Campaign
                     }
 
                     if (item.quantity > item.stackSize ||
-                        !TryFindStableInventoryBindingForItem(
+                        !TryResolveStableInventoryItem(
                             item,
-                            out CampaignInventoryItemBinding binding))
+                            out _,
+                            out ItemStats definition))
                     {
                         error =
                             $"Inventory slot {sourceIndex} contains an unsupported or invalid stable item.";
                         return false;
                     }
 
-                    ItemStats definition = binding.ItemData;
                     ItemStats desiredItem =
                         CampaignInventoryTokenUtility.CloneItemStats(
                             definition,
@@ -3269,16 +3364,27 @@ namespace Bloodroot.Campaign
             controller.hasFlashlight = loadedData._savhasFlashlight;
             if (applyGuns)
             {
-                controller.gunInv = loadedData._savgunInv != null
-                    ? new List<gunStats>(loadedData._savgunInv)
-                    : new List<gunStats>();
-                controller.gunInv.RemoveAll(gun => gun == null);
-                controller.gunInvPos = controller.gunInv.Count > 0
-                    ? Mathf.Clamp(
+                WeaponDatabase weaponDatabase =
+                    gameManager.instance != null
+                        ? gameManager.instance.weaponDatabase
+                        : null;
+                if (SafetyWeaponSaveUtility.TryRestoreRuntimeInventory(
+                        loadedData._savgunInv,
                         loadedData._savgunInvPos,
-                        0,
-                        controller.gunInv.Count - 1)
-                    : 0;
+                        weaponDatabase,
+                        out List<gunStats> restoredGuns,
+                        out int restoredGunSelection,
+                        out string gunRestoreError))
+                {
+                    controller.gunInv = restoredGuns;
+                    controller.gunInvPos = restoredGunSelection;
+                }
+                else
+                {
+                    Debug.LogError(
+                        "Safety F9 rollback could not restore its weapon " +
+                        "inventory: " + gunRestoreError);
+                }
             }
 
             if (applyPosition && loadedData._savplayerPosition != null &&
@@ -3952,7 +4058,7 @@ namespace Bloodroot.Campaign
             {
                 loadedData = SaveSystem.LoadGame() ?? new GameData();
                 loadedData._savInventory ??= Array.Empty<ItemSaveData>();
-                loadedData._savgunInv ??= new List<gunStats>();
+                loadedData._savgunInv ??= Array.Empty<WeaponSaveData>();
                 error = string.Empty;
                 return true;
             }
@@ -3985,7 +4091,7 @@ namespace Bloodroot.Campaign
                 }
 
                 GameData data = SaveSystem.LoadGame() ?? new GameData();
-                data._savgunInv = new List<gunStats>();
+                data._savgunInv = Array.Empty<WeaponSaveData>();
                 data._savgunInvPos = 0;
                 SaveSystem.SaveGame(data);
                 error = string.Empty;

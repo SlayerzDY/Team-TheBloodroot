@@ -707,7 +707,11 @@ void selectGun()
             gunInvPos++;
             changeGun();
         }
+<<<<<<< HEAD
+        else if (Input.GetAxis("Mouse ScrollWheel") > 0 && gunInvPos >= 0)
+=======
         else if (Input.GetAxis("Mouse ScrollWheel") < 0f && gunInvPos > 0)
+>>>>>>> 84e6e51fb04617fdd6f4f9d3fdd33e9fd0460f5e
         {
             gunInvPos--;
             changeGun();
