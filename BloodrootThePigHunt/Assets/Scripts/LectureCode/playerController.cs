@@ -722,6 +722,11 @@ void selectGun()
         HP = HPOrig;
         updatePlayerAmmo();
         updatePlayerUI();
+        if (gunInv != null) {
+            if (gunInv.Count > 0) {
+                changeGun();
+            }
+        }
     }
     //==========================================================================================
     // Function, Test Remove Item
