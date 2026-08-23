@@ -786,9 +786,9 @@ void selectGun()
     //==========================================================================================
     public void UpdateUpgradedStats(string statType = "all")
     {
-        if (statType == "all" || statType == "Health" || statType == "HP") { HP = Mathf.RoundToInt(HPOrig * healthMultiplier); }
+        if (statType == "all" || statType == "Health" || statType == "HP") { HPOrig = Mathf.RoundToInt(HPOrig * healthMultiplier); HP = HPOrig; }
 
-        if (statType == "all" || statType == "Stamina") { stam = stamOrig * staminaMultiplier;}
+        if (statType == "all" || statType == "Stamina") { stamOrig = stamOrig * staminaMultiplier; stam = stamOrig; }
     }
 
 }
