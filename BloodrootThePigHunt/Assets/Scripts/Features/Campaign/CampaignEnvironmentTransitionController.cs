@@ -487,9 +487,7 @@ namespace Bloodroot.Campaign
         {
             if (!ValidateRuntimeContract(out string problem))
             {
-                Debug.LogError(
-                    "Campaign environment configuration is invalid: " + problem,
-                    this);
+
                 enabled = false;
                 return;
             }

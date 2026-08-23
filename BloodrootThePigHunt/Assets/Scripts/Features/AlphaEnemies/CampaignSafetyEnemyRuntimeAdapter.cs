@@ -18,6 +18,12 @@ namespace Bloodroot.Features.AlphaEnemies
         private const BindingFlags SafetyMethodFlags =
             BindingFlags.Instance | BindingFlags.NonPublic;
         private const int WalkableAreaMask = 1;
+        private const float MinimumNavMeshSampleRadius = 0.01f;
+        private const float GroundProbeStartHeight = 4f;
+        private const float GroundProbeDistance = 8f;
+        private const float MaximumGroundVerticalGap = 0.15f;
+        private const float MaximumGroundSurfaceAboveNavMesh = 0.05f;
+        private const float MinimumGroundNormalY = 0.15f;
 
         private static readonly FieldInfo BoarStartingPositionField =
             typeof(global::enemyAI).GetField(
@@ -262,6 +268,199 @@ namespace Bloodroot.Features.AlphaEnemies
             return true;
         }
 
+        /// <summary>
+        /// Resolves an authored spawn marker to a point that is compatible with
+        /// the exact enemy agent and physically supported by a non-trigger
+        /// collider. NavMesh alone is not sufficient: a baked surface without
+        /// ground under it is rejected so enemies cannot appear in the air or
+        /// below terrain.
+        /// </summary>
+        public static bool TryResolveGroundedSpawnPosition(
+            GameObject enemyPrefabOrInstance,
+            Vector3 requestedPosition,
+            float navMeshSampleRadius,
+            out NavMeshHit groundedPosition,
+            out string error)
+        {
+            groundedPosition = default;
+            if (enemyPrefabOrInstance == null ||
+                !IsFinite(requestedPosition))
+            {
+                error = "A grounded campaign spawn requires a finite enemy and marker position.";
+                return false;
+            }
+
+            if (!IsFinite(navMeshSampleRadius) ||
+                navMeshSampleRadius < MinimumNavMeshSampleRadius)
+            {
+                error = "A grounded campaign spawn requires a positive NavMesh sample radius.";
+                return false;
+            }
+
+            if (!TryGetExactAllowedController(
+                    enemyPrefabOrInstance,
+                    out Component controller,
+                    out error) ||
+                !TryResolveSingletonComponents(
+                    controller,
+                    out NavMeshAgent agent,
+                    out _,
+                    out error))
+            {
+                return false;
+            }
+
+            int areaMask = agent.areaMask & WalkableAreaMask;
+            if (areaMask == 0)
+            {
+                error =
+                    $"'{enemyPrefabOrInstance.name}' cannot use the authored Walkable NavMesh area.";
+                return false;
+            }
+
+            NavMeshQueryFilter queryFilter = new NavMeshQueryFilter
+            {
+                agentTypeID = agent.agentTypeID,
+                areaMask = areaMask
+            };
+            if (!NavMesh.SamplePosition(
+                    requestedPosition,
+                    out groundedPosition,
+                    navMeshSampleRadius,
+                    queryFilter) ||
+                !IsFinite(groundedPosition.position))
+            {
+                error =
+                    $"'{enemyPrefabOrInstance.name}' has no compatible baked NavMesh within {navMeshSampleRadius:0.##}m of its spawn marker.";
+                return false;
+            }
+
+            if (!TryValidateSolidGround(
+                    groundedPosition.position,
+                    null,
+                    out error))
+            {
+                error =
+                    $"'{enemyPrefabOrInstance.name}' resolved to an unsupported NavMesh point. {error}";
+                return false;
+            }
+
+            error = string.Empty;
+            return true;
+        }
+
+        /// <summary>
+        /// Binds a freshly instantiated campaign enemy to an already validated
+        /// grounded NavMesh point before its AI is enabled. The helper fails
+        /// closed when the root agent cannot warp onto the exact supported
+        /// location.
+        /// </summary>
+        public static bool TryPrepareGroundedSpawn(
+            GameObject spawnedEnemy,
+            NavMeshHit groundedPosition,
+            out Component controller,
+            out string error)
+        {
+            controller = null;
+            if (spawnedEnemy == null ||
+                !IsFinite(groundedPosition.position))
+            {
+                error = "A grounded campaign spawn requires a finite live enemy and NavMesh position.";
+                return false;
+            }
+
+            if (!TryGetExactAllowedController(
+                    spawnedEnemy,
+                    out controller,
+                    out error) ||
+                !TryResolveSingletonComponents(
+                    controller,
+                    out NavMeshAgent agent,
+                    out Animator animator,
+                    out error))
+            {
+                controller = null;
+                return false;
+            }
+
+            if (!TryValidateSolidGround(
+                    groundedPosition.position,
+                    spawnedEnemy.transform,
+                    out error))
+            {
+                controller = null;
+                return false;
+            }
+
+            Behaviour controllerBehaviour = controller as Behaviour;
+            if (controllerBehaviour == null)
+            {
+                error =
+                    $"'{spawnedEnemy.name}' has no enabled-behaviour campaign controller.";
+                controller = null;
+                return false;
+            }
+
+            try
+            {
+                // An instantiated Safety prefab can arrive with its AI already
+                // enabled. Freeze it before touching the agent so no Update can
+                // call SetDestination between creation and the validated warp.
+                controllerBehaviour.enabled = false;
+                if (IsExactRawScreecherController(controller))
+                {
+                    global::ScreecherAI screecher =
+                        controller.GetComponent<global::ScreecherAI>();
+                    if (screecher != null)
+                    {
+                        screecher.enabled = false;
+                    }
+                }
+
+                agent.enabled = true;
+                animator.enabled = true;
+                if (!spawnedEnemy.activeInHierarchy ||
+                    !agent.isActiveAndEnabled || !animator.isActiveAndEnabled)
+                {
+                    error =
+                        $"'{spawnedEnemy.name}' could not activate its root agent and Animator for grounded placement.";
+                    controller = null;
+                    return false;
+                }
+
+                spawnedEnemy.transform.position = groundedPosition.position;
+                if (!agent.Warp(groundedPosition.position) ||
+                    !agent.isOnNavMesh)
+                {
+                    error =
+                        $"'{spawnedEnemy.name}' could not bind its active root NavMeshAgent to the validated ground point.";
+                    controller = null;
+                    return false;
+                }
+            }
+            catch (Exception exception)
+            {
+                error =
+                    $"Could not place '{spawnedEnemy.name}' on its grounded NavMesh point: {exception.Message}";
+                controller = null;
+                return false;
+            }
+
+            if (!TryPrepare(spawnedEnemy, out error) ||
+                !TryGetAgent(spawnedEnemy, out agent, out error) ||
+                !agent.isOnNavMesh)
+            {
+                error = string.IsNullOrWhiteSpace(error)
+                    ? $"'{spawnedEnemy.name}' lost its root NavMeshAgent binding during preparation."
+                    : error;
+                controller = null;
+                return false;
+            }
+
+            error = string.Empty;
+            return true;
+        }
+
         public static bool TryPrepare(
             GameObject spawnedEnemy,
             out string error)
@@ -384,6 +583,11 @@ namespace Bloodroot.Features.AlphaEnemies
                 return false;
             }
 
+            if (!TryRequireActiveAgentOnNavMesh(controller, out error))
+            {
+                return false;
+            }
+
             try
             {
                 if (controller is global::enemyAI boar)
@@ -423,6 +627,11 @@ namespace Bloodroot.Features.AlphaEnemies
             if (!IsExactAllowedController(controller))
             {
                 error = "Only an approved campaign enemy can be alerted.";
+                return false;
+            }
+
+            if (!TryRequireActiveAgentOnNavMesh(controller, out error))
+            {
                 return false;
             }
 
@@ -468,6 +677,102 @@ namespace Bloodroot.Features.AlphaEnemies
         private static bool IsIntField(FieldInfo field)
         {
             return field != null && field.FieldType == typeof(int);
+        }
+
+        private static bool TryRequireActiveAgentOnNavMesh(
+            Component controller,
+            out string error)
+        {
+            error = string.Empty;
+            if (!TryResolveSingletonComponents(
+                    controller,
+                    out NavMeshAgent agent,
+                    out _,
+                    out error))
+            {
+                return false;
+            }
+
+            if (!agent.isActiveAndEnabled || !agent.isOnNavMesh)
+            {
+                error =
+                    $"'{controller.name}' requires an active NavMeshAgent that is placed on the NavMesh before it can act.";
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool TryValidateSolidGround(
+            Vector3 navMeshPosition,
+            Transform ignoredRoot,
+            out string error)
+        {
+            error = string.Empty;
+            if (!IsFinite(navMeshPosition))
+            {
+                error = "The NavMesh point is not finite.";
+                return false;
+            }
+
+            Vector3 rayOrigin = navMeshPosition +
+                                Vector3.up * GroundProbeStartHeight;
+            RaycastHit[] hits = Physics.RaycastAll(
+                rayOrigin,
+                Vector3.down,
+                GroundProbeDistance,
+                Physics.DefaultRaycastLayers,
+                QueryTriggerInteraction.Ignore);
+            float nearestVerticalGap = float.PositiveInfinity;
+            Collider supportingCollider = null;
+            for (int index = 0; index < hits.Length; index++)
+            {
+                RaycastHit hit = hits[index];
+                Collider collider = hit.collider;
+                if (collider == null || !collider.enabled ||
+                    collider.isTrigger ||
+                    !collider.gameObject.activeInHierarchy ||
+                    (ignoredRoot != null &&
+                     (collider.transform == ignoredRoot ||
+                      collider.transform.IsChildOf(ignoredRoot))) ||
+                    hit.normal.y < MinimumGroundNormalY ||
+                    !IsFinite(hit.point))
+                {
+                    continue;
+                }
+
+                float verticalGap = Mathf.Abs(hit.point.y - navMeshPosition.y);
+                if (hit.point.y > navMeshPosition.y +
+                    MaximumGroundSurfaceAboveNavMesh ||
+                    verticalGap > MaximumGroundVerticalGap ||
+                    verticalGap >= nearestVerticalGap)
+                {
+                    continue;
+                }
+
+                nearestVerticalGap = verticalGap;
+                supportingCollider = collider;
+            }
+
+            if (supportingCollider == null)
+            {
+                error =
+                    $"No solid ground collider exists directly beneath the NavMesh point within {MaximumGroundVerticalGap:0.##}m.";
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool IsFinite(float value)
+        {
+            return !float.IsNaN(value) && !float.IsInfinity(value);
+        }
+
+        private static bool IsFinite(Vector3 value)
+        {
+            return IsFinite(value.x) && IsFinite(value.y) &&
+                   IsFinite(value.z);
         }
 
         private static bool TryBindSpawnedComponents(

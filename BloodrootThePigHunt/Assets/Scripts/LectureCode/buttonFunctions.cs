@@ -31,7 +31,7 @@ public class buttonFunctions : MonoBehaviour {
 
         if (manager == null)
         {
-            Debug.LogError("Respawn requires the authored GameManager.");
+
             return;
         }
 
@@ -42,7 +42,7 @@ public class buttonFunctions : MonoBehaviour {
 
         if (manager.playerController == null)
         {
-            Debug.LogError("Respawn requires the authored player controller.");
+
             return;
         }
         gameManager.instance.Save();
@@ -57,6 +57,7 @@ public class buttonFunctions : MonoBehaviour {
 
     public void ReturnToMainMenu()
     {
+        gameManager.instance.Save();
         OpenLevel("MainMenu");
     }
 
@@ -70,7 +71,7 @@ public class buttonFunctions : MonoBehaviour {
 
         if (manager == null)
         {
-            Debug.LogError("Respawn requires the authored GameManager.");
+
             return;
         }
 
@@ -81,7 +82,7 @@ public class buttonFunctions : MonoBehaviour {
 
         if (manager.playerController == null)
         {
-            Debug.LogError("Respawn requires the authored player controller.");
+
             return;
         }
         if (gameManager.instance != null)
@@ -94,10 +95,10 @@ public class buttonFunctions : MonoBehaviour {
 
         gameManager.instance.Save();
         OpenLevelHub("Farm_PrologueHub");
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-        manager.playerController.spawnPlayer();
-        manager.NotifyPlayerRespawned();
-        manager.stateUnpause();
+        //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        //manager.playerController.spawnPlayer();
+        //manager.NotifyPlayerRespawned();
+        //manager.stateUnpause();
     }
 
     //==========================================================================================
@@ -142,7 +143,7 @@ public class buttonFunctions : MonoBehaviour {
             playerController controller = gameManager.instance.player.GetComponent<playerController>();
             if (controller == null) { return; }
             controller.LoadLevel(levelName);
-            gameManager.instance.checkpoint("PlayerSpawnPosBlackPines");
+            gameManager.instance.checkpoint("PlayerSpawnPos");
     }
     //==========================================================================================
     // Function, Open Level
@@ -152,7 +153,7 @@ public class buttonFunctions : MonoBehaviour {
             playerController controller = gameManager.instance.player.GetComponent<playerController>();
             if (controller == null) { return; }
             controller.LoadLevel(levelName);
-        gameManager.instance.checkpoint("PlayerSpawnPosStillwater");
+        gameManager.instance.checkpoint("PlayerSpawnPos");
     }
     //==========================================================================================
     // Function, Open Level
@@ -162,7 +163,7 @@ public class buttonFunctions : MonoBehaviour {
             playerController controller = gameManager.instance.player.GetComponent<playerController>();
             if (controller == null) { return; }
             controller.LoadLevel(levelName);
-        gameManager.instance.checkpoint("PlayerSpawnPosHarrowEstate");
+        gameManager.instance.checkpoint("PlayerSpawnPos");
     }
     //==========================================================================================
     // Function, Open Level
@@ -172,7 +173,7 @@ public class buttonFunctions : MonoBehaviour {
             playerController controller = gameManager.instance.player.GetComponent<playerController>();
             if (controller == null) { return; }
             controller.LoadLevel(levelName);
-        gameManager.instance.checkpoint("PlayerSpawnPosBloodRootHollow");
+        gameManager.instance.checkpoint("PlayerSpawnPos");
     }
     //==========================================================================================
     // Function, Open Level

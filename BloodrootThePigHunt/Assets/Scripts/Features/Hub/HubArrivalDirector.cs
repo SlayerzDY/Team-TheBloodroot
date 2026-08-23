@@ -291,7 +291,7 @@ namespace Bloodroot.Features.Hub
         private void Fail(string reason)
         {
             string safeReason = reason ?? string.Empty;
-            Debug.LogError(safeReason, this);
+
             HubEventUtility.Invoke(ArrivalFailed, safeReason, this);
             HubEventUtility.Invoke(arrivalFailed, safeReason, this);
         }

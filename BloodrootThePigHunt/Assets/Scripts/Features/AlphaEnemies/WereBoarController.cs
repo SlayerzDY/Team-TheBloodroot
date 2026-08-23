@@ -10,6 +10,8 @@ namespace Bloodroot.Features.AlphaEnemies
     [RequireComponent(typeof(NavMeshAgent))]
     public sealed class WereBoarController : MonoBehaviour, global::IDamage
     {
+        private const float MinimumNavMeshRecoveryRadius = 6f;
+
         [Header("Required Runtime References")]
         [SerializeField] private NavMeshAgent agent;
         [SerializeField] private Transform target;
@@ -17,7 +19,7 @@ namespace Bloodroot.Features.AlphaEnemies
         [SerializeField] private bool resolveTargetFromGameManager = true;
 
         [Header("Vitals")]
-        [SerializeField, Min(1)] private int baseMaxHealth = 360;
+        [SerializeField, Min(1)] private int baseMaxHealth = 1;
         [SerializeField, Min(0)] private int baseRushDamage = 45;
         [SerializeField, Min(0f)] private float deathDestroyDelay = 4f;
 
@@ -171,7 +173,7 @@ namespace Bloodroot.Features.AlphaEnemies
                 if (!targetWarningIssued)
                 {
                     targetWarningIssued = true;
-                    Debug.LogWarning($"{name}: WereBoarController requires a live target before it can patrol or attack.", this);
+
                 }
 
                 FailClosed();
@@ -179,11 +181,14 @@ namespace Bloodroot.Features.AlphaEnemies
             }
 
             targetWarningIssued = false;
-            bool canNavigate = CanNavigate();
+            bool canNavigate = EnemyNavMeshSafety.TryRecover(
+                agent,
+                transform.position,
+                Mathf.Max(MinimumNavMeshRecoveryRadius, navMeshSampleRadius));
             if (!canNavigate && !navMeshWarningIssued)
             {
                 navMeshWarningIssued = true;
-                Debug.LogWarning($"{name}: WereBoarController requires an active NavMeshAgent placed on a baked NavMesh.", this);
+
             }
 
             if (!canNavigate)
@@ -680,18 +685,11 @@ namespace Bloodroot.Features.AlphaEnemies
 
         private bool TrySetDestination(Vector3 desiredPosition)
         {
-            if (!CanNavigate())
-            {
-                return false;
-            }
-
-            if (!NavMesh.SamplePosition(desiredPosition, out NavMeshHit hit, navMeshSampleRadius, agent.areaMask))
-            {
-                return false;
-            }
-
-            agent.isStopped = false;
-            return agent.SetDestination(hit.position);
+            return EnemyNavMeshSafety.TrySetDestination(
+                agent,
+                desiredPosition,
+                Mathf.Max(MinimumNavMeshRecoveryRadius, navMeshSampleRadius),
+                navMeshSampleRadius);
         }
 
         private bool HasReachedDestination()
@@ -711,7 +709,7 @@ namespace Bloodroot.Features.AlphaEnemies
 
         private bool CanNavigate()
         {
-            return agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh;
+            return EnemyNavMeshSafety.IsReady(agent);
         }
 
         private void FailClosed()
@@ -726,8 +724,7 @@ namespace Bloodroot.Features.AlphaEnemies
 
             if (CanNavigate())
             {
-                agent.isStopped = true;
-                agent.ResetPath();
+                EnemyNavMeshSafety.Stop(agent);
             }
 
             if (!isDead && state != WereBoarState.Patrol)
@@ -841,8 +838,13 @@ namespace Bloodroot.Features.AlphaEnemies
             float oldMaximum = Mathf.Max(1, scaledMaxHealth);
             float oldRatio = currentHealth > 0 ? currentHealth / oldMaximum : 1f;
             int levelOffset = Mathf.Max(0, difficultyLevel - 1);
-            scaledMaxHealth = Mathf.Max(1, Mathf.RoundToInt(
-                baseMaxHealth * healthScalar * (1f + healthPerLevel * levelOffset)));
+            // Preserve the authored one-health beta test value even when a
+            // difficulty scalar is supplied by a spawner.
+            scaledMaxHealth = baseMaxHealth <= 1
+                ? 1
+                : Mathf.Max(1, Mathf.RoundToInt(
+                    baseMaxHealth * healthScalar *
+                    (1f + healthPerLevel * levelOffset)));
             scaledRushDamage = Mathf.Max(0, Mathf.RoundToInt(
                 baseRushDamage * damageScalar * (1f + damagePerLevel * levelOffset)));
             scaledSpeedMultiplier = Mathf.Max(0.01f,
@@ -882,8 +884,7 @@ namespace Bloodroot.Features.AlphaEnemies
             SetState(WereBoarState.Dead);
             if (CanNavigate())
             {
-                agent.isStopped = true;
-                agent.ResetPath();
+                EnemyNavMeshSafety.Stop(agent);
             }
 
             SetCollidersEnabled(false);

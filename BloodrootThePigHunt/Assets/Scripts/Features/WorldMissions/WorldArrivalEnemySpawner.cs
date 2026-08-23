@@ -40,8 +40,6 @@ namespace Bloodroot.Features.WorldMissions
     [RequireComponent(typeof(BoxCollider))]
     public sealed class WorldArrivalEnemySpawner : MonoBehaviour
     {
-        private const int WalkableAreaMask = 1;
-
         [Header("Arrival Trigger")]
         [SerializeField] private Collider arrivalTrigger;
         [SerializeField] private string playerTag = "Player";
@@ -162,7 +160,7 @@ namespace Bloodroot.Features.WorldMissions
                         out string alertError))
                 {
                     activeControllers.RemoveAt(index);
-                    Debug.LogWarning(alertError, this);
+
                 }
             }
         }
@@ -210,27 +208,17 @@ namespace Bloodroot.Features.WorldMissions
             for (int index = 0; index < spawns.Length; index++)
             {
                 WorldArrivalEnemySpawnDefinition spawn = spawns[index];
-                NavMeshAgent prefabAgent = spawn.EnemyPrefab
-                    .GetComponentInChildren<NavMeshAgent>(true);
-                int areaMask = prefabAgent != null
-                    ? prefabAgent.areaMask & WalkableAreaMask
-                    : 0;
-                if (areaMask == 0)
+                if (!CampaignSafetyEnemyRuntimeAdapter
+                        .TryResolveGroundedSpawnPosition(
+                            spawn.EnemyPrefab,
+                            spawn.SpawnPoint.position,
+                            navMeshSampleRadius,
+                            out resolved[index],
+                            out string groundError))
                 {
                     return Reject(
-                        $"Arrival enemy '{spawn.EnemyPrefab.name}' cannot use " +
-                        "the authored Walkable NavMesh area.");
-                }
-
-                if (!NavMesh.SamplePosition(
-                        spawn.SpawnPoint.position,
-                        out resolved[index],
-                        navMeshSampleRadius,
-                        areaMask))
-                {
-                    return Reject(
-                        $"Arrival enemy point '{spawn.SpawnPoint.name}' is not " +
-                        $"within {navMeshSampleRadius:0.##}m of the baked NavMesh.");
+                        $"Arrival enemy point '{spawn.SpawnPoint.name}' was " +
+                        $"rejected by grounded NavMesh validation. {groundError}");
                 }
             }
 
@@ -256,37 +244,14 @@ namespace Bloodroot.Features.WorldMissions
                     created.Add(instance);
 
                     if (!CampaignSafetyEnemyRuntimeAdapter
-                            .TryGetExactAllowedController(
+                            .TryPrepareGroundedSpawn(
                                 instance,
+                                resolved[index],
                                 out Component controller,
-                                out string controllerError))
-                    {
-                        throw new InvalidOperationException(controllerError);
-                    }
-
-                    if (!CampaignSafetyEnemyRuntimeAdapter.TryPrepare(
-                            instance,
-                            out string compatibilityError))
+                                out string placementError))
                     {
                         throw new InvalidOperationException(
-                            compatibilityError);
-                    }
-
-                    if (!CampaignSafetyEnemyRuntimeAdapter.TryGetAgent(
-                            instance,
-                            out NavMeshAgent agent,
-                            out string agentError))
-                    {
-                        throw new InvalidOperationException(agentError);
-                    }
-
-                    if (!agent.isOnNavMesh &&
-                        (!agent.Warp(resolved[index].position) ||
-                         !agent.isOnNavMesh))
-                    {
-                        throw new InvalidOperationException(
-                            $"Spawned enemy '{instance.name}' could not bind " +
-                            "to the baked NavMesh.");
+                            placementError);
                     }
 
                     if (!CampaignSafetyEnemyRuntimeAdapter.TryInitialize(
@@ -504,11 +469,6 @@ namespace Bloodroot.Features.WorldMissions
             string normalized = string.IsNullOrWhiteSpace(reason)
                 ? "Arrival enemy spawning was rejected."
                 : reason;
-            if (!string.Equals(lastFailure, normalized, StringComparison.Ordinal))
-            {
-                Debug.LogError(normalized, this);
-            }
-
             lastFailure = normalized;
             return false;
         }
@@ -544,34 +504,5 @@ namespace Bloodroot.Features.WorldMissions
             return local.z >= -(box.size.z * 0.5f);
         }
 
-        private void OnDrawGizmosSelected()
-        {
-            Collider trigger = arrivalTrigger != null
-                ? arrivalTrigger
-                : GetComponent<BoxCollider>();
-            if (trigger is BoxCollider box)
-            {
-                Gizmos.color = new Color(1f, 0.75f, 0.1f, 0.75f);
-                Matrix4x4 previous = Gizmos.matrix;
-                Gizmos.matrix = box.transform.localToWorldMatrix;
-                Gizmos.DrawWireCube(box.center, box.size);
-                Gizmos.matrix = previous;
-            }
-
-            if (spawns == null)
-                return;
-
-            Gizmos.color = new Color(0.9f, 0.1f, 0.1f, 0.9f);
-            foreach (WorldArrivalEnemySpawnDefinition spawn in spawns)
-            {
-                if (spawn?.SpawnPoint != null)
-                {
-                    Gizmos.DrawWireSphere(spawn.SpawnPoint.position, 0.75f);
-                    Gizmos.DrawRay(
-                        spawn.SpawnPoint.position,
-                        spawn.SpawnPoint.forward * 2f);
-                }
-            }
-        }
     }
 }

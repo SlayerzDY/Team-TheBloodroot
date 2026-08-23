@@ -41,14 +41,15 @@ namespace Bloodroot.Features.Hub
 
             foreach (Action listener in callback.GetInvocationList())
             {
-                try
-                {
-                    listener.Invoke();
-                }
-                catch (Exception exception)
-                {
-                    Debug.LogException(exception, context);
-                }
+                listener.Invoke();
+                //try
+                //{
+
+                //}
+                //catch (Exception exception)
+                //{
+
+                //}
             }
         }
 
@@ -62,14 +63,15 @@ namespace Bloodroot.Features.Hub
 
             foreach (Action<T> listener in callback.GetInvocationList())
             {
-                try
-                {
-                    listener.Invoke(value);
-                }
-                catch (Exception exception)
-                {
-                    Debug.LogException(exception, context);
-                }
+                listener.Invoke(value);
+                //try
+                //{
+
+                //}
+                //catch (Exception exception)
+                //{
+
+                //}
             }
         }
 
@@ -85,14 +87,15 @@ namespace Bloodroot.Features.Hub
             foreach (Action<T1, T2> listener in
                      callback.GetInvocationList())
             {
-                try
-                {
-                    listener.Invoke(first, second);
-                }
-                catch (Exception exception)
-                {
-                    Debug.LogException(exception, context);
-                }
+                listener.Invoke(first, second);
+                //try
+                //{
+
+                //}
+                //catch (Exception exception)
+                //{
+
+                //}
             }
         }
 
@@ -109,14 +112,15 @@ namespace Bloodroot.Features.Hub
             foreach (Action<T1, T2, T3> listener in
                      callback.GetInvocationList())
             {
-                try
-                {
-                    listener.Invoke(first, second, third);
-                }
-                catch (Exception exception)
-                {
-                    Debug.LogException(exception, context);
-                }
+                listener.Invoke(first, second, third);
+                //try
+                //{
+
+                //}
+                //catch (Exception exception)
+                //{
+
+                //}
             }
         }
 
@@ -126,15 +130,15 @@ namespace Bloodroot.Features.Hub
         {
             if (callback == null)
                 return;
+            callback.Invoke();
+            //try
+            //{
 
-            try
-            {
-                callback.Invoke();
-            }
-            catch (Exception exception)
-            {
-                Debug.LogException(exception, context);
-            }
+            //}
+            //catch (Exception exception)
+            //{
+
+            //}
         }
 
         public static void Invoke<T>(
@@ -144,15 +148,15 @@ namespace Bloodroot.Features.Hub
         {
             if (callback == null)
                 return;
+            callback.Invoke(value);
+            //try
+            //{
 
-            try
-            {
-                callback.Invoke(value);
-            }
-            catch (Exception exception)
-            {
-                Debug.LogException(exception, context);
-            }
+            //}
+            //catch (Exception exception)
+            //{
+
+            //}
         }
 
         public static void Invoke<T1, T2>(
@@ -163,15 +167,15 @@ namespace Bloodroot.Features.Hub
         {
             if (callback == null)
                 return;
+            callback.Invoke(first, second);
+            //try
+            //{
 
-            try
-            {
-                callback.Invoke(first, second);
-            }
-            catch (Exception exception)
-            {
-                Debug.LogException(exception, context);
-            }
+            //}
+            //catch (Exception exception)
+            //{
+
+            //}
         }
 
         public static void Invoke<T1, T2, T3>(
@@ -183,15 +187,15 @@ namespace Bloodroot.Features.Hub
         {
             if (callback == null)
                 return;
+            callback.Invoke(first, second, third);
+            //try
+            //{
 
-            try
-            {
-                callback.Invoke(first, second, third);
-            }
-            catch (Exception exception)
-            {
-                Debug.LogException(exception, context);
-            }
+            //}
+            //catch (Exception exception)
+            //{
+
+            //}
         }
     }
 }

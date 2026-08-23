@@ -12,11 +12,7 @@ namespace Bloodroot.Campaign
     }
 
     /// <summary>
-    /// Campaign-owned Root Tree interaction. It offers the prologue cursed
-    /// object first, then Esther, Ruth, Naomi, and Nell in story order. The
-    /// protected Tree scripts are presentation assets only; all identity,
-    /// inventory recovery, and emergence obligations are durable campaign
-    /// state.
+    /// Campaign-owned Root Tree interaction for the prologue cursed object.
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Collider))]
@@ -28,11 +24,7 @@ namespace Bloodroot.Campaign
 
         private static readonly string[] OrderedOfferingIds =
         {
-            CampaignRootOfferingIds.PrologueCursedObject,
-            CampaignNameStoneIds.Esther,
-            CampaignNameStoneIds.Ruth,
-            CampaignNameStoneIds.Naomi,
-            CampaignNameStoneIds.Nell
+            CampaignRootOfferingIds.PrologueCursedObject
         };
 
         [Header("Campaign Authority")]
@@ -46,9 +38,9 @@ namespace Bloodroot.Campaign
         [SerializeField] private Collider interactionCollider;
 
         [Header("Authored Offered-Object Presentation")]
-        [Tooltip("Order: prologue object, Esther, Ruth, Naomi, Nell.")]
+        [Tooltip("The prologue cursed-object presentation.")]
         [SerializeField] private GameObject[] offeredObjectVisuals =
-            new GameObject[5];
+            new GameObject[1];
 
         [Header("Reload Reconciliation")]
         [SerializeField, Min(0f)] private float initialReconcileDelay = 0.75f;
@@ -113,7 +105,7 @@ namespace Bloodroot.Campaign
             initialReconcileDelay = Mathf.Max(0f, initialReconcileDelay);
             reconcileAttempts = Mathf.Max(1, reconcileAttempts);
             reconcileRetryDelay = Mathf.Max(0.05f, reconcileRetryDelay);
-            offeredObjectVisuals ??= new GameObject[5];
+            offeredObjectVisuals ??= new GameObject[1];
             if (interactionCollider == null)
                 interactionCollider = GetComponent<Collider>();
         }
@@ -130,7 +122,10 @@ namespace Bloodroot.Campaign
             inventoryCarryover = carryover;
             cursedItemPickupObject = authoredCursedItemPickup;
             playerInventory = inventory;
-            offeredObjectVisuals = offeringVisuals ?? new GameObject[5];
+            offeredObjectVisuals = offeringVisuals != null &&
+                                  offeringVisuals.Length > 0
+                ? new[] { offeringVisuals[0] }
+                : new GameObject[1];
             if (interactionCollider == null)
                 interactionCollider = GetComponent<Collider>();
             BindStateService();
@@ -148,13 +143,12 @@ namespace Bloodroot.Campaign
             GameObject authoredCursedItemPickup,
             global::Inventory inventory,
             global::TreeRootInteraction protectedTreePresentation,
-            GameObject[] nameStoneVisuals)
+            GameObject[] legacyVisuals)
         {
-            var migratedVisuals = new GameObject[5];
-            if (nameStoneVisuals != null)
+            var migratedVisuals = new GameObject[1];
+            if (legacyVisuals != null && legacyVisuals.Length > 0)
             {
-                int count = Mathf.Min(4, nameStoneVisuals.Length);
-                Array.Copy(nameStoneVisuals, 0, migratedVisuals, 1, count);
+                migratedVisuals[0] = legacyVisuals[0];
             }
 
             Configure(
@@ -219,14 +213,6 @@ namespace Bloodroot.Campaign
                     out string dependencyError))
             {
                 return Reject(dependencyError);
-            }
-
-            if (!carryover.TryReconcileExtractedNameStoneTokens(
-                    cursedItemPickupObject,
-                    inventory))
-            {
-                return Reject(
-                    "Extracted cursed-object inventory could not be reconciled safely.");
             }
 
             string offeringId = FindNextOfferableOfferingId(state);
@@ -299,7 +285,7 @@ namespace Bloodroot.Campaign
             }
             catch (Exception exception)
             {
-                Debug.LogException(exception, this);
+
                 return Reject(
                     "An unexpected error interrupted the cursed-object offering; durable recovery will retry it.");
             }
@@ -442,7 +428,7 @@ namespace Bloodroot.Campaign
             }
             catch (Exception exception)
             {
-                Debug.LogException(exception, this);
+
                 return Reject(
                     $"Pending cursed object '{offeringId}' could not be reconciled.");
             }
@@ -768,29 +754,6 @@ namespace Bloodroot.Campaign
                 return 0;
 
             int expected = 0;
-            if (!string.Equals(
-                    pendingOfferingId,
-                    CampaignRootOfferingIds.PrologueCursedObject,
-                    StringComparison.Ordinal) &&
-                state.PrologueCursedObjectRevealed &&
-                !state.PrologueCursedObjectOffered)
-            {
-                expected++;
-            }
-
-            foreach (string stoneId in CampaignNameStoneIds.All)
-            {
-                if (!string.Equals(
-                        stoneId,
-                        pendingOfferingId,
-                        StringComparison.Ordinal) &&
-                    state.IsNameStoneExtracted(stoneId) &&
-                    !state.IsNameStoneOffered(stoneId))
-                {
-                    expected++;
-                }
-            }
-
             return expected;
         }
 
@@ -840,15 +803,10 @@ namespace Bloodroot.Campaign
             if (state == null)
                 return false;
 
-            if (string.Equals(
-                    offeringId,
-                    CampaignRootOfferingIds.PrologueCursedObject,
-                    StringComparison.Ordinal))
-            {
-                return state.PrologueCursedObjectRevealed;
-            }
-
-            return state.IsNameStoneExtracted(offeringId);
+            return string.Equals(
+                offeringId,
+                CampaignRootOfferingIds.PrologueCursedObject,
+                StringComparison.Ordinal) && state.PrologueCursedObjectRevealed;
         }
 
         private static bool IsOfferingCommitted(
@@ -858,15 +816,10 @@ namespace Bloodroot.Campaign
             if (state == null)
                 return false;
 
-            if (string.Equals(
-                    offeringId,
-                    CampaignRootOfferingIds.PrologueCursedObject,
-                    StringComparison.Ordinal))
-            {
-                return state.PrologueCursedObjectOffered;
-            }
-
-            return state.IsNameStoneOffered(offeringId);
+            return string.Equals(
+                offeringId,
+                CampaignRootOfferingIds.PrologueCursedObject,
+                StringComparison.Ordinal) && state.PrologueCursedObjectOffered;
         }
 
         private static int GetItemQuantity(
@@ -943,7 +896,7 @@ namespace Bloodroot.Campaign
             lastFailureReason = string.IsNullOrWhiteSpace(reason)
                 ? "The Root Tree cannot accept that offering right now."
                 : reason.Trim();
-            Debug.LogWarning(lastFailureReason, this);
+
             CampaignEventUtility.Invoke(
                 offerRejected,
                 lastFailureReason,

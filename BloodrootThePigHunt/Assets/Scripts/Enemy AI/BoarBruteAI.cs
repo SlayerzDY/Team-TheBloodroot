@@ -31,6 +31,41 @@ public class BoarBruteAI : enemyAI
     float timer;
     private bool shouldUpdate;
 
+    private bool HasActiveAgentOnNavMesh()
+    {
+        return agent != null
+            && agent.enabled
+            && agent.isActiveAndEnabled
+            && agent.isOnNavMesh;
+    }
+
+    private bool TryRestoreAgentToNavMesh()
+    {
+        if (agent == null || !agent.gameObject.activeInHierarchy) { return false; }
+        if (HasActiveAgentOnNavMesh()) { return true; }
+
+        float recoveryRadius = Mathf.Max(
+            sampleTolerance,
+            Mathf.Abs(chargeSpeed) * Mathf.Max(chargeTime, 0f) + agent.radius);
+
+        if (!NavMesh.SamplePosition(transform.position, out NavMeshHit hit, recoveryRadius, agent.areaMask))
+        {
+            return false;
+        }
+
+        // The charge moves the transform manually while the agent is disabled.
+        // Re-enable only after placing the transform on a valid NavMesh point.
+        agent.enabled = false;
+        transform.position = hit.position;
+        agent.enabled = true;
+        return HasActiveAgentOnNavMesh();
+    }
+
+    private bool TrySetAgentDestination(Vector3 destination)
+    {
+        return HasActiveAgentOnNavMesh() && agent.SetDestination(destination);
+    }
+
     //==========================================================================================
     // Function Override, Start
     //==========================================================================================
@@ -43,6 +78,21 @@ public class BoarBruteAI : enemyAI
     // Function Override, Update
     //==========================================================================================
     protected override void Update() {
+        // enemyAI.Update reads agent state, so do not enter it while this boar is
+        // charging with its NavMeshAgent intentionally disabled.
+        if (charging)
+        {
+            if (gameManager.instance != null && gameManager.instance.player != null)
+            {
+                playerDir = gameManager.instance.player.transform.position - transform.position;
+            }
+
+            StartCharge();
+            return;
+        }
+
+        if (!TryRestoreAgentToNavMesh()) { return; }
+
         base.Update();
         if (playerInTrigger) { if (shouldUpdate) { StartCharge(); } } else { checkRoam(); }
     }
@@ -53,9 +103,10 @@ public class BoarBruteAI : enemyAI
         charging = false;
         timer = 0f;
         shouldUpdate = false;
-        if (agent != null) {
-            agent.enabled = true;
-            agent.Warp(transform.position);
+        if (!TryRestoreAgentToNavMesh())
+        {
+            shouldUpdate = true;
+            return;
         }
         if (runAwayRoutine != null) { StopCoroutine(runAwayRoutine); }
         runAwayRoutine = StartCoroutine(RunAwayInCircle());
@@ -69,7 +120,7 @@ public class BoarBruteAI : enemyAI
         startOffset.y = 0f;
         float startAngle = Mathf.Atan2(startOffset.z, startOffset.x);
         for (int i = 1; i < circlePoints; i++) {
-            if (agent == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh) { yield break; }
+            if (!HasActiveAgentOnNavMesh()) { yield break; }
             int rand = Random.Range(0, randomChanceComplete) + 1;
             if (rand <= 8) { continue; }
             playerPos = gameManager.instance.player.transform.position;
@@ -80,11 +131,9 @@ public class BoarBruteAI : enemyAI
             if (NavMesh.SamplePosition(candidatePoint, out NavMeshHit hit, sampleTolerance, NavMesh.AllAreas)) {
                 waypoint = hit.position;
             } else {
-                //Debug.Log($"Waypoint {i} sample FAILED at {candidatePoint}");
                 waypoint = transform.position;
             }
-            if (agent == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh) { yield break; }
-            agent.SetDestination(waypoint);
+            if (!TrySetAgentDestination(waypoint)) { yield break; }
             while (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh
                    && (agent.pathPending || agent.remainingDistance > waypointTolerance)) {
                 yield return null;
@@ -113,11 +162,24 @@ public class BoarBruteAI : enemyAI
     // Start Charge
     //==========================================================================================
     public virtual void StartCharge() {
+        if (isUnalived || gameManager.instance == null || gameManager.instance.player == null)
+        {
+            charging = false;
+            timer = 0f;
+            return;
+        }
+
         if (!charging) {
+            if (!TryRestoreAgentToNavMesh())
+            {
+                timer = 0f;
+                return;
+            }
+
             Vector3 dirToPlayer = gameManager.instance.player.transform.position - transform.position;
             dirToPlayer.y = 0f;
             if (dirToPlayer.sqrMagnitude > 0.0001f) { transform.forward = dirToPlayer.normalized; }
-            if (agent != null) { agent.enabled = false; }
+            agent.enabled = false;
         }
         charging = true;
         performCharge();
@@ -127,8 +189,8 @@ public class BoarBruteAI : enemyAI
     // Perform Charge
     //==========================================================================================
     protected virtual void performCharge() {
-        if (!charging && agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh) {
-            agent.SetDestination(gameManager.instance.player.transform.position);
+        if (!charging && gameManager.instance != null && gameManager.instance.player != null) {
+            TrySetAgentDestination(gameManager.instance.player.transform.position);
         }
         if (charging) {
             timer += Time.deltaTime;
@@ -136,19 +198,22 @@ public class BoarBruteAI : enemyAI
             if (timer >= chargeTime) {
                 charging = false;
                 timer = 0f;
-                if (agent != null) {
-                    agent.enabled = true;
-                    if (gameManager.instance != null && gameManager.instance.player != null) {
-                        agent.SetDestination(gameManager.instance.player.transform.position);
-                    }
+                if (!TryRestoreAgentToNavMesh())
+                {
+                    return;
+                }
+
+                if (gameManager.instance != null && gameManager.instance.player != null) {
+                    TrySetAgentDestination(gameManager.instance.player.transform.position);
                 }
             }
         }
         if (!charging) {
             chargeCooldownTimer += Time.deltaTime;
             if (chargeCooldownTimer >= chargeCooldown && playerDir.magnitude > meleeRange * 2f && !isUnalived) {
-                charging = true;
                 chargeCooldownTimer = 0f;
+                StartCharge();
+                return;
             }
         }
         if (isMelee) {
@@ -176,13 +241,13 @@ public class BoarBruteAI : enemyAI
         shootTimer += Time.deltaTime;
         playerDir = gameManager.instance.player.transform.position - transform.position;
         angleToPlayer = Vector3.Angle(playerDir, transform.forward);
-        Debug.DrawRay(transform.position, playerDir, Color.red);
+
         RaycastHit hit;
         if (Physics.Raycast(transform.position, playerDir, out hit))
         {
             if (hit.collider.CompareTag("Player") && angleToPlayer <= FOV)
             {
-                agent.SetDestination(gameManager.instance.player.transform.position);
+                if (!TrySetAgentDestination(gameManager.instance.player.transform.position)) { return false; }
                 rotateGun();
                 faceTarget();
                 if (shootTimer >= shootRate)
@@ -193,7 +258,7 @@ public class BoarBruteAI : enemyAI
                 return true;
             }
         }
-        agent.stoppingDistance = 0;
+        if (HasActiveAgentOnNavMesh()) { agent.stoppingDistance = 0; }
         return false;
     }
     //==========================================================================================

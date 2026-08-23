@@ -68,7 +68,7 @@ namespace Bloodroot.Campaign
             state.HasAllNameStonesOffered();
 
         public bool CanEnterHollow =>
-            state.harrowCompleted && state.HasAllNameStonesOffered();
+            state.harrowCompleted && state.hollowTowerActivated;
 
         public bool IsHeartrootCarried =>
             state.heartrootCarried && !state.heartrootBurned;
@@ -192,10 +192,7 @@ namespace Bloodroot.Campaign
                 if (!warnedAboutSafetyMenuContract)
                 {
                     warnedAboutSafetyMenuContract = true;
-                    Debug.LogWarning(
-                        "Campaign safety-menu compatibility is inactive because " +
-                        "the online safety gameManager menu contract changed.",
-                        this);
+
                 }
 
                 return;
@@ -367,11 +364,6 @@ namespace Bloodroot.Campaign
             state = loadResult.Data ?? CampaignSaveData.CreateNewGame();
             state.Normalize();
             allowSaveWrites = !loadResult.HasNewerUnsupportedVersion;
-
-            if (!string.IsNullOrEmpty(loadResult.Warning))
-            {
-                Debug.LogWarning(loadResult.Warning, this);
-            }
 
             if (allowSaveWrites &&
                 (loadResult.NeedsPrimaryRepair || !loadResult.FoundSave))
@@ -647,24 +639,15 @@ namespace Bloodroot.Campaign
                         legacy.Data,
                         out string migrationError))
                 {
-                    Debug.LogWarning(
-                        "Could not migrate the legacy campaign save to the " +
-                        $"current product folder: {migrationError}",
-                        this);
+
                     return;
                 }
 
-                Debug.Log(
-                    "Migrated the campaign save from the legacy product " +
-                    "folder without deleting the recovery source.",
-                    this);
+
             }
             catch (Exception exception)
             {
-                Debug.LogWarning(
-                    "Legacy campaign save migration was skipped: " +
-                    exception.Message,
-                    this);
+
             }
         }
 
@@ -686,7 +669,7 @@ namespace Bloodroot.Campaign
                 ? "A legacy campaign save was created by a newer game " +
                   "version. This version will not overwrite it."
                 : warning.Trim();
-            Debug.LogWarning(message, this);
+
 
             CampaignProgressSnapshot snapshot = state.Snapshot;
             CampaignEventUtility.Invoke(ProgressLoaded, snapshot, this);
@@ -717,7 +700,7 @@ namespace Bloodroot.Campaign
                 catch (Exception exception)
                 {
                     saved = false;
-                    Debug.LogException(exception, this);
+
                 }
 
                 if (!saved)
@@ -741,7 +724,7 @@ namespace Bloodroot.Campaign
 
             string messageWithPath =
                 $"Could not save campaign progress to '{SavePath}': {error}";
-            Debug.LogError(messageWithPath, this);
+
             CampaignEventUtility.Invoke(SaveFailed, messageWithPath, this);
             return false;
         }
@@ -1326,25 +1309,17 @@ namespace Bloodroot.Campaign
         }
 
         /// <summary>
-        /// Durably activates the final progression cylinder. The Nell stone
-        /// facts are hidden compatibility state for Safety's established
-        /// thorn-veil contract; no retired offering or emergence events are
-        /// emitted by this simplified campaign action.
+        /// Durably activates the final progression cylinder.
         /// </summary>
         public bool TryActivateHollowTower()
         {
-            bool alreadyActivated =
-                state.IsNameStoneOffered(CampaignNameStoneIds.Nell) &&
-                state.IsFarmEmergenceCompleted(CampaignNameStoneIds.Nell);
+            bool alreadyActivated = state.hollowTowerActivated;
             if (alreadyActivated)
                 return true;
 
             if (!state.harrowCompleted || !state.hollowUnlocked ||
                 state.hollowCompleted || state.heartrootCarried ||
-                state.heartrootBurned || state.campaignCompleted ||
-                !state.IsNameStoneOffered(CampaignNameStoneIds.Esther) ||
-                !state.IsNameStoneOffered(CampaignNameStoneIds.Ruth) ||
-                !state.IsNameStoneOffered(CampaignNameStoneIds.Naomi))
+                state.heartrootBurned || state.campaignCompleted)
             {
                 return false;
             }
@@ -1398,8 +1373,7 @@ namespace Bloodroot.Campaign
         }
 
         /// <summary>
-        /// Atomically records one canonical clue and, for the four authored
-        /// stone-bearing clues, its matching extracted Name Stone.
+        /// Atomically records one canonical clue.
         /// </summary>
         public bool TryRecordEvidence(
             string evidenceId,
@@ -1407,8 +1381,6 @@ namespace Bloodroot.Campaign
             string optionalNameStoneId = null)
         {
             string normalizedEvidenceId = evidenceId?.Trim() ?? string.Empty;
-            string normalizedStoneId =
-                optionalNameStoneId?.Trim() ?? string.Empty;
             if (!Enum.IsDefined(typeof(CampaignAreaId), area) ||
                 !CampaignEvidenceIds.TryGetArea(
                     normalizedEvidenceId,
@@ -1419,23 +1391,9 @@ namespace Bloodroot.Campaign
                 return false;
             }
 
-            string requiredStoneId =
-                CampaignEvidenceIds.RequiredNameStoneId(
-                    normalizedEvidenceId);
-            if (!string.Equals(
-                    normalizedStoneId,
-                    requiredStoneId,
-                    StringComparison.Ordinal))
-            {
-                return false;
-            }
-
             bool evidenceChanged =
                 !state.IsEvidenceCollected(normalizedEvidenceId);
-            bool stoneChanged = normalizedStoneId.Length > 0 &&
-                                !state.IsNameStoneExtracted(
-                                    normalizedStoneId);
-            if (!evidenceChanged && !stoneChanged)
+            if (!evidenceChanged)
             {
                 return false;
             }
@@ -1444,11 +1402,6 @@ namespace Bloodroot.Campaign
             if (evidenceChanged)
             {
                 state.TryAddEvidence(normalizedEvidenceId);
-            }
-
-            if (stoneChanged)
-            {
-                state.TryAddExtractedNameStone(normalizedStoneId);
             }
 
             if (!SaveNow())
@@ -1462,14 +1415,6 @@ namespace Bloodroot.Campaign
                 CampaignEventUtility.Invoke(
                     EvidenceCollected,
                     normalizedEvidenceId,
-                    this);
-            }
-
-            if (stoneChanged)
-            {
-                CampaignEventUtility.Invoke(
-                    NameStoneExtracted,
-                    normalizedStoneId,
                     this);
             }
 
@@ -1521,8 +1466,10 @@ namespace Bloodroot.Campaign
         public bool TryBeginRootOffering(string offeringId)
         {
             string id = offeringId?.Trim() ?? string.Empty;
-            if (!CampaignRootOfferingIds.IsCanonical(id) ||
-                CampaignNameStoneIds.IsCanonical(id) ||
+            if (!string.Equals(
+                    id,
+                    CampaignRootOfferingIds.PrologueCursedObject,
+                    StringComparison.Ordinal) ||
                 !string.IsNullOrEmpty(state.pendingRootOfferingId) ||
                 state.HasUnresolvedFarmEmergence() ||
                 state.IsRootOfferingCommitted(id))
@@ -1530,19 +1477,7 @@ namespace Bloodroot.Campaign
                 return false;
             }
 
-            bool isPrologueOffering = string.Equals(
-                id,
-                CampaignRootOfferingIds.PrologueCursedObject,
-                StringComparison.Ordinal);
-            if (isPrologueOffering)
-            {
-                if (!state.prologueCursedObjectRevealed ||
-                    state.prologueCompleted)
-                {
-                    return false;
-                }
-            }
-            else if (!state.IsNameStoneExtracted(id))
+            if (!state.prologueCursedObjectRevealed || state.prologueCompleted)
             {
                 return false;
             }
@@ -1556,13 +1491,6 @@ namespace Bloodroot.Campaign
             }
 
             CampaignEventUtility.Invoke(RootOfferingStarted, id, this);
-            if (CampaignNameStoneIds.IsCanonical(id))
-            {
-                CampaignEventUtility.Invoke(
-                    NameStoneOfferStarted,
-                    id,
-                    this);
-            }
 
             CampaignEventUtility.Invoke(
                 ProgressChanged,
@@ -1574,14 +1502,16 @@ namespace Bloodroot.Campaign
         public bool TryCommitPendingRootOffering()
         {
             string id = state.pendingRootOfferingId?.Trim() ?? string.Empty;
-            if (!CampaignRootOfferingIds.IsCanonical(id) ||
+            if (!string.Equals(
+                    id,
+                    CampaignRootOfferingIds.PrologueCursedObject,
+                    StringComparison.Ordinal) ||
                 state.HasUnresolvedFarmEmergence() ||
                 state.IsRootOfferingCommitted(id))
             {
                 return false;
             }
 
-            bool couldEnterBefore = CanEnterHollow;
             CampaignSaveData previousState = state.Clone();
             if (!state.TryCommitRootOffering(id))
             {
@@ -1596,23 +1526,9 @@ namespace Bloodroot.Campaign
             }
 
             CampaignEventUtility.Invoke(RootOfferingCommitted, id, this);
-            if (string.Equals(
-                    id,
-                    CampaignRootOfferingIds.PrologueCursedObject,
-                    StringComparison.Ordinal))
-            {
-                CampaignEventUtility.Invoke(
-                    PrologueCursedObjectOfferCommitted,
-                    this);
-            }
-            else
-            {
-                CampaignEventUtility.Invoke(NameStoneOffered, id, this);
-                if (!couldEnterBefore && CanEnterHollow)
-                {
-                    CampaignEventUtility.Invoke(HollowEntryAvailable, this);
-                }
-            }
+            CampaignEventUtility.Invoke(
+                PrologueCursedObjectOfferCommitted,
+                this);
 
             CampaignEventUtility.Invoke(
                 ProgressChanged,
@@ -1635,7 +1551,10 @@ namespace Bloodroot.Campaign
         public bool TryCancelPendingRootOffering()
         {
             string id = state.pendingRootOfferingId?.Trim() ?? string.Empty;
-            if (!CampaignRootOfferingIds.IsCanonical(id))
+            if (!string.Equals(
+                    id,
+                    CampaignRootOfferingIds.PrologueCursedObject,
+                    StringComparison.Ordinal))
             {
                 return false;
             }
@@ -1649,13 +1568,6 @@ namespace Bloodroot.Campaign
             }
 
             CampaignEventUtility.Invoke(RootOfferingCanceled, id, this);
-            if (CampaignNameStoneIds.IsCanonical(id))
-            {
-                CampaignEventUtility.Invoke(
-                    NameStoneOfferCanceled,
-                    id,
-                    this);
-            }
 
             CampaignEventUtility.Invoke(
                 ProgressChanged,
@@ -2026,7 +1938,7 @@ namespace Bloodroot.Campaign
 
             string messageWithPath =
                 $"Could not {operation} at '{SavePath}': {error}";
-            Debug.LogError(messageWithPath, this);
+
             CampaignEventUtility.Invoke(SaveFailed, messageWithPath, this);
             return false;
         }

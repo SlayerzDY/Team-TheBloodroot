@@ -103,9 +103,7 @@ namespace Bloodroot.Features.AlphaMenu
         {
             if (!ValidateAuthoredContract(out string error))
             {
-                Debug.LogError(
-                    $"Alpha main-menu scene contract is incomplete: {error}",
-                    this);
+
                 enabled = false;
                 return;
             }
@@ -230,7 +228,7 @@ namespace Bloodroot.Features.AlphaMenu
                     $"Safety saves: {resetError}");
                 return;
             }
-
+            PersistOutsideWorld.instance.SaveData(false);
             BeginSceneLoad(newGameSceneName);
         }
 
@@ -256,7 +254,7 @@ namespace Bloodroot.Features.AlphaMenu
                 FailAction("No resumable campaign progress was found.");
                 return;
             }
-
+            PersistOutsideWorld.instance.SaveData(false);
             string targetScene = GetContinueTarget(state.Current);
             BeginSceneLoad(targetScene);
         }
@@ -692,7 +690,7 @@ namespace Bloodroot.Features.AlphaMenu
                 menuAudio.PlayCancel();
             }
 
-            Debug.LogError(message, this);
+
         }
 
         private void SetCurrentScreenInteractable(bool interactable)

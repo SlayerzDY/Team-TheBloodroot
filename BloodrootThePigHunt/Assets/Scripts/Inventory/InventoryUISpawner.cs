@@ -67,7 +67,7 @@ public class InventoryUISpawner : MonoBehaviour {
         int size = playerInventory.inventoryItems.Length;
         if (slots != null && slots.Length == size) { return; }
         if (slotPrefab == null) {
-            Debug.LogWarning("InventoryUISpawner: slotPrefab is not assigned - cannot build slots.");
+
             return;
         }
         foreach (Transform child in transform) {
@@ -78,7 +78,7 @@ public class InventoryUISpawner : MonoBehaviour {
             GameObject slotGO = Instantiate(slotPrefab, transform);
             InventorySlot slot = slotGO.GetComponent<InventorySlot>();
             if (slot == null) {
-                Debug.LogWarning("InventoryUISpawner: slotPrefab has no InventorySlot component.");
+
                 continue;
             }
             slot.index = i;

@@ -26,11 +26,6 @@ public class TreeRootInteraction : MonoBehaviour, IInteract
             uiCostText = interactionUIPanel.transform.Find("Cost").GetComponent<TextMeshProUGUI>();
 
         }
-        else
-        {
-            Debug.LogError("TreeRootInteraction: Could not automatically find 'TreeInteractionUI' in the scene hierarchy");
-        }
-
         HideTreeUI();
 
         playerInventory = FindAnyObjectByType<Inventory>();
@@ -60,7 +55,7 @@ public class TreeRootInteraction : MonoBehaviour, IInteract
     {
         if (gameManager.instance.isDefenseActive)
         {
-            Debug.Log("Tree is locked during base defense");
+
             return;
         }
 
@@ -73,7 +68,7 @@ public class TreeRootInteraction : MonoBehaviour, IInteract
 
         if (playerInventory == null || playerInventory.inventoryItems == null)
         {
-            Debug.LogError("Cannot feed tree: Inventory component is missing reference");
+
             return;
         }
 
@@ -106,11 +101,7 @@ public class TreeRootInteraction : MonoBehaviour, IInteract
             }
             Invoke(nameof(ResetFeeding), 0.5f);
 
-            Debug.Log($"Manually fed {itemsRequiredToFeed}x {requiredItemName} to the tree!");
-        }
-        else
-        {
-            Debug.Log($"Cannot feed: You only have {currentCount}/{itemsRequiredToFeed} {requiredItemName}s.");
+
         }
     }
 

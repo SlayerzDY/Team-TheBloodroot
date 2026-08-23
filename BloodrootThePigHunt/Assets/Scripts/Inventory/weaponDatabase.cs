@@ -35,8 +35,26 @@ public class WeaponDatabase : MonoBehaviour
         if (allItemPrefabs == null) { return; }
         foreach (pickupGun prefab in allItemPrefabs)
         {
-            if (prefab == null || prefab.gun == null || string.IsNullOrEmpty(prefab.gun.itemID)) { continue; }
-            lookup[prefab.gun.itemID] = prefab.gun;
+            if (prefab == null || prefab.gun == null)
+            {
+
+                continue;
+            }
+
+            string itemID = prefab.gun.itemID;
+            if (string.IsNullOrWhiteSpace(itemID))
+            {
+
+                continue;
+            }
+
+            if (lookup.ContainsKey(itemID))
+            {
+
+                continue;
+            }
+
+            lookup.Add(itemID, prefab.gun);
         }
     }
     //==========================================================================================
@@ -44,9 +62,39 @@ public class WeaponDatabase : MonoBehaviour
     //------------------------------------------------------------------------------------------
     public gunStats GetByID(string id)
     {
-        if (string.IsNullOrEmpty(id)) { return null; }
+        if (string.IsNullOrWhiteSpace(id)) { return null; }
         if (lookup == null) { BuildLookup(); }
         return lookup.TryGetValue(id, out gunStats item) ? item : null;
+    }
+
+    //==========================================================================================
+    // Function, Try Resolve Registered Weapon
+    //------------------------------------------------------------------------------------------
+    // Accept either the authored definition itself or an exact runtime copy.
+    // An arbitrary ScriptableObject must not become saveable simply by claiming
+    // the same itemID as a registered weapon.
+    //==========================================================================================
+    public bool TryResolveRegisteredWeapon(
+        gunStats candidate,
+        out gunStats definition)
+    {
+        definition = null;
+        if (candidate == null || string.IsNullOrWhiteSpace(candidate.itemID))
+        {
+            return false;
+        }
+
+        definition = GetByID(candidate.itemID);
+        if (definition == null)
+        {
+            return false;
+        }
+
+        return ReferenceEquals(candidate, definition) ||
+               (candidate.gunModel == definition.gunModel &&
+                candidate.bullet == definition.bullet &&
+                candidate.ammoMax == definition.ammoMax &&
+                candidate.gunType == definition.gunType);
     }
     //==========================================================================================
 }

@@ -67,7 +67,7 @@ namespace Bloodroot.Features.FarmPrologue
             }
             catch (Exception exception)
             {
-                Debug.LogException(exception, context);
+
             }
         }
 
@@ -85,7 +85,7 @@ namespace Bloodroot.Features.FarmPrologue
             }
             catch (Exception exception)
             {
-                Debug.LogException(exception, context);
+
             }
         }
 
@@ -105,7 +105,7 @@ namespace Bloodroot.Features.FarmPrologue
             }
             catch (Exception exception)
             {
-                Debug.LogException(exception, context);
+
             }
         }
 
@@ -124,7 +124,7 @@ namespace Bloodroot.Features.FarmPrologue
                 }
                 catch (Exception exception)
                 {
-                    Debug.LogException(exception, context);
+
                 }
             }
         }
@@ -145,7 +145,7 @@ namespace Bloodroot.Features.FarmPrologue
                 }
                 catch (Exception exception)
                 {
-                    Debug.LogException(exception, context);
+
                 }
             }
         }
@@ -169,7 +169,7 @@ namespace Bloodroot.Features.FarmPrologue
                 }
                 catch (Exception exception)
                 {
-                    Debug.LogException(exception, context);
+
                 }
             }
         }

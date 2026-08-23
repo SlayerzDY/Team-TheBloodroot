@@ -175,8 +175,6 @@ public class gameManager : MonoBehaviour
             }
             else if (menuActive == menuInventory) { openInventory(false); }
         }
-        if (Input.GetKeyDown(KeyCode.F5)) Save();
-        if (Input.GetKeyDown(KeyCode.F9)) Load();
         //timer += Time.deltaTime;
     }
 
@@ -335,8 +333,7 @@ public class gameManager : MonoBehaviour
 
         if (spawner == null)
         {
-            Debug.LogError(
-                "GameManager cannot start the next wave because no MobSpawner was found.");
+
 
             return false;
         }
@@ -363,8 +360,8 @@ public class gameManager : MonoBehaviour
         {
             playerController = null;
             playerSpawnPos = GameObject.FindWithTag("PlayerSpawnPos");
-            
-            Debug.LogError("GameManager could not find an active Player object.");
+
+
             return;
         }
 
@@ -424,7 +421,7 @@ public class gameManager : MonoBehaviour
     //==========================================================================================
     private IEnumerator StartDefenseWithCountDown(int enemyCount)
     {
-      
+
 
         if(timeText != null)
         {
@@ -434,7 +431,7 @@ public class gameManager : MonoBehaviour
         }
         while (preperationTime > 0)
         { 
-        
+
             if(timeText != null)
             {
 
@@ -469,7 +466,6 @@ public class gameManager : MonoBehaviour
         if (congratulations != null) { congratulations.text = $"Wave Defense has been cleared"; }
         yield return new WaitForSeconds(5.0f);
         if (congratulations != null) { congratulations.gameObject.SetActive(false); }
-        //Debug.Log("You Completed the Defense the Hub is safe");
         DefensesBeat++;
 
     }
@@ -559,11 +555,12 @@ public class gameManager : MonoBehaviour
     public void Save() {
         // Get References Needed
         playerController player = gameManager.instance.player.GetComponent<playerController>();
-        if (player == null) { Debug.LogError("Please Assign Player Controller!"); return; }
+        if (player == null) {  return; }
         Inventory playerInv = gameManager.instance.player.GetComponent<Inventory>();
-        if (playerInv == null) { Debug.LogError("Please Assign Player Inventory!"); return; }
+        if (playerInv == null) {  return; }
         // Pass live references into the constructor
         GameData dataToSave = new GameData(player, playerInv);
+        //Debug.Log("SavedGame");
         SaveSystem.SaveGame(dataToSave);
     }
     //==========================================================================================
@@ -573,18 +570,23 @@ public class gameManager : MonoBehaviour
     {
         // Pull the saved data from Save System
         GameData loadedData = SaveSystem.LoadGame();
-        //if (loadedData == null) { Debug.Log("No save data to load!"); return; }
+        if (loadedData == null) {  return; }
         // Get live references
-        playerController player = gameManager.instance.player.GetComponent<playerController>();
-        Inventory playerInv = gameManager.instance.player.GetComponent<Inventory>();
-        ItemDatabase itemDatabase = gameManager.instance.itemDatabase;
-        //Debug.Log($"player: {player}, playerInv: {playerInv}, itemDatabase: {itemDatabase}");
-        if (player == null || playerInv == null || itemDatabase == null) { Debug.Log("Missing Player, Inventory, or ItemDatabase!"); return; }
+        gameManager manager = gameManager.instance;
+        if (manager == null || manager.player == null)
+        {
+
+            return;
+        }
+
+        playerController player = manager.player.GetComponent<playerController>();
+        Inventory playerInv = manager.player.GetComponent<Inventory>();
+        ItemDatabase itemDatabase = manager.itemDatabase;
+        if (player == null || playerInv == null || itemDatabase == null) {  return; }
         // Apply saved stats back to the player
         player.HP = loadedData._savHP;
         player.stam = loadedData._savstam;
         player.hasFlashlight = loadedData._savhasFlashlight;
-        player.gunInvPos = loadedData._savgunInvPos;
         playerInv.inventoryWeight = loadedData._savinventoryWeight;
         // Apply position
         //if (loadedData._savplayerPosition != null && loadedData._savplayerPosition.Length >= 3)
@@ -605,7 +607,7 @@ public class gameManager : MonoBehaviour
                 ItemSaveData saved = loadedData._savInventory[i];
                 if (saved == null || string.IsNullOrEmpty(saved.itemID)) { continue; }
                 ItemStats template = itemDatabase.GetByID(saved.itemID);
-                if (template == null) { Debug.LogWarning("No item found for ID: " + saved.itemID); continue; }
+                if (template == null) {  continue; }
                 playerInv.inventoryItems[i] = new ItemStats
                 {
                     itemID = template.itemID,
@@ -623,9 +625,18 @@ public class gameManager : MonoBehaviour
         }
         if (loadedData._savgunInv != null)
         {
-            player.gunInv = new List<gunStats>(loadedData._savgunInv);
+            if (SafetyWeaponSaveUtility.TryRestoreRuntimeInventory(
+                    loadedData._savgunInv,
+                    loadedData._savgunInvPos,
+                    weaponDatabase,
+                    out List<gunStats> restoredGuns,
+                    out int restoredGunSelection,
+                    out string gunRestoreError))
+            {
+                player.gunInv = restoredGuns;
+                player.gunInvPos = restoredGunSelection;
+            }
         }
-        Debug.Log("Game loaded successfully!");
     }
     public void OpenLevelForGameManager(string levelName)
     {

@@ -337,6 +337,37 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &3746364397304464265
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1283972515795502040}
+  m_Layer: 0
+  m_Name: SLOT_Heartroot_Carry
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1283972515795502040
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3746364397304464265}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.08715574, y: 0, z: 0, w: 0.9961947}
+  m_LocalPosition: {x: 0.45, y: 0.85, z: 0.55}
+  m_LocalScale: {x: 0.35, y: 0.35, z: 0.35}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1807269356616824130}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4159644953564479450
 GameObject:
   m_ObjectHideFlags: 0
@@ -362,7 +393,7 @@ GameObject:
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &5028720492388589776
 Transform:
@@ -379,6 +410,7 @@ Transform:
   m_Children:
   - {fileID: 699826136247196992}
   - {fileID: 6708914341681198381}
+  - {fileID: 1807269356616824130}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: -85.617, z: 0}
 --- !u!114 &1650396044609078620
@@ -397,7 +429,7 @@ MonoBehaviour:
   ignoreLayer:
     serializedVersion: 2
     m_Bits: 8
-  HP: 30
+  HP: 300
   stam: 100
   stamReduction: 0.1
   stamRegen: 1
@@ -444,7 +476,7 @@ MonoBehaviour:
   flashlight: {fileID: 0}
   flashlightButton: Fire2
   flashlightKey: 102
-  testLevel: L_DevScene
+  testLevel: Level_02
   hasFlashlight: 0
   shootPos: {fileID: 9215448509803119699}
   newGame: 0
@@ -742,6 +774,72 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!1 &7034275166317271659
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1807269356616824130}
+  - component: {fileID: 1841574619790374148}
+  m_Layer: 0
+  m_Name: __CAMPAIGN_HEARTROOT_CARRIED_PRESENTATION_V1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1807269356616824130
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7034275166317271659}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1283972515795502040}
+  m_Father: {fileID: 5028720492388589776}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1841574619790374148
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7034275166317271659}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 423e07af78e14a95bc83862801ef2215, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Campaign.CampaignHeartrootFinaleBridge
+  stateService: {fileID: 0}
+  inventoryCarryover: {fileID: 0}
+  playerInventory: {fileID: 5816373040676030608}
+  heartrootInventoryTokenPickup: {fileID: 5477449501311831939, guid: 70b8c164f9ec53540b3fd65501627626, type: 3}
+  presentationMode: 1
+  productionHeartrootVisualPrefab: {fileID: 7118139241304758401, guid: 0653cdcd0f3480842806fd60cf31f857, type: 3}
+  presentationSocket: {fileID: 1283972515795502040}
+  authoredPresentationInstance: {fileID: 0}
+  restrictToAuthoredCampaignScene: 1
+  recoveryAccepted:
+    m_PersistentCalls:
+      m_Calls: []
+  recoveryRejected:
+    m_PersistentCalls:
+      m_Calls: []
+  burnAccepted:
+    m_PersistentCalls:
+      m_Calls: []
+  burnRejected:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1001 &8773575324857570646
 PrefabInstance:
   m_ObjectHideFlags: 0

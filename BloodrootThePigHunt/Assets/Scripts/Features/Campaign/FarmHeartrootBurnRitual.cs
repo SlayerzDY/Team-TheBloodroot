@@ -303,9 +303,7 @@ namespace Bloodroot.Campaign
                 }
                 catch (UnityException exception)
                 {
-                    Debug.LogError(
-                        $"{name}: player tag '{playerTag}' is not configured. {exception.Message}",
-                        this);
+
                     return false;
                 }
 
@@ -320,7 +318,7 @@ namespace Bloodroot.Campaign
             lastFailureReason = string.IsNullOrWhiteSpace(reason)
                 ? "The Farm Heartroot burn was rejected."
                 : reason.Trim();
-            Debug.LogWarning(lastFailureReason, this);
+
             CampaignEventUtility.Invoke(burnRejected, this);
             return false;
         }

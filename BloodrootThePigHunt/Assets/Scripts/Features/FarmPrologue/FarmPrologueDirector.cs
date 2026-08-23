@@ -103,6 +103,7 @@ namespace Bloodroot.Features.FarmPrologue
 
         private Coroutine phaseRoutine;
         private Coroutine groundRumbleRoutine;
+        private Coroutine hubSpawnReassertionRoutine;
         private waveManager boundWaveEncounter;
         private CampaignStateService boundCampaignState;
         private gameManager boundGameManager;
@@ -190,6 +191,7 @@ namespace Bloodroot.Features.FarmPrologue
         {
             StopPhaseRoutine();
             StopGroundRumble();
+            StopHubSpawnReassertion();
             UnbindWaveEvents();
             UnbindCampaignEvents();
             UnbindGameManagerEvents();
@@ -218,28 +220,8 @@ namespace Bloodroot.Features.FarmPrologue
             completionSaveMaxRetrySeconds =
                 Mathf.Max(0.1f, completionSaveMaxRetrySeconds);
 
-            if (waveManagerRoot != null &&
-                waveManagerRoot == mobSpawnerRoot)
-            {
-                Debug.LogWarning(
-                    "FarmPrologueDirector needs separate WaveManager and " +
-                    "MobSpawner roots for deterministic combat startup.",
-                    this);
-            }
-
             if (gameplayInputBehaviours == null)
                 return;
-
-            foreach (Behaviour inputBehaviour in gameplayInputBehaviours)
-            {
-                if (inputBehaviour == this)
-                {
-                    Debug.LogWarning(
-                        "FarmPrologueDirector cannot gate itself. Remove it " +
-                        "from Gameplay Input Behaviours.",
-                        this);
-                }
-            }
         }
 
         public void BeginPrologue()
@@ -252,6 +234,7 @@ namespace Bloodroot.Features.FarmPrologue
 
             StopPhaseRoutine();
             StopGroundRumble();
+            StopHubSpawnReassertion();
             ResolveCampaignReferences();
             ClaimExistingCompletionSystems();
             combatCompletionReceived = false;
@@ -503,6 +486,17 @@ namespace Bloodroot.Features.FarmPrologue
             StopPhaseRoutine();
             StopGroundRumble();
             SetPhase(FarmProloguePhase.AwaitingOffering);
+
+            // The prologue owns the transition that makes this pickup
+            // available. Commit the reveal here instead of relying only on a
+            // separate scene listener noticing the phase change later.
+            ResolveCampaignReferences();
+            if (campaignState != null &&
+                !campaignState.PrologueCursedObjectRevealed)
+            {
+                campaignState.TryRevealPrologueCursedObject();
+            }
+
             PublishObjective(
                 "The cursed object surfaced. Recover it and carry it to the Root Tree.",
                 0,
@@ -845,7 +839,7 @@ namespace Bloodroot.Features.FarmPrologue
                 }
                 catch (Exception exception)
                 {
-                    Debug.LogException(exception, this);
+
                     saveFailureReason =
                         "The safe hub remains locked because campaign " +
                         "completion raised an unexpected save error.";
@@ -859,7 +853,7 @@ namespace Bloodroot.Features.FarmPrologue
 
             if (!saved)
             {
-                Debug.LogError(saveFailureReason, this);
+
                 SetPhase(FarmProloguePhase.CompletionPending);
                 string retryMessage =
                     saveFailureReason +
@@ -997,6 +991,7 @@ namespace Bloodroot.Features.FarmPrologue
         private void EnterHubFromSavedProgress()
         {
             StopPhaseRoutine();
+            StopHubSpawnReassertion();
             ClaimExistingCompletionSystems();
             RestoreCompletedChores();
             playerDeathPending = false;
@@ -1013,6 +1008,7 @@ namespace Bloodroot.Features.FarmPrologue
             MovePlayerToAuthoritativeSpawn(hubSpawn);
 
             SetPhase(FarmProloguePhase.Hub);
+            ScheduleHubSpawnReassertion();
             PublishObjective(hubObjective, 1, 1);
             RaiseHubUnlockedOnce();
         }
@@ -1050,9 +1046,63 @@ namespace Bloodroot.Features.FarmPrologue
                 playerSpawnFallback.SetPositionAndRotation(
                     destination.position,
                     destination.rotation);
+
+                // Safety's playerController.Start and respawn path use this
+                // public marker reference. Keep it tied to the Farm-local
+                // fallback so an Open World marker or a saved world position
+                // cannot win after a return to the completed Hub.
+                gameManager manager = gameManager.instance;
+                if (manager != null)
+                {
+                    manager.playerSpawnPos = playerSpawnFallback.gameObject;
+                }
             }
 
             MovePlayerTo(destination);
+        }
+
+        private void ScheduleHubSpawnReassertion()
+        {
+            if (!isActiveAndEnabled || hubSpawn == null)
+                return;
+
+            StopHubSpawnReassertion();
+            hubSpawnReassertionRoutine = StartCoroutine(
+                ReassertHubSpawnAfterSafetyBootstrap());
+        }
+
+        private IEnumerator ReassertHubSpawnAfterSafetyBootstrap()
+        {
+            // playerController.Start and the carryover restore both run
+            // after the Farm director's first placement. Reapply the exact
+            // authored Hub pose once those startup hooks have completed so a
+            // stale Open World save coordinate cannot survive the return.
+            yield return null;
+            hubSpawnReassertionRoutine = null;
+
+            if (!isActiveAndEnabled ||
+                CurrentPhase != FarmProloguePhase.Hub)
+            {
+                yield break;
+            }
+
+            ResolveCampaignReferences();
+            if (campaignState == null ||
+                !campaignState.HasCompletedPrologue)
+            {
+                yield break;
+            }
+
+            MovePlayerToAuthoritativeSpawn(hubSpawn);
+        }
+
+        private void StopHubSpawnReassertion()
+        {
+            if (hubSpawnReassertionRoutine == null)
+                return;
+
+            StopCoroutine(hubSpawnReassertionRoutine);
+            hubSpawnReassertionRoutine = null;
         }
 
         private void MovePlayerTo(Transform destination)
@@ -1081,7 +1131,7 @@ namespace Bloodroot.Features.FarmPrologue
             }
             catch (Exception exception)
             {
-                Debug.LogException(exception, this);
+
             }
             finally
             {
@@ -1327,9 +1377,7 @@ namespace Bloodroot.Features.FarmPrologue
 
             if (!scene.IsValid() || !scene.isLoaded)
             {
-                Debug.LogError(
-                    "Farm prologue could not reload because its scene is not loaded.",
-                    this);
+
                 return;
             }
 
@@ -1358,7 +1406,7 @@ namespace Bloodroot.Features.FarmPrologue
             }
             catch (Exception exception)
             {
-                Debug.LogException(exception, this);
+
                 HandleFarmSceneReloadFailure(
                     "The Farm scene could not reload to reset the active encounter.");
             }
@@ -1746,7 +1794,7 @@ namespace Bloodroot.Features.FarmPrologue
                     }
                     catch (Exception exception)
                     {
-                        Debug.LogException(exception, this);
+
                     }
                 }
                 return;
@@ -1769,7 +1817,7 @@ namespace Bloodroot.Features.FarmPrologue
                     }
                     catch (Exception exception)
                     {
-                        Debug.LogException(exception, this);
+
                     }
                 }
             }

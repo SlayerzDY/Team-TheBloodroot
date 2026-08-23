@@ -84,9 +84,8 @@ namespace Bloodroot.Campaign
             "M1 Garand Ammo5736854368";
         private const string SafetyRadarStableItemId = "radar";
         private const string SafetyRadarItemId = "Radar5474357346";
-        private const string SafetyNameStoneStableItemId = "name_stone";
-        private const string SafetyNameStoneItemId =
-            "Cursed Item321580235087";
+        // Retained only to discard the retired slot while loading older saves.
+        private const string RetiredNameStoneStableItemId = "name_stone";
         private const string CursedRootShardStableItemId =
             "cursed_root_shard";
         private const string CursedRootShardItemId =
@@ -125,14 +124,6 @@ namespace Bloodroot.Campaign
         private Coroutine restoreRoutine;
         private Inventory suppressedSceneInventory;
         private bool suppressedSceneInventoryWasEnabled;
-        private gameManager suppressedHotkeyManager;
-        private bool suppressedHotkeyManagerWasEnabled;
-        private bool hotkeyLoadPending;
-        private bool hotkeyInventoryRebuilt;
-        private bool hotkeyInventoryCleared;
-        private GameData hotkeyLoadedData;
-        private GameData hotkeyRecoveryPlayerData;
-        private ItemStats[] hotkeyRecoveryItems = Array.Empty<ItemStats>();
         private playerController automaticLoadGuardController;
         private bool automaticLoadGuardPreviousNewGame;
         private bool startupInitializationAttempted;
@@ -161,10 +152,7 @@ namespace Bloodroot.Campaign
             if (!startupSafe)
             {
                 restoreFailedPending = true;
-                Debug.LogError(
-                    "Safety automatic Load could not be made startup-safe: " +
-                    sanitizeError,
-                    this);
+
             }
         }
 
@@ -211,75 +199,7 @@ namespace Bloodroot.Campaign
 
             restoreInProgress = false;
             RestoreSuppressedSceneInventory();
-            RestoreSuppressedHotkeyManager();
-            hotkeyLoadPending = false;
-            hotkeyInventoryRebuilt = false;
-            hotkeyInventoryCleared = false;
-            hotkeyLoadedData = null;
-            hotkeyRecoveryPlayerData = null;
-            hotkeyRecoveryItems = Array.Empty<ItemStats>();
             ReleaseAutomaticLoadGuard();
-        }
-
-        private void Update()
-        {
-            if (!IsGameplayScene(SceneManager.GetActiveScene().name))
-            {
-                return;
-            }
-
-            gameManager manager = gameManager.instance;
-            if (manager == null || !manager.enabled)
-                return;
-
-            bool loadPressed = Input.GetKeyDown(KeyCode.F9);
-            bool savePressed = Input.GetKeyDown(KeyCode.F5);
-            if (!loadPressed && !savePressed)
-                return;
-
-            // Even a rejected checkpoint must consume this frame's Safety
-            // manager Update; otherwise its uncoordinated F5/F9 path bypasses
-            // the campaign restore latch.
-            if (restoreInProgress || restoreFailedPending)
-            {
-                SuppressHotkeyManager(manager);
-                Debug.LogError(
-                    "Safety checkpoint input was rejected while campaign " +
-                    "inventory reconciliation is pending.",
-                    this);
-                return;
-            }
-
-            // Run before Safety's default-order gameManager.Update, suppress
-            // only that manager for this frame, and invoke the same public
-            // Save/Load APIs exactly once under the campaign transaction.
-            if (loadPressed)
-            {
-                BeginSafetyLoadHotkey(manager);
-                return;
-            }
-
-            if (savePressed)
-                BeginSafetySaveHotkey(manager);
-        }
-
-        private void LateUpdate()
-        {
-            try
-            {
-                if (hotkeyLoadPending)
-                    CompleteSafetyLoadHotkey();
-            }
-            finally
-            {
-                hotkeyLoadPending = false;
-                hotkeyInventoryRebuilt = false;
-                hotkeyInventoryCleared = false;
-                hotkeyLoadedData = null;
-                hotkeyRecoveryPlayerData = null;
-                hotkeyRecoveryItems = Array.Empty<ItemStats>();
-                RestoreSuppressedHotkeyManager();
-            }
         }
 
         public void Configure(CampaignInventoryItemBinding[] catalog)
@@ -328,7 +248,7 @@ namespace Bloodroot.Campaign
             string safeReason = string.IsNullOrWhiteSpace(reason)
                 ? "Campaign inventory recovery is required before traveling."
                 : reason.Trim();
-            Debug.LogError(safeReason, this);
+
         }
 
         private void OnApplicationPause(bool paused)
@@ -363,11 +283,7 @@ namespace Bloodroot.Campaign
                     nextQuantities,
                     out validationError))
             {
-                Debug.LogError(
-                    string.IsNullOrWhiteSpace(validationError)
-                        ? "Campaign travel inventory does not match the normalized durable campaign facts."
-                        : validationError,
-                    this);
+
                 return false;
             }
 
@@ -409,25 +325,19 @@ namespace Bloodroot.Campaign
             quantities = Array.Empty<int>();
             if (restoreInProgress || restoreFailedPending)
             {
-                Debug.LogError(
-                    restoreInProgress
-                        ? "Campaign inventory carryover is still restoring the destination Inventory. Wait for it to finish before completing or traveling."
-                        : "Campaign inventory carryover still has a failed destination restore pending. Reload the destination to retry before completing or traveling.",
-                    this);
+
                 return false;
             }
 
             if (!ValidateCatalog(out string error))
             {
-                Debug.LogError(error, this);
+
                 return false;
             }
 
             if (inventory == null)
             {
-                Debug.LogError(
-                    "Campaign inventory carryover could not find the active player Inventory.",
-                    this);
+
                 return false;
             }
 
@@ -471,7 +381,7 @@ namespace Bloodroot.Campaign
 
             CampaignStateService state = CampaignStateService.Instance;
             if (state == null ||
-                !state.UpdateInventoryCarryover(itemIds, quantities))
+                !state.UpdateInventoryCarryover(GetCatalogIds(), mapped))
             {
                 return false;
             }
@@ -482,136 +392,12 @@ namespace Bloodroot.Campaign
             return true;
         }
 
-        /// <summary>
-        /// Restores the generic inventory representation for durable,
-        /// extracted-but-unoffered Name Stones. Campaign IDs remain the
-        /// identity authority; this method only repairs a missing CursedItem
-        /// token after an OpenWorld crash/quit where carryover capture was
-        /// deliberately suppressed.
-        /// </summary>
+        [Obsolete("Retired campaign data is discarded during save migration.")]
         public bool TryReconcileExtractedNameStoneTokens(
             GameObject authoredPickup,
             Inventory inventory)
         {
-            CampaignStateService state = CampaignStateService.Instance;
-            ItemStats item =
-                CampaignInventoryTokenUtility.GetItemStats(authoredPickup);
-            if (state == null || inventory == null || item == null ||
-                !string.Equals(
-                    item.itemName?.Trim(),
-                    "CursedItem",
-                    StringComparison.Ordinal) ||
-                item.quantity != 1 || item.stackSize != 1)
-            {
-                return false;
-            }
-
-            try
-            {
-                if (!inventory.IsValidIndex(0))
-                {
-                    return false;
-                }
-            }
-            catch (Exception)
-            {
-                // Inventory.Start has not initialized its backing array yet.
-                return false;
-            }
-
-            int requiredTokens = 0;
-            foreach (string stoneId in CampaignNameStoneIds.All)
-            {
-                if (state.IsNameStoneExtracted(stoneId) &&
-                    !state.IsNameStoneOffered(stoneId))
-                {
-                    requiredTokens++;
-                }
-            }
-
-            if (!string.IsNullOrEmpty(state.PendingNameStoneOfferId))
-            {
-                // A pending transaction may already have consumed its token.
-                // The tree adapter owns that single reconciliation.
-                requiredTokens = Mathf.Max(0, requiredTokens - 1);
-            }
-
-            int startingQuantity = Mathf.Max(
-                0,
-                inventory.FindItem(item).Value);
-            int missing = Mathf.Max(0, requiredTokens - startingQuantity);
-            if (missing == 0)
-            {
-                return true;
-            }
-
-            int emptySlots = 0;
-            for (int index = 0;
-                 index < 4096 && inventory.IsValidIndex(index);
-                 index++)
-            {
-                if (inventory.IsSlotEmpty(index))
-                {
-                    emptySlots++;
-                }
-            }
-
-            if (emptySlots < missing)
-            {
-                return false;
-            }
-
-            try
-            {
-                for (int count = 0; count < missing; count++)
-                {
-                    int before = inventory.FindItem(item).Value;
-                    inventory.AddItem(
-                        CampaignInventoryTokenUtility.CloneItemStats(item, 1));
-                    if (inventory.FindItem(item).Value != before + 1)
-                    {
-                        throw new InvalidOperationException(
-                            "Inventory did not restore exactly one Name Stone token.");
-                    }
-                }
-
-                return inventory.FindItem(item).Value == requiredTokens;
-            }
-            catch (Exception exception)
-            {
-                bool rolledBack = false;
-                try
-                {
-                    int current = Mathf.Max(
-                        0,
-                        inventory.FindItem(item).Value);
-                    int unexpected = Mathf.Max(
-                        0,
-                        current - startingQuantity);
-                    if (unexpected > 0)
-                    {
-                        inventory.RemoveItem(
-                            item.itemName,
-                            unexpected,
-                            false);
-                    }
-
-                    rolledBack = inventory.FindItem(item).Value ==
-                                 startingQuantity;
-                }
-                catch (Exception rollbackException)
-                {
-                    Debug.LogError(
-                        "Campaign Name Stone token rollback also failed: " +
-                        rollbackException.Message,
-                        this);
-                }
-
-                Debug.LogError(
-                    $"Campaign Name Stone token reconciliation failed: {exception.Message}",
-                    this);
-                return rolledBack && startingQuantity >= requiredTokens;
-            }
+            return true;
         }
 
         /// <summary>
@@ -943,9 +729,6 @@ namespace Bloodroot.Campaign
                     return true;
                 case SafetyRadarStableItemId:
                     expectedItemId = SafetyRadarItemId;
-                    return true;
-                case SafetyNameStoneStableItemId:
-                    expectedItemId = SafetyNameStoneItemId;
                     return true;
                 case CursedRootShardStableItemId:
                     expectedItemId = CursedRootShardItemId;
@@ -1404,9 +1187,7 @@ namespace Bloodroot.Campaign
                         ReleaseAutomaticLoadGuardAfterStart());
                 }
 
-                Debug.LogError(
-                    "Campaign inventory reconciliation is blocked by an invalid durable snapshot; Safety inventory was not adopted.",
-                    this);
+
                 CampaignEventUtility.Invoke(RestoreCompleted, false, this);
                 return;
             }
@@ -1455,13 +1236,7 @@ namespace Bloodroot.Campaign
                 restoreFailedPending = true;
                 restoreInProgress = false;
                 RestoreSuppressedSceneInventory();
-                Debug.LogError(
-                    "Safety automatic Load preflight failed before Player " +
-                    "Start: " +
-                    (hasSceneAuthority
-                        ? preloadError
-                        : "The fully bound Safety Player authority is missing."),
-                    this);
+
                 restoreRoutine = StartCoroutine(
                     ReleaseAutomaticLoadGuardAfterStart());
                 CampaignEventUtility.Invoke(RestoreCompleted, false, this);
@@ -1482,7 +1257,6 @@ namespace Bloodroot.Campaign
                 // A destination scene can briefly awaken its authored copy
                 // after CampaignStateService has already rejected that copy.
                 // It must never sanitize/load Safety data or survive long
-                // enough to process hotkeys while destruction is pending.
                 enabled = false;
                 return false;
             }
@@ -1641,10 +1415,6 @@ namespace Bloodroot.Campaign
                     string.Equals(
                         binding.ItemId,
                         SafetyRadarStableItemId,
-                        StringComparison.Ordinal) ||
-                    string.Equals(
-                        binding.ItemId,
-                        SafetyNameStoneStableItemId,
                         StringComparison.Ordinal);
                 if (registered == null ||
                     !string.Equals(
@@ -1788,9 +1558,7 @@ namespace Bloodroot.Campaign
             {
                 CampaignLoadoutEquipmentBridge.Instance
                     ?.RollbackStableGunRestore();
-                Debug.LogError(
-                    "Campaign inventory carryover could not find a fully initialized destination Player, Inventory, gameManager, ItemDatabase, and playerController authority. The snapshot remains pending.",
-                    this);
+
                 restoreFailedPending = true;
                 RestoreSuppressedSceneInventory();
                 restoreInProgress = false;
@@ -1884,7 +1652,7 @@ namespace Bloodroot.Campaign
             {
                 CampaignLoadoutEquipmentBridge.Instance
                     ?.RollbackStableGunRestore();
-                Debug.LogException(exception, this);
+
                 restoreFailedPending = true;
                 RestoreSuppressedSceneInventory();
                 restoreInProgress = false;
@@ -1920,17 +1688,6 @@ namespace Bloodroot.Campaign
                 }
 
                 restoreFailedPending = false;
-                if (TryFindNameStonePickup(out GameObject nameStonePickup) &&
-                    !TryReconcileExtractedNameStoneTokens(
-                        nameStonePickup,
-                        inventory))
-                {
-                    Debug.LogWarning(
-                        "Campaign inventory restored, but one or more durable " +
-                        "Name Stone tokens could not yet be reconciled. Free " +
-                        "inventory space and use the Root Tree to retry.",
-                        this);
-                }
 
                 if (!TryReconcileHeartrootToken(
                         inventory,
@@ -1939,12 +1696,12 @@ namespace Bloodroot.Campaign
                     throw new InvalidOperationException(reconcileError);
                 }
 
-                if (!TryRefreshSafetySaveAndInventoryPair(
-                        inventory,
-                        out reconcileError))
-                {
-                    throw new InvalidOperationException(reconcileError);
-                }
+                //if (!TryRefreshSafetySaveAndInventoryPair(
+                //        inventory,
+                //        out reconcileError))
+                //{
+                //    throw new InvalidOperationException(reconcileError);
+                //}
 
                 CampaignSafetySaveIntegration.CompletePendingArrival(
                     sceneName);
@@ -1954,7 +1711,7 @@ namespace Bloodroot.Campaign
             }
             catch (Exception exception)
             {
-                Debug.LogException(exception, this);
+
                 CampaignLoadoutEquipmentBridge.Instance
                     ?.RollbackStableGunRestore();
                 restoreFailedPending = true;
@@ -1964,551 +1721,6 @@ namespace Bloodroot.Campaign
             restoreInProgress = false;
             restoreRoutine = null;
             CampaignEventUtility.Invoke(RestoreCompleted, restored, this);
-        }
-
-        private void BeginSafetySaveHotkey(gameManager manager)
-        {
-            SuppressHotkeyManager(manager);
-            if (!TryCaptureForAreaCompletion(
-                    out string[] itemIds,
-                    out int[] quantities))
-            {
-                Debug.LogError(
-                    "Safety F5 could not validate the campaign inventory " +
-                    "checkpoint; neither save was changed.",
-                    this);
-                return;
-            }
-
-            CampaignStateService state = CampaignStateService.Instance;
-            if (state == null ||
-                !state.TryGetInventoryCarryover(
-                    out string[] previousIds,
-                    out int[] previousQuantities))
-            {
-                Debug.LogError(
-                    "Safety F5 requires the normalized destination inventory " +
-                    "snapshot established during scene reconciliation.",
-                    this);
-                return;
-            }
-
-            if (!CampaignSafetySaveIntegration.TryBeginCurrentGameSave(
-                    out CampaignSafetySaveIntegration.SaveTransaction
-                        safetyTransaction,
-                    out string saveError))
-            {
-                Debug.LogError(
-                    $"Safety F5 checkpoint failed: {saveError}",
-                    this);
-                return;
-            }
-
-            bool campaignSaved = state.UpdateInventoryCarryover(
-                itemIds,
-                quantities);
-            string pairError = campaignSaved
-                ? string.Empty
-                : "The campaign inventory save failed.";
-            bool pairRecorded = campaignSaved &&
-                CampaignSafetySaveIntegration
-                    .TryWriteCampaignInventoryCheckpoint(
-                        itemIds,
-                        quantities,
-                        out pairError);
-            if (!campaignSaved || !pairRecorded)
-            {
-                bool campaignRolledBack = !campaignSaved ||
-                    state.UpdateInventoryCarryover(
-                        previousIds,
-                        previousQuantities);
-                bool safetyRolledBack =
-                    safetyTransaction.TryRollback(
-                        out string safetyRollbackError);
-                if (!campaignRolledBack || !safetyRolledBack)
-                {
-                    MarkInventoryRecoveryPending(
-                        "Safety F5 could not roll back a failed paired " +
-                        $"checkpoint. {pairError} {safetyRollbackError}");
-                }
-                else
-                {
-                    Debug.LogError(
-                        "Safety F5 paired checkpoint was rejected; both " +
-                        "saves were restored. " + pairError,
-                        this);
-                }
-
-                return;
-            }
-
-            carriedQuantities = quantities;
-            hasSnapshot = true;
-            restoreFailedPending = false;
-            safetyTransaction.Commit();
-        }
-
-        private void BeginSafetyLoadHotkey(gameManager manager)
-        {
-            SuppressHotkeyManager(manager);
-            Inventory inventory = FindPlayerInventory();
-            playerController controller = inventory != null
-                ? inventory.GetComponent<playerController>()
-                : null;
-            if (inventory == null || controller == null ||
-                manager.itemDatabase == null ||
-                manager.player != inventory.gameObject ||
-                manager.playerController != controller)
-            {
-                Debug.LogError(
-                    "Safety F9 requires the fully bound gameplay Player, " +
-                    "Inventory, ItemDatabase, and playerController authority.",
-                    this);
-                return;
-            }
-
-            if (!ValidateSafetyNativeInventoryDatabase(
-                    manager.itemDatabase,
-                    out string databaseError))
-            {
-                Debug.LogError(
-                    "Safety F9 rejected its ItemDatabase/catalog mapping: " +
-                    databaseError,
-                    this);
-                return;
-            }
-
-            hotkeyRecoveryPlayerData = new GameData(controller, inventory);
-            hotkeyInventoryRebuilt = false;
-            hotkeyInventoryCleared = false;
-            // Suppress before any fallible preparation so Safety's default
-            // Update cannot observe this same F9 after an owned preflight
-            // rejection and run an uncoordinated Load.
-            string snapshotError = string.Empty;
-            string clearError = string.Empty;
-            bool cloned = TryCloneInventoryItems(
-                inventory.inventoryItems,
-                out hotkeyRecoveryItems,
-                out snapshotError);
-            if (!cloned)
-            {
-                Debug.LogError(
-                    "Safety F9 could not prepare the live Inventory without " +
-                    $"data loss: {snapshotError}",
-                    this);
-                hotkeyRecoveryItems = Array.Empty<ItemStats>();
-                return;
-            }
-
-            bool cleared = TryClearTrackedInventory(
-                inventory,
-                out clearError);
-            if (!cleared)
-            {
-                Debug.LogError(
-                    "Safety F9 could not clear the live Inventory: " +
-                    clearError,
-                    this);
-                if (!TryRecoverHotkeyState(
-                        inventory,
-                        controller,
-                        out string recoveryError))
-                {
-                    MarkInventoryRecoveryPending(
-                        "Safety F9 failed to roll back its clear: " +
-                        recoveryError);
-                }
-                return;
-            }
-
-            hotkeyInventoryCleared = true;
-
-            try
-            {
-                manager.Load();
-                if (!CampaignSafetySaveIntegration.TryLoadGameData(
-                        out hotkeyLoadedData,
-                        out string loadError))
-                {
-                    throw new InvalidOperationException(loadError);
-                }
-
-                if (!TryRestoreStableGunsForScene(
-                        controller,
-                        SceneManager.GetActiveScene().name,
-                        out string stableGunError))
-                {
-                    throw new InvalidOperationException(
-                        stableGunError);
-                }
-
-                hotkeyLoadPending = true;
-            }
-            catch (Exception exception)
-            {
-                CampaignLoadoutEquipmentBridge.Instance
-                    ?.RollbackStableGunRestore();
-                Debug.LogError(
-                    $"Safety F9 checkpoint failed: {exception.Message}",
-                    this);
-                if (!TryRecoverHotkeyState(
-                        inventory,
-                        controller,
-                        out string recoveryError))
-                {
-                    MarkInventoryRecoveryPending(
-                        "Safety F9 also failed to recover the pre-load " +
-                        $"Inventory: {recoveryError}");
-                }
-
-                hotkeyRecoveryItems = Array.Empty<ItemStats>();
-            }
-        }
-
-        private void CompleteSafetyLoadHotkey()
-        {
-            Inventory inventory = FindPlayerInventory();
-            playerController controller = inventory != null
-                ? inventory.GetComponent<playerController>()
-                : null;
-            gameManager manager = gameManager.instance;
-            if (inventory == null || controller == null ||
-                hotkeyLoadedData == null || manager == null ||
-                manager.itemDatabase == null ||
-                manager.player != inventory.gameObject ||
-                manager.playerController != controller)
-            {
-                MarkInventoryRecoveryPending(
-                    "Safety F9 could not resolve its post-Load player state.");
-                return;
-            }
-
-            int[] previousQuantities = carriedQuantities != null
-                ? (int[])carriedQuantities.Clone()
-                : Array.Empty<int>();
-            bool previousHasSnapshot = hasSnapshot;
-            CampaignStateService previousState =
-                CampaignStateService.Instance;
-            CampaignProgressSnapshot previousProgress = previousState != null
-                ? previousState.Current
-                : default;
-            string[] previousIds = Array.Empty<string>();
-            int[] previousDurableQuantities = Array.Empty<int>();
-            bool hadPreviousDurableSnapshot = previousState != null &&
-                previousState.TryGetInventoryCarryover(
-                    out previousIds,
-                    out previousDurableQuantities);
-            string previousCampaignCheckpoint = string.Empty;
-            string previousCheckpointError = string.Empty;
-            bool exportedPreviousCampaign = previousState != null &&
-                previousState.TryExportCheckpoint(
-                    out previousCampaignCheckpoint,
-                    out previousCheckpointError);
-            bool campaignSnapshotChanged = false;
-            try
-            {
-                inventory.Start();
-                inventory.inventoryWeight = 0f;
-                if (!TryGetInventoryCapacity(
-                        inventory,
-                        out int inventoryCapacity,
-                        out string capacityError))
-                {
-                    throw new InvalidOperationException(capacityError);
-                }
-
-                string sceneName = SceneManager.GetActiveScene().name;
-                bool pairedCheckpoint =
-                    TryApplyPairedHotkeySnapshot(sceneName);
-                bool hasFullCampaignCheckpoint =
-                    CampaignSafetySaveIntegration.TryReadCampaignCheckpoint(
-                        sceneName,
-                        out string pairedCampaignCheckpoint,
-                        out string pairedCheckpointError);
-                if (!pairedCheckpoint || !hasFullCampaignCheckpoint)
-                {
-                    throw new InvalidOperationException(
-                        "Safety F9 requires a complete paired campaign " +
-                        $"checkpoint. {pairedCheckpointError}");
-                }
-                bool applyLoadedPosition =
-                    CampaignSafetySaveIntegration.ShouldApplyLoadedPosition(
-                        sceneName,
-                        CampaignStateService.Instance);
-                ApplyLoadedPlayerState(
-                    controller,
-                    hotkeyLoadedData,
-                    applyLoadedPosition,
-                    false);
-
-                if (!TryReadStableInventoryForScene(
-                        sceneName,
-                        out ItemStats[] stableItems,
-                        out bool hasStableItems,
-                        out string stableInventoryError))
-                {
-                    throw new InvalidOperationException(
-                        stableInventoryError);
-                }
-
-                if (!TryRestoreStableGunsForScene(
-                        controller,
-                        sceneName,
-                        out string stableGunError))
-                {
-                    throw new InvalidOperationException(
-                        stableGunError);
-                }
-
-                ItemStats[] loadedInventory;
-                if (hasStableItems)
-                {
-                    loadedInventory = stableItems;
-                }
-                else if (!TryDecodeSafetyInventory(
-                             hotkeyLoadedData,
-                             manager.itemDatabase,
-                             inventoryCapacity,
-                             out loadedInventory,
-                             out string safetyInventoryError))
-                {
-                    throw new InvalidOperationException(
-                        safetyInventoryError);
-                }
-
-                if (!TryBuildReconciledInventory(
-                        loadedInventory,
-                        hasSnapshot,
-                        inventoryCapacity,
-                        out List<ItemStats> reconciledItems,
-                        out string error) ||
-                    !TryPopulateFreshInventory(
-                        inventory,
-                        reconciledItems,
-                        out error) ||
-                    (!hasSnapshot &&
-                     !TryAdoptLiveInventoryDurably(inventory, out error)))
-                {
-                    throw new InvalidOperationException(error);
-                }
-
-                hotkeyInventoryRebuilt = true;
-
-                if (pairedCheckpoint)
-                {
-                    CampaignStateService state =
-                        CampaignStateService.Instance;
-                    string campaignRestoreError = string.Empty;
-                    if (!exportedPreviousCampaign || state == null ||
-                        !state.TryRestoreCheckpoint(
-                            pairedCampaignCheckpoint,
-                            out campaignRestoreError))
-                    {
-                        carriedQuantities = previousQuantities;
-                        hasSnapshot = previousHasSnapshot;
-                        throw new InvalidOperationException(
-                            "Safety F9 could not restore its full paired " +
-                            $"campaign checkpoint. {previousCheckpointError} " +
-                            campaignRestoreError);
-                    }
-
-                    campaignSnapshotChanged = true;
-                }
-
-                if (!TryReconcileHeartrootToken(
-                        inventory,
-                        out error))
-                {
-                    throw new InvalidOperationException(error);
-                }
-
-                if (!TryRefreshSafetySaveAndInventoryPair(
-                        inventory,
-                        out error))
-                {
-                    throw new InvalidOperationException(error);
-                }
-
-                restoreFailedPending = false;
-                CampaignLoadoutEquipmentBridge.Instance
-                    ?.CommitStableGunRestore();
-                CampaignEventUtility.Invoke(RestoreCompleted, true, this);
-                CampaignProgressSnapshot restoredProgress =
-                    CampaignStateService.Instance != null
-                        ? CampaignStateService.Instance.Current
-                        : default;
-                if (HasHeartrootFinaleProgressChanged(
-                        previousProgress,
-                        restoredProgress) &&
-                    IsGameplayScene(sceneName))
-                {
-                    StartCoroutine(
-                        ReloadGameplaySceneAfterHotkeyRestore(sceneName));
-                }
-            }
-            catch (Exception exception)
-            {
-                CampaignLoadoutEquipmentBridge.Instance
-                    ?.RollbackStableGunRestore();
-                bool campaignRolledBack = true;
-                if (campaignSnapshotChanged)
-                {
-                    campaignRolledBack = exportedPreviousCampaign &&
-                        previousState != null &&
-                        previousState.TryRestoreCheckpoint(
-                            previousCampaignCheckpoint,
-                            out _);
-                }
-
-                carriedQuantities = previousQuantities;
-                hasSnapshot = previousHasSnapshot;
-                if (campaignRolledBack &&
-                    hadPreviousDurableSnapshot && campaignSnapshotChanged)
-                {
-                    campaignRolledBack = TryRestoreTravelSnapshot(
-                        previousIds,
-                        previousDurableQuantities);
-                }
-
-                if (!campaignRolledBack)
-                {
-                    MarkInventoryRecoveryPending(
-                        "Safety F9 could not roll back its campaign snapshot.");
-                }
-
-                Debug.LogError(
-                    $"Safety F9 reconciliation failed: {exception.Message}",
-                    this);
-                if (!TryRecoverHotkeyState(
-                        inventory,
-                        controller,
-                        out string recoveryError))
-                {
-                    MarkInventoryRecoveryPending(
-                        "Safety F9 could not restore either the loaded or " +
-                        $"pre-load Inventory: {recoveryError}");
-                }
-            }
-        }
-
-        private IEnumerator ReloadGameplaySceneAfterHotkeyRestore(
-            string restoredSceneName)
-        {
-            // Hollow encounter actors are deliberately scene-owned. Reload
-            // one frame after a successful paired F9 so the durable witch
-            // stage can reconstruct actors that the newer scene state had
-            // already destroyed.
-            yield return null;
-            Scene active = SceneManager.GetActiveScene();
-            if (IsGameplayScene(restoredSceneName) &&
-                string.Equals(
-                    active.name,
-                    restoredSceneName,
-                    StringComparison.Ordinal))
-            {
-                SceneManager.LoadScene(
-                    restoredSceneName,
-                    LoadSceneMode.Single);
-            }
-        }
-
-        private static bool HasHeartrootFinaleProgressChanged(
-            CampaignProgressSnapshot before,
-            CampaignProgressSnapshot after)
-        {
-            return before.HollowVeilCrossed != after.HollowVeilCrossed ||
-                   before.DefeatedWitchCount !=
-                   after.DefeatedWitchCount ||
-                   before.HeartrootExposed != after.HeartrootExposed ||
-                   before.HeartrootCarried != after.HeartrootCarried ||
-                   before.HeartrootBurned != after.HeartrootBurned ||
-                   before.CampaignCompleted != after.CampaignCompleted;
-        }
-
-        private bool TryRecoverHotkeyState(
-            Inventory inventory,
-            playerController controller,
-            out string error)
-        {
-            if (inventory == null || controller == null ||
-                hotkeyRecoveryPlayerData == null)
-            {
-                error = "The pre-load player checkpoint is unavailable.";
-                return false;
-            }
-
-            if ((hotkeyInventoryRebuilt || !hotkeyInventoryCleared) &&
-                (!TryClearTrackedInventory(
-                     inventory,
-                     out string clearError) ||
-                 Mathf.Abs(inventory.inventoryWeight) > 0.001f))
-            {
-                error =
-                    "The live Inventory could not return to an empty " +
-                    $"public-API state before rollback: {clearError}";
-                return false;
-            }
-
-            // Only discard the backing array after public removals have
-            // proven the private occupied-slot counter is back at zero.
-            // This also completes a partially failed pre-Load clear before
-            // rebuilding the exact recovery topology.
-            inventory.Start();
-            inventory.inventoryWeight = 0f;
-
-            if (!TryPopulateFreshInventory(
-                    inventory,
-                    hotkeyRecoveryItems,
-                    out error))
-            {
-                return false;
-            }
-
-            ApplyLoadedPlayerState(
-                controller,
-                hotkeyRecoveryPlayerData,
-                true,
-                true);
-            if (Mathf.Abs(
-                    inventory.inventoryWeight -
-                    hotkeyRecoveryPlayerData._savinventoryWeight) > 0.001f)
-            {
-                error =
-                    "The pre-load Inventory weight could not be restored exactly.";
-                return false;
-            }
-
-            CampaignLoadoutEquipmentBridge equipmentBridge =
-                CampaignLoadoutEquipmentBridge.Instance;
-            if (equipmentBridge != null &&
-                !equipmentBridge.TryPresentCurrentGunSelection(
-                    controller,
-                    out error))
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        private bool TryApplyPairedHotkeySnapshot(string sceneName)
-        {
-            if (!CampaignSafetySaveIntegration
-                    .TryReadCampaignInventoryCheckpoint(
-                        sceneName,
-                        out string[] savedIds,
-                        out int[] savedQuantities) ||
-                !TryMapExactCatalogSnapshot(
-                    savedIds,
-                    savedQuantities,
-                    out int[] mapped))
-            {
-                return false;
-            }
-
-            carriedQuantities = mapped;
-            hasSnapshot = true;
-            return true;
         }
 
         private bool TryMapExactCatalogSnapshot(
@@ -2521,24 +1733,15 @@ namespace Bloodroot.Campaign
             if (savedIds == null || savedQuantities == null ||
                 savedIds.Length == 0 ||
                 savedIds.Length != savedQuantities.Length ||
-                (savedIds.Length != catalogCount &&
-                 savedIds.Length != catalogCount - 1))
-            {
-                return false;
-            }
-
-            bool additiveHeartrootMigration =
-                savedIds.Length == catalogCount - 1 &&
-                catalogCount ==
-                CampaignHeartrootInventoryIds.RequiredCatalogCount;
-            if (savedIds.Length != catalogCount &&
-                !additiveHeartrootMigration)
+                savedIds.Length < catalogCount - 1 ||
+                savedIds.Length > catalogCount + 1)
             {
                 return false;
             }
 
             var next = new int[catalogCount];
             var seen = new HashSet<string>(StringComparer.Ordinal);
+            bool discardedRetiredEntry = false;
             for (int savedIndex = 0;
                  savedIndex < savedIds.Length;
                  savedIndex++)
@@ -2547,6 +1750,20 @@ namespace Bloodroot.Campaign
                 if (id.Length == 0 || !seen.Add(id) ||
                     savedQuantities[savedIndex] < 0)
                     return false;
+
+                if (string.Equals(
+                        id,
+                        RetiredNameStoneStableItemId,
+                        StringComparison.Ordinal))
+                {
+                    if (discardedRetiredEntry)
+                    {
+                        return false;
+                    }
+
+                    discardedRetiredEntry = true;
+                    continue;
+                }
 
                 bool matched = false;
                 for (int catalogIndex = 0;
@@ -2568,21 +1785,17 @@ namespace Bloodroot.Campaign
                     return false;
             }
 
-            if (additiveHeartrootMigration)
+            for (int catalogIndex = 0;
+                 catalogIndex < catalogCount;
+                 catalogIndex++)
             {
-                for (int catalogIndex = 0;
-                     catalogIndex < catalogCount;
-                     catalogIndex++)
+                string catalogId = itemCatalog[catalogIndex]?.ItemId ?? string.Empty;
+                if (!seen.Contains(catalogId) && !string.Equals(
+                        catalogId,
+                        HeartrootStableItemId,
+                        StringComparison.Ordinal))
                 {
-                    string catalogId =
-                        itemCatalog[catalogIndex]?.ItemId ?? string.Empty;
-                    if (!seen.Contains(catalogId) && !string.Equals(
-                            catalogId,
-                            HeartrootStableItemId,
-                            StringComparison.Ordinal))
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
 
@@ -2728,27 +1941,6 @@ namespace Bloodroot.Campaign
             }
 
             return true;
-        }
-
-        private void SuppressHotkeyManager(gameManager manager)
-        {
-            if (manager == null || suppressedHotkeyManager != null)
-                return;
-
-            suppressedHotkeyManager = manager;
-            suppressedHotkeyManagerWasEnabled = manager.enabled;
-            manager.enabled = false;
-        }
-
-        private void RestoreSuppressedHotkeyManager()
-        {
-            if (suppressedHotkeyManager == null)
-                return;
-
-            suppressedHotkeyManager.enabled =
-                suppressedHotkeyManagerWasEnabled;
-            suppressedHotkeyManager = null;
-            suppressedHotkeyManagerWasEnabled = false;
         }
 
         private void RestoreSuppressedSceneInventory()
@@ -3222,50 +2414,6 @@ namespace Bloodroot.Campaign
             }
         }
 
-        private static bool TryCloneInventoryItems(
-            ItemStats[] source,
-            out ItemStats[] clones,
-            out string error)
-        {
-            try
-            {
-                ItemStats[] original = source ?? Array.Empty<ItemStats>();
-                if (!IsSupportedInventoryCapacity(original.Length))
-                {
-                    clones = Array.Empty<ItemStats>();
-                    error =
-                        "Inventory rollback snapshot has an invalid Safety capacity.";
-                    return false;
-                }
-
-                var copied = new ItemStats[original.Length];
-                for (int slot = 0; slot < original.Length; slot++)
-                {
-                    ItemStats item = original[slot];
-                    if (item == null || string.IsNullOrWhiteSpace(item.itemName) ||
-                        item.quantity <= 0 || item.stackSize <= 0)
-                    {
-                        continue;
-                    }
-
-                    copied[slot] =
-                        CampaignInventoryTokenUtility.CloneItemStats(
-                            item,
-                            item.quantity);
-                }
-
-                clones = copied;
-                error = string.Empty;
-                return true;
-            }
-            catch (Exception exception)
-            {
-                clones = Array.Empty<ItemStats>();
-                error = exception.Message;
-                return false;
-            }
-        }
-
         private static bool TryClearTrackedInventory(
             Inventory inventory,
             out string error)
@@ -3364,16 +2512,21 @@ namespace Bloodroot.Campaign
             controller.hasFlashlight = loadedData._savhasFlashlight;
             if (applyGuns)
             {
-                controller.gunInv = loadedData._savgunInv != null
-                    ? new List<gunStats>(loadedData._savgunInv)
-                    : new List<gunStats>();
-                controller.gunInv.RemoveAll(gun => gun == null);
-                controller.gunInvPos = controller.gunInv.Count > 0
-                    ? Mathf.Clamp(
+                WeaponDatabase weaponDatabase =
+                    gameManager.instance != null
+                        ? gameManager.instance.weaponDatabase
+                        : null;
+                if (SafetyWeaponSaveUtility.TryRestoreRuntimeInventory(
+                        loadedData._savgunInv,
                         loadedData._savgunInvPos,
-                        0,
-                        controller.gunInv.Count - 1)
-                    : 0;
+                        weaponDatabase,
+                        out List<gunStats> restoredGuns,
+                        out int restoredGunSelection,
+                        out string gunRestoreError))
+                {
+                    controller.gunInv = restoredGuns;
+                    controller.gunInvPos = restoredGunSelection;
+                }
             }
 
             if (applyPosition && loadedData._savplayerPosition != null &&
@@ -3483,9 +2636,7 @@ namespace Bloodroot.Campaign
             if (slotCount <= 0 || occupiedSlots != 0 ||
                 requiredSlots > slotCount)
             {
-                Debug.LogError(
-                    "Campaign inventory carryover destination Inventory is not empty or cannot fit the captured catalog. The snapshot remains pending.",
-                    this);
+
                 return false;
             }
 
@@ -3526,51 +2677,15 @@ namespace Bloodroot.Campaign
             }
             catch (Exception exception)
             {
-                Debug.LogError(
-                    $"Campaign inventory carryover restore failed: {exception.Message} " +
-                    "Rolling the destination inventory back to its starting totals.",
-                    this);
-
-                if (!TryRollbackToStartingTotals(
-                        inventory,
-                        startingTotals,
-                        out string rollbackError))
-                {
-                    Debug.LogError(
-                        "Campaign inventory carryover could not fully roll back the " +
-                        $"destination inventory: {rollbackError}",
-                        this);
-                }
+                _ = TryRollbackToStartingTotals(
+                    inventory,
+                    startingTotals,
+                    out _);
 
                 return false;
             }
         }
 
-        private bool TryFindNameStonePickup(out GameObject pickup)
-        {
-            CampaignInventoryItemBinding[] catalog =
-                itemCatalog ?? Array.Empty<CampaignInventoryItemBinding>();
-            for (int index = 0; index < catalog.Length; index++)
-            {
-                GameObject candidate = catalog[index]?.PickupPrefab;
-                ItemStats item =
-                    CampaignInventoryTokenUtility.GetItemStats(candidate);
-                if (item != null &&
-                    string.Equals(
-                        item.itemName?.Trim(),
-                        "CursedItem",
-                        StringComparison.Ordinal) &&
-                    item.quantity == 1 &&
-                    item.stackSize == 1)
-                {
-                    pickup = candidate;
-                    return true;
-                }
-            }
-
-            pickup = null;
-            return false;
-        }
 
         private bool TryRollbackToStartingTotals(
             Inventory inventory,
@@ -3632,9 +2747,7 @@ namespace Bloodroot.Campaign
             }
             catch (UnityException exception)
             {
-                Debug.LogError(
-                    $"Campaign inventory carryover player tag '{playerTag}' is invalid: {exception.Message}",
-                    this);
+
                 return null;
             }
         }
@@ -3679,9 +2792,7 @@ namespace Bloodroot.Campaign
                 {
                     restoreFailedPending = true;
                     hasSnapshot = false;
-                    Debug.LogError(
-                        "Campaign inventory carryover found mismatched durable arrays; Safety inventory adoption is blocked.",
-                        this);
+
                 }
 
                 return;
@@ -3692,9 +2803,7 @@ namespace Bloodroot.Campaign
             {
                 restoreFailedPending = true;
                 hasSnapshot = false;
-                Debug.LogError(
-                    "Campaign inventory carryover found an invalid durable snapshot shape; Safety inventory adoption is blocked.",
-                    this);
+
                 return;
             }
 
@@ -3710,9 +2819,7 @@ namespace Bloodroot.Campaign
                 {
                     restoreFailedPending = true;
                     hasSnapshot = false;
-                    Debug.LogError(
-                        "Campaign inventory carryover found blank, duplicate, or negative durable item data; Safety inventory adoption is blocked.",
-                        this);
+
                     return;
                 }
 
@@ -3946,7 +3053,7 @@ namespace Bloodroot.Campaign
 
             try
             {
-                manager.Save();
+                //manager.Save();
                 if (!TrySanitizeSafetyGunSave(out string sanitizeError))
                     throw new InvalidOperationException(sanitizeError);
 
@@ -4047,7 +3154,7 @@ namespace Bloodroot.Campaign
             {
                 loadedData = SaveSystem.LoadGame() ?? new GameData();
                 loadedData._savInventory ??= Array.Empty<ItemSaveData>();
-                loadedData._savgunInv ??= new List<gunStats>();
+                loadedData._savgunInv ??= Array.Empty<WeaponSaveData>();
                 error = string.Empty;
                 return true;
             }
@@ -4080,7 +3187,7 @@ namespace Bloodroot.Campaign
                 }
 
                 GameData data = SaveSystem.LoadGame() ?? new GameData();
-                data._savgunInv = new List<gunStats>();
+                data._savgunInv = Array.Empty<WeaponSaveData>();
                 data._savgunInvPos = 0;
                 SaveSystem.SaveGame(data);
                 error = string.Empty;
@@ -4601,9 +3708,7 @@ namespace Bloodroot.Campaign
             }
             catch (Exception exception)
             {
-                Debug.LogWarning(
-                    "Could not read the paired Safety/campaign inventory " +
-                    $"checkpoint: {exception.Message}");
+
                 return false;
             }
         }
@@ -4721,12 +3826,7 @@ namespace Bloodroot.Campaign
 
         public static void CompletePendingArrival(string destinationSceneName)
         {
-            if (!TryCompletePendingArrival(destinationSceneName))
-            {
-                Debug.LogWarning(
-                    "Campaign inventory restored, but the Safety save " +
-                    "scene-context arrival marker could not be cleared.");
-            }
+            TryCompletePendingArrival(destinationSceneName);
         }
 
         public static bool ShouldApplyLoadedPosition(
@@ -4762,9 +3862,7 @@ namespace Bloodroot.Campaign
             }
             catch (Exception exception)
             {
-                Debug.LogWarning(
-                    "Safety position restore was skipped because its owned " +
-                    $"scene context could not be read: {exception.Message}");
+
                 return false;
             }
         }
@@ -4788,9 +3886,7 @@ namespace Bloodroot.Campaign
             }
             catch (Exception exception)
             {
-                Debug.LogWarning(
-                    "Could not update the Safety save scene context: " +
-                    exception.Message);
+
                 return false;
             }
         }

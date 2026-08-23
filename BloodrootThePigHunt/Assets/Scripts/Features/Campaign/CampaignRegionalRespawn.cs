@@ -150,11 +150,7 @@ namespace Bloodroot.Campaign
             }
             while (Time.unscaledTime <= deadline);
 
-            Debug.LogWarning(
-                $"Regional respawn for '{activeMapping?.Area}' could not " +
-                $"place the authored player within {playerLookupTimeout:0.##} " +
-                "seconds.",
-                this);
+
         }
 
         private static bool ShouldPreserveNamedSceneArrival(
@@ -221,10 +217,7 @@ namespace Bloodroot.Campaign
                 if (!configurationErrorLogged)
                 {
                     configurationErrorLogged = true;
-                    Debug.LogError(
-                        "Regional respawn configuration is invalid: " +
-                        problem,
-                        this);
+
                 }
 
                 return false;
@@ -440,11 +433,7 @@ namespace Bloodroot.Campaign
             }
             catch (Exception exception)
             {
-                Debug.LogError(
-                    $"Could not place the player at the " +
-                    $"{activeMapping.Area} regional respawn: " +
-                    exception.Message,
-                    this);
+
                 return false;
             }
             finally
@@ -521,10 +510,7 @@ namespace Bloodroot.Campaign
             }
             catch (UnityException exception)
             {
-                Debug.LogError(
-                    "Regional respawn cannot resolve the authored " +
-                    $"PlayerSpawnPos tag: {exception.Message}",
-                    this);
+
                 return null;
             }
         }

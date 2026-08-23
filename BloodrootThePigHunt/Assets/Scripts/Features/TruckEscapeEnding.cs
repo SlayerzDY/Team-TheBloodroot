@@ -37,7 +37,7 @@ public class TruckEscapeEnding : MonoBehaviour
             return;
 
         truckKeyCollected = true;
-        Debug.Log("Truck key collected.");
+
 
         if (escapeReady)
         {
@@ -152,11 +152,6 @@ public class TruckEscapeEnding : MonoBehaviour
         if (gameManager.instance != null)
         {
             gameManager.instance.youWin();
-        }
-        else
-        {
-            Debug.LogError(
-                "TruckEscapeEnding could not find GameManager to end the game.");
         }
     }
 

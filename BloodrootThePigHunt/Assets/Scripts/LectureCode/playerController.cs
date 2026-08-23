@@ -91,6 +91,19 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         speedOrig = speed;
         if (!newGame) { gameManager.instance.Load(); }
         gameManager.instance.updatePlayer();
+        StartCoroutine(ExecuteAfterDelay(0.1f));
+        if (PersistOutsideWorld.instance == null) { return; }
+        if (PersistOutsideWorld.instance.state) {
+            gameManager.instance.Load();
+        }
+
+
+    }
+
+    private IEnumerator ExecuteAfterDelay(float delayInSeconds)
+    {
+        yield return new WaitForSeconds(delayInSeconds);
+
         spawnPlayer();
     }
     //==========================================================================================
@@ -104,7 +117,9 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             //isJumping = false;
             movement();
             useFlashlight();
-            if (Input.GetKeyDown(KeyCode.K)) { LoadTestScene(); }
+            //if (Input.GetKeyDown(KeyCode.K)) { LoadTestScene(); }
+            if (Input.GetKeyDown(KeyCode.F5)) { gameManager.instance.Save(); }
+            if (Input.GetKeyDown(KeyCode.F9)) { gameManager.instance.Load(); }
         }
         sprint();
         if (isSprinting) { StaminaReduction(stamReduction); } else { if (stam <= stamOrig) { StaminaRegen(); }}
@@ -717,11 +732,31 @@ void selectGun()
     // Function, Spawn Player
     //==========================================================================================
     public void spawnPlayer() {
+
         controller.transform.position = gameManager.instance.playerSpawnPos.transform.position;
         Physics.SyncTransforms();
         HP = HPOrig;
         updatePlayerAmmo();
         updatePlayerUI();
+        if (gunInv != null) {
+            if (gunInv.Count > 0) {
+                changeGun();
+            }
+        }
+        Inventory playerInv = this.GetComponent<Inventory>();
+        if (playerInv == null) { return; }
+        if (playerInv.inventoryItems == null) { return; }
+        if (playerInv.inventoryItems == null || playerInv.inventoryItems.Length < 1) { return; }
+        if (playerInv.inventoryItems[0] == null) { return; }
+        if (playerInv.inventoryItems[0].itemName == null) { return; }
+        for (int i = 0; i < playerInv.inventoryItems.Length; i++) {
+            if (playerInv.inventoryItems == null) { continue; }
+            if (playerInv.inventoryItems[i] == null) { continue; } 
+            if (playerInv.inventoryItems[i].itemName == null) { continue; }
+            if (playerInv.inventoryItems[i].itemName == "Radar") {
+                gameManager.instance.ActivateRadar(true);
+            }
+        }
     }
     //==========================================================================================
     // Function, Test Remove Item
@@ -781,9 +816,9 @@ void selectGun()
     //==========================================================================================
     public void UpdateUpgradedStats(string statType = "all")
     {
-        if (statType == "all" || statType == "Health" || statType == "HP") { HP = Mathf.RoundToInt(HPOrig * healthMultiplier); }
+        if (statType == "all" || statType == "Health" || statType == "HP") { HPOrig = Mathf.RoundToInt(HPOrig * healthMultiplier); HP = HPOrig; }
 
-        if (statType == "all" || statType == "Stamina") { stam = stamOrig * staminaMultiplier;}
+        if (statType == "all" || statType == "Stamina") { stamOrig = stamOrig * staminaMultiplier; stam = stamOrig; }
     }
 
 }

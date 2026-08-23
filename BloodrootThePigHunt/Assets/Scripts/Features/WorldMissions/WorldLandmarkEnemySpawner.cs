@@ -40,7 +40,6 @@ namespace Bloodroot.Features.WorldMissions
     [RequireComponent(typeof(BoxCollider))]
     public sealed class WorldLandmarkEnemySpawner : MonoBehaviour
     {
-        private const int WalkableAreaMask = 1;
         private const int MinimumSpawnAttempts = 1;
         private const int MaximumSpawnAttemptsLimit = 5;
         private const float MinimumRetryDelay = 0.1f;
@@ -200,27 +199,17 @@ namespace Bloodroot.Features.WorldMissions
             for (int index = 0; index < spawns.Length; index++)
             {
                 WorldLandmarkEnemySpawnDefinition spawn = spawns[index];
-                NavMeshAgent prefabAgent = spawn.EnemyPrefab
-                    .GetComponentInChildren<NavMeshAgent>(true);
-                int areaMask = prefabAgent != null
-                    ? prefabAgent.areaMask & WalkableAreaMask
-                    : 0;
-                if (areaMask == 0)
+                if (!CampaignSafetyEnemyRuntimeAdapter
+                        .TryResolveGroundedSpawnPosition(
+                            spawn.EnemyPrefab,
+                            spawn.SpawnPoint.position,
+                            navMeshSampleRadius,
+                            out resolved[index],
+                            out string groundError))
                 {
                     return RecordFailedAttempt(
-                        $"Landmark enemy '{spawn.EnemyPrefab.name}' cannot " +
-                        "use the authored Walkable NavMesh area.");
-                }
-
-                if (!NavMesh.SamplePosition(
-                        spawn.SpawnPoint.position,
-                        out resolved[index],
-                        navMeshSampleRadius,
-                        areaMask))
-                {
-                    return RecordFailedAttempt(
-                        $"Landmark enemy point '{spawn.SpawnPoint.name}' is " +
-                        $"not within {navMeshSampleRadius:0.##}m of the baked NavMesh.");
+                        $"Landmark enemy point '{spawn.SpawnPoint.name}' was " +
+                        $"rejected by grounded NavMesh validation. {groundError}");
                 }
             }
 
@@ -246,37 +235,14 @@ namespace Bloodroot.Features.WorldMissions
                     created.Add(instance);
 
                     if (!CampaignSafetyEnemyRuntimeAdapter
-                            .TryGetExactAllowedController(
+                            .TryPrepareGroundedSpawn(
                                 instance,
+                                resolved[index],
                                 out Component controller,
-                                out string controllerError))
-                    {
-                        throw new InvalidOperationException(controllerError);
-                    }
-
-                    if (!CampaignSafetyEnemyRuntimeAdapter.TryPrepare(
-                            instance,
-                            out string compatibilityError))
+                                out string placementError))
                     {
                         throw new InvalidOperationException(
-                            compatibilityError);
-                    }
-
-                    if (!CampaignSafetyEnemyRuntimeAdapter.TryGetAgent(
-                            instance,
-                            out NavMeshAgent agent,
-                            out string agentError))
-                    {
-                        throw new InvalidOperationException(agentError);
-                    }
-
-                    if (!agent.isOnNavMesh &&
-                        (!agent.Warp(resolved[index].position) ||
-                         !agent.isOnNavMesh))
-                    {
-                        throw new InvalidOperationException(
-                            $"Spawned enemy '{instance.name}' could not bind " +
-                            "to the baked NavMesh.");
+                            placementError);
                     }
 
                     if (!CampaignSafetyEnemyRuntimeAdapter.TryInitialize(
@@ -468,11 +434,6 @@ namespace Bloodroot.Features.WorldMissions
             string normalized = string.IsNullOrWhiteSpace(reason)
                 ? "Landmark enemy spawning was rejected."
                 : reason;
-            if (!string.Equals(lastFailure, normalized, StringComparison.Ordinal))
-            {
-                Debug.LogError(normalized, this);
-            }
-
             lastFailure = normalized;
             return false;
         }
@@ -519,34 +480,5 @@ namespace Bloodroot.Features.WorldMissions
                    candidateTransform.IsChildOf(player.transform);
         }
 
-        private void OnDrawGizmosSelected()
-        {
-            Collider trigger = proximityTrigger != null
-                ? proximityTrigger
-                : GetComponent<BoxCollider>();
-            if (trigger is BoxCollider box)
-            {
-                Gizmos.color = new Color(0.15f, 0.65f, 1f, 0.8f);
-                Matrix4x4 previous = Gizmos.matrix;
-                Gizmos.matrix = box.transform.localToWorldMatrix;
-                Gizmos.DrawWireCube(box.center, box.size);
-                Gizmos.matrix = previous;
-            }
-
-            if (spawns == null)
-                return;
-
-            Gizmos.color = new Color(0.9f, 0.1f, 0.1f, 0.9f);
-            foreach (WorldLandmarkEnemySpawnDefinition spawn in spawns)
-            {
-                if (spawn?.SpawnPoint == null)
-                    continue;
-
-                Gizmos.DrawWireSphere(spawn.SpawnPoint.position, 0.75f);
-                Gizmos.DrawRay(
-                    spawn.SpawnPoint.position,
-                    spawn.SpawnPoint.forward * 2f);
-            }
-        }
     }
 }
