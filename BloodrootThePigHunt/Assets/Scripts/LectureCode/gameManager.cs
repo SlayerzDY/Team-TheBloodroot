@@ -38,6 +38,7 @@ public class gameManager : MonoBehaviour
     [SerializeField] GameObject menuUpgrade;
     [SerializeField] GameObject menuToast;
     //[SerializeField] TMP_Text gameGoalCountText;
+    
 
     [Header("Text")]
     [SerializeField] TMP_Text timeText;
@@ -54,6 +55,7 @@ public class gameManager : MonoBehaviour
     public TextMeshProUGUI weight;
     public TextMeshProUGUI AmmoCount;
     public TextMeshProUGUI FlashlightCount;
+    public TextMeshProUGUI ReloadingText;
     public Image playerHPBAR;
     public GameObject playerStam;
     public Image playerStamBar;
@@ -68,6 +70,7 @@ public class gameManager : MonoBehaviour
     private float timeScaleOrig;
     //private int gameGoalCount;
     //private bool waveManagerControlsWin;
+    public bool NeedReload = false;
 
     [Header("Tree Root Variables")]
     public TreeSpawner RootSpanw;
@@ -653,7 +656,33 @@ public class gameManager : MonoBehaviour
         if (controller == null) { return; }
         controller.LoadLevel(levelName);
     }
+
+
+    public void NeedReloading()
+    {
+
+        if (NeedReload){
+
+            Color c = ReloadingText.color;
+            c.a = 1f;
+            ReloadingText.color = c;
+
+
+        }
+        else {
+
+            Color c = ReloadingText.color;
+            c.a = 0f;
+            ReloadingText.color = c;
+
+
+        }
+
+    }
+
     //==========================================================================================
+
+
 }
 //==============================================================================================
 // End of Game Manager

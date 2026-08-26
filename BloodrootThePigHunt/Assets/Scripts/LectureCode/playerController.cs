@@ -149,7 +149,15 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         {
           Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * gunInv[gunInvPos].shootDistance, Color.red);
         }
-         reload();
+        if (gunInv[gunInvPos].ammoCurr <= 0) { 
+                
+                gameManager.instance.NeedReload = true;
+                gameManager.instance.NeedReloading();
+                reload();
+            
+        }
+        
+       // reload();
     }
     //==========================================================================================
     // Function, Sprint
@@ -330,8 +338,9 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             if (gunInv[gunInvPos].reloadSound.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(gunInv[gunInvPos].reloadSound[Random.Range(0, gunInv[gunInvPos].reloadSound.Length)], gunInv[gunInvPos].reloadSoundVolume); }
             animator.SetTrigger("IsReload");
             gunInv[gunInvPos].ammoCurr = gunInv[gunInvPos].ammoMax;
-            updatePlayerAmmo();
-            StartCoroutine(ReloadTimer(3f));
+            gameManager.instance.NeedReload = false;
+            gameManager.instance.NeedReloading();
+            StartCoroutine(ReloadTimer(2f));
         }
     }
     //==========================================================================================
@@ -731,11 +740,15 @@ void selectGun()
         if (Input.GetAxis("Mouse ScrollWheel") > 0f && gunInvPos < gunInv.Count - 1)
         {
             gunInvPos++;
+            gameManager.instance.NeedReload = false;
+            gameManager.instance.NeedReloading();
             changeGun();
         }
         else if (Input.GetAxis("Mouse ScrollWheel") < 0f && gunInvPos > 0)
         {
             gunInvPos--;
+            gameManager.instance.NeedReload = false;
+            gameManager.instance.NeedReloading();
             changeGun();
         }
     }
@@ -835,6 +848,7 @@ void selectGun()
     //==========================================================================================
     private IEnumerator ReloadTimer(float seconds) {
         yield return new WaitForSecondsRealtime(seconds);
+        updatePlayerAmmo();
         isReloading = false;
     }
     //==========================================================================================
