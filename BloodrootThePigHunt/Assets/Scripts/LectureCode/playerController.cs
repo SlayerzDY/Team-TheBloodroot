@@ -73,11 +73,13 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     Vector3 playerVel;
     bool isSprinting;
     bool isPlayingSteps;
+    private bool isReloading;
     //private bool isJumping;
     //==========================================================================================
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     //==========================================================================================
     void Start() {
+        isReloading = false;
         if (controller == null) {
             controller = GetComponent<CharacterController>();
             if (controller == null) {
@@ -142,7 +144,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         controller.Move(playerVel * Time.deltaTime);
         playerVel.y -= gravity * Time.deltaTime;
         shootTimer += Time.deltaTime;
-        if (Input.GetButton("Fire1") && gunInv.Count > 0 && gunInv[gunInvPos].ammoCurr > 0 && shootTimer > gunInv[gunInvPos].shootRate) { shoot(); }
+        if (Input.GetButton("Fire1") && gunInv.Count > 0 && gunInv[gunInvPos].ammoCurr > 0 && shootTimer > gunInv[gunInvPos].shootRate && !isReloading) { shoot(); }
         if (gunInv.Count > 0)   
         {
           Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * gunInv[gunInvPos].shootDistance, Color.red);
@@ -324,10 +326,12 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
 
     void reload() {
         if (Input.GetButtonDown("Reload") && gunInv.Count > 0) {
+            isReloading = true;
             if (gunInv[gunInvPos].reloadSound.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(gunInv[gunInvPos].reloadSound[Random.Range(0, gunInv[gunInvPos].reloadSound.Length)], gunInv[gunInvPos].reloadSoundVolume); }
             animator.SetTrigger("IsReload");
             gunInv[gunInvPos].ammoCurr = gunInv[gunInvPos].ammoMax;
             updatePlayerAmmo();
+            StartCoroutine(ReloadTimer(3f));
         }
     }
     //==========================================================================================
@@ -818,7 +822,6 @@ void selectGun()
         }
     }
     //==========================================================================================
-    //==========================================================================================
     // Function, Called in Upgradee tabl to update stats once upgraded
     //==========================================================================================
     public void UpdateUpgradedStats(string statType = "all")
@@ -827,7 +830,14 @@ void selectGun()
 
         if (statType == "all" || statType == "Stamina") { stamOrig = stamOrig * staminaMultiplier; stam = stamOrig; }
     }
-
+    //==========================================================================================
+    // Function, Reload Timer
+    //==========================================================================================
+    private IEnumerator ReloadTimer(float seconds) {
+        yield return new WaitForSecondsRealtime(seconds);
+        isReloading = false;
+    }
+    //==========================================================================================
 }
 //==============================================================================================
 // End of Player Controller .cs
