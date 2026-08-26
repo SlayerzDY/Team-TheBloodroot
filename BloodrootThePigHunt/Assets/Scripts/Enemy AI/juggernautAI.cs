@@ -38,6 +38,7 @@ public class juggernautEnemyAI : MonoBehaviour, IDamage
     [SerializeField] MobSpawner spawner;
     [SerializeField] float damageMultiplier;  
     [SerializeField] float healthGrowth = 1.15f;
+    [SerializeField, Range(100f, 1000f)] int sightRange;
     //[SerializeField] float damageGrowth = 1.08f;
     Vector3 playerDir;
     Vector3 startingPos;
@@ -306,7 +307,7 @@ public class juggernautEnemyAI : MonoBehaviour, IDamage
 
 
         RaycastHit hit;
-        if (Physics.Raycast(transform.position, playerDir, out hit))
+        if (Physics.Raycast(transform.position, playerDir, out hit, sightRange))
         {
             if (hit.collider.CompareTag("Player") && angleToPlayer <= FOV)
             {
