@@ -154,9 +154,19 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     //==========================================================================================
     void sprint()
         {
+            if (stam <= 1)
+            {
+                StaminaRegen();
+                speed = speedOrig;
+                isSprinting = false;
+                return;
+            }
             if (Input.GetButtonDown("Sprint"))
             {
+<<<<<<< HEAD
                 if (stam <= 1) { return; }
+=======
+>>>>>>> spicerDev
                 speed *= sprintMod;
                 isSprinting = true;
             }
@@ -787,7 +797,7 @@ void selectGun()
     // Function, Stamina Regen
     //==========================================================================================
     private void StaminaRegen() {
-        if (stam >= stamOrig) { gameManager.instance.Stamina(false); stam = stamOrig; return; }
+        if (stam >= stamOrig - 1) { gameManager.instance.Stamina(false); stam = stamOrig; return; }
         stam += stamRegen;
         updatePlayerUI();
     }
