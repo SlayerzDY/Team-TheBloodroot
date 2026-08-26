@@ -163,10 +163,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             }
             if (Input.GetButtonDown("Sprint"))
             {
-<<<<<<< HEAD
                 if (stam <= 1) { return; }
-=======
->>>>>>> spicerDev
                 speed *= sprintMod;
                 isSprinting = true;
             }
