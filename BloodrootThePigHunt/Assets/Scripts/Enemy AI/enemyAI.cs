@@ -42,6 +42,7 @@ public class enemyAI : MonoBehaviour, IDamage
     [SerializeField] protected float meleeRange;
     [SerializeField] protected float healthGrowth = 1.15f;
     [SerializeField] protected float damageGrowth = 1.08f;
+    [SerializeField, Range(100f, 1000f)] int sightRange;
     protected Color colorOrig;
     protected Vector3 playerDir;
     protected Vector3 startingPos;
@@ -57,7 +58,6 @@ public class enemyAI : MonoBehaviour, IDamage
     protected float stoppingDistanceOrig;
     protected bool isCharging;
     protected bool isUnalived;
-
     //==========================================================================================
     // Function, Start
     //==========================================================================================
@@ -375,7 +375,7 @@ public class enemyAI : MonoBehaviour, IDamage
 
         // Hey I see you!!
         RaycastHit hit;
-        if (Physics.Raycast(transform.position, playerDir, out hit)) {
+        if (Physics.Raycast(transform.position, playerDir, out hit, sightRange)) {
             if (hit.collider.CompareTag("Player") && angleToPlayer <= FOV) {
                 if (!EnemyNavMeshSafety.TrySetDestination(
                         agent,
