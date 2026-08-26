@@ -149,12 +149,12 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         {
           Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * gunInv[gunInvPos].shootDistance, Color.red);
         }
-        if (gunInv[gunInvPos].ammoCurr <= 0) { 
+        if (gunInv.Count> 0 && gunInv[gunInvPos] != null && gunInv[gunInvPos].ammoCurr <= 0) { 
                 
                 gameManager.instance.NeedReload = true;
                 gameManager.instance.NeedReloading();
                 reload();
-            
+
         }
         
        // reload();
