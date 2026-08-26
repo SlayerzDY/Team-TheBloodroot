@@ -151,17 +151,12 @@ public class gameManager : MonoBehaviour
                 menuActive.SetActive(true);
             }
             else if (menuActive != null && menuActive != menuPause) {
-                if (menuActive == menuUpgrade)
-                {
-                    if (MenuTracker.Instance != null) MenuTracker.Instance.Clear();
-                    stateUnpause();
-                }
-                else
-                {
-                    menuActive.SetActive(false);
-                    menuActive = MenuTracker.Instance.PreviousMenu();
-                    menuActive.SetActive(true);
-                }
+                
+             
+                menuActive.SetActive(false);
+                menuActive = MenuTracker.Instance.PreviousMenu();
+                menuActive.SetActive(true);
+                
             }
             else if (menuActive == menuPause) {
                 menuActive.SetActive(false);
@@ -169,6 +164,7 @@ public class gameManager : MonoBehaviour
                 MenuTracker.Instance.Clear();
                 stateUnpause();
             }
+            
         }
         if (Input.GetButtonDown("Inventory"))
         {
@@ -231,10 +227,10 @@ public class gameManager : MonoBehaviour
 
             if (menuActive != null) { menuActive.SetActive(true); }
 
-            if (MenuTracker.Instance != null)
-            {
-                MenuTracker.Instance.AddMenu(menuUpgrade);
-            }
+            //if (MenuTracker.Instance != null)
+            //{
+            //    MenuTracker.Instance.AddMenu(menuUpgrade);
+            //}
         }
     }
     //==========================================================================================

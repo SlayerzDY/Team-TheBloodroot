@@ -21,7 +21,7 @@ public class UpgradeUI : MonoBehaviour
 
     private void Start()
     {
-        if (panel != null) { panel.SetActive(false); }
+        //if (panel != null) { panel.SetActive(false); }
     }
 
     public void OpenPanelMulti(List<UpgradeScriptable> available, UpgradeTable table)
