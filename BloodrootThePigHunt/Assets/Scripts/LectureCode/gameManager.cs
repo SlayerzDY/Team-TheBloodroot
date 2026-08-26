@@ -175,6 +175,14 @@ public class gameManager : MonoBehaviour
             }
             else if (menuActive == menuInventory) { openInventory(false); }
         }
+        if (Input.GetButtonDown("Inventory1"))
+        {
+            if (menuActive == null)
+            {
+                openInventory();
+            }
+            else if (menuActive == menuInventory) { openInventory(false); }
+        }
         //timer += Time.deltaTime;
     }
 

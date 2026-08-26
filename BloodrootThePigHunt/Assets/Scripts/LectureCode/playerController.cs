@@ -156,7 +156,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         {
             if (Input.GetButtonDown("Sprint"))
             {
-                if (stam <= 0) { return; }
+                if (stam <= 1) { return; }
                 speed *= sprintMod;
                 isSprinting = true;
             }
