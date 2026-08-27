@@ -106,6 +106,7 @@ public class GameData
     //==========================================================================================
     public int _savHP;
     public float _savstam;
+    public float _savstamMax;
     public ItemSaveData[] _savInventory;
     public WeaponSaveData[] _savgunInv;
     public int _savgunInvPos;
@@ -121,6 +122,7 @@ public class GameData
     {
         _savHP = 100;
         _savstam = 100f;
+        _savstamMax = 100f;
         _savplayerPosition = new float[] { 0f, 0f, 0f };
         _savgunInv = Array.Empty<WeaponSaveData>();
         _savhasFlashlight = false;
@@ -177,6 +179,7 @@ public class GameData
         //}
         _savgunInvPos = player.gunInvPos;
         _savhasFlashlight = player.hasFlashlight;
+        _savstamMax = player.stamMax;
         _savinventoryWeight = playerInv.inventoryWeight;
     }
     //==========================================================================================

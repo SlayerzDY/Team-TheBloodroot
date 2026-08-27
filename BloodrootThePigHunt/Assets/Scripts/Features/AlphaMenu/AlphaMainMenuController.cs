@@ -50,6 +50,7 @@ namespace Bloodroot.Features.AlphaMenu
         [SerializeField] private AlphaMenuAudio menuAudio;
         [SerializeField] private EventSystem menuEventSystem;
         [SerializeField] private AlphaMenuTransition menuTransition;
+        [SerializeField] public GameObject exitMenu;
 
         [Header("Authored Screens")]
         [SerializeField] private AlphaMenuScreenBinding[] screenBindings;
@@ -101,6 +102,12 @@ namespace Bloodroot.Features.AlphaMenu
 
         private void Start()
         {
+#if UNITY_WEBGL
+            disableExit(true);
+#else
+            // Do Nothing
+#endif
+
             if (!ValidateAuthoredContract(out string error))
             {
 
@@ -794,6 +801,14 @@ namespace Bloodroot.Features.AlphaMenu
             Down,
             Left,
             Right
+        }
+
+        private void disableExit(bool isOn = true) {
+            if (isOn) {
+                exitMenu.SetActive(false);
+            } else {
+                exitMenu.SetActive(true);
+            }
         }
 
 #if UNITY_EDITOR

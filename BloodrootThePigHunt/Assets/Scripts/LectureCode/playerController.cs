@@ -186,7 +186,11 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             }
             if (Input.GetButtonDown("Sprint"))
             {
-                if (stam <= 1) { return; }
+                if (stam <= 1) {
+                    speed = speedOrig;
+                    isSprinting = false;
+                    return; 
+                }
                 speed *= sprintMod;
                 isSprinting = true;
             }
@@ -194,7 +198,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             {
                 StaminaRegen();
                 speed /= sprintMod;
-                if (speed <= 1) { speed = 5; }
+                if (speed <= 4) { speed = 5; }
                 isSprinting = false;
             }
         }
