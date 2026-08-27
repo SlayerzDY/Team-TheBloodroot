@@ -17,9 +17,9 @@ namespace Bloodroot.Features.FarmPrologue
 
         [Header("Authored Camera")]
         [SerializeField] private Transform cameraTransform;
-        [SerializeField, Min(0f)] private float shakeAmplitude = 0.09f;
-        [SerializeField, Min(0.01f)] private float shakeFrequency = 17f;
-        [SerializeField, Min(0f)] private float rampInSeconds = 0.2f;
+        [SerializeField, Min(0f)] private float shakeAmplitude = 0.025f;
+        [SerializeField, Min(0.01f)] private float shakeFrequency = 10f;
+        [SerializeField, Min(0f)] private float rampInSeconds = 0.35f;
         [SerializeField] private Vector3 axisScale =
             new Vector3(1f, 0.65f, 0.35f);
 
@@ -38,6 +38,9 @@ namespace Bloodroot.Features.FarmPrologue
         private Vector3 capturedLocalPosition;
 
         public bool IsPresenting => isPresenting;
+        public float ShakeAmplitude => shakeAmplitude;
+        public float ShakeFrequency => shakeFrequency;
+        public float RampInSeconds => rampInSeconds;
 
         private void OnEnable()
         {

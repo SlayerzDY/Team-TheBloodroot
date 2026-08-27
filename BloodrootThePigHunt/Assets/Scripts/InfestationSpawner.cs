@@ -44,10 +44,13 @@ public class InfestationSpawner : MonoBehaviour
     public Transform[] spawnPoints;
     public float spawnRadius;
     public int zoneAmount = 3;
+    [SerializeField] private BoxCollider spawnContainment;
 
 
     private List<GameObject> activeZones = new List<GameObject>();
     private waveManager waveManager;
+
+    public BoxCollider SpawnContainment => spawnContainment;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -150,6 +153,11 @@ public class InfestationSpawner : MonoBehaviour
                 {
                     Transform center = spawnPoints[Random.Range(0, spawnPoints.Length)];
 
+                    if (center == null)
+                    {
+                        continue;
+                    }
+
                     Vector3 candidate = center.position;
                     BoxCollider box = center.GetComponent<BoxCollider>();
 
@@ -174,7 +182,8 @@ public class InfestationSpawner : MonoBehaviour
 
                         candidate = navHit.position;
 
-                        if (!Physics.CheckSphere(candidate, clearanceRadius, avoidanceLayer))
+                        if (IsInsideSpawnContainment(candidate) &&
+                            !Physics.CheckSphere(candidate, clearanceRadius, avoidanceLayer))
                         {
                             spawnPos = candidate;
 
@@ -196,18 +205,27 @@ public class InfestationSpawner : MonoBehaviour
                     activeZones.Add(ILoathZone);
 
                 }
-                // could cause issues if spawner is not set corectly. Ex: can spawn things outside of nav mesh
-                else
-                {
-                    GameObject theWinner = GetWeight();
-
-                    Transform center2 = spawnPoints[Random.Range(0, spawnPoints.Length)];
-
-                    GameObject IhateZones = Instantiate(theWinner, center2.position, Quaternion.identity, transform);
-
-                    activeZones.Add(IhateZones);
-                }
             }
         }
+    }
+
+    public void ConfigureSpawnContainment(
+        BoxCollider containment,
+        Transform[] containedSpawnPoints)
+    {
+        spawnContainment = containment;
+        spawnPoints = containedSpawnPoints ?? System.Array.Empty<Transform>();
+    }
+
+    private bool IsInsideSpawnContainment(Vector3 worldPosition)
+    {
+        if (spawnContainment == null)
+            return true;
+
+        Vector3 local = spawnContainment.transform
+            .InverseTransformPoint(worldPosition) - spawnContainment.center;
+        Vector3 halfSize = spawnContainment.size * 0.5f;
+        return Mathf.Abs(local.x) <= halfSize.x &&
+               Mathf.Abs(local.z) <= halfSize.z;
     }
 }

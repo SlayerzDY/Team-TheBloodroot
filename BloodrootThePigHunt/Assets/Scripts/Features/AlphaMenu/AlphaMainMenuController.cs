@@ -276,6 +276,9 @@ namespace Bloodroot.Features.AlphaMenu
 
         public void ExitGame()
         {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            return;
+#else
             if (!CanBeginAction())
             {
                 return;
@@ -293,6 +296,7 @@ namespace Bloodroot.Features.AlphaMenu
             {
                 actionInProgress = false;
             }
+#endif
         }
 
         public void RefreshContinueAvailability()

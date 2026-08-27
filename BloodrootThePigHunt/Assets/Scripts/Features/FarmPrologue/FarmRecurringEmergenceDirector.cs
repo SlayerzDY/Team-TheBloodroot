@@ -39,6 +39,7 @@ namespace Bloodroot.Features.FarmPrologue
             Array.Empty<GameObject>();
         [SerializeField] private Transform[] spawnPoints =
             Array.Empty<Transform>();
+        [SerializeField] private BoxCollider spawnContainment;
         [SerializeField, Min(0.05f)] private float spawnIntervalSeconds = 1f;
         [SerializeField, Min(0.1f)] private float completionRetrySeconds = 1f;
         [SerializeField, Min(0.1f)] private float completionRetryMaximumSeconds = 15f;
@@ -76,6 +77,7 @@ namespace Bloodroot.Features.FarmPrologue
         public int ExpectedEnemyCount => expectedEnemyCount;
         public IReadOnlyList<GameObject> EnemyPrefabs => enemyPrefabs;
         public IReadOnlyList<Transform> SpawnPoints => spawnPoints;
+        public BoxCollider SpawnContainment => spawnContainment;
         public FarmEmergenceStringEvent EmergenceStartedEvent =>
             emergenceStarted;
         public FarmEmergenceStringEvent EmergenceCompletedEvent =>
@@ -216,6 +218,11 @@ namespace Bloodroot.Features.FarmPrologue
 
             error = string.Empty;
             return true;
+        }
+
+        public void ConfigureSpawnContainment(BoxCollider containment)
+        {
+            spawnContainment = containment;
         }
 
         private static bool HasExactRecurringEnemyPrefab(
@@ -438,6 +445,12 @@ namespace Bloodroot.Features.FarmPrologue
                             $"rejected by grounded NavMesh validation. {groundError}");
                     }
 
+                    if (!IsInsideSpawnContainment(groundedPosition.position))
+                    {
+                        throw new InvalidOperationException(
+                            $"Farm emergence point '{spawnPoint.name}' resolved outside the fenced Farm spawn area.");
+                    }
+
                     enemy = Instantiate(
                         prefab,
                         groundedPosition.position,
@@ -547,6 +560,18 @@ namespace Bloodroot.Features.FarmPrologue
                     1);
                 yield return new WaitForSecondsRealtime(delay);
             }
+        }
+
+        private bool IsInsideSpawnContainment(Vector3 worldPosition)
+        {
+            if (spawnContainment == null)
+                return true;
+
+            Vector3 local = spawnContainment.transform
+                .InverseTransformPoint(worldPosition) - spawnContainment.center;
+            Vector3 halfSize = spawnContainment.size * 0.5f;
+            return Mathf.Abs(local.x) <= halfSize.x &&
+                   Mathf.Abs(local.z) <= halfSize.z;
         }
 
         private void FailWithoutCompleting(string offeringId, string reason)

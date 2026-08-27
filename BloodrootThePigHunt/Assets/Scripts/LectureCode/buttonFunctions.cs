@@ -119,12 +119,14 @@ public class buttonFunctions : MonoBehaviour {
     // Function, Quit
     //==========================================================================================
     public void quit() {
-#if UNITY_EDITOR
+#if UNITY_WEBGL && !UNITY_EDITOR
+        return;
+#elif UNITY_EDITOR
         gameManager.instance.Save();    
         UnityEditor.EditorApplication.isPlaying = false;
-    #else
-            Application.Quit();     
-    #endif
+#else
+        Application.Quit();
+#endif
     }
     //==========================================================================================
     // Function, Open Level

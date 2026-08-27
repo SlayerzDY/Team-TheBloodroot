@@ -27,11 +27,14 @@ public class MobSpawner : MonoBehaviour
     [SerializeField] Transform[] spawnPoint;
     [SerializeField]float spawnRate;
     [SerializeField] float spawnRadius;
+    [SerializeField] BoxCollider spawnContainment;
 
 
     public int maxEnemies;
     public int currentEnemies;
     public int currentRegularPigs;
+
+    public BoxCollider SpawnContainment => spawnContainment;
 
     float timer = 0f;
 
@@ -108,14 +111,12 @@ public class MobSpawner : MonoBehaviour
             return;
         }
 
-        if (!TryGetSpawnPoint(out Vector3 Spawn, out Quaternion Rotation))
+        if (!TryGetSpawnPoint(out Vector3 Spawn, out Quaternion Rotation) ||
+            !TryResolveContainedSpawn(Spawn, out Vector3 groundedSpawn))
             return;
 
-        NavMeshHit hit;
-        NavMesh.SamplePosition(Spawn, out hit, spawnRadius, 1);
-
         GameObject spawnedPig =
-            Instantiate(regularPig, hit.position, Rotation);    
+            Instantiate(regularPig, groundedSpawn, Rotation);
 
         RegularHog hog =
             spawnedPig.GetComponent<RegularHog>();
@@ -140,16 +141,14 @@ public class MobSpawner : MonoBehaviour
             return;
         }
 
-        if (!TryGetSpawnPoint(out Vector3 Spawn, out Quaternion Rotation))
+        if (!TryGetSpawnPoint(out Vector3 Spawn, out Quaternion Rotation) ||
+            !TryResolveContainedSpawn(Spawn, out Vector3 groundedSpawn))
         {
             return;
         }
 
-        NavMeshHit hit;
-        NavMesh.SamplePosition(Spawn, out hit, spawnRadius, 1);
-
         GameObject spawnedEnemy =
-            Instantiate(enemyToSpawn, hit.position, Rotation);
+            Instantiate(enemyToSpawn, groundedSpawn, Rotation);
 
         if (manager == null)
         {
@@ -249,6 +248,42 @@ public class MobSpawner : MonoBehaviour
         //Spawn = center.position + randomOffset;
         Rotation = center.rotation;
         return true;
+    }
+
+    public void ConfigureSpawnContainment(BoxCollider containment)
+    {
+        spawnContainment = containment;
+    }
+
+    private bool TryResolveContainedSpawn(
+        Vector3 requestedPosition,
+        out Vector3 resolvedPosition)
+    {
+        resolvedPosition = requestedPosition;
+        if (!NavMesh.SamplePosition(
+                requestedPosition,
+                out NavMeshHit hit,
+                Mathf.Max(0.1f, spawnRadius),
+                1) ||
+            !IsInsideSpawnContainment(hit.position))
+        {
+            return false;
+        }
+
+        resolvedPosition = hit.position;
+        return true;
+    }
+
+    private bool IsInsideSpawnContainment(Vector3 worldPosition)
+    {
+        if (spawnContainment == null)
+            return true;
+
+        Vector3 local = spawnContainment.transform
+            .InverseTransformPoint(worldPosition) - spawnContainment.center;
+        Vector3 halfSize = spawnContainment.size * 0.5f;
+        return Mathf.Abs(local.x) <= halfSize.x &&
+               Mathf.Abs(local.z) <= halfSize.z;
     }
 
   public void StartWave(int totalEnemies)

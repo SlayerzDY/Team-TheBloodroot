@@ -70,11 +70,11 @@ public static class BloodrootNavMeshSpawnGroundingRepair
     {
         new FarmSpawnVolumeSpec(
             "EMERGENCE_ZONE_01",
-            new Vector2(45f, 27f),
+            new Vector2(45f, 25f),
             new Vector2(12f, 4f)),
         new FarmSpawnVolumeSpec(
             "EMERGENCE_ZONE_02",
-            new Vector2(27.2f, -28.3f),
+            new Vector2(33f, -28.3f),
             new Vector2(24f, 4f)),
         new FarmSpawnVolumeSpec(
             "EMERGENCE_ZONE_03",
