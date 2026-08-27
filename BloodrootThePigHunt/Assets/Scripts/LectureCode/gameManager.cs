@@ -37,6 +37,8 @@ public class gameManager : MonoBehaviour
     [SerializeField] GameObject menuExtraction;
     [SerializeField] GameObject menuUpgrade;
     [SerializeField] GameObject menuToast;
+    [SerializeField] GameObject menuLoading;
+    [SerializeField] GameObject quitButton;
     //[SerializeField] TMP_Text gameGoalCountText;
     
 
@@ -118,6 +120,24 @@ public class gameManager : MonoBehaviour
     //==========================================================================================
     void Start()
     {
+        //==========================================================================================
+        // Only When in Editor
+        //==========================================================================================
+#if UNITY_EDITOR
+        // Do Nothing
+#else
+        if (menuLoading != null) { LoadMenu(true); }
+#endif
+        //==========================================================================================
+        // Only When in WebGL
+        //==========================================================================================
+#if UNITY_WEBGL
+    // Runs ONLY when targeting / building for WebGL
+    if (quitButton != null) { DisableQuitButton(true); }
+#else
+        // Do Nothing Yay!
+#endif
+        //==========================================================================================
         timeScaleOrig = GetPlayableTimeScale(Time.timeScale);
         //ScoreboardManager.GetOrCreate();
 
@@ -549,12 +569,40 @@ public class gameManager : MonoBehaviour
         }
     }
     //==========================================================================================
+    // Function, Toast Menu
+    //==========================================================================================
+    public void LoadMenu(bool isOn) {
+        if (isOn) {
+            menuLoading.SetActive(isOn);
+            StartCoroutine(AutoHideLoading());
+        } else {
+            menuLoading.SetActive(false);
+        }
+    }
+    //==========================================================================================
+    // Function, Toast Menu
+    //==========================================================================================
+    public void DisableQuitButton(bool isOn) {
+        if (isOn) {
+            quitButton.SetActive(false);
+        } else {
+            quitButton.SetActive(isOn);
+        }
+    }
+    //==========================================================================================
     // Function, Auto Hide Toast
     //==========================================================================================
     private IEnumerator AutoHideToast() {
         yield return new WaitForSeconds(3f);
         menuToast.SetActive(false);
         ToastMenu(false, "Hidden");
+    }
+    //==========================================================================================
+    // Function, Auto Hide Toast
+    //==========================================================================================
+    private IEnumerator AutoHideLoading() {
+        yield return new WaitForSeconds(10f);
+        LoadMenu(false);
     }
     //==========================================================================================
     // Function, Save
