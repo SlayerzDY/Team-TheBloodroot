@@ -47,9 +47,10 @@ public class UpgradeTable : MonoBehaviour, IInteract
         }
 
         ItemStats scriptableItemData = itemComponent.item;
-        bool hasItem = playerInventory.CheckItem(scriptableItemData);
+        var itemDataPair = playerInventory.FindItem(scriptableItemData);
+        int playerHasAmount = itemDataPair.Value;
 
-        if (hasItem)
+        if (playerHasAmount >= seleectedUpgrade.requirdAmount)
         {
             playerInventory.RemoveItem(scriptableItemData.itemName, seleectedUpgrade.requirdAmount, false, 0);
 
@@ -95,21 +96,26 @@ public class UpgradeTable : MonoBehaviour, IInteract
             return;
         }
 
-        switch (stat)
+        Debug.Log("Switch triggered! Checking string: " + seleectedUpgrade.statToUpgrade);
+
+        switch (stat.Trim())
         {
             case "ammo":
                 break;
-            case "Health":
-            case "HP":
+            case "health":
+            case "hp":
+                Debug.Log("Success! Entered the Health/HP case block.");
                 ctrler.healthMultiplier += seleectedUpgrade.upgradeValue;
                 ctrler.healthMultiplier = Mathf.Clamp(ctrler.healthMultiplier, 1f, 4f);
                 ctrler.UpdateUpgradedStats("Health");
+                ctrler.updatePlayerUI();
                 break;
 
-            case "Stamina":
+            case "stamina":
                 ctrler.staminaMultiplier += seleectedUpgrade.upgradeValue;
                 ctrler.staminaMultiplier = Mathf.Clamp(ctrler.staminaMultiplier, 1f, 4f);
                 ctrler.UpdateUpgradedStats("Stamina");
+                ctrler.updatePlayerUI();
                 break;
         }
 

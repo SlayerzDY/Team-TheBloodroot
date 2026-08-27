@@ -175,7 +175,7 @@ public class gameManager : MonoBehaviour
              
                 menuActive.SetActive(false);
                 menuActive = MenuTracker.Instance.PreviousMenu();
-                menuActive.SetActive(true);
+                menuActive.SetActive(true); 
                 
             }
             else if (menuActive == menuPause) {

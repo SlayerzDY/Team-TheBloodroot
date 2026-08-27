@@ -4,6 +4,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 //==============================================================================================
@@ -61,6 +62,8 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     float flashlightFlickerTimer;
     float lowBatterySoundTimer;
 
+    public TextMeshProUGUI playerHPText;
+
     //[SerializeField] Transform gunPivot;
     [SerializeField] Transform shootPos;
     public bool newGame;
@@ -68,6 +71,8 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     int jumpCount;
     int HPOrig;
     float stamOrig;
+    public float stamMax;
+    public int maxHp;
     public int gunInvPos;
     float shootTimer;
     Vector3 moveDir;
@@ -80,6 +85,9 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     //==========================================================================================
     void Start() {
+
+        GameObject foundTextObj = GameObject.Find("HP Bar Text");
+        if (foundTextObj != null) { playerHPText = foundTextObj.GetComponent<TextMeshProUGUI>(); }
         isReloading = false;
         if (controller == null) {
             controller = GetComponent<CharacterController>();
@@ -100,7 +108,11 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             gameManager.instance.Load();
         }
 
-
+        if (staminaMultiplier <= 0f) { staminaMultiplier = 1f; }
+        if (healthMultiplier <= 0f) { healthMultiplier = 1f; }
+        UpdateUpgradedStats("all");
+        stam = stamMax;
+        updatePlayerUI();
     }
 
     private IEnumerator ExecuteAfterDelay(float delayInSeconds)
@@ -125,7 +137,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             if (Input.GetKeyDown(KeyCode.F9)) { gameManager.instance.Load(); }
         }
         sprint();
-        if (isSprinting) { StaminaReduction(stamReduction); } else { if (stam <= stamOrig) { StaminaRegen(); }}
+        if (isSprinting) { StaminaReduction(stamReduction); } else { if (stam <= stamMax) { StaminaRegen(); }}
     //==========================================================================================
     // Function, Movement
     //==========================================================================================
@@ -182,7 +194,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             {
                 StaminaRegen();
                 speed /= sprintMod;
-                if (speed < 1) { speed = 1; }
+                if (speed <= 1) { speed = 5; }
                 isSprinting = false;
             }
         }
@@ -416,9 +428,10 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     public void updatePlayerUI() {
         //fixed
         if (gameManager.instance == null || gameManager.instance.playerHPBAR == null) { return; }
-        gameManager.instance.playerHPBAR.fillAmount = (float)HP / HPOrig;
+        gameManager.instance.playerHPBAR.fillAmount = (float)HP / maxHp;
+        if(playerHPText != null) { playerHPText.text = $"{HP} / {maxHp}"; }
         if (gameManager.instance == null || gameManager.instance.playerStamBar == null) { return; }
-        gameManager.instance.playerStamBar.fillAmount = (float)stam / stamOrig;
+        gameManager.instance.playerStamBar.fillAmount = (float)stam / stamMax;
     }
     //==========================================================================================
     // Function, Update Player Ammo
@@ -818,7 +831,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         gameManager.instance.Stamina(true);
         float temp = Mathf.Abs(amount);
         stam -= temp;
-        stam = Mathf.Clamp(stam, 0, stamOrig);
+        stam = Mathf.Clamp(stam, 0, stamMax);
         updatePlayerUI();
         return stam;
     }
@@ -826,7 +839,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     // Function, Stamina Regen
     //==========================================================================================
     private void StaminaRegen() {
-        if (stam >= stamOrig - 1) { gameManager.instance.Stamina(false); stam = stamOrig; return; }
+        if (stam >= stamMax - 1) { gameManager.instance.Stamina(false); stam = stamMax; return; }
         stam += stamRegen;
         updatePlayerUI();
     }
@@ -854,9 +867,22 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     //==========================================================================================
     public void UpdateUpgradedStats(string statType = "all")
     {
-        if (statType == "all" || statType == "Health" || statType == "HP") { HPOrig = Mathf.RoundToInt(HPOrig * healthMultiplier); HP = HPOrig; }
+        if (statType == "all" || statType == "Health" || statType == "HP") {
 
-        if (statType == "all" || statType == "Stamina") { stamOrig = stamOrig * staminaMultiplier; stam = stamOrig; }
+            // use this one for exponential growth of the stats 100 -> 200 -> 400
+            //HPOrig = Mathf.RoundToInt(HPOrig * healthMultiplier); HP = HPOrig;
+
+            // use this one for small increases like going from 100 -> 120 -> 140 or for example 1x multi on the sciptible is 100->200->300 at starting hp values of 100S
+            maxHp = Mathf.RoundToInt(HPOrig * healthMultiplier);
+            HP = maxHp;
+        }
+
+        if (statType == "all" || statType == "Stamina") { 
+
+            stamMax = stamOrig * staminaMultiplier;
+            stam = stamMax;
+        
+        }
     }
     //==========================================================================================
     // Function, Reload Timer
