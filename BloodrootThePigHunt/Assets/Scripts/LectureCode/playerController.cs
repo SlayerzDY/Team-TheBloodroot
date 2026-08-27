@@ -50,6 +50,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     [SerializeField] string flashlightButton = "Fire2";
     [SerializeField] KeyCode flashlightKey = KeyCode.F;
     [SerializeField] private string testLevel = "Level_02";
+    [SerializeField] Material fallbackGunMaterial;
     Vector3 flashlightHoldPosition = new Vector3(0.75f, -0.85f, -0.9f);
     Vector3 flashlightLightPosition = new Vector3(0, -0.05f, 0.15f);
     GameObject flashlightModel;
@@ -723,19 +724,33 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     //==========================================================================================
     // Function, Change Gun
     //==========================================================================================
-    public void changeGun()
-    {
-        // Assign Visuals
+    public void changeGun() {
+        gunStats temp = gunInv[gunInvPos];
+        gunStats dump = gameManager.instance.weaponDatabase.GetByID(temp.itemID);
         updatePlayerAmmo();
-        gunModel.GetComponent<MeshFilter>().sharedMesh = gunInv[gunInvPos].gunModel.GetComponent<MeshFilter>().sharedMesh;
-        gunModel.GetComponent<MeshRenderer>().sharedMaterial = gunInv[gunInvPos].gunModel.GetComponent<MeshRenderer>().sharedMaterial;
+        if (temp.gunModel != null) {
+            MeshFilter sourceFilter = temp.gunModel.GetComponentInChildren<MeshFilter>();
+            MeshRenderer sourceRenderer = temp.gunModel.GetComponentInChildren<MeshRenderer>();
+            MeshFilter targetFilter = gunModel.GetComponentInChildren<MeshFilter>();
+            MeshRenderer targetRenderer = gunModel.GetComponentInChildren<MeshRenderer>();
+            if (targetFilter != null && sourceFilter != null)  {
+                targetFilter.sharedMesh = sourceFilter.sharedMesh;
+            }
+            if (targetRenderer != null) {
+                if (sourceRenderer != null && sourceRenderer.sharedMaterial != null) {
+                    targetRenderer.sharedMaterial = sourceRenderer.sharedMaterial;
+                } else {
+                    targetRenderer.sharedMaterial = fallbackGunMaterial;
+                }
+            }
+        }
         animator.SetInteger("WeaponType", gunInv[gunInvPos].gunType);
         animator.SetBool("IsAiming", true);
     }
-//==========================================================================================
-// Function, Select Gun
-//==========================================================================================
-void selectGun()
+    //==========================================================================================
+    // Function, Select Gun
+    //==========================================================================================
+    void selectGun()
     {
         if (Input.GetAxis("Mouse ScrollWheel") > 0f && gunInvPos < gunInv.Count - 1)
         {
