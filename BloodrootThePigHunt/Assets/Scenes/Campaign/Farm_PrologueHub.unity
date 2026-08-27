@@ -3921,17 +3921,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 24, y: 5.34, z: 4}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &765393429 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6970637296006004547, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-  m_PrefabInstance: {fileID: 2876893488616602247}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9db772dc605d1ab4a8e436e57a590930, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &774719879
 GameObject:
   m_ObjectHideFlags: 0
@@ -11250,22 +11239,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1293284999152927730, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_TextStyleHashCode
-      value: -1183493901
-      objectReference: {fileID: 0}
-    - target: {fileID: 1569124525235386682, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_text
-      value: 'SHOOT [LMB] RELOAD WHEN EMPTY [R] INTERACT [E] INVENTORY [TAB]'
-      objectReference: {fileID: 0}
-    - target: {fileID: 1569124525235386682, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_fontSize
-      value: 26
-      objectReference: {fileID: 0}
-    - target: {fileID: 1569124525235386682, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_fontSizeBase
-      value: 26
-      objectReference: {fileID: 0}
     - target: {fileID: 1856443771790681283, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -11354,122 +11327,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: UI
       objectReference: {fileID: 0}
-    - target: {fileID: 2346639963743731079, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_TextStyleHashCode
-      value: -1183493901
-      objectReference: {fileID: 0}
-    - target: {fileID: 2995019106221505775, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_fontColor32.rgba
-      value: 4282870783
-      objectReference: {fileID: 0}
-    - target: {fileID: 2995019106221505775, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_TextStyleHashCode
-      value: -1183493901
-      objectReference: {fileID: 0}
-    - target: {fileID: 4147449217216785128, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_fontColor32.rgba
-      value: 4293656435
-      objectReference: {fileID: 0}
-    - target: {fileID: 4147449217216785128, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_TextStyleHashCode
-      value: -1183493901
-      objectReference: {fileID: 0}
-    - target: {fileID: 5464869875397994838, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_TextStyleHashCode
-      value: -1183493901
-      objectReference: {fileID: 0}
-    - target: {fileID: 5592903895654892863, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6334860400226859827, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_TextStyleHashCode
-      value: -1183493901
-      objectReference: {fileID: 0}
-    - target: {fileID: 6364421864350112412, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_TextStyleHashCode
-      value: -1183493901
-      objectReference: {fileID: 0}
-    - target: {fileID: 6877949253299540632, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_fontColor32.rgba
-      value: 4283620351
-      objectReference: {fileID: 0}
-    - target: {fileID: 6877949253299540632, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_TextStyleHashCode
-      value: -1183493901
-      objectReference: {fileID: 0}
-    - target: {fileID: 6894900984248403110, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_fontColor32.rgba
-      value: 4283600127
-      objectReference: {fileID: 0}
-    - target: {fileID: 6894900984248403110, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_TextStyleHashCode
-      value: -1183493901
-      objectReference: {fileID: 0}
     - target: {fileID: 6983105011337631069, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 195037784}
-    - target: {fileID: 7403515508645094288, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7403515508645094288, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7403515508645094288, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_AnchorMin.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7403515508645094288, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7403515508645094288, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: -760
-      objectReference: {fileID: 0}
-    - target: {fileID: 7403515508645094288, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 12
-      objectReference: {fileID: 0}
-    - target: {fileID: 7814835639237393465, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_fontColor32.rgba
-      value: 4292268472
-      objectReference: {fileID: 0}
-    - target: {fileID: 7814835639237393465, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_TextStyleHashCode
-      value: -1183493901
-      objectReference: {fileID: 0}
-    - target: {fileID: 8237981792648885035, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8237981792648885035, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 8237981792648885035, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 765393429}
-    - target: {fileID: 8237981792648885035, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 8237981792648885035, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: OpenLevelBlackPines
-      objectReference: {fileID: 0}
-    - target: {fileID: 8237981792648885035, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: buttonFunctions, Assembly-CSharp
-      objectReference: {fileID: 0}
-    - target: {fileID: 8237981792648885035, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
-      value: UnityEngine.Object, UnityEngine
-      objectReference: {fileID: 0}
     - target: {fileID: 9126216655841172495, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
       propertyPath: player
       value: 

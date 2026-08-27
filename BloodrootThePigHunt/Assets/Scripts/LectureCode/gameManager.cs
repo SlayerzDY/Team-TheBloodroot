@@ -140,7 +140,6 @@ public class gameManager : MonoBehaviour
         //==========================================================================================
         timeScaleOrig = GetPlayableTimeScale(Time.timeScale);
         //ScoreboardManager.GetOrCreate();
-
        // timeText.gameObject.SetActive(false);
         enemyCountText.gameObject.SetActive(false);
         //congratulations.gameObject.SetActive(false);
