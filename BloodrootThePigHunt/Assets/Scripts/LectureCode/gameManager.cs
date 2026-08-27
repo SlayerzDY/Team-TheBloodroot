@@ -132,10 +132,10 @@ public class gameManager : MonoBehaviour
         // Only When in WebGL
         //==========================================================================================
 #if UNITY_WEBGL
-    // Runs ONLY when targeting / building for WebGL
+        // Runs ONLY when targeting / building for WebGL
     if (quitButton != null) { DisableQuitButton(true); }
 #else
-        // Do Nothing Yay!
+        // Do Nothing
 #endif
         //==========================================================================================
         timeScaleOrig = GetPlayableTimeScale(Time.timeScale);
@@ -586,7 +586,7 @@ public class gameManager : MonoBehaviour
         if (isOn) {
             quitButton.SetActive(false);
         } else {
-            quitButton.SetActive(isOn);
+            quitButton.SetActive(true);
         }
     }
     //==========================================================================================

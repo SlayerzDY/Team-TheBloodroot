@@ -12375,6 +12375,7 @@ GameObject:
   - component: {fileID: 7154616636168619536}
   - component: {fileID: 7021555055131013390}
   - component: {fileID: 6807934322766034731}
+  - component: {fileID: 5203563641133461229}
   m_Layer: 5
   m_Name: Pause Menu
   m_TagString: Untagged
@@ -12401,10 +12402,10 @@ RectTransform:
   - {fileID: 5217025141151964697}
   m_Father: {fileID: 2415739188045417824}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMin: {x: 0, y: 0.5}
+  m_AnchorMax: {x: 0, y: 0.5}
   m_AnchoredPosition: {x: 152, y: -18}
-  m_SizeDelta: {x: 300, y: -4}
+  m_SizeDelta: {x: 300, y: 1110}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7154616636168619536
 CanvasRenderer:
@@ -12457,6 +12458,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Features.AlphaMenu.AlphaMenuFocusOnEnable
   firstSelectedButton: {fileID: 4821867441215652818}
+--- !u!114 &5203563641133461229
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8550732320864007867}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a8695521f0d02e499659fee002a26c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GridLayoutGroup
+  m_Padding:
+    m_Left: 75
+    m_Right: 0
+    m_Top: 350
+    m_Bottom: 0
+  m_ChildAlignment: 0
+  m_StartCorner: 0
+  m_StartAxis: 0
+  m_CellSize: {x: 160, y: 50}
+  m_Spacing: {x: 20, y: 20}
+  m_Constraint: 0
+  m_ConstraintCount: 2
 --- !u!1 &8555111024787164707
 GameObject:
   m_ObjectHideFlags: 0
