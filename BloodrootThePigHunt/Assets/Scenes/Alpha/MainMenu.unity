@@ -365,7 +365,7 @@ RectTransform:
   m_Father: {fileID: 1170283684}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0.49995, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -1267,8 +1267,8 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 893677733}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.49995, y: 0}
-  m_AnchorMax: {x: 0.49995, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -1320,6 +1320,7 @@ GameObject:
   m_Component:
   - component: {fileID: 516066896}
   - component: {fileID: 516066897}
+  - component: {fileID: 516066898}
   m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
@@ -1342,8 +1343,8 @@ RectTransform:
   - {fileID: 853027294}
   m_Father: {fileID: 1511529315}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 1}
-  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
@@ -1361,6 +1362,32 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ContentSizeFitter
   m_HorizontalFit: 0
   m_VerticalFit: 2
+--- !u!114 &516066898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 516066895}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.VerticalLayoutGroup
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 0
+  m_Spacing: 0
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 1
+  m_ChildControlWidth: 1
+  m_ChildControlHeight: 1
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1 &567428498
 GameObject:
   m_ObjectHideFlags: 0
@@ -1411,7 +1438,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.46226418, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2133,6 +2160,7 @@ MonoBehaviour:
   menuAudio: {fileID: 1543486186}
   menuEventSystem: {fileID: 1838326425}
   menuTransition: {fileID: 82935328}
+  exitMenu: {fileID: 1598286778}
   screenBindings:
   - screenId: 0
     canvasGroup: {fileID: 641034399}
@@ -2175,6 +2203,7 @@ GameObject:
   - component: {fileID: 853027294}
   - component: {fileID: 853027296}
   - component: {fileID: 853027295}
+  - component: {fileID: 853027297}
   m_Layer: 5
   m_Name: Credits Placeholder
   m_TagString: Untagged
@@ -2196,11 +2225,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 516066896}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 16.000053, y: 125}
-  m_SizeDelta: {x: 500, y: 350}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 275, y: 0}
+  m_SizeDelta: {x: 550, y: 0}
+  m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &853027295
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2242,40 +2271,48 @@ MonoBehaviour:
 
     https://www.fab.com/listings/9939041c-a505-47f5-a636-ee51381787ea
 
+
     "Apocalyptic
     Survivor/Assassin Character - Low Poly" by Shady-3D
 
     https://www.fab.com/listings/7b1fe6a8-89ea-491f-b59f-1d2aa48bbe79
+
 
     "FPS
     Guns 4k - Pistol2" by Heart State Games
 
     https://www.fab.com/listings/0d1c1104-b08d-44e1-88a9-4d59106636ac
 
+
     "FPS
     Guns 4k - Rifle 1" by Heart State Games
 
     https://www.fab.com/listings/a7e70f32-2091-416c-8da9-1546b4dff1bb
+
 
     "Human
     Soldier Animations FREE" by Kevin Iglesias
 
     https://assetstore.unity.com/packages/3d/animations/human-soldier-animations-free-340690
 
+
     "Boar"
     by anru97580
 
     https://sketchfab.com/3d-models/boar-30e7851e9ab14d51aff4bcd7d93836bb
+
 
     "Tree"
     by DjMaesen
 
     https://sketchfab.com/3d-models/tree-1d26dcc1af0c4a06a95c459b7ca4cf6f
 
+
     "Game-ready
     Work Bench" by nooo
 
     https://sketchfab.com/3d-models/game-ready-work-bench-0ab9dfe219484a1b99cae2ac569ba1c2
+
 
     3D
     Models
@@ -2284,6 +2321,10 @@ MonoBehaviour:
 
     https://www.meshy.ai
 
+
+    "Low
+    Poly: Witch Doll" (https://skfb.ly/orGPo) by ClintonAbbott.Art is licensed under
+    Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
 
 
     UI
@@ -2302,10 +2343,12 @@ MonoBehaviour:
 
     https://www.fab.com/listings/9d4c3cc6-1720-447a-981c-ba1349cf2810
 
+
     "Serendipity"
     by 1000 Handz
 
     https://freemusicarchive.org/music/1000-handz/cc-by-free-to-use-melodiessamples-no-drums/serendipity/
+
 
     "[Misc]"
     - pixabay Sound Effects
@@ -2358,7 +2401,7 @@ MonoBehaviour:
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 2
-  m_VerticalAlignment: 512
+  m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_characterHorizontalScale: 1
@@ -2403,6 +2446,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 853027293}
   m_CullTransparentMesh: 1
+--- !u!114 &853027297
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 853027293}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ContentSizeFitter
+  m_HorizontalFit: 0
+  m_VerticalFit: 2
 --- !u!1 &893677732
 GameObject:
   m_ObjectHideFlags: 0
@@ -2683,8 +2740,8 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1922335133}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.49995, y: 0}
-  m_AnchorMax: {x: 0.49995, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -3079,9 +3136,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -335}
+  m_AnchoredPosition: {x: 0, y: -135}
   m_SizeDelta: {x: 550, y: 400}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1143252080
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3097,7 +3154,7 @@ MonoBehaviour:
   m_Content: {fileID: 516066896}
   m_Horizontal: 0
   m_Vertical: 1
-  m_MovementType: 0
+  m_MovementType: 2
   m_Elasticity: 20
   m_Inertia: 1
   m_DecelerationRate: 0.135
@@ -3106,7 +3163,7 @@ MonoBehaviour:
   m_HorizontalScrollbar: {fileID: 1855566660}
   m_VerticalScrollbar: {fileID: 1563796439}
   m_HorizontalScrollbarVisibility: 2
-  m_VerticalScrollbarVisibility: 2
+  m_VerticalScrollbarVisibility: 0
   m_HorizontalScrollbarSpacing: -3
   m_VerticalScrollbarSpacing: -3
   m_OnValueChanged:
@@ -3385,7 +3442,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!225 &1272957495
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -3394,7 +3451,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1272957494}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 0
   m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
@@ -4237,7 +4294,7 @@ RectTransform:
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0, y: 1}
+  m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1511529316
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4856,7 +4913,7 @@ RectTransform:
   m_Father: {fileID: 971669203}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0.49995, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -5086,7 +5143,7 @@ MonoBehaviour:
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_DisabledColor: {r: 1, g: 1, b: 1, a: 0}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
@@ -5105,7 +5162,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 567428499}
   m_Direction: 2
   m_Value: 1
-  m_Size: 1
+  m_Size: 0.21635973
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -5892,9 +5949,9 @@ RectTransform:
   m_Father: {fileID: 1143252079}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 20}
+  m_SizeDelta: {x: -17, y: 20}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &1855566660
 MonoBehaviour:
@@ -5939,7 +5996,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 731770991}
   m_HandleRect: {fileID: 731770990}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -6443,6 +6500,7 @@ GameObject:
   - component: {fileID: 1977123954}
   - component: {fileID: 1977123953}
   - component: {fileID: 1977123952}
+  - component: {fileID: 1977123957}
   m_Layer: 5
   m_Name: Exit Button
   m_TagString: Untagged
@@ -6605,6 +6663,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1977123950}
   m_CullTransparentMesh: 1
+--- !u!114 &1977123957
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1977123950}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28239d4e1e0f4a87a21192f88c283411, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bloodroot.Features.AlphaMenu.WebGLQuitButtonGuard
+  quitControl: {fileID: 1977123954}
 --- !u!1 &2051536314
 GameObject:
   m_ObjectHideFlags: 0

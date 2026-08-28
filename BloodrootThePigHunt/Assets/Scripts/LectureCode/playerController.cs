@@ -4,6 +4,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 //==============================================================================================
@@ -50,6 +51,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     [SerializeField] string flashlightButton = "Fire2";
     [SerializeField] KeyCode flashlightKey = KeyCode.F;
     [SerializeField] private string testLevel = "Level_02";
+    [SerializeField] Material fallbackGunMaterial;
     Vector3 flashlightHoldPosition = new Vector3(0.75f, -0.85f, -0.9f);
     Vector3 flashlightLightPosition = new Vector3(0, -0.05f, 0.15f);
     GameObject flashlightModel;
@@ -60,6 +62,8 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     float flashlightFlickerTimer;
     float lowBatterySoundTimer;
 
+    public TextMeshProUGUI playerHPText;
+
     //[SerializeField] Transform gunPivot;
     [SerializeField] Transform shootPos;
     public bool newGame;
@@ -67,17 +71,24 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     int jumpCount;
     int HPOrig;
     float stamOrig;
+    public float stamMax;
+    public int maxHp;
     public int gunInvPos;
     float shootTimer;
     Vector3 moveDir;
     Vector3 playerVel;
     bool isSprinting;
     bool isPlayingSteps;
+    private bool isReloading;
     //private bool isJumping;
     //==========================================================================================
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     //==========================================================================================
     void Start() {
+
+        GameObject foundTextObj = GameObject.Find("HP Bar Text");
+        if (foundTextObj != null) { playerHPText = foundTextObj.GetComponent<TextMeshProUGUI>(); }
+        isReloading = false;
         if (controller == null) {
             controller = GetComponent<CharacterController>();
             if (controller == null) {
@@ -97,7 +108,11 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             gameManager.instance.Load();
         }
 
-
+        if (staminaMultiplier <= 0f) { staminaMultiplier = 1f; }
+        if (healthMultiplier <= 0f) { healthMultiplier = 1f; }
+        UpdateUpgradedStats("all");
+        stam = stamMax;
+        updatePlayerUI();
     }
 
     private IEnumerator ExecuteAfterDelay(float delayInSeconds)
@@ -122,7 +137,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             if (Input.GetKeyDown(KeyCode.F9)) { gameManager.instance.Load(); }
         }
         sprint();
-        if (isSprinting) { StaminaReduction(stamReduction); } else { if (stam <= stamOrig) { StaminaRegen(); }}
+        if (isSprinting) { StaminaReduction(stamReduction); } else { if (stam <= stamMax) { StaminaRegen(); }}
     //==========================================================================================
     // Function, Movement
     //==========================================================================================
@@ -142,21 +157,40 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
         controller.Move(playerVel * Time.deltaTime);
         playerVel.y -= gravity * Time.deltaTime;
         shootTimer += Time.deltaTime;
-        if (Input.GetButton("Fire1") && gunInv.Count > 0 && gunInv[gunInvPos].ammoCurr > 0 && shootTimer > gunInv[gunInvPos].shootRate) { shoot(); }
+        if (Input.GetButton("Fire1") && gunInv.Count > 0 && gunInv[gunInvPos].ammoCurr > 0 && shootTimer > gunInv[gunInvPos].shootRate && !isReloading) { shoot(); }
         if (gunInv.Count > 0)   
         {
           Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.forward * gunInv[gunInvPos].shootDistance, Color.red);
         }
-         reload();
+        if (gunInv.Count> 0 && gunInv[gunInvPos] != null && gunInv[gunInvPos].ammoCurr <= 0) { 
+                
+                gameManager.instance.NeedReload = true;
+                gameManager.instance.NeedReloading();
+                reload();
+
+        }
+        
+       // reload();
     }
     //==========================================================================================
     // Function, Sprint
     //==========================================================================================
     void sprint()
         {
+            if (stam <= 1)
+            {
+                StaminaRegen();
+                speed = speedOrig;
+                isSprinting = false;
+                return;
+            }
             if (Input.GetButtonDown("Sprint"))
             {
-                if (stam <= 1) { return; }
+                if (stam <= 1) {
+                    speed = speedOrig;
+                    isSprinting = false;
+                    return; 
+                }
                 speed *= sprintMod;
                 isSprinting = true;
             }
@@ -164,7 +198,7 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
             {
                 StaminaRegen();
                 speed /= sprintMod;
-                if (speed < 1) { speed = 1; }
+                if (speed <= 4) { speed = 5; }
                 isSprinting = false;
             }
         }
@@ -317,10 +351,13 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
 
     void reload() {
         if (Input.GetButtonDown("Reload") && gunInv.Count > 0) {
+            isReloading = true;
             if (gunInv[gunInvPos].reloadSound.Count() > 0) { audioManager.instance.audPlayer.PlayOneShot(gunInv[gunInvPos].reloadSound[Random.Range(0, gunInv[gunInvPos].reloadSound.Length)], gunInv[gunInvPos].reloadSoundVolume); }
             animator.SetTrigger("IsReload");
             gunInv[gunInvPos].ammoCurr = gunInv[gunInvPos].ammoMax;
-            updatePlayerAmmo();
+            gameManager.instance.NeedReload = false;
+            gameManager.instance.NeedReloading();
+            StartCoroutine(ReloadTimer(2f));
         }
     }
     //==========================================================================================
@@ -395,9 +432,10 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     public void updatePlayerUI() {
         //fixed
         if (gameManager.instance == null || gameManager.instance.playerHPBAR == null) { return; }
-        gameManager.instance.playerHPBAR.fillAmount = (float)HP / HPOrig;
+        gameManager.instance.playerHPBAR.fillAmount = (float)HP / maxHp;
+        if(playerHPText != null) { playerHPText.text = $"{HP} / {maxHp}"; }
         if (gameManager.instance == null || gameManager.instance.playerStamBar == null) { return; }
-        gameManager.instance.playerStamBar.fillAmount = (float)stam / stamOrig;
+        gameManager.instance.playerStamBar.fillAmount = (float)stam / stamMax;
     }
     //==========================================================================================
     // Function, Update Player Ammo
@@ -703,28 +741,46 @@ public class playerController : MonoBehaviour, IDamage, IPickupGun, IPickupFlash
     //==========================================================================================
     // Function, Change Gun
     //==========================================================================================
-    public void changeGun()
-    {
-        // Assign Visuals
+    public void changeGun() {
+        gunStats temp = gunInv[gunInvPos];
+        gunStats dump = gameManager.instance.weaponDatabase.GetByID(temp.itemID);
         updatePlayerAmmo();
-        gunModel.GetComponent<MeshFilter>().sharedMesh = gunInv[gunInvPos].gunModel.GetComponent<MeshFilter>().sharedMesh;
-        gunModel.GetComponent<MeshRenderer>().sharedMaterial = gunInv[gunInvPos].gunModel.GetComponent<MeshRenderer>().sharedMaterial;
+        if (temp.gunModel != null) {
+            MeshFilter sourceFilter = temp.gunModel.GetComponentInChildren<MeshFilter>();
+            MeshRenderer sourceRenderer = temp.gunModel.GetComponentInChildren<MeshRenderer>();
+            MeshFilter targetFilter = gunModel.GetComponentInChildren<MeshFilter>();
+            MeshRenderer targetRenderer = gunModel.GetComponentInChildren<MeshRenderer>();
+            if (targetFilter != null && sourceFilter != null)  {
+                targetFilter.sharedMesh = sourceFilter.sharedMesh;
+            }
+            if (targetRenderer != null) {
+                if (sourceRenderer != null && sourceRenderer.sharedMaterial != null) {
+                    targetRenderer.sharedMaterial = sourceRenderer.sharedMaterial;
+                } else {
+                    targetRenderer.sharedMaterial = fallbackGunMaterial;
+                }
+            }
+        }
         animator.SetInteger("WeaponType", gunInv[gunInvPos].gunType);
         animator.SetBool("IsAiming", true);
     }
-//==========================================================================================
-// Function, Select Gun
-//==========================================================================================
-void selectGun()
+    //==========================================================================================
+    // Function, Select Gun
+    //==========================================================================================
+    void selectGun()
     {
         if (Input.GetAxis("Mouse ScrollWheel") > 0f && gunInvPos < gunInv.Count - 1)
         {
             gunInvPos++;
+            gameManager.instance.NeedReload = false;
+            gameManager.instance.NeedReloading();
             changeGun();
         }
         else if (Input.GetAxis("Mouse ScrollWheel") < 0f && gunInvPos > 0)
         {
             gunInvPos--;
+            gameManager.instance.NeedReload = false;
+            gameManager.instance.NeedReloading();
             changeGun();
         }
     }
@@ -779,7 +835,7 @@ void selectGun()
         gameManager.instance.Stamina(true);
         float temp = Mathf.Abs(amount);
         stam -= temp;
-        stam = Mathf.Clamp(stam, 0, stamOrig);
+        stam = Mathf.Clamp(stam, 0, stamMax);
         updatePlayerUI();
         return stam;
     }
@@ -787,7 +843,7 @@ void selectGun()
     // Function, Stamina Regen
     //==========================================================================================
     private void StaminaRegen() {
-        if (stam >= stamOrig) { gameManager.instance.Stamina(false); stam = stamOrig; return; }
+        if (stam >= stamMax - 1) { gameManager.instance.Stamina(false); stam = stamMax; return; }
         stam += stamRegen;
         updatePlayerUI();
     }
@@ -811,16 +867,36 @@ void selectGun()
         }
     }
     //==========================================================================================
-    //==========================================================================================
     // Function, Called in Upgradee tabl to update stats once upgraded
     //==========================================================================================
     public void UpdateUpgradedStats(string statType = "all")
     {
-        if (statType == "all" || statType == "Health" || statType == "HP") { HPOrig = Mathf.RoundToInt(HPOrig * healthMultiplier); HP = HPOrig; }
+        if (statType == "all" || statType == "Health" || statType == "HP") {
 
-        if (statType == "all" || statType == "Stamina") { stamOrig = stamOrig * staminaMultiplier; stam = stamOrig; }
+            // use this one for exponential growth of the stats 100 -> 200 -> 400
+            //HPOrig = Mathf.RoundToInt(HPOrig * healthMultiplier); HP = HPOrig;
+
+            // use this one for small increases like going from 100 -> 120 -> 140 or for example 1x multi on the sciptible is 100->200->300 at starting hp values of 100S
+            maxHp = Mathf.RoundToInt(HPOrig * healthMultiplier);
+            HP = maxHp;
+        }
+
+        if (statType == "all" || statType == "Stamina") { 
+
+            stamMax = stamOrig * staminaMultiplier;
+            stam = stamMax;
+        
+        }
     }
-
+    //==========================================================================================
+    // Function, Reload Timer
+    //==========================================================================================
+    private IEnumerator ReloadTimer(float seconds) {
+        yield return new WaitForSecondsRealtime(seconds);
+        updatePlayerAmmo();
+        isReloading = false;
+    }
+    //==========================================================================================
 }
 //==============================================================================================
 // End of Player Controller .cs

@@ -18,10 +18,12 @@ public class UpgradeUI : MonoBehaviour
     // private variables
     private UpgradeScriptable activeScriptable;
     private UpgradeTable activeTable;
+    private Inventory playerInventory;
 
     private void Start()
     {
-        if (panel != null) { panel.SetActive(false); }
+        //if (panel != null) { panel.SetActive(false); }
+        playerInventory = FindAnyObjectByType<Inventory>();
     }
 
     public void OpenPanelMulti(List<UpgradeScriptable> available, UpgradeTable table)
@@ -77,7 +79,9 @@ public class UpgradeUI : MonoBehaviour
         activeScriptable = data;
         seleectText.text = $"Selected Upgrade: {data.upgradeNamee}";
         detailsText.text = $"{data.statToUpgrade} is being Upgraded (+{data.upgradeValue}x)";
-        costTeext.text = $"Need {data.requirdAmount} {data.requiredItem.GetComponent<Item>().item.itemName}'s"; ;   
+        string itemName = data.requiredItem.GetComponent<Item>().item.itemName;
+        int currentCount = GetCurrentItemCount(itemName);
+        costTeext.text = $"Need {itemName} {currentCount} / {data.requirdAmount}"; 
         
         if(purchase != null) { purchase.gameObject.SetActive(true); }
         purchase.onClick.RemoveAllListeners();
@@ -104,6 +108,18 @@ public class UpgradeUI : MonoBehaviour
         if (isSuccess) { notificationText.color = Color.green;  }
         else {notificationText.color = Color.red; }
 
+    }
+
+    private int GetCurrentItemCount(string requiredItemName)
+    {
+
+        if (playerInventory == null || playerInventory.inventoryItems == null) return 0;
+        int count = 0;
+        foreach (ItemStats item in playerInventory.inventoryItems)
+        {
+            if (item != null && item.itemName == requiredItemName) {  count+= item.quantity;}
+        }
+        return count;
     }
 
 }

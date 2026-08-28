@@ -37,7 +37,10 @@ public class gameManager : MonoBehaviour
     [SerializeField] GameObject menuExtraction;
     [SerializeField] GameObject menuUpgrade;
     [SerializeField] GameObject menuToast;
+    [SerializeField] GameObject menuLoading;
+    [SerializeField] GameObject quitButton;
     //[SerializeField] TMP_Text gameGoalCountText;
+    
 
     [Header("Text")]
     [SerializeField] TMP_Text timeText;
@@ -54,6 +57,7 @@ public class gameManager : MonoBehaviour
     public TextMeshProUGUI weight;
     public TextMeshProUGUI AmmoCount;
     public TextMeshProUGUI FlashlightCount;
+    public TextMeshProUGUI ReloadingText;
     public Image playerHPBAR;
     public GameObject playerStam;
     public Image playerStamBar;
@@ -68,6 +72,7 @@ public class gameManager : MonoBehaviour
     private float timeScaleOrig;
     //private int gameGoalCount;
     //private bool waveManagerControlsWin;
+    public bool NeedReload = false;
 
     [Header("Tree Root Variables")]
     public TreeSpawner RootSpanw;
@@ -115,9 +120,24 @@ public class gameManager : MonoBehaviour
     //==========================================================================================
     void Start()
     {
+        //==========================================================================================
+        // Clear the loading overlay once the scene is active
+        //==========================================================================================
+        // Start runs after scene activation. Clear any leftover loading panel
+        // on every platform without changing the player's pause state.
+        if (menuLoading != null) { LoadMenu(false); }
+        //==========================================================================================
+        // Only When in WebGL
+        //==========================================================================================
+#if UNITY_WEBGL
+        // Runs ONLY when targeting / building for WebGL
+    if (quitButton != null) { DisableQuitButton(true); }
+#else
+        // Do Nothing
+#endif
+        //==========================================================================================
         timeScaleOrig = GetPlayableTimeScale(Time.timeScale);
         //ScoreboardManager.GetOrCreate();
-
        // timeText.gameObject.SetActive(false);
         enemyCountText.gameObject.SetActive(false);
         //congratulations.gameObject.SetActive(false);
@@ -148,17 +168,12 @@ public class gameManager : MonoBehaviour
                 menuActive.SetActive(true);
             }
             else if (menuActive != null && menuActive != menuPause) {
-                if (menuActive == menuUpgrade)
-                {
-                    if (MenuTracker.Instance != null) MenuTracker.Instance.Clear();
-                    stateUnpause();
-                }
-                else
-                {
-                    menuActive.SetActive(false);
-                    menuActive = MenuTracker.Instance.PreviousMenu();
-                    menuActive.SetActive(true);
-                }
+                
+             
+                menuActive.SetActive(false);
+                menuActive = MenuTracker.Instance.PreviousMenu();
+                menuActive.SetActive(true); 
+                
             }
             else if (menuActive == menuPause) {
                 menuActive.SetActive(false);
@@ -166,6 +181,7 @@ public class gameManager : MonoBehaviour
                 MenuTracker.Instance.Clear();
                 stateUnpause();
             }
+            
         }
         if (Input.GetButtonDown("Inventory"))
         {
@@ -228,10 +244,10 @@ public class gameManager : MonoBehaviour
 
             if (menuActive != null) { menuActive.SetActive(true); }
 
-            if (MenuTracker.Instance != null)
-            {
-                MenuTracker.Instance.AddMenu(menuUpgrade);
-            }
+            //if (MenuTracker.Instance != null)
+            //{
+            //    MenuTracker.Instance.AddMenu(menuUpgrade);
+            //}
         }
     }
     //==========================================================================================
@@ -550,12 +566,42 @@ public class gameManager : MonoBehaviour
         }
     }
     //==========================================================================================
+    // Function, Toast Menu
+    //==========================================================================================
+    public void LoadMenu(bool isOn) {
+        if (isOn) {
+            menuLoading.SetActive(isOn);
+            StartCoroutine(AutoHideLoading());
+        } else {
+            menuLoading.SetActive(false);
+        }
+    }
+    //==========================================================================================
+    // Function, Toast Menu
+    //==========================================================================================
+    public void DisableQuitButton(bool isOn) {
+        if (isOn) {
+            quitButton.SetActive(false);
+        } else {
+            quitButton.SetActive(true);
+        }
+    }
+    //==========================================================================================
     // Function, Auto Hide Toast
     //==========================================================================================
     private IEnumerator AutoHideToast() {
         yield return new WaitForSeconds(3f);
         menuToast.SetActive(false);
         ToastMenu(false, "Hidden");
+    }
+    //==========================================================================================
+    // Function, Auto Hide Toast
+    //==========================================================================================
+    private IEnumerator AutoHideLoading() {
+        // Loading UI must still finish while an extraction or pause menu
+        // has stopped gameplay time.
+        yield return new WaitForSecondsRealtime(10f);
+        LoadMenu(false);
     }
     //==========================================================================================
     // Function, Save
@@ -653,7 +699,33 @@ public class gameManager : MonoBehaviour
         if (controller == null) { return; }
         controller.LoadLevel(levelName);
     }
+
+
+    public void NeedReloading()
+    {
+
+        if (NeedReload){
+
+            Color c = ReloadingText.color;
+            c.a = 1f;
+            ReloadingText.color = c;
+
+
+        }
+        else {
+
+            Color c = ReloadingText.color;
+            c.a = 0f;
+            ReloadingText.color = c;
+
+
+        }
+
+    }
+
     //==========================================================================================
+
+
 }
 //==============================================================================================
 // End of Game Manager

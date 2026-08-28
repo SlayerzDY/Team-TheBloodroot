@@ -25,6 +25,8 @@ public static class BloodrootNavMeshSpawnGroundingRepair
 {
     private const string FarmScenePath =
         "Assets/Scenes/Campaign/Farm_PrologueHub.unity";
+    private const string FarmNavMeshDataPath =
+        "Assets/Scenes/Campaign/Farm_PrologueHub/NavMesh-Level NavMesh Surface.asset";
     private const string OpenWorldScenePath =
         "Assets/Scenes/OpenWorld/Bloodroot_OpenWorld.unity";
     private const int WalkableAreaMask = 1;
@@ -38,6 +40,11 @@ public static class BloodrootNavMeshSpawnGroundingRepair
     private const float BelowTerrainTolerance = 0.05f;
     private const float SpawnVolumeSampleDistance = 0.75f;
     private const float MinimumSafeSpawnVolumeSize = 0.5f;
+    private const float GeometrySupportTolerance = 0.08f;
+    private const float GeometryMaximumAuditDrop = 2.5f;
+    private const float GeometryMaximumSupportPenetration = 0.20f;
+    private const float GeometryRepairTolerance = 0.035f;
+    private const float GeometryMaximumRepairDrop = 3f;
 
     private readonly struct FarmSpawnVolumeSpec
     {
@@ -63,11 +70,11 @@ public static class BloodrootNavMeshSpawnGroundingRepair
     {
         new FarmSpawnVolumeSpec(
             "EMERGENCE_ZONE_01",
-            new Vector2(45f, 27f),
+            new Vector2(45f, 25f),
             new Vector2(12f, 4f)),
         new FarmSpawnVolumeSpec(
             "EMERGENCE_ZONE_02",
-            new Vector2(27.2f, -28.3f),
+            new Vector2(33f, -28.3f),
             new Vector2(24f, 4f)),
         new FarmSpawnVolumeSpec(
             "EMERGENCE_ZONE_03",
@@ -132,6 +139,236 @@ public static class BloodrootNavMeshSpawnGroundingRepair
     }
 
     /// <summary>
+    /// Read-only live-scene diagnostic for static visual placements. Detailed
+    /// architecture keeps its authored compound colliders and exact deployment
+    /// poses; this audit identifies loose unsupported visuals, missing solid
+    /// collision, and stair meshes without local physical collision.
+    /// </summary>
+    [MenuItem("Tools/Bloodroot/Navigation/Audit Campaign Geometry Integrity")]
+    public static void AuditCampaignGeometryIntegrity()
+    {
+        EnsureIdleEditor();
+
+        SceneSetup[] originalSetup = EditorSceneManager.GetSceneManagerSetup();
+        bool restoreSetup = !Application.isBatchMode &&
+                            originalSetup != null &&
+                            originalSetup.Length > 0;
+        try
+        {
+            AuditSceneGeometry(FarmScenePath, "Farm Prologue/Hub");
+            AuditSceneGeometry(OpenWorldScenePath, "Open World");
+            Console.WriteLine("BLOODROOT_CAMPAIGN_GEOMETRY_AUDIT: PASS_COMPLETED");
+        }
+        finally
+        {
+            if (restoreSetup)
+            {
+                EditorSceneManager.RestoreSceneManagerSetup(originalSetup);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Read-only route proof against the current Safety campaign topology.
+    /// It intentionally does not use the retired six-objective Alpha mission
+    /// validator: the current campaign has one progression tower per area.
+    /// </summary>
+    [MenuItem("Tools/Bloodroot/Navigation/Validate Campaign Geometry Traversal")]
+    public static void ValidateCampaignGeometryTraversal()
+    {
+        EnsureIdleEditor();
+
+        SceneSetup[] originalSetup = EditorSceneManager.GetSceneManagerSetup();
+        bool restoreSetup = !Application.isBatchMode &&
+                            originalSetup != null &&
+                            originalSetup.Length > 0;
+        try
+        {
+            Scene farm = EditorSceneManager.OpenScene(
+                FarmScenePath,
+                OpenSceneMode.Single);
+            NavMeshSurface farmSurface = RequireSingleSurface(
+                farm,
+                "Farm Prologue/Hub");
+            EnsureSurfaceDataRegistered(farmSurface, "Farm Prologue/Hub");
+            int farmRoutes = ValidateFarmObjectiveTraversal(farm);
+
+            Scene world = EditorSceneManager.OpenScene(
+                OpenWorldScenePath,
+                OpenSceneMode.Single);
+            NavMeshSurface worldSurface = RequireSingleSurface(
+                world,
+                "Open World");
+            EnsureSurfaceDataRegistered(worldSurface, "Open World");
+            int activeLinks = RefreshActiveNavMeshLinks(world);
+            int markerRoutes = ValidateRouteMarkerContainers(world);
+            int namedRoutes = ValidateOpenWorldNamedTraversal(world);
+
+            Console.WriteLine(
+                "BLOODROOT_CAMPAIGN_GEOMETRY_TRAVERSAL: PASS " +
+                "farmObjectiveRoutes=" + farmRoutes + " " +
+                "activeOpenWorldLinks=" + activeLinks + " " +
+                "openWorldMarkerRoutes=" + markerRoutes + " " +
+                "openWorldNamedRoutes=" + namedRoutes + ".");
+        }
+        finally
+        {
+            if (restoreSetup)
+            {
+                EditorSceneManager.RestoreSceneManagerSetup(originalSetup);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Grounds only known ground-contact scenery, restores the authored
+    /// low-poly forest collision that scene dressing disabled, and fits
+    /// collision to the small number of Farm meshes that have no authored
+    /// collision. Enterable architecture retains its source-prefab compound
+    /// walls, doorway gaps, floors, and physical stair ramps.
+    /// </summary>
+    [MenuItem("Tools/Bloodroot/Navigation/Repair Campaign Geometry Integrity")]
+    public static void RepairCampaignGeometryIntegrity()
+    {
+        EnsureIdleEditor();
+
+        SceneSetup[] originalSetup = EditorSceneManager.GetSceneManagerSetup();
+        bool restoreSetup = !Application.isBatchMode &&
+                            originalSetup != null &&
+                            originalSetup.Length > 0;
+        try
+        {
+            int farmGrounded;
+            int farmColliders;
+            RepairSceneGeometry(
+                FarmScenePath,
+                "Farm Prologue/Hub",
+                true,
+                out farmGrounded,
+                out farmColliders);
+
+            int worldGrounded;
+            int worldColliders;
+            RepairSceneGeometry(
+                OpenWorldScenePath,
+                "Open World",
+                false,
+                out worldGrounded,
+                out worldColliders);
+
+            AssetDatabase.SaveAssets();
+            Console.WriteLine(
+                "BLOODROOT_CAMPAIGN_GEOMETRY_REPAIR: PASS " +
+                "farmGrounded=" + farmGrounded + " " +
+                "farmColliders=" + farmColliders + " " +
+                "openWorldGrounded=" + worldGrounded + " " +
+                "openWorldColliders=" + worldColliders + ".");
+        }
+        finally
+        {
+            if (restoreSetup)
+            {
+                EditorSceneManager.RestoreSceneManagerSetup(originalSetup);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Rebuilds the shared Farm Prologue/Hub and Open World NavMeshSurfaces in
+    /// isolation, then validates every current campaign enemy spawn marker
+    /// against the new navigation data. Both canonical asset GUIDs remain
+    /// stable so authored scene references are preserved.
+    /// </summary>
+    [MenuItem("Tools/Bloodroot/Navigation/Bake and Repair Campaign Navigation")]
+    public static void BakeAndRepairCampaignNavigation()
+    {
+        EnsureIdleEditor();
+
+        SceneSetup[] originalSetup = EditorSceneManager.GetSceneManagerSetup();
+        bool restoreSetup = !Application.isBatchMode &&
+                            originalSetup != null &&
+                            originalSetup.Length > 0;
+        try
+        {
+            // Prologue and Hub are two states of this one Farm scene, so the
+            // single focused Farm bake updates navigation for both states.
+            RebuildFarmNavMeshOnly();
+            RebuildOpenWorldNavMeshOnly();
+            RepairAndValidate();
+            Console.WriteLine(
+                "BLOODROOT_CAMPAIGN_NAVMESH_BAKE: PASS " +
+                "farm=Farm_PrologueHub openWorld=Bloodroot_OpenWorld.");
+        }
+        finally
+        {
+            if (restoreSetup)
+            {
+                EditorSceneManager.RestoreSceneManagerSetup(originalSetup);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Rebuilds the shared Farm Prologue/Hub NavMeshSurface in isolation and
+    /// replaces only the canonical NavMesh asset contents. The existing meta
+    /// file and GUID remain unchanged so every authored reference stays valid.
+    /// </summary>
+    private static void RebuildFarmNavMeshOnly()
+    {
+        Scene scene = EditorSceneManager.OpenScene(
+            FarmScenePath,
+            OpenSceneMode.Single);
+        NavMeshSurface surface = RequireSingleSurface(
+            scene,
+            "Farm Prologue/Hub");
+        NavMeshData canonicalData = surface.navMeshData;
+        string canonicalPath = AssetDatabase.GetAssetPath(canonicalData);
+        string canonicalGuid = AssetDatabase.AssetPathToGUID(canonicalPath);
+        if (!string.Equals(
+                canonicalPath,
+                FarmNavMeshDataPath,
+                StringComparison.Ordinal) ||
+            string.IsNullOrWhiteSpace(canonicalGuid))
+        {
+            throw new InvalidOperationException(
+                "Farm Prologue/Hub NavMeshSurface must reference the canonical " +
+                "saved NavMesh asset at '" + FarmNavMeshDataPath + "'.");
+        }
+
+        Physics.SyncTransforms();
+        surface.BuildNavMesh();
+        NavMeshData rebuiltData = surface.navMeshData;
+        if (rebuiltData == null || rebuiltData == canonicalData)
+        {
+            throw new InvalidOperationException(
+                "Farm Prologue/Hub NavMeshSurface did not produce new " +
+                "navigation data.");
+        }
+
+        CommitRebuiltNavMeshData(
+            surface,
+            rebuiltData,
+            canonicalData,
+            canonicalPath,
+            canonicalGuid,
+            "Farm Prologue/Hub");
+        EnsureSurfaceDataRegistered(surface, "Farm Prologue/Hub");
+        EditorUtility.SetDirty(surface);
+        EditorSceneManager.MarkSceneDirty(scene);
+        if (!EditorSceneManager.SaveScene(scene, FarmScenePath))
+        {
+            throw new InvalidOperationException(
+                "Unity could not save the focused Farm Prologue/Hub " +
+                "NavMesh bake.");
+        }
+
+        AssetDatabase.SaveAssets();
+        Console.WriteLine(
+            "BLOODROOT_FARM_NAVMESH_BAKE: PASS guid=" +
+            canonicalGuid + ".");
+    }
+
+    /// <summary>
     /// Rebuilds only the currently authored Open World NavMeshSurface. It does
     /// not invoke the retired alpha-mission builder because that builder owns
     /// a superseded multi-objective campaign contract. The replacement keeps
@@ -163,12 +400,8 @@ public static class BloodrootNavMeshSpawnGroundingRepair
                 "Open World NavMeshSurface must reference a canonical saved NavMesh asset.");
         }
 
-        string canonicalFullPath = ToProjectFilePath(canonicalPath);
-        byte[] originalNavMeshBytes = File.ReadAllBytes(canonicalFullPath);
-        string temporaryPath = string.Empty;
         Dictionary<GameObject, bool> activeStates = null;
         Dictionary<Collider, bool> gateColliderStates = null;
-        bool canonicalReplaced = false;
 
         try
         {
@@ -184,39 +417,13 @@ public static class BloodrootNavMeshSpawnGroundingRepair
                     "Open World NavMeshSurface did not produce a new NavMeshData instance.");
             }
 
-            rebuiltData.name = Path.GetFileNameWithoutExtension(canonicalPath);
-
-            temporaryPath = AssetDatabase.GenerateUniqueAssetPath(
-                "Assets/Scenes/OpenWorld/Bloodroot_OpenWorld/" +
-                "NavMesh-SpawnGrounding.pending.asset");
-            AssetDatabase.CreateAsset(rebuiltData, temporaryPath);
-            AssetDatabase.SaveAssets();
-
-            surface.RemoveData();
-            surface.navMeshData = null;
-            File.Copy(
-                ToProjectFilePath(temporaryPath),
-                canonicalFullPath,
-                overwrite: true);
-            canonicalReplaced = true;
-            AssetDatabase.Refresh(
-                ImportAssetOptions.ForceSynchronousImport |
-                ImportAssetOptions.ForceUpdate);
-
-            NavMeshData reboundData = AssetDatabase.LoadAssetAtPath<NavMeshData>(
-                canonicalPath);
-            if (reboundData == null ||
-                !string.Equals(
-                    AssetDatabase.AssetPathToGUID(canonicalPath),
-                    canonicalGuid,
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                throw new InvalidOperationException(
-                    "Focused Open World bake did not preserve the canonical NavMesh asset GUID.");
-            }
-
-            surface.navMeshData = reboundData;
-            surface.AddData();
+            CommitRebuiltNavMeshData(
+                surface,
+                rebuiltData,
+                canonicalData,
+                canonicalPath,
+                canonicalGuid,
+                "Open World");
             RestoreThornVeilBakeColliders(gateColliderStates);
             gateColliderStates = null;
             RestoreActiveStates(activeStates);
@@ -235,8 +442,6 @@ public static class BloodrootNavMeshSpawnGroundingRepair
                     "Unity could not save the focused Open World NavMesh bake.");
             }
 
-            AssetDatabase.DeleteAsset(temporaryPath);
-            temporaryPath = string.Empty;
             AssetDatabase.SaveAssets();
             Console.WriteLine(
                 "BLOODROOT_OPEN_WORLD_NAVMESH_BAKE: PASS guid=" +
@@ -255,20 +460,86 @@ public static class BloodrootNavMeshSpawnGroundingRepair
                 // saved until the success path, so reopening remains safe.
             }
 
-            if (!string.IsNullOrWhiteSpace(temporaryPath))
+            throw;
+        }
+    }
+
+    private static void CommitRebuiltNavMeshData(
+        NavMeshSurface surface,
+        NavMeshData rebuiltData,
+        NavMeshData canonicalData,
+        string canonicalPath,
+        string canonicalGuid,
+        string label)
+    {
+        NavMeshData rollbackData = UnityEngine.Object.Instantiate(canonicalData);
+        bool canonicalUpdated = false;
+
+        try
+        {
+            surface.RemoveData();
+            canonicalUpdated = true;
+            EditorUtility.CopySerialized(rebuiltData, canonicalData);
+            canonicalData.name = Path.GetFileNameWithoutExtension(canonicalPath);
+            EditorUtility.SetDirty(canonicalData);
+            AssetDatabase.SaveAssetIfDirty(canonicalData);
+
+            if (!string.Equals(
+                    AssetDatabase.GetAssetPath(canonicalData),
+                    canonicalPath,
+                    StringComparison.Ordinal) ||
+                !string.Equals(
+                    AssetDatabase.AssetPathToGUID(canonicalPath),
+                    canonicalGuid,
+                    StringComparison.OrdinalIgnoreCase))
             {
-                AssetDatabase.DeleteAsset(temporaryPath);
+                throw new InvalidOperationException(
+                    "Focused " + label + " bake did not preserve the " +
+                    "canonical NavMesh asset path and GUID.");
             }
 
-            if (canonicalReplaced)
+            surface.navMeshData = canonicalData;
+            surface.AddData();
+        }
+        catch (Exception commitException)
+        {
+            try
             {
-                File.WriteAllBytes(canonicalFullPath, originalNavMeshBytes);
-                AssetDatabase.Refresh(
-                    ImportAssetOptions.ForceSynchronousImport |
-                    ImportAssetOptions.ForceUpdate);
+                surface.RemoveData();
+                if (canonicalUpdated)
+                {
+                    EditorUtility.CopySerialized(rollbackData, canonicalData);
+                    EditorUtility.SetDirty(canonicalData);
+                    AssetDatabase.SaveAssetIfDirty(canonicalData);
+                }
+
+                surface.navMeshData = canonicalData;
+                if (surface.isActiveAndEnabled)
+                {
+                    surface.AddData();
+                }
+            }
+            catch (Exception rollbackException)
+            {
+                throw new InvalidOperationException(
+                    label + " NavMesh commit failed and its in-memory " +
+                    "rollback also failed.",
+                    new AggregateException(commitException, rollbackException));
             }
 
             throw;
+        }
+        finally
+        {
+            if (rebuiltData != null && !EditorUtility.IsPersistent(rebuiltData))
+            {
+                UnityEngine.Object.DestroyImmediate(rebuiltData);
+            }
+
+            if (rollbackData != null)
+            {
+                UnityEngine.Object.DestroyImmediate(rollbackData);
+            }
         }
     }
 
@@ -372,14 +643,6 @@ public static class BloodrootNavMeshSpawnGroundingRepair
                 state.Key.SetActive(state.Value);
             }
         }
-    }
-
-    private static string ToProjectFilePath(string assetPath)
-    {
-        string projectPath = Directory.GetParent(Application.dataPath).FullName;
-        return Path.Combine(
-            projectPath,
-            assetPath.Replace('/', Path.DirectorySeparatorChar));
     }
 
     private static int RepairFarmSpawnMarkers(out int changes)
@@ -1248,6 +1511,1403 @@ public static class BloodrootNavMeshSpawnGroundingRepair
                                Mathf.Abs(
                                    hit.point.y - navMeshPosition.y) <=
                                GroundSupportTolerance);
+    }
+
+    private static int ValidateFarmObjectiveTraversal(Scene scene)
+    {
+        string[] objectiveSteps =
+        {
+            "STEP_01_Collect_Feed_Scoop",
+            "STEP_02_Fill_South_Trough",
+            "STEP_03_Fill_North_Trough",
+            "STEP_04_Clear_East_Stall",
+            "STEP_05_Clear_West_Stall",
+            "STEP_06_Dump_Muck_Wheelbarrow",
+            "STEP_07_Prime_Livestock_Pump",
+            "STEP_08_Open_Trough_Valve"
+        };
+
+        int routes = 0;
+        foreach (string stepName in objectiveSteps)
+        {
+            Transform target = RequireSingleSceneTransform(scene, stepName);
+            ValidateLocalTraversalApproach(
+                target,
+                "Farm objective approach -> " + stepName);
+            routes++;
+        }
+
+        return routes;
+    }
+
+    private static void ValidateLocalTraversalApproach(
+        Transform target,
+        string label)
+    {
+        Vector3 requested = ResolveTraversalPoint(
+            target,
+            useVisualBottom: true,
+            useColliderTop: false);
+        if (!NavMesh.SamplePosition(
+                requested,
+                out NavMeshHit targetHit,
+                3f,
+                NavMesh.AllAreas))
+        {
+            throw new InvalidOperationException(
+                label + " has no nearby baked NavMesh approach.");
+        }
+
+        const float approachRadius = 2.25f;
+        for (int index = 0; index < 8; index++)
+        {
+            float angle = index * Mathf.PI * 0.25f;
+            Vector3 requestedApproach = requested + new Vector3(
+                Mathf.Cos(angle) * approachRadius,
+                0f,
+                Mathf.Sin(angle) * approachRadius);
+            if (!NavMesh.SamplePosition(
+                    requestedApproach,
+                    out NavMeshHit approachHit,
+                    1.5f,
+                    NavMesh.AllAreas) ||
+                Vector3.Distance(
+                    approachHit.position,
+                    targetHit.position) < 0.75f)
+            {
+                continue;
+            }
+
+            var path = new NavMeshPath();
+            if (NavMesh.CalculatePath(
+                    approachHit.position,
+                    targetHit.position,
+                    NavMesh.AllAreas,
+                    path) &&
+                path.status == NavMeshPathStatus.PathComplete)
+            {
+                return;
+            }
+        }
+
+        throw new InvalidOperationException(
+            label + " has no complete local player approach route.");
+    }
+
+    private static int ValidateRouteMarkerContainers(Scene scene)
+    {
+        int routeCount = 0;
+        routeCount += ValidateRouteMarkerContainer(
+            scene,
+            "RouteMarkers",
+            "Farmhouse",
+            new[]
+            {
+                "ExteriorStart", "CellarDestination",
+                "GroundStart", "AtticDestination"
+            });
+        routeCount += ValidateRouteMarkerContainer(
+            scene,
+            "PersistentHardRouteMarkers_18Gates",
+            "Siltwater Traversal",
+            new[]
+            {
+                "WarehouseExterior", "WarehouseInterior",
+                "DockExterior", "DockPlatform",
+                "DockPlatform", "WarehouseDockInterior",
+                "WarehouseInterior", "WarehouseCage",
+                "WarehouseInterior", "Catwalk2",
+                "Catwalk2", "Catwalk4",
+                "Catwalk4", "Catwalk6",
+                "Catwalk6", "Catwalk8",
+                "Catwalk8", "Catwalk10",
+                "Catwalk10", "Elevator10",
+                "Elevator0", "Elevator5",
+                "Elevator5", "Elevator10",
+                "Elevator10", "Elevator15",
+                "Elevator15", "Elevator20",
+                "Elevator20", "Elevator25",
+                "Elevator20", "SiloCatwalk22",
+                "WarehouseExterior", "Elevator25",
+                "WarehouseExterior", "SiloCatwalk22"
+            },
+            requireCompleteNavMeshPaths: false,
+            expectedPhysicalRampLinks: 18);
+        routeCount += ValidateRouteMarkerContainer(
+            scene,
+            "PersistentHardRouteMarkers",
+            "Siltwater Investigation",
+            new[]
+            {
+                "ExteriorStart", "MainHallInvestigation",
+                "MainHallStairBase", "MezzanineLanding",
+                "MezzanineLanding", "AnnexUpperOffice",
+                "AnnexUpperOffice", "AnnexGroundOffice",
+                "AnnexGroundOffice", "QualityLab",
+                "QualityLab", "RecordsOffice",
+                "RecordsOffice", "QualityVault"
+            });
+
+        if (routeCount == 0)
+        {
+            throw new InvalidOperationException(
+                "Open World has no active deployed architecture route markers.");
+        }
+
+        return routeCount;
+    }
+
+    private static int RefreshActiveNavMeshLinks(Scene scene)
+    {
+        NavMeshLink[] links = FindComponents<NavMeshLink>(scene)
+            .Where(link => link != null && link.isActiveAndEnabled)
+            .ToArray();
+        foreach (NavMeshLink link in links)
+        {
+            link.UpdateLink();
+        }
+
+        return links.Length;
+    }
+
+    private static int ValidateRouteMarkerContainer(
+        Scene scene,
+        string containerName,
+        string label,
+        string[] routeEndpoints,
+        bool requireCompleteNavMeshPaths = true,
+        int expectedPhysicalRampLinks = 0)
+    {
+        if (routeEndpoints == null ||
+            routeEndpoints.Length == 0 ||
+            routeEndpoints.Length % 2 != 0)
+        {
+            throw new ArgumentException(
+                "Route endpoints must contain complete start/destination pairs.",
+                nameof(routeEndpoints));
+        }
+
+        string[] requiredMarkerNames = routeEndpoints.Distinct().ToArray();
+        Transform[] containers = FindComponents<Transform>(scene)
+            .Where(candidate => candidate != null &&
+                                candidate.gameObject.activeInHierarchy &&
+                                string.Equals(
+                                    candidate.name,
+                                    containerName,
+                                    StringComparison.Ordinal) &&
+                                requiredMarkerNames.All(
+                                    markerName => FindDirectActiveChild(
+                                        candidate,
+                                        markerName) != null))
+            .ToArray();
+        if (containers.Length != 1)
+        {
+            throw new InvalidOperationException(
+                label + " requires exactly one active '" + containerName +
+                "' container with its authored route markers; found " +
+                containers.Length + ".");
+        }
+
+        Transform container = containers[0];
+        if (requireCompleteNavMeshPaths)
+        {
+            for (int index = 0; index < routeEndpoints.Length; index += 2)
+            {
+                Transform start = RequireDirectActiveChild(
+                    container,
+                    routeEndpoints[index]);
+                Transform destination = RequireDirectActiveChild(
+                    container,
+                    routeEndpoints[index + 1]);
+                ValidateCompleteTraversalRoute(
+                    start,
+                    destination,
+                    label + "/" + start.name + " -> " + destination.name,
+                    useVisualBottom: false,
+                    sampleDistance: 2.5f);
+            }
+        }
+        else
+        {
+            foreach (string markerName in requiredMarkerNames)
+            {
+                ValidateLocalTraversalApproach(
+                    RequireDirectActiveChild(container, markerName),
+                    label + "/" + markerName);
+            }
+
+            ValidatePhysicalRampBackedLinks(
+                container.parent,
+                label,
+                expectedPhysicalRampLinks);
+        }
+
+        return routeEndpoints.Length / 2;
+    }
+
+    private static void ValidatePhysicalRampBackedLinks(
+        Transform architectureRoot,
+        string label,
+        int expectedCount)
+    {
+        if (architectureRoot == null || expectedCount <= 0)
+        {
+            throw new InvalidOperationException(
+                label + " requires an authored physical ramp-link contract.");
+        }
+
+        NavMeshLink[] links = architectureRoot
+            .GetComponentsInChildren<NavMeshLink>(true)
+            .Where(link => link != null)
+            .ToArray();
+        if (links.Length != expectedCount)
+        {
+            throw new InvalidOperationException(
+                label + " requires exactly " + expectedCount +
+                " physical ramp links; found " + links.Length + ".");
+        }
+
+        foreach (NavMeshLink link in links)
+        {
+            MeshCollider physicalRamp = link.GetComponent<MeshCollider>();
+            if (!link.isActiveAndEnabled ||
+                !link.activated ||
+                !link.bidirectional ||
+                link.agentTypeID != 0 ||
+                physicalRamp == null ||
+                !physicalRamp.enabled ||
+                physicalRamp.isTrigger ||
+                physicalRamp.sharedMesh == null)
+            {
+                throw new InvalidOperationException(
+                    label + "/" + link.name +
+                    " must remain an active bidirectional agent-0 link on an " +
+                    "enabled solid physical MeshCollider ramp.");
+            }
+
+            Vector3 start = link.transform.TransformPoint(link.startPoint);
+            Vector3 end = link.transform.TransformPoint(link.endPoint);
+            if (!NavMesh.SamplePosition(
+                    start,
+                    out _,
+                    1.25f,
+                    NavMesh.AllAreas) ||
+                !NavMesh.SamplePosition(
+                    end,
+                    out _,
+                    1.25f,
+                    NavMesh.AllAreas))
+            {
+                throw new InvalidOperationException(
+                    label + "/" + link.name +
+                    " is not attached to baked walkable landing geometry at " +
+                    "both ends.");
+            }
+        }
+    }
+
+    private static Transform RequireDirectActiveChild(
+        Transform parent,
+        string childName)
+    {
+        Transform child = FindDirectActiveChild(parent, childName);
+        if (child == null)
+        {
+            throw new InvalidOperationException(
+                GeometryHierarchyPath(parent) + " is missing active route marker '" +
+                childName + "'.");
+        }
+
+        return child;
+    }
+
+    private static Transform FindDirectActiveChild(
+        Transform parent,
+        string childName)
+    {
+        if (parent == null)
+        {
+            return null;
+        }
+
+        return parent
+            .Cast<Transform>()
+            .FirstOrDefault(candidate => candidate != null &&
+                                         candidate.gameObject.activeInHierarchy &&
+                                         string.Equals(
+                                             candidate.name,
+                                             childName,
+                                             StringComparison.Ordinal));
+    }
+
+    private static int ValidateOpenWorldNamedTraversal(Scene scene)
+    {
+        int routes = 0;
+        routes += ValidateNamedRouteChain(
+            scene,
+            "Black Pines Fire Tower",
+            "TowerGroundApproach_NAV",
+            "TowerSwitchbackLanding_Bay0",
+            "TowerSwitchbackLanding_Bay1",
+            "TowerSwitchbackLanding_Bay2",
+            "TowerSwitchbackLanding_Bay3",
+            "TowerLevelLanding_4P5",
+            "TowerLevelLanding_9",
+            "TowerLevelLanding_13P5",
+            "TowerLevelLanding_18",
+            "TowerCabinRobustConnector_NAV",
+            "TowerCabinInteriorFloor_NAV");
+        routes += ValidateNamedRouteChain(
+            scene,
+            "Black Pines Ranger Outpost",
+            "OutpostPorch_NAV",
+            "OutpostMainFloor_NAV",
+            "OutpostStorageToShedConnector_NAV",
+            "OutpostPowerShedFloor_NAV");
+        routes += ValidateNamedRouteChain(
+            scene,
+            "Harrow Mausoleum to Crypt",
+            "MausoleumGroundApproach_NAV",
+            "MausoleumThresholdLanding_NAV",
+            "CryptEntrySocketLanding_NAV",
+            "CryptEntryConnector_NAV",
+            "CryptMainFloor_NAV",
+            "CryptVaultConnector_NAV");
+        return routes;
+    }
+
+    private static int ValidateNamedRouteChain(
+        Scene scene,
+        string label,
+        params string[] pointNames)
+    {
+        if (pointNames == null || pointNames.Length < 2)
+        {
+            throw new ArgumentException(
+                "A named traversal chain needs at least two points.",
+                nameof(pointNames));
+        }
+
+        Transform[] points = pointNames
+            .Select(name => RequireSingleSceneTransform(scene, name))
+            .ToArray();
+        for (int index = 1; index < points.Length; index++)
+        {
+            ValidateCompleteTraversalRoute(
+                points[index - 1],
+                points[index],
+                label + "/" + pointNames[index - 1] + " -> " +
+                pointNames[index],
+                useVisualBottom: false,
+                sampleDistance: 2.5f,
+                useColliderTop: true);
+        }
+
+        return points.Length - 1;
+    }
+
+    private static void ValidateCompleteTraversalRoute(
+        Transform requestedStart,
+        Transform requestedEnd,
+        string label,
+        bool useVisualBottom,
+        float sampleDistance,
+        bool useColliderTop = false)
+    {
+        Vector3 start = ResolveTraversalPoint(
+            requestedStart,
+            useVisualBottom,
+            useColliderTop);
+        Vector3 end = ResolveTraversalPoint(
+            requestedEnd,
+            useVisualBottom,
+            useColliderTop);
+        if (!NavMesh.SamplePosition(
+                start,
+                out NavMeshHit startHit,
+                sampleDistance,
+                NavMesh.AllAreas))
+        {
+            throw new InvalidOperationException(
+                label + " start has no nearby baked NavMesh at " + start + ".");
+        }
+
+        if (!NavMesh.SamplePosition(
+                end,
+                out NavMeshHit endHit,
+                sampleDistance,
+                NavMesh.AllAreas))
+        {
+            throw new InvalidOperationException(
+                label + " destination has no nearby baked NavMesh at " +
+                end + ".");
+        }
+
+        var path = new NavMeshPath();
+        if (!NavMesh.CalculatePath(
+                startHit.position,
+                endHit.position,
+                NavMesh.AllAreas,
+                path) ||
+            path.status != NavMeshPathStatus.PathComplete)
+        {
+            throw new InvalidOperationException(
+                label + " is not a complete player NavMesh route (" +
+                path.status + ").");
+        }
+    }
+
+    private static Vector3 ResolveTraversalPoint(
+        Transform target,
+        bool useVisualBottom,
+        bool useColliderTop)
+    {
+        if (target == null)
+        {
+            throw new InvalidOperationException(
+                "Traversal point is missing.");
+        }
+
+        if (useColliderTop)
+        {
+            Collider collider = target
+                .GetComponentsInChildren<Collider>(true)
+                .FirstOrDefault(item => item != null &&
+                                        item.enabled &&
+                                        !item.isTrigger);
+            if (collider != null)
+            {
+                return new Vector3(
+                    collider.bounds.center.x,
+                    collider.bounds.max.y + 0.05f,
+                    collider.bounds.center.z);
+            }
+        }
+
+        if (useVisualBottom &&
+            TryGetCombinedVisualBounds(target.gameObject, out Bounds bounds))
+        {
+            return new Vector3(
+                bounds.center.x,
+                bounds.min.y + 0.05f,
+                bounds.center.z);
+        }
+
+        return target.position;
+    }
+
+    private static void RepairSceneGeometry(
+        string scenePath,
+        string label,
+        bool isFarm,
+        out int groundedCount,
+        out int colliderCount)
+    {
+        Scene scene = EditorSceneManager.OpenScene(
+            scenePath,
+            OpenSceneMode.Single);
+        Terrain[] terrains = FindComponents<Terrain>(scene)
+            .Where(item => item != null && item.terrainData != null)
+            .ToArray();
+        GameObject[] placements = CollectGeometryPlacements(scene);
+        groundedCount = 0;
+        colliderCount = 0;
+
+        if (isFarm)
+        {
+            RemoveEmergencePresentationCollision(scene);
+        }
+
+        // Restore source-authored collision before support raycasts so every
+        // placed world rock participates in the repaired NavMesh bake. Farm
+        // emergence roots/spikes remain nonblocking presentation so enemies
+        // cannot spawn inside a newly introduced obstacle.
+        foreach (GameObject placement in placements)
+        {
+            string assetPath =
+                PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(
+                    placement);
+            colliderCount += RestoreForestAssetCollision(
+                placement,
+                assetPath);
+        }
+
+        Physics.SyncTransforms();
+        foreach (GameObject placement in placements)
+        {
+            string assetPath =
+                PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(
+                    placement);
+            if (!IsGroundContactRepairCandidate(placement, assetPath) ||
+                !TryGetCombinedVisualBounds(placement, out Bounds bounds) ||
+                !TryFindHighestExternalSupport(
+                    placement,
+                    bounds,
+                    terrains,
+                    out float supportY))
+            {
+                continue;
+            }
+
+            float gap = bounds.min.y - supportY;
+            if (gap <= GeometryRepairTolerance ||
+                gap > GeometryMaximumRepairDrop)
+            {
+                continue;
+            }
+
+            Transform transform = placement.transform;
+            transform.position += Vector3.down * gap;
+            EditorUtility.SetDirty(transform);
+            if (PrefabUtility.IsPartOfPrefabInstance(transform))
+            {
+                PrefabUtility.RecordPrefabInstancePropertyModifications(
+                    transform);
+            }
+
+            groundedCount++;
+            Physics.SyncTransforms();
+        }
+
+        if (isFarm)
+        {
+            // These scene-authored Farm props are intentionally not converted
+            // into giant renderer boxes. Exact static mesh collision preserves
+            // their openings/profile; simple bed primitives get fitted boxes.
+            colliderCount += EnsureExactMeshCollision(
+                RequireSingleSceneTransform(
+                    scene,
+                    "Meshy_AI_i_need_a_low_poly_cou_0822004032_texture")
+                    .gameObject);
+            colliderCount += EnsureExactMeshCollision(
+                RequireSingleSceneTransform(scene, "Feed Bin").gameObject);
+            colliderCount += EnsureFittedBoxCollision(
+                RequireSingleSceneTransform(
+                    scene,
+                    "SLOT_Replaceable_Bed_Frame").gameObject);
+            colliderCount += EnsureFittedBoxCollision(
+                RequireSingleSceneTransform(
+                    scene,
+                    "SLOT_Replaceable_Bed_Mattress").gameObject);
+            colliderCount += EnsureFittedBoxCollision(
+                RequireSingleSceneTransform(
+                    scene,
+                    "SLOT_Replaceable_Bed_Pillow").gameObject);
+        }
+
+        colliderCount += ConfigureReliableLargeMeshCollision(scene, isFarm);
+
+        Physics.SyncTransforms();
+        if (groundedCount > 0 || colliderCount > 0)
+        {
+            EditorSceneManager.MarkSceneDirty(scene);
+            if (!EditorSceneManager.SaveScene(scene, scenePath))
+            {
+                throw new InvalidOperationException(
+                    "Unity could not save repaired " + label +
+                    " geometry.");
+            }
+        }
+
+        Console.WriteLine(
+            "BLOODROOT_GEOMETRY_SCENE_REPAIR " +
+            "scene=\"" + EscapeAuditValue(label) + "\" " +
+            "grounded=" + groundedCount + " " +
+            "colliders=" + colliderCount + ".");
+    }
+
+    private static int RestoreForestAssetCollision(
+        GameObject placement,
+        string assetPath)
+    {
+        if (!ContainsAnyIgnoreCase(assetPath, new[] { "/SM_Rock_" }))
+        {
+            return 0;
+        }
+
+        int changes = 0;
+        foreach (Collider collider in
+                 placement.GetComponentsInChildren<Collider>(true))
+        {
+            if (collider == null || collider.isTrigger || collider.enabled)
+            {
+                continue;
+            }
+
+            SerializedObject serialized = new SerializedObject(collider);
+            SerializedProperty enabled = serialized.FindProperty("m_Enabled");
+            if (enabled != null &&
+                enabled.prefabOverride &&
+                PrefabUtility.IsPartOfPrefabInstance(collider))
+            {
+                PrefabUtility.RevertPropertyOverride(
+                    enabled,
+                    InteractionMode.AutomatedAction);
+                serialized.Update();
+            }
+
+            if (!collider.enabled)
+            {
+                collider.enabled = true;
+                EditorUtility.SetDirty(collider);
+                if (PrefabUtility.IsPartOfPrefabInstance(collider))
+                {
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(
+                        collider);
+                }
+            }
+
+            if (collider.enabled)
+            {
+                changes++;
+            }
+        }
+
+        bool hasEnabledSolid = placement
+            .GetComponentsInChildren<Collider>(true)
+            .Any(collider => collider != null &&
+                             collider.enabled &&
+                             !collider.isTrigger);
+        if (!hasEnabledSolid)
+        {
+            changes += EnsureExactMeshCollision(placement);
+        }
+
+        return changes;
+    }
+
+    private static void RemoveEmergencePresentationCollision(Scene scene)
+    {
+        foreach (GameObject root in scene.GetRootGameObjects())
+        {
+            Transform[] transforms = root.GetComponentsInChildren<Transform>(
+                true);
+            foreach (Transform transform in transforms)
+            {
+                if (transform == null ||
+                    !ContainsAnyIgnoreCase(
+                        GeometryHierarchyPath(transform),
+                        new[] { "Generated Alpha Infected Ground" }))
+                {
+                    continue;
+                }
+
+                foreach (Collider collider in
+                         transform.GetComponents<Collider>())
+                {
+                    if (collider == null || collider.isTrigger)
+                    {
+                        continue;
+                    }
+
+                    if (PrefabUtility.IsAddedComponentOverride(collider))
+                    {
+                        UnityEngine.Object.DestroyImmediate(collider, true);
+                    }
+                    else if (collider.enabled)
+                    {
+                        collider.enabled = false;
+                        EditorUtility.SetDirty(collider);
+                        if (PrefabUtility.IsPartOfPrefabInstance(collider))
+                        {
+                            PrefabUtility.RecordPrefabInstancePropertyModifications(
+                                collider);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static int EnsureExactMeshCollision(GameObject root)
+    {
+        int changes = 0;
+        MeshColliderCookingOptions reliableCooking =
+            MeshColliderCookingOptions.CookForFasterSimulation |
+            MeshColliderCookingOptions.EnableMeshCleaning |
+            MeshColliderCookingOptions.WeldColocatedVertices;
+        foreach (MeshFilter filter in root.GetComponentsInChildren<MeshFilter>(
+                     true))
+        {
+            if (filter == null || filter.sharedMesh == null)
+            {
+                continue;
+            }
+
+            MeshCollider existingMesh = filter.GetComponent<MeshCollider>();
+            if (existingMesh != null &&
+                existingMesh.enabled &&
+                !existingMesh.isTrigger &&
+                existingMesh.sharedMesh == filter.sharedMesh)
+            {
+                if (existingMesh.cookingOptions != reliableCooking)
+                {
+                    existingMesh.cookingOptions = reliableCooking;
+                    EditorUtility.SetDirty(existingMesh);
+                    changes++;
+                }
+
+                continue;
+            }
+
+            if (filter.GetComponents<Collider>().Any(collider =>
+                    collider != null &&
+                    collider.enabled &&
+                    !collider.isTrigger))
+            {
+                continue;
+            }
+
+            Rigidbody body = filter.GetComponentInParent<Rigidbody>();
+            if (body != null && !body.isKinematic)
+            {
+                throw new InvalidOperationException(
+                    "Static exact mesh collision cannot be added beneath " +
+                    "non-kinematic Rigidbody '" + body.name + "'.");
+            }
+
+            MeshCollider collider = filter.gameObject.AddComponent<MeshCollider>();
+            collider.sharedMesh = filter.sharedMesh;
+            collider.convex = false;
+            collider.isTrigger = false;
+            collider.enabled = true;
+            collider.cookingOptions = reliableCooking;
+            EditorUtility.SetDirty(collider);
+            if (PrefabUtility.IsPartOfPrefabInstance(collider))
+            {
+                PrefabUtility.RecordPrefabInstancePropertyModifications(
+                    collider);
+            }
+
+            changes++;
+        }
+
+        return changes;
+    }
+
+    private static int EnsureFittedBoxCollision(GameObject target)
+    {
+        if (target.GetComponents<Collider>().Any(collider =>
+                collider != null &&
+                collider.enabled &&
+                !collider.isTrigger))
+        {
+            return 0;
+        }
+
+        if (!TryGetLocalMeshBounds(target.transform, out Bounds bounds))
+        {
+            throw new InvalidOperationException(
+                "Cannot fit collision to '" + target.name +
+                "' because it has no mesh bounds.");
+        }
+
+        BoxCollider collider = target.AddComponent<BoxCollider>();
+        collider.center = bounds.center;
+        collider.size = bounds.size;
+        collider.isTrigger = false;
+        collider.enabled = true;
+        EditorUtility.SetDirty(collider);
+        return 1;
+    }
+
+    private static int ConfigureReliableLargeMeshCollision(
+        Scene scene,
+        bool configureAllSceneMeshColliders)
+    {
+        int changes = 0;
+        foreach (MeshCollider collider in FindComponents<MeshCollider>(scene))
+        {
+            Mesh mesh = collider != null ? collider.sharedMesh : null;
+            if (mesh == null ||
+                (collider.cookingOptions &
+                 MeshColliderCookingOptions.UseFastMidphase) == 0)
+            {
+                continue;
+            }
+
+            ulong triangleCount = 0;
+            for (int subMesh = 0; subMesh < mesh.subMeshCount; subMesh++)
+            {
+                triangleCount += mesh.GetIndexCount(subMesh) / 3UL;
+            }
+
+            if (!configureAllSceneMeshColliders &&
+                triangleCount <= 2097152UL)
+            {
+                continue;
+            }
+
+            collider.cookingOptions &=
+                ~MeshColliderCookingOptions.UseFastMidphase;
+            EditorUtility.SetDirty(collider);
+            if (PrefabUtility.IsPartOfPrefabInstance(collider))
+            {
+                PrefabUtility.RecordPrefabInstancePropertyModifications(
+                    collider);
+            }
+
+            changes++;
+            Console.WriteLine(
+                "BLOODROOT_GEOMETRY_LARGE_MESH_RELIABLE_COOKING " +
+                "collider=\"" + EscapeAuditValue(
+                    GeometryHierarchyPath(collider.transform)) + "\" " +
+                "triangles=" + triangleCount + ".");
+        }
+
+        return changes;
+    }
+
+    private static bool TryGetLocalMeshBounds(
+        Transform root,
+        out Bounds bounds)
+    {
+        bool initialized = false;
+        bounds = default;
+        foreach (MeshFilter filter in root.GetComponentsInChildren<MeshFilter>(
+                     true))
+        {
+            Mesh mesh = filter != null ? filter.sharedMesh : null;
+            if (mesh == null)
+            {
+                continue;
+            }
+
+            Bounds meshBounds = mesh.bounds;
+            Vector3 center = meshBounds.center;
+            Vector3 extents = meshBounds.extents;
+            for (int x = -1; x <= 1; x += 2)
+            {
+                for (int y = -1; y <= 1; y += 2)
+                {
+                    for (int z = -1; z <= 1; z += 2)
+                    {
+                        Vector3 localCorner = center + Vector3.Scale(
+                            extents,
+                            new Vector3(x, y, z));
+                        Vector3 rootLocal = root.InverseTransformPoint(
+                            filter.transform.TransformPoint(localCorner));
+                        if (!initialized)
+                        {
+                            bounds = new Bounds(rootLocal, Vector3.zero);
+                            initialized = true;
+                        }
+                        else
+                        {
+                            bounds.Encapsulate(rootLocal);
+                        }
+                    }
+                }
+            }
+        }
+
+        return initialized && bounds.size.sqrMagnitude > 0.0001f;
+    }
+
+    private static bool IsGroundContactRepairCandidate(
+        GameObject placement,
+        string assetPath)
+    {
+        string identity = placement.name + " " + assetPath + " " +
+                          GeometryHierarchyPath(placement.transform);
+        return ContainsAnyIgnoreCase(identity, new[]
+        {
+            "/SM_Rock_",
+            "BlackPinesInfectedPatch.prefab",
+            "Item_Radar",
+            "Pickup - Flashlight",
+            "Pickup - Rifle",
+            "Windmill",
+            "/Water Well and Pump",
+            "/Water tank",
+            "/Feed trough",
+            "/Pig poo",
+            "/Wheelbarrow",
+            "worktable_01a_fbx"
+        });
+    }
+
+    private static void AuditSceneGeometry(string scenePath, string label)
+    {
+        Scene scene = EditorSceneManager.OpenScene(
+            scenePath,
+            OpenSceneMode.Single);
+        Physics.SyncTransforms();
+
+        Terrain[] terrains = FindComponents<Terrain>(scene)
+            .Where(item => item != null && item.terrainData != null)
+            .ToArray();
+        GameObject[] placements = CollectGeometryPlacements(scene);
+        int supported = 0;
+        int floating = 0;
+        int noSupport = 0;
+        int missingSolidCollider = 0;
+        int stairMeshes = 0;
+        int stairsWithoutLocalCollision = 0;
+
+        foreach (GameObject placement in placements)
+        {
+            if (!TryGetCombinedVisualBounds(placement, out Bounds bounds))
+            {
+                continue;
+            }
+
+            string assetPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(
+                placement);
+            string hierarchyPath = GeometryHierarchyPath(placement.transform);
+            Collider[] solidColliders = placement
+                .GetComponentsInChildren<Collider>(true)
+                .Where(collider => collider != null &&
+                                   collider.enabled &&
+                                   !collider.isTrigger)
+                .ToArray();
+
+            if (solidColliders.Length == 0 &&
+                RequiresStaticSolidCollision(placement, bounds, assetPath))
+            {
+                missingSolidCollider++;
+                Console.WriteLine(
+                    "BLOODROOT_GEOMETRY_MISSING_SOLID_COLLIDER " +
+                    "scene=\"" + EscapeAuditValue(label) + "\" " +
+                    "root=\"" + EscapeAuditValue(hierarchyPath) + "\" " +
+                    "asset=\"" + EscapeAuditValue(assetPath) + "\" " +
+                    "size=" + bounds.size.ToString("F3") + ".");
+            }
+
+            if (TryFindHighestExternalSupport(
+                    placement,
+                    bounds,
+                    terrains,
+                    out float supportY))
+            {
+                float gap = bounds.min.y - supportY;
+                bool mustTouchSupport = IsGroundContactRepairCandidate(
+                    placement,
+                    assetPath);
+                if (gap > GeometrySupportTolerance &&
+                    (mustTouchSupport || gap <= GeometryMaximumAuditDrop))
+                {
+                    floating++;
+                    Console.WriteLine(
+                        "BLOODROOT_GEOMETRY_FLOATING " +
+                        "scene=\"" + EscapeAuditValue(label) + "\" " +
+                        "root=\"" + EscapeAuditValue(hierarchyPath) + "\" " +
+                        "asset=\"" + EscapeAuditValue(assetPath) + "\" " +
+                        "gap=" + gap.ToString("F3") + " " +
+                        "visualBottom=" + bounds.min.y.ToString("F3") + " " +
+                        "support=" + supportY.ToString("F3") + ".");
+                }
+                else
+                {
+                    supported++;
+                }
+            }
+            else
+            {
+                noSupport++;
+                Console.WriteLine(
+                    "BLOODROOT_GEOMETRY_NO_NEAR_SUPPORT " +
+                    "scene=\"" + EscapeAuditValue(label) + "\" " +
+                    "root=\"" + EscapeAuditValue(hierarchyPath) + "\" " +
+                    "asset=\"" + EscapeAuditValue(assetPath) + "\" " +
+                    "visualBottom=" + bounds.min.y.ToString("F3") + ".");
+            }
+
+            Transform[] stairCandidates = placement
+                .GetComponentsInChildren<Transform>(true)
+                .Where(IsStairOrRampVisual)
+                .ToArray();
+            stairCandidates = stairCandidates
+                .Where(candidate => !stairCandidates.Any(ancestor =>
+                    ancestor != candidate &&
+                    candidate.IsChildOf(ancestor)))
+                .ToArray();
+            foreach (Transform stair in stairCandidates)
+            {
+                stairMeshes++;
+                bool hasLocalSolidCollider =
+                    TryGetCombinedVisualBounds(
+                        stair.gameObject,
+                        out Bounds stairBounds) &&
+                    (HasOverlappingSolidCollider(
+                         placement,
+                         stairBounds) ||
+                     HasNamedStairCollisionAuthority(
+                         placement,
+                         stair));
+                if (hasLocalSolidCollider)
+                {
+                    continue;
+                }
+
+                stairsWithoutLocalCollision++;
+                Console.WriteLine(
+                    "BLOODROOT_GEOMETRY_STAIR_WITHOUT_LOCAL_COLLIDER " +
+                    "scene=\"" + EscapeAuditValue(label) + "\" " +
+                    "stair=\"" + EscapeAuditValue(
+                        GeometryHierarchyPath(stair)) + "\" " +
+                    "asset=\"" + EscapeAuditValue(assetPath) + "\".");
+            }
+        }
+
+        Console.WriteLine(
+            "BLOODROOT_GEOMETRY_SCENE_AUDIT " +
+            "scene=\"" + EscapeAuditValue(label) + "\" " +
+            "placements=" + placements.Length + " " +
+            "supported=" + supported + " " +
+            "floating=" + floating + " " +
+            "noSupport=" + noSupport + " " +
+            "missingSolidCollider=" + missingSolidCollider + " " +
+            "stairMeshes=" + stairMeshes + " " +
+            "stairsWithoutLocalCollision=" +
+            stairsWithoutLocalCollision + ".");
+    }
+
+    private static GameObject[] CollectGeometryPlacements(Scene scene)
+    {
+        var placements = new HashSet<GameObject>();
+        foreach (Renderer renderer in FindComponents<Renderer>(scene))
+        {
+            if (!IsInspectableStaticRenderer(renderer))
+            {
+                continue;
+            }
+
+            GameObject prefabRoot =
+                PrefabUtility.GetOutermostPrefabInstanceRoot(
+                    renderer.gameObject);
+            GameObject placement = prefabRoot != null &&
+                                   prefabRoot.scene == scene
+                ? prefabRoot
+                : renderer.gameObject;
+            if (placement == null ||
+                IsGeometryAuditExcluded(placement, renderer))
+            {
+                continue;
+            }
+
+            placements.Add(placement);
+        }
+
+        return placements
+            .OrderBy(item => GeometryHierarchyPath(item.transform),
+                StringComparer.Ordinal)
+            .ToArray();
+    }
+
+    private static bool IsInspectableStaticRenderer(Renderer renderer)
+    {
+        return renderer != null &&
+               renderer.enabled &&
+               renderer.gameObject.activeInHierarchy &&
+               !(renderer is ParticleSystemRenderer) &&
+               !(renderer is TrailRenderer) &&
+               !(renderer is LineRenderer) &&
+               !(renderer is SkinnedMeshRenderer);
+    }
+
+    private static bool IsGeometryAuditExcluded(
+        GameObject placement,
+        Renderer sourceRenderer)
+    {
+        if (placement.GetComponentInChildren<Terrain>(true) != null ||
+            placement.GetComponentInChildren<Canvas>(true) != null ||
+            placement.GetComponentInChildren<Camera>(true) != null ||
+            placement.GetComponentInChildren<NavMeshAgent>(true) != null ||
+            placement.GetComponentInChildren<CharacterController>(true) != null)
+        {
+            return true;
+        }
+
+        Rigidbody[] rigidbodies =
+            placement.GetComponentsInChildren<Rigidbody>(true);
+        if (rigidbodies.Any(body => body != null && !body.isKinematic))
+        {
+            return true;
+        }
+
+        string assetPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(
+            placement);
+        string identity = placement.name + " " +
+                          sourceRenderer.gameObject.name + " " + assetPath;
+        string[] excludedTokens =
+        {
+            "/UI/", "/Player/", "/Enemy", "/Enemies/", "/Witch",
+            " marker", "marker_", "trigger", " volume", "_volume",
+            "spawn", "socket", "nav_anchor", "route_marker", "loop_marker",
+            "particle", "vfx", "fx_", "decal", "skybox", "cloud",
+            "water plane", "waterplane", "reflection probe", "light probe"
+        };
+        if (ContainsAnyIgnoreCase(identity, excludedTokens))
+        {
+            return true;
+        }
+
+        Bounds bounds = sourceRenderer.bounds;
+        return bounds.size.x > 250f ||
+               bounds.size.y > 250f ||
+               bounds.size.z > 250f;
+    }
+
+    private static bool TryGetCombinedVisualBounds(
+        GameObject placement,
+        out Bounds bounds)
+    {
+        Renderer[] renderers = placement
+            .GetComponentsInChildren<Renderer>(true)
+            .Where(IsInspectableStaticRenderer)
+            .ToArray();
+        if (renderers.Length == 0)
+        {
+            bounds = default;
+            return false;
+        }
+
+        bounds = renderers[0].bounds;
+        for (int index = 1; index < renderers.Length; index++)
+        {
+            bounds.Encapsulate(renderers[index].bounds);
+        }
+
+        return bounds.size.sqrMagnitude > 0.0001f;
+    }
+
+    private static bool TryFindHighestExternalSupport(
+        GameObject placement,
+        Bounds bounds,
+        IReadOnlyList<Terrain> terrains,
+        out float supportY)
+    {
+        supportY = float.NegativeInfinity;
+        bool found = false;
+        float sampleX = Mathf.Min(bounds.extents.x * 0.45f, 2f);
+        float sampleZ = Mathf.Min(bounds.extents.z * 0.45f, 2f);
+        Vector2[] footprint =
+        {
+            Vector2.zero,
+            new Vector2(sampleX, sampleZ),
+            new Vector2(sampleX, -sampleZ),
+            new Vector2(-sampleX, sampleZ),
+            new Vector2(-sampleX, -sampleZ)
+        };
+
+        foreach (Vector2 offset in footprint)
+        {
+            Vector3 point = new Vector3(
+                bounds.center.x + offset.x,
+                bounds.min.y,
+                bounds.center.z + offset.y);
+            foreach (Terrain terrain in terrains)
+            {
+                if (!IsWithinTerrain(terrain, point))
+                {
+                    continue;
+                }
+
+                float terrainY = terrain.SampleHeight(point) +
+                                 terrain.transform.position.y;
+                if (terrainY <= bounds.min.y +
+                    GeometryMaximumSupportPenetration)
+                {
+                    supportY = Mathf.Max(supportY, terrainY);
+                    found = true;
+                }
+            }
+
+            Vector3 origin = point + Vector3.up * 0.5f;
+            RaycastHit[] hits = Physics.RaycastAll(
+                origin,
+                Vector3.down,
+                GeometryMaximumAuditDrop + 0.75f,
+                Physics.AllLayers,
+                QueryTriggerInteraction.Ignore);
+            foreach (RaycastHit hit in hits)
+            {
+                Collider collider = hit.collider;
+                if (collider == null ||
+                    !collider.enabled ||
+                    collider.isTrigger ||
+                    hit.point.y > bounds.min.y +
+                        GeometryMaximumSupportPenetration ||
+                    collider.transform == placement.transform ||
+                    collider.transform.IsChildOf(placement.transform))
+                {
+                    continue;
+                }
+
+                supportY = Mathf.Max(supportY, hit.point.y);
+                found = true;
+            }
+        }
+
+        return found;
+    }
+
+    private static bool RequiresStaticSolidCollision(
+        GameObject placement,
+        Bounds bounds,
+        string assetPath)
+    {
+        if (bounds.size.x < 0.15f ||
+            bounds.size.y < 0.15f ||
+            bounds.size.z < 0.15f)
+        {
+            return false;
+        }
+
+        string identity = placement.name + " " + assetPath + " " +
+                          GeometryHierarchyPath(placement.transform);
+        string[] nonBlockingTokens =
+        {
+            "/Items/", "/ItemPickups/", "evidence_paper", "evidence_folder",
+            "evidence_clipboard", "evidence_bag", "presentation", "preview",
+            "highlight", "indicator", "beacon", "ghost", "visual only",
+            "infectedpatch", "infected_patch", "infected mound",
+            "infected_mound", "pig poo", "pig_poo",
+            "Generated Alpha Infected Ground", "FarmChoreStepFeedback"
+        };
+        return !ContainsAnyIgnoreCase(identity, nonBlockingTokens);
+    }
+
+    private static bool HasOverlappingSolidCollider(
+        GameObject placement,
+        Bounds visualBounds)
+    {
+        visualBounds.Expand(new Vector3(0.4f, 0.75f, 0.4f));
+        return placement
+            .GetComponentsInChildren<Collider>(true)
+            .Any(collider => collider != null &&
+                             collider.enabled &&
+                             !collider.isTrigger &&
+                             collider.gameObject.activeInHierarchy &&
+                             collider.bounds.size.sqrMagnitude > 0.0001f &&
+                             collider.bounds.Intersects(visualBounds));
+    }
+
+    private static bool HasNamedStairCollisionAuthority(
+        GameObject placement,
+        Transform stair)
+    {
+        if (string.Equals(
+                stair.name,
+                "MILL_STAIR_LANDING_MID",
+                StringComparison.Ordinal))
+        {
+            return HasNamedEnabledSolidCollider(
+                       placement,
+                       "COLLIDER_StairMidLanding_2P00x1P50") &&
+                   HasNamedEnabledSolidCollider(
+                       placement,
+                       "OVERRIDE_RobustStairRamp_Flight01_1P50W") &&
+                   HasNamedEnabledSolidCollider(
+                       placement,
+                       "OVERRIDE_RobustStairRamp_Flight02_1P50W");
+        }
+
+        if (string.Equals(
+                stair.name,
+                "ELEVATOR_FLOOR_STAIR_0__GE_FLOOR_5",
+                StringComparison.Ordinal))
+        {
+            string[] authorities =
+            {
+                "COLLIDER_ElevatorABottomLanding_0",
+                "COLLIDER_ElevatorBTopAndFloorLanding_0",
+                "COLLIDER_ElevatorFloorEast_0",
+                "COLLIDER_ElevatorFloorRear_0",
+                "PHYSICAL_ElevatorRamp_0_A",
+                "PHYSICAL_ElevatorRamp_0_B"
+            };
+            return authorities.All(name =>
+                HasNamedEnabledSolidCollider(placement, name));
+        }
+
+        return false;
+    }
+
+    private static bool HasNamedEnabledSolidCollider(
+        GameObject placement,
+        string objectName)
+    {
+        return placement
+            .GetComponentsInChildren<Transform>(true)
+            .Where(candidate => candidate != null &&
+                                (string.Equals(
+                                     candidate.name,
+                                     objectName,
+                                     StringComparison.Ordinal) ||
+                                 candidate.name.StartsWith(
+                                     objectName + "_",
+                                     StringComparison.Ordinal)))
+            .Any(candidate => candidate
+                .GetComponentsInChildren<Collider>(true)
+                .Any(collider => collider != null &&
+                                 collider.enabled &&
+                                 !collider.isTrigger));
+    }
+
+    private static bool IsStairOrRampVisual(Transform candidate)
+    {
+        if (candidate == null ||
+            !candidate.gameObject.activeInHierarchy ||
+            !candidate.GetComponentsInChildren<Renderer>(true)
+                .Any(IsInspectableStaticRenderer))
+        {
+            return false;
+        }
+
+        if (candidate.name.StartsWith(
+                "OVERRIDE_WarehouseStairRoofOpening_",
+                StringComparison.Ordinal))
+        {
+            // These are thin visual frame posts around a deliberately clear
+            // 1.50m stair route, not walkable stair surfaces.
+            return false;
+        }
+
+        return ContainsAnyIgnoreCase(candidate.name, new[]
+        {
+            "stair", "staircase", "steps", "physical_ramp", "walkable_ramp"
+        });
+    }
+
+    private static bool ContainsAnyIgnoreCase(
+        string value,
+        IEnumerable<string> tokens)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return false;
+        }
+
+        return tokens.Any(token =>
+            !string.IsNullOrEmpty(token) &&
+            value.IndexOf(token, StringComparison.OrdinalIgnoreCase) >= 0);
+    }
+
+    private static string GeometryHierarchyPath(Transform target)
+    {
+        if (target == null)
+        {
+            return "<missing>";
+        }
+
+        var names = new Stack<string>();
+        for (Transform current = target;
+             current != null;
+             current = current.parent)
+        {
+            names.Push(current.name);
+        }
+
+        return string.Join("/", names);
+    }
+
+    private static string EscapeAuditValue(string value)
+    {
+        return (value ?? string.Empty)
+            .Replace("\\", "/")
+            .Replace("\"", "'");
     }
 
     private static NavMeshSurface RequireSingleSurface(
