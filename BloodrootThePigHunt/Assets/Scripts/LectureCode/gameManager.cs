@@ -125,8 +125,11 @@ public class gameManager : MonoBehaviour
         //==========================================================================================
 #if UNITY_EDITOR
         // Do Nothing
+        if (menuLoading != null) { LoadMenu(true); }
+
 #else
         if (menuLoading != null) { LoadMenu(true); }
+        stateUnpause();
 #endif
         //==========================================================================================
         // Only When in WebGL
@@ -572,7 +575,7 @@ public class gameManager : MonoBehaviour
     //==========================================================================================
     public void LoadMenu(bool isOn) {
         if (isOn) {
-            menuLoading.SetActive(isOn);
+            menuLoading.SetActive(true);
             StartCoroutine(AutoHideLoading());
         } else {
             menuLoading.SetActive(false);
@@ -639,7 +642,9 @@ public class gameManager : MonoBehaviour
         if (player == null || playerInv == null || itemDatabase == null) {  return; }
         // Apply saved stats back to the player
         player.HP = loadedData._savHP;
+        player.maxHp = loadedData._savmaxHP;
         player.stam = loadedData._savstam;
+        player.stamMax = loadedData._savstamMax;
         player.hasFlashlight = loadedData._savhasFlashlight;
         playerInv.inventoryWeight = loadedData._savinventoryWeight;
         // Apply position

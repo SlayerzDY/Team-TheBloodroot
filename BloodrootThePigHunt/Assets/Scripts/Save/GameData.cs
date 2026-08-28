@@ -105,6 +105,7 @@ public class GameData
     // Declare Variables
     //==========================================================================================
     public int _savHP;
+    public int _savmaxHP;
     public float _savstam;
     public float _savstamMax;
     public ItemSaveData[] _savInventory;
@@ -121,6 +122,7 @@ public class GameData
     public GameData()
     {
         _savHP = 100;
+        _savmaxHP = 100;
         _savstam = 100f;
         _savstamMax = 100f;
         _savplayerPosition = new float[] { 0f, 0f, 0f };
@@ -145,7 +147,9 @@ public class GameData
             player.transform.position.z
         };
         _savHP = player.HP;
+        _savmaxHP = player.maxHp;
         _savstam = player.stam;
+        _savstamMax = player.stamMax;
         if (playerInv.inventoryItems != null)
         {
             _savInventory = new ItemSaveData[playerInv.inventoryItems.Length];
