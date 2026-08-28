@@ -31081,6 +31081,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 924201087}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &404569826 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3646540142485221213, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
+  m_PrefabInstance: {fileID: 1278229383}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
 --- !u!1 &405710406
 GameObject:
   m_ObjectHideFlags: 0
@@ -75093,6 +75104,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: UI
       objectReference: {fileID: 0}
+    - target: {fileID: 7752097953145397847, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_StringArgument
+      value: Farm_PrologueHub
+      objectReference: {fileID: 0}
     - target: {fileID: 9126216655841172495, guid: 0e4f77b2cb9385a4f970b1e3413e896f, type: 3}
       propertyPath: player
       value: 
@@ -111552,6 +111567,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1650396044609078620, guid: 97b58db9d62441945a90056c1b1b933b, type: 3}
+      propertyPath: playerHPText
+      value: 
+      objectReference: {fileID: 404569826}
     - target: {fileID: 1841574619790374148, guid: 97b58db9d62441945a90056c1b1b933b, type: 3}
       propertyPath: stateService
       value: 
