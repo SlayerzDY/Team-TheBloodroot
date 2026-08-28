@@ -121,13 +121,11 @@ public class gameManager : MonoBehaviour
     void Start()
     {
         //==========================================================================================
-        // Only When in Editor
+        // Clear the loading overlay once the scene is active
         //==========================================================================================
-#if UNITY_EDITOR
-        // Do Nothing
-#else
-        if (menuLoading != null) { LoadMenu(true); }
-#endif
+        // Start runs after scene activation. Clear any leftover loading panel
+        // on every platform without changing the player's pause state.
+        if (menuLoading != null) { LoadMenu(false); }
         //==========================================================================================
         // Only When in WebGL
         //==========================================================================================
