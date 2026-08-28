@@ -50,16 +50,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Item
   item:
-    itemName: Leather
-    itemDescription: Wonderful bits of dead pig!
-    icon: {fileID: 21300000, guid: 768fb2c35c8c65d4ba2afe09821f8e98, type: 3}
-    weight: 1
+    itemName: Scrap Metal
+    itemDescription: You found a piece of Rusty Metal! Watch your hands!
+    icon: {fileID: 21300000, guid: 8b8def5acabe2ab489130f84ad96985b, type: 3}
+    weight: 5
     quantity: 1
     stackSize: 99
-    itemMesh: {fileID: 919132149155446097, guid: 089573e79cecb77498bf6f6423ae4424, type: 3}
+    itemMesh: {fileID: 919132149155446097, guid: 98a3b4cdd863df0428f53a5a1e03370f, type: 3}
     pickupSound: []
     itemIncreases: {fileID: 11400000, guid: 1fd5b603596412145bd58b5bbe757e2b, type: 2}
-    itemID: 
+    itemID: Scrap Metal3546547457
   canInteract: 1
 --- !u!114 &1807892849295950277
 MonoBehaviour:
@@ -87,7 +87,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 817942340654339044}
-  m_Mesh: {fileID: 2616682858060250926, guid: 089573e79cecb77498bf6f6423ae4424, type: 3}
+  m_Mesh: {fileID: 49922456532426737, guid: 98a3b4cdd863df0428f53a5a1e03370f, type: 3}
 --- !u!23 &4942448490666211775
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -113,7 +113,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3d44c90a3d61ff345a1126dd327983a3, type: 2}
+  - {fileID: 2100000, guid: 2edc7b0cc34ac4680b9ff4f527c30174, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
