@@ -145,6 +145,10 @@ public class buttonFunctions : MonoBehaviour {
             playerController controller = gameManager.instance.player.GetComponent<playerController>();
             if (controller == null) { return; }
             controller.LoadLevel(levelName);
+            // Accepted truck travel must not carry the extraction pause
+            // into the next scene. A failed load leaves the menu unchanged.
+            if (!string.IsNullOrEmpty(levelName) && gameManager.instance != null)
+                gameManager.instance.stateUnpause();
             gameManager.instance.checkpoint("PlayerSpawnPos");
     }
     //==========================================================================================

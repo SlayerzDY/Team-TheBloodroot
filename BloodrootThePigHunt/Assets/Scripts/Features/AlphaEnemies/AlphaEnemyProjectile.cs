@@ -26,6 +26,8 @@ namespace Bloodroot.Features.AlphaEnemies
         private float expiresAt;
         private bool resolved;
         private bool homingEnabled;
+        private SphereCollider projectileCollider;
+        private readonly RaycastHit[] sweepHits = new RaycastHit[16];
 
         public void Configure(GameObject projectileOwner, Transform target, int configuredDamage, float speedScalar = 1f)
         {
@@ -66,6 +68,7 @@ namespace Bloodroot.Features.AlphaEnemies
                 projectileBody = GetComponent<Rigidbody>();
             }
 
+            projectileCollider = GetComponent<SphereCollider>();
             currentSpeed = baseSpeed;
             flightDirection = transform.forward;
             homingEnabled = homeOnAssignedTarget;
@@ -89,7 +92,12 @@ namespace Bloodroot.Features.AlphaEnemies
             UpdateDirection(Time.deltaTime);
             if (projectileBody == null || projectileBody.isKinematic)
             {
-                transform.position += flightDirection * (currentSpeed * Time.deltaTime);
+                Vector3 movement = flightDirection * (currentSpeed * Time.deltaTime);
+                CheckFlightPath(movement);
+                if (!resolved)
+                {
+                    transform.position += movement;
+                }
             }
         }
 
@@ -97,7 +105,11 @@ namespace Bloodroot.Features.AlphaEnemies
         {
             if (!resolved && projectileBody != null && !projectileBody.isKinematic)
             {
-                ApplyBodyVelocity();
+                CheckFlightPath(flightDirection * (currentSpeed * Time.fixedDeltaTime));
+                if (!resolved)
+                {
+                    ApplyBodyVelocity();
+                }
             }
         }
 
@@ -167,35 +179,108 @@ namespace Bloodroot.Features.AlphaEnemies
 
         private void ResolveHit(Collider other)
         {
-            if (resolved || other == null || other.isTrigger && !AlphaEnemyEventUtility.IsSameHierarchy(other.transform, assignedTarget))
+            if (resolved || !TryGetHitReceiver(other, out global::IDamage receiver))
             {
                 return;
+            }
+
+            // Commit the hit before damage callbacks or another collider can resolve it again.
+            resolved = true;
+            if (projectileBody != null && !projectileBody.isKinematic)
+            {
+                projectileBody.linearVelocity = Vector3.zero;
+            }
+            Destroy(gameObject);
+            if (receiver != null && damage > 0)
+            {
+                receiver.TakeDamage(damage);
+            }
+        }
+
+        private void CheckFlightPath(Vector3 movement)
+        {
+            if (projectileCollider == null || !projectileCollider.enabled)
+            {
+                return;
+            }
+
+            float distance = movement.magnitude;
+            Vector3 scale = projectileCollider.transform.lossyScale;
+            float radius = projectileCollider.radius * Mathf.Max(
+                Mathf.Abs(scale.x), Mathf.Abs(scale.y), Mathf.Abs(scale.z));
+            if (distance <= 0f || radius <= 0f)
+            {
+                return;
+            }
+
+            Vector3 origin = projectileCollider.transform.TransformPoint(projectileCollider.center);
+            if (projectileBody != null && !projectileBody.isKinematic)
+            {
+                origin += projectileBody.position - transform.position;
+            }
+
+            // Trigger callbacks can miss a whole crossing between physics steps.
+            // Include triggers explicitly: this project's global queries ignore them.
+            Vector3 direction = movement / distance;
+            RaycastHit[] hits = sweepHits;
+            int hitCount = Physics.SphereCastNonAlloc(
+                origin, radius, direction, hits, distance, Physics.AllLayers, QueryTriggerInteraction.Collide);
+            if (hitCount == hits.Length)
+            {
+                // A full buffer is not guaranteed to contain the nearest obstruction.
+                hits = Physics.SphereCastAll(
+                    origin, radius, direction, distance, Physics.AllLayers, QueryTriggerInteraction.Collide);
+                hitCount = hits.Length;
+            }
+
+            Collider nearestCollider = null;
+            float nearestDistance = float.PositiveInfinity;
+            for (int index = 0; index < hitCount; index++)
+            {
+                RaycastHit hit = hits[index];
+                if (hit.distance < nearestDistance && TryGetHitReceiver(hit.collider, out _))
+                {
+                    nearestCollider = hit.collider;
+                    nearestDistance = hit.distance;
+                }
+            }
+
+            ResolveHit(nearestCollider);
+        }
+
+        private bool TryGetHitReceiver(Collider other, out global::IDamage receiver)
+        {
+            receiver = null;
+            if (other == null || AlphaEnemyEventUtility.IsSameHierarchy(other.transform, transform))
+            {
+                return false;
             }
 
             if (owner != null && AlphaEnemyEventUtility.IsSameHierarchy(other.transform, owner.transform))
             {
-                return;
+                return false;
+            }
+
+            if (projectileCollider != null &&
+                (Physics.GetIgnoreLayerCollision(projectileCollider.gameObject.layer, other.gameObject.layer) ||
+                 Physics.GetIgnoreCollision(projectileCollider, other)))
+            {
+                return false;
             }
 
             bool isAssignedTarget = assignedTarget != null &&
                                     AlphaEnemyEventUtility.IsSameHierarchy(other.transform, assignedTarget);
-            if (!onlyDamageAssignedTarget || isAssignedTarget)
+            if (other.isTrigger && !isAssignedTarget)
             {
-                global::IDamage receiver = AlphaEnemyEventUtility.FindDamageReceiver(other.transform);
-                if (receiver != null && damage > 0)
-                {
-                    receiver.TakeDamage(damage);
-                    resolved = true;
-                    Destroy(gameObject);
-                    return;
-                }
+                return false;
             }
 
-            if (destroyOnAnySolidHit && !other.isTrigger)
+            if (!onlyDamageAssignedTarget || isAssignedTarget)
             {
-                resolved = true;
-                Destroy(gameObject);
+                receiver = AlphaEnemyEventUtility.FindDamageReceiver(other.transform);
             }
+
+            return receiver != null && damage > 0 || destroyOnAnySolidHit && !other.isTrigger;
         }
 
         private void OnValidate()

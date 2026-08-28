@@ -600,7 +600,9 @@ public class gameManager : MonoBehaviour
     // Function, Auto Hide Toast
     //==========================================================================================
     private IEnumerator AutoHideLoading() {
-        yield return new WaitForSeconds(10f);
+        // Loading UI must still finish while an extraction or pause menu
+        // has stopped gameplay time.
+        yield return new WaitForSecondsRealtime(10f);
         LoadMenu(false);
     }
     //==========================================================================================
